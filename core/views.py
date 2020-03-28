@@ -4,14 +4,14 @@ from django.db.models import Q
 from django.utils.dateparse import parse_date
 
 from scrape.scrape_data import get_data
-from data.models import Paper
+from data.models import Paper, Category
 
 
 def home(request):
-
     papers = Paper.objects.all()
+    categories = Category.objects.all()
 
-    return render(request, "core/home.html", {'papers': papers})
+    return render(request, "core/home.html", {'papers': papers, 'categories': categories})
 
 
 def search(request):
@@ -21,6 +21,7 @@ def search(request):
     :return:
     """
     if request.method == "POST":
+        category_names = request.POST.getlist("categories")
         search_query = request.POST.get("search", "")
 
         start_date = request.POST.get("published_at_start", "")
@@ -36,13 +37,11 @@ def search(request):
         except ValueError:
             end_date = None
 
-
-        papers = Paper.objects.all().filter(Q(title__contains=search_query) |
-                                            Q(authors__first_name__contains=search_query) |
-                                            Q(authors__last_name__contains=search_query)).distinct()
-
-        print(start_date)
-        print(end_date)
+        categories = Category.objects.filter(name__in=category_names)
+        papers = Paper.objects.filter(Q(category__in=categories) & (Q(title__contains=search_query) |
+                                                                    Q(authors__first_name__contains=search_query) |
+                                                                    Q(authors__last_name__contains=search_query))
+                                      ).distinct()
 
         if start_date:
             papers = papers.filter(published_at__gte=start_date)

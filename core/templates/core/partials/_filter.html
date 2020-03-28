@@ -1,5 +1,5 @@
 {% if html %}
-    <div class="filter-container my-4 px-5 py-3 bg-light rounded shadow">
+    <div class="filter-container my-4 px-5 py-3 bg-light z-1 rounded shadow">
 
         <form id="paper-search-form" method="POST" action="{% url action %}">
             {% csrf_token %}
@@ -15,15 +15,9 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <div class="input-group">
-                                <input name="search" id="search-input" type="text" class="form-control"
-                                       placeholder="Search for papers or topics">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-secondary" type="button"><i
-                                            class="fas fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
+                            <input name="search" id="search-input" type="text" class="form-control"
+                                   placeholder="Search for papers or topics">
+
                         </div>
                     </div>
                 </div>
@@ -34,7 +28,6 @@
                             <label for="chose-category">Choose a category:</label>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-12">
                             <select name="categories"
@@ -42,15 +35,13 @@
                                     class="selectpicker w-100"
                                     data-live-search="true"
                                     multiple="multiple">
-                                <option value="micro" selected>Microbiology</option>
-                                <option value="study" selected>Study</option>
+                                {% for category in categories %}
+                                    <option value="{{ category.name }}" selected>{{ category.name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
-
                 </div>
-
-
             </div>
 
             <div class="row mt-3">
@@ -65,7 +56,7 @@
 
                     <div class="row">
                         <div class="col-5">
-                            <input name="published_at_start" id="start-date"/>
+                            <input autocomplete="off" name="published_at_start" id="start-date"/>
                         </div>
 
                         <div class="col-2 text-center pt-2">
@@ -73,7 +64,7 @@
                         </div>
 
                         <div class="col-5">
-                            <input name="published_at_end" id="end-date"/>
+                            <input autocomplete="off" name="published_at_end" id="end-date"/>
                         </div>
                     </div>
                 </div>
@@ -97,7 +88,9 @@
                 </div>
 
                 <div class="col-md-1 pt-2">
-                    <button class="btn btn-primary float-right mt-4"><i class="fas fa-sync"></i></button>
+                    <button class="btn btn-primary float-right mt-4">
+                        <i class="fas fa-search"></i>
+                    </button>
                 </div>
             </div>
 
