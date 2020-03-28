@@ -41,13 +41,3 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def to_dict(self):
-        return dict(
-            title=self.title,
-            date=str(self.published_at),
-            description=self.abstract,
-            pdf='#',
-            ext='#',
-            img_src=str(static('core/img/paper-sample.png'))
-        )

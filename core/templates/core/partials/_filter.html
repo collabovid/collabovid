@@ -1,20 +1,22 @@
 {% if html %}
-    <div class="filter-container my-4 p-5">
+    <div class="filter-container my-4 px-5 py-3 bg-light rounded shadow">
 
-        <form>
+        <form id="paper-search-form" method="POST" action="{% url action %}">
+            {% csrf_token %}
+
             <div class="row">
 
                 <div class="col-md-8">
                     <div class="row">
                         <div class="col-12">
-                            <label for="search">Search:</label>
+                            <label for="search-input">Search:</label>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-12">
                             <div class="input-group">
-                                <input id="search" type="text" class="form-control"
+                                <input name="search" id="search-input" type="text" class="form-control"
                                        placeholder="Search for papers or topics">
                                 <div class="input-group-append">
                                     <button class="btn btn-outline-secondary" type="button"><i
@@ -35,7 +37,10 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <select id="chose-category" class="selectpicker w-100" data-live-search="true"
+                            <select name="categories"
+                                    id="chose-category"
+                                    class="selectpicker w-100"
+                                    data-live-search="true"
                                     multiple="multiple">
                                 <option value="micro" selected>Microbiology</option>
                                 <option value="study" selected>Study</option>
@@ -60,7 +65,7 @@
 
                     <div class="row">
                         <div class="col-5">
-                            <input id="start-date"/>
+                            <input name="published_at_start" id="start-date"/>
                         </div>
 
                         <div class="col-2 text-center pt-2">
@@ -68,12 +73,12 @@
                         </div>
 
                         <div class="col-5">
-                            <input id="end-date"/>
+                            <input name="published_at_end" id="end-date"/>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-7">
+                <div class="col-md-6">
                     <div class="row">
                         <div class="col-12">
                             <label for="chose-category">What topic are you interested in?</label>
@@ -82,13 +87,17 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <select id="chose-cluster" class="selectpicker w-100" data-live-search="true"
+                            <select name="topics" id="chose-cluster" class="selectpicker w-100" data-live-search="true"
                                     multiple="multiple">
                                 <option value="micro">Cluster1</option>
                                 <option value="study">Cluster2</option>
                             </select>
                         </div>
                     </div>
+                </div>
+
+                <div class="col-md-1 pt-2">
+                    <button class="btn btn-primary float-right mt-4"><i class="fas fa-sync"></i></button>
                 </div>
             </div>
 
@@ -102,14 +111,47 @@
     <script type="text/javascript">
         type = "text/javascript" >
             $(document).ready(function () {
+                let indicator = $("#{{ indicator_id }}");
+                let paper_container = $("#{{ result_container_id }}");
+
+
                 $('#chose-category').selectpicker();
                 $('#chose-cluster').selectpicker();
                 $('#start-date').datepicker({
-                    uiLibrary: 'bootstrap4'
+                    uiLibrary: 'bootstrap4',
+                    format: 'yyyy-mm-dd'
                 });
                 $('#end-date').datepicker({
-                    uiLibrary: 'bootstrap4'
+                    uiLibrary: 'bootstrap4',
+                    format: 'yyyy-mm-dd'
                 });
+
+
+                $("#paper-search-form").submit(function (e) {
+                    e.preventDefault();
+
+                    paper_container.hide();
+                    indicator.show();
+
+
+                    let form = $(this);
+
+                    $.ajax({
+                        url: form.attr("action"),
+                        type: 'POST',
+                        data: form.serialize(),
+                        success: function (data) {
+                            paper_container.html(data);
+
+                            indicator.hide();
+                            paper_container.fadeIn();
+                        },
+                        error: function (request, error) {
+                            console.log("Request: " + JSON.stringify(request));
+                            console.log("Error: " + error);
+                        }
+                    });
+                })
             });
     </script>
 

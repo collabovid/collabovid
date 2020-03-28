@@ -19,6 +19,7 @@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQRangeSlider/5.7.2/css/classic.min.css"/>
+    <link rel="stylesheet" href="{% static "core/css/main.css" %}"/>
 
     {% block css %}
     {% endblock %}
@@ -26,7 +27,7 @@
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
+<nav class="navbar navbar-expand-lg navbar-light static-top bg-light-semi-transparent">
     <div class="container">
         <img src="{% static "core/img/search.png" %}" class="img-fluid" width="56px">
         <a class="navbar-brand ml-3" href="#">Covid-19 Publications</a>
@@ -56,7 +57,7 @@
 {% block content %}
 {% endblock %}
 
-<footer class="py-5 bg-light" style="width: 100%">
+<footer class="py-5 bg-light fixed-bottom w-100">
     <div class="container">
         <div class="row">
             <div class="col-4">
