@@ -65,4 +65,9 @@ def scrape(request):
 def topic(request, id):
 
     topic = get_object_or_404(Topic, pk=id)
+
+    for paper in topic.papers.all():
+
+        print(paper.authors.count())
+
     return render(request, "core/topic.html", {'topic': topic})

@@ -5,10 +5,17 @@
     <div>
 
         <div class="container">
-            <h2>Current Topic {{ topic.name }}</h2>
-            <div class="text-muted">{{ topic.description }}</div>
+            <div class="row h-100 align-items-center py-5">
+
+                <div class="col-12">
+                    <h2 class="text-white display-4">{{ topic.name }}</h2>
+
+                    <div class="muted-white">{{ topic.description }}</div>
+
+                </div>
+            </div>
             <div id="paper-container" class="container">
-                {% include "core/partials/_search_results.html" with papers=topic.papers.all %}
+                {% include "core/partials/_search_results.html" with papers=topic.papers.all score=50%}
             </div>
         </div>
 

@@ -1,0 +1,21 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="">
+
+        <div id="paper-container" class="container">
+            {% include "core/partials/_search_results.html" with papers=papers%}
+        </div>
+
+
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}

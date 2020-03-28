@@ -8,29 +8,12 @@
         </div>
         <div class="col-md-8">
             <div class="card-block">
-                <h5 class="card-title" style="font-size: 1.2em">{{ title }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
-                    {% for author in authors.all %}
-                        {% if not forloop.first %}&nbsp;&nbsp;&nbsp;{% endif %}
-                        <span class="need-tooltip text-nowrap text-muted"
-                           data-toggle="tooltip"
-                           data-placement="top"
-                           title="Citations: {{ author.citation_count }}">
-                                <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
-                        </span>
-
-                    {% endfor %}
-
-
-                </h6>
+                <h5 class="card-title" style="font-size: 1.2em">{{ topic.name }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">{{ date }}</h6>
                 <p class="card-text" style="font-size: 0.8em">{{ description|truncatechars:400 }}</p>
             </div>
         </div>
         <div class="col-md-2 text-center align-self-start">
-            <span class="text-muted small float-right">{{ date }}</span>
-
-            <div class="clearfix mb-3"></div>
-
             {% if score %}
                 <div class="progress">
                     <div class="progress-bar
