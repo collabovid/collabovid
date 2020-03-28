@@ -27,7 +27,16 @@
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-light static-top bg-light-semi-transparent">
+<div class="bg">
+    <div class="svg-border-rounded text-white">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144.54 17.34" preserveAspectRatio="none"
+             fill="currentColor">
+            <path d="M144.54,17.34H0V0H144.54ZM0,0S32.36,17.34,72.27,17.34,144.54,0,144.54,0"></path>
+        </svg>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark static-top">
     <div class="container">
         <img src="{% static "core/img/search.png" %}" class="img-fluid" width="56px">
         <a class="navbar-brand ml-3" href="#">Covid-19 Publications</a>
@@ -53,11 +62,14 @@
     </div>
 </nav>
 
-<!-- Page Content -->
-{% block content %}
-{% endblock %}
+<div id="content">
+    <!-- Page Content -->
+    {% block content %}
+    {% endblock %}
 
-<footer class="py-5 bg-light fixed-bottom w-100">
+</div>
+
+<footer class="py-5 bg-light w-100">
     <div class="container">
         <div class="row">
             <div class="col-4">

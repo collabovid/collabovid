@@ -10,7 +10,7 @@
             <div class="card-block">
                 <h5 class="card-title" style="font-size: 1.2em">{{ title }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">{{ date }}</h6>
-                <p class="card-text" style="font-size: 0.8em">{{ description }}</p>
+                <p class="card-text" style="font-size: 0.8em">{{ description|truncatechars:400 }}</p>
             </div>
         </div>
         <div class="col-md-2 text-center align-self-start">

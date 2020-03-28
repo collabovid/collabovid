@@ -4,8 +4,25 @@ html, body {
 }
 
 body {
-    background: #D0E4F5 url("/static/core/img/background.jpg") no-repeat fixed;
     background-size: 100% auto;
+    height: 100%;
+    position: relative;
+}
+
+.bg {
+    background-color: #0061f2;
+    background-image: linear-gradient(135deg, #0061f2 0%, #0D47A1 100%);
+    position: absolute;
+    height: 550px;
+    width: 100%;
+}
+
+.svg-border-rounded svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3rem;
+    width: 100%;
 }
 
 .bg-light-semi-transparent {
@@ -17,4 +34,16 @@ body {
     -webkit-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
     box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+}
+
+#content {
+    min-height: 100vh; /* will cover the 100% of viewport */
+    overflow: hidden;
+    display: block;
+    position: relative;
+    padding-bottom: 100px;
+}
+
+.muted-white {
+    color: rgba(255, 255, 255, 0.5);
 }
