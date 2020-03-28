@@ -2,6 +2,17 @@
 {% block content %}
 
     <div class="container">
+
+        {% include "core/partials/_filter.html" with html=True %}
+
         Hello!
     </div>
+{% endblock %}
+
+{% block script %}
+    {% include "core/partials/_filter.html" with script=True %}
+{% endblock %}
+
+{% block css %}
+    {% include "core/partials/_filter.html" with css=True %}
 {% endblock %}
