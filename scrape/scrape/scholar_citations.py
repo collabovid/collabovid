@@ -21,6 +21,10 @@ def get_scholar_citations(firstname: str, lastname: str):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
 
+    if response.status_code != 200:
+        print(f"Request error: {response.status_code} ({response.reason})")
+        return None
+
     authors = soup.find_all('div', {'class': 'gsc_1usr'})
 
     if len(authors) == 0:
