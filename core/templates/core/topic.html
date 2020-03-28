@@ -1,0 +1,23 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div>
+
+        <div class="container">
+            <h2>Current Topic {{ topic.name }} ({{ topic.pk }})</h2>
+            <div id="paper-container" class="container">
+                {% include "core/partials/_search_results.html" with papers=topic.papers.all %}
+            </div>
+        </div>
+
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}

@@ -1,6 +1,11 @@
 from django.db import models
 from django.templatetags.static import static
 
+
+class Topic(models.Model):
+    name = models.CharField(default="Unknown", max_length=60)
+
+
 class PaperHost(models.Model):
     """
     e.g. medrxiv
@@ -32,6 +37,12 @@ class Paper(models.Model):
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
 
+    topic = models.ForeignKey(Topic,
+                              related_name="papers",
+                              null=True,
+                              default=None,
+                              on_delete=models.SET_DEFAULT)
+
     abstract = models.TextField()
 
     url = models.URLField()
@@ -41,3 +52,4 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
