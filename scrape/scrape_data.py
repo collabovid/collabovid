@@ -14,6 +14,8 @@ def get_data(detailed: bool = True, count=None):
     data = json.loads(response.text)['rels']
 
     for i, item in enumerate(data):
+        print(i)
+
         site = item['rel_site']
         host, created = PaperHost.objects.get_or_create(
             name=site,
@@ -96,7 +98,7 @@ def get_detailed_information(url: str) -> Tuple[List[Tuple[str, str, bool]], str
     if len(categories) > 1:
         print(f"Found multiple categories")
     if len(categories) == 0:
-        category = "unkown"
+        category = "unknown"
     else:
         category = categories[0].text.strip()
     return authors, category
