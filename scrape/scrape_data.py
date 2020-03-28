@@ -46,7 +46,6 @@ def get_data(detailed: bool = True, count=None):
                 db_author, created = Author.objects.get_or_create(
                     first_name=author[0],
                     last_name=author[1],
-                    first=author[2],
                 )
                 db_author.save()
                 paper.authors.add(db_author)

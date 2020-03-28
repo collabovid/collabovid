@@ -15,7 +15,6 @@ class Author(models.Model):
     """
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    first = models.BooleanField(default=True)
 
 
 class Category(models.Model):
