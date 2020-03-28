@@ -6,7 +6,7 @@ from scrape.scrape_data import get_data
 
 class ScrapeTest(TestCase):
     def test_scrape_data(self):
-        get_data(count=1)
+        get_data(count=5)
 
         assert len(Paper.objects.all()) == 1
         assert len(Author.objects.all()) == 3

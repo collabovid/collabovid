@@ -16,10 +16,11 @@
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
 
     <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQRangeSlider/5.7.2/css/classic.min.css" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQRangeSlider/5.7.2/css/classic.min.css"/>
 
-    {% block css%}
+    {% block css %}
     {% endblock %}
 </head>
 
@@ -42,6 +43,9 @@
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
                     <a class="nav-link" href="{% url "about" %}">About</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "scrape" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "scrape" %}">Scrape</a>
                 </li>
             </ul>
         </div>

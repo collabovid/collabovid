@@ -1,29 +1,23 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from django.templatetags.static import static
 
+from scrape.scrape_data import get_data
+from data.models import Paper
 
 def home(request):
-    card = dict(
-        title='Tracing DAY-ZERO and Forecasting the Fade out of the COVID-19 Outbreak in Lombardy, Italy: A Compartmental Modelling and Numerical Optimization Approach.',
-        date='March 26, 2020',
-        description='Objectives: The rapidly evolving coronavirus disease 2019 (COVID-19), was declared a pandemic by the World Health Organization on March 11, 2020. It was first detected in the city of Wuhan in China and has spread globally resulting in substantial health and economic crisis in many countries.',
-        pdf='#',
-        ext='#',
-        img_src=str(static('core/img/paper-sample.png'))
-    )
-    return render(request, "core/home.html", {'card': card})
 
+    all_papers = Paper.objects.all()
 
-def card_demo(request):
-    card = dict(
-        title='Tracing DAY-ZERO and Forecasting the Fade out of the COVID-19 Outbreak in Lombardy, Italy: A Compartmental Modelling and Numerical Optimization Approach.',
-        date='March 26, 2020',
-        description='Objectives: The rapidly evolving coronavirus disease 2019 (COVID-19), was declared a pandemic by the World Health Organization on March 11, 2020. It was first detected in the city of Wuhan in China and has spread globally resulting in substantial health and economic crisis in many countries.',
-        pdf='#',
-        ext='#',
-        img_src=str(static('core/img/paper-sample.png'))
-    )
-    return render(request, "core/card_demo.html", {'card': card})
+    paper_dicts = list()
+
+    for paper in all_papers:
+        paper_dicts.append(paper.to_dict())
+
+    return render(request, "core/home.html", {'papers': paper_dicts})
 
 def about(request):
     return render(request, "core/about.html")
+
+def scrape(request):
+    get_data(count=5)
+    return HttpResponse("Scrape successfully.")

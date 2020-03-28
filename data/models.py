@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.templatetags.static import static
 
 class PaperHost(models.Model):
     """
@@ -25,7 +25,6 @@ class Category(models.Model):
 
 
 class Paper(models.Model):
-
     doi = models.CharField(max_length=100, primary_key=True)
 
     title = models.CharField(max_length=200)
@@ -42,3 +41,13 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def to_dict(self):
+        return dict(
+            title=self.title,
+            date=str(self.published_at),
+            description=self.abstract,
+            pdf='#',
+            ext='#',
+            img_src=str(static('core/img/paper-sample.png'))
+        )

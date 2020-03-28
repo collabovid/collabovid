@@ -41,6 +41,7 @@ def get_data(detailed: bool = True, count=None):
             db_category.save()
 
             paper.category = db_category
+            paper.save()
 
             for author in authors:
                 db_author, created = Author.objects.get_or_create(
