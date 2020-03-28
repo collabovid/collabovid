@@ -1,0 +1,30 @@
+{% load static %}
+
+<div class="card p-4">
+    <div class="row d-flex flex-wrap align-items-center">
+        <div class="col-md-2">
+            <img src="{{ img_src }}" style="max-height: 200px"
+                 class="img-fluid mx-auto d-block">
+        </div>
+        <div class="col-md-8">
+            <div class="card-block">
+                <h5 class="card-title" style="font-size: 1.2em">{{ title }}</h5>
+                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">{{ date }}</h6>
+                <p class="card-text" style="font-size: 0.8em">{{ description }}</p>
+            </div>
+        </div>
+        <div class="col-md-2 text-center align-self-start">
+            <a href="{{ pdf }}">
+                <button class="btn btn-outline-primary mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
+            </a>
+            <a href="{{ ext }}">
+                <button class="btn btn-outline-success mt-2 w-100"><i
+                        class="fa fa-external-link-alt"></i>
+                    medrxiv
+                </button>
+            </a>
+        </div>
+
+    </div>
+</div>
+</div>

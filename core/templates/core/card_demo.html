@@ -1,0 +1,9 @@
+{% extends "core/base.html" %}
+{% block content %}
+
+    <div class="container">
+        <div class="m-5">
+            {% include 'core/partials/_paper_card.html' with title=card.title date=card.date description=card.description pdf=card.pdf ext=card.ext img_src=card.img_src %}
+        </div>
+    </div>
+{% endblock %}
