@@ -1,25 +1,22 @@
 from django.db import models
-from django.templatetags.static import static
 
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
+    description = models.TextField()
+
+    latent_topic_score = models.BinaryField(null=True)
 
 
 class PaperHost(models.Model):
-    """
-    e.g. medrxiv
-    """
     name = models.CharField(max_length=60)
     url = models.URLField()
 
 
 class Author(models.Model):
-    """
-    TODO: Add Google Scholar, ORCID etc.
-    """
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    citation_count = models.IntegerField(default=-1)
 
 
 class Category(models.Model):
@@ -49,6 +46,8 @@ class Paper(models.Model):
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField()
+
+    latent_topic_score = models.BinaryField(null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -5,7 +5,8 @@
     <div>
 
         <div class="container">
-            <h2>Current Topic {{ topic.name }} ({{ topic.pk }})</h2>
+            <h2>Current Topic {{ topic.name }}</h2>
+            <div class="text-muted">{{ topic.description }}</div>
             <div id="paper-container" class="container">
                 {% include "core/partials/_search_results.html" with papers=topic.papers.all %}
             </div>
@@ -20,4 +21,4 @@
 {% endblock %}
 
 {% block css %}
-{% endblock %}
+{% endblock %}Ok
