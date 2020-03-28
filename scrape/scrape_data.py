@@ -34,6 +34,8 @@ def get_data(detailed: bool = True, count=None):
             url = item['rel_link']
             authors, category = get_detailed_information(url)
             # print(f"{i}, {category}, {authors}")
+            if category is None:
+                category = "unknown"
 
             db_category, created = Category.objects.get_or_create(
                 name=category,
