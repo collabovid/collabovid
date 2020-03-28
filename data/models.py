@@ -14,9 +14,12 @@ class PaperHost(models.Model):
 
 
 class Author(models.Model):
+    CITATIONS_AUTHOR_NOT_FOUND = -2
+    CITATIONS_NOT_SCRAPED = -1
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
-    citation_count = models.IntegerField(default=-1)
+    citation_count = models.IntegerField(default=CITATIONS_NOT_SCRAPED)
 
 
 class Category(models.Model):
