@@ -25,41 +25,51 @@ def get_data(detailed: bool = True, count=None):
             paper = Paper.objects.get(
                 doi=item['rel_doi']
             )
+            if paper.category_id == 'unknown':
+                #print(f"{i}, update category")
+                url = item['rel_link']
+                authors, category = get_detailed_information(url)
+
+                db_category, created = Category.objects.get_or_create(
+                    name=category,
+                )
+                db_category.save()
+
+                paper.category = db_category
+                paper.save()
         except Paper.DoesNotExist:
+            #print(f"{i}, add {item['rel_doi']}")
             paper = Paper(
                 doi=item['rel_doi']
             )
 
-        paper.title = item['rel_title']
-        paper.url = item['rel_link']
-        paper.abstract = item['rel_abs']
-        paper.host = host
-        paper.published_at = item['rel_date']
+            paper.title = item['rel_title']
+            paper.url = item['rel_link']
+            paper.abstract = item['rel_abs']
+            paper.host = host
+            paper.published_at = item['rel_date']
 
-        if detailed:
-            url = item['rel_link']
-            authors, category = get_detailed_information(url)
-            # print(f"{i}, {category}, {authors}")
-            if category is None:
-                category = "unknown"
+            if detailed:
+                url = item['rel_link']
+                authors, category = get_detailed_information(url)
 
-            db_category, created = Category.objects.get_or_create(
-                name=category,
-            )
-            db_category.save()
-
-            paper.category = db_category
-            paper.save()
-
-            for author in authors:
-                db_author, created = Author.objects.get_or_create(
-                    first_name=author[0],
-                    last_name=author[1],
+                db_category, created = Category.objects.get_or_create(
+                    name=category,
                 )
-                db_author.save()
-                paper.authors.add(db_author)
+                db_category.save()
 
-        paper.save()
+                paper.category = db_category
+                paper.save()
+
+                for author in authors:
+                    db_author, created = Author.objects.get_or_create(
+                        first_name=author[0],
+                        last_name=author[1],
+                    )
+                    db_author.save()
+                    paper.authors.add(db_author)
+
+            paper.save()
 
         if count and i >= count - 1:
             break
@@ -86,7 +96,7 @@ def get_detailed_information(url: str) -> Tuple[List[Tuple[str, str, bool]], str
     if len(categories) > 1:
         print(f"Found multiple categories")
     if len(categories) == 0:
-        category = None
+        category = "unkown"
     else:
         category = categories[0].text.strip()
     return authors, category
