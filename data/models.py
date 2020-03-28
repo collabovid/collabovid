@@ -15,6 +15,7 @@ class Author(models.Model):
     """
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+    first = models.BooleanField(default=True)
 
 
 class Category(models.Model):
@@ -38,7 +39,7 @@ class Paper(models.Model):
     url = models.URLField()
     is_preprint = models.BooleanField(default=True)
 
-    published_at = models.DateTimeField()
+    published_at = models.DateField()
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
