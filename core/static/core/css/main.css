@@ -10,8 +10,8 @@ body {
 }
 
 .bg {
-    background-color: #0061f2;
-    background-image: linear-gradient(135deg, #0061f2 0%, #0D47A1 100%);
+    background-color: #75a5f2;
+    background-image: linear-gradient(135deg, #75A5F2 0%, #5475a1 100%);
     position: absolute;
     height: 550px;
     width: 100%;
