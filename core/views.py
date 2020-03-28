@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404
+from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.db.models import Q
 from django.utils.dateparse import parse_date
@@ -11,7 +11,8 @@ def home(request):
     papers = Paper.objects.all()
     categories = Category.objects.all()
 
-    return render(request, "core/home.html", {'papers': papers, 'categories': categories})
+    return render(request, "core/home.html",
+                  {'papers': papers, 'categories': categories, 'search_url': reverse("search")})
 
 
 def search(request):
@@ -27,27 +28,9 @@ def search(request):
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
-        try:
-            start_date = parse_date(start_date)
-        except ValueError:
-            start_date = None
-
-        try:
-            end_date = parse_date(end_date)
-        except ValueError:
-            end_date = None
-
         categories = Category.objects.filter(name__in=category_names)
-        papers = Paper.objects.filter(Q(category__in=categories) & (Q(title__contains=search_query) |
-                                                                    Q(authors__first_name__contains=search_query) |
-                                                                    Q(authors__last_name__contains=search_query))
-                                      ).distinct()
 
-        if start_date:
-            papers = papers.filter(published_at__gte=start_date)
-
-        if end_date:
-            papers = papers.filter(published_at__lte=end_date)
+        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories)
 
         return render(request, "core/partials/_search_results.html", {'papers': papers})
 
@@ -62,12 +45,34 @@ def scrape(request):
     get_data(count=50)
     return HttpResponse("Scrape successfully.")
 
-def topic(request, id):
 
+def topic(request, id):
     topic = get_object_or_404(Topic, pk=id)
 
-    for paper in topic.papers.all():
+    if request.method == "GET":
+        categories = set()
+        for paper in topic.papers.all():
+            categories.add(paper.category)
 
-        print(paper.authors.count())
+        return render(request, "core/topic.html",
+                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,))})
 
-    return render(request, "core/topic.html", {'topic': topic})
+    elif request.method == "POST":
+
+        category_names = request.POST.getlist("categories")
+        search_query = request.POST.get("search", "")
+
+        start_date = request.POST.get("published_at_start", "")
+        end_date = request.POST.get("published_at_end", "")
+
+        categories = Category.objects.filter(name__in=category_names)
+
+        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories).filter(topic=topic)
+
+        return render(request, "core/partials/_search_results.html", {'papers': papers})
+
+    return HttpResponseNotFound()
+
+
+def topic_overview(request):
+    return render(request, "core/topic_overview.html", {'topics': Topic.objects.all()})

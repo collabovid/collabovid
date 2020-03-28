@@ -14,8 +14,16 @@
 
                 </div>
             </div>
+            <div class="container">
+                {% include "core/partials/_filter.html" with html=True action=search_url categories=categories %}
+            </div>
+
             <div id="paper-container" class="container">
-                {% include "core/partials/_search_results.html" with papers=topic.papers.all score=50%}
+                {% include "core/partials/_search_results.html" with papers=topic.papers.all score=50 %}
+            </div>
+
+            <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i>
             </div>
         </div>
 
@@ -25,7 +33,9 @@
 {% endblock %}
 
 {% block script %}
+    {% include "core/partials/_filter.html" with script=True result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
 {% endblock %}
 
 {% block css %}
-{% endblock %}Ok
+    {% include "core/partials/_filter.html" with css=True %}
+{% endblock %}

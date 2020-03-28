@@ -1,7 +1,7 @@
 {% if html %}
     <div class="filter-container my-4 px-5 py-3 bg-light z-1 rounded shadow">
 
-        <form id="paper-search-form" method="POST" action="{% url action %}">
+        <form id="paper-search-form" method="POST" action="{{ action }}">
             {% csrf_token %}
 
             <div class="row">
@@ -32,7 +32,7 @@
                         <div class="col-12">
                             <select name="categories"
                                     id="chose-category"
-                                    class="selectpicker w-100"
+                                    class="selectpicker"
                                     data-live-search="true"
                                     multiple="multiple">
                                 {% for category in categories %}
@@ -78,7 +78,7 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <select name="topics" id="chose-cluster" class="selectpicker w-100" data-live-search="true"
+                            <select name="topics" id="chose-cluster" class="selectpicker" data-live-search="true"
                                     multiple="multiple">
                                 <option value="micro">Cluster1</option>
                                 <option value="study">Cluster2</option>

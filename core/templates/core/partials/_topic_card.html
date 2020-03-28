@@ -1,45 +1,43 @@
 {% load static %}
 
-<div class="card p-4 rounded shadow">
+<div class="card p-4 rounded shadow my-3">
     <div class="row d-flex flex-wrap align-items-center">
-        <div class="col-md-2">
-            <img src="{{ img_src }}" style="max-height: 200px"
-                 class="img-fluid mx-auto d-block">
-        </div>
-        <div class="col-md-8">
+        <div class="col-md-9">
             <div class="card-block">
                 <h5 class="card-title" style="font-size: 1.2em">{{ topic.name }}</h5>
-                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">{{ date }}</h6>
-                <p class="card-text" style="font-size: 0.8em">{{ description|truncatechars:400 }}</p>
+
+                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em"></h6>
+                <p class="card-text" style="font-size: 0.8em">{{ topic.description|truncatechars:400 }}</p>
             </div>
         </div>
-        <div class="col-md-2 text-center align-self-start">
-            {% if score %}
-                <div class="progress">
-                    <div class="progress-bar
-                        {% if score >= 70 %}
-                            bg-success
-                        {% elif score >= 40 %}
-                            bg-info
-                        {% else %}
-                            bg-danger
-                        {% endif %}"
-                         role="progressbar"
-                         style="width: {{ score }}%"
-                         aria-valuenow="{{ score }}"
-                         aria-valuemin="0"
-                         aria-valuemax="100"></div>
+        <div class="col-md-3 text-center align-self-start">
+
+            <div class="row">
+                <div class="col-12">
+                    <a class="mb-5 d" href="{% url "topic" topic.pk %}">
+                        <button class="btn btn-outline-info mt-2 w-75 float-right">
+                            <i class="fa fa-external-link-alt"></i>
+                            Assigned Papers
+                        </button>
+                    </a>
                 </div>
-            {% endif %}
-            <a href="{{ pdf }}">
-                <button class="btn btn-outline-primary mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
-            </a>
-            <a href="{{ ext }}">
-                <button class="btn btn-outline-success mt-2 w-100"><i
-                        class="fa fa-external-link-alt"></i>
-                    medrxiv
-                </button>
-            </a>
+            </div>
+
+
+            <div class="row mt-3">
+                <div class="col-12 text-right">
+                    <a class="" href="https://www.kaggle.com/covid19">
+                        <img class="w-25" src="{% static "core/img/kaggle-logo.png" %}">
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12 text-right">
+                    <img class="w-75" src="{% static "core/img/kaggle-partners.png" %}">
+                </div>
+            </div>
+
         </div>
 
     </div>

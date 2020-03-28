@@ -4,10 +4,27 @@
 
     <div class="">
 
-        <div id="paper-container" class="container">
-            {% include "core/partials/_search_results.html" with papers=papers%}
-        </div>
+        <div class="container">
+            <div class="row h-100 align-items-center py-5">
 
+                <div class="col-12">
+                    <h2 class="text-white display-4">Topics</h2>
+
+                    <div class="muted-white">
+                        10 key questions as tasks and 10 ways you can help the world to understand and recover from
+                        coronavirus faster. Major AI initiatives and The White House have come together
+                        and made available over 45,000 scholarly articles about COVID-19 and related coronaviruses
+                        for you to help answer questions the scientific community is asking and win cash prizes.
+                    </div>
+
+                </div>
+            </div>
+            <div id="paper-container" class="container">
+                {% for topic in topics %}
+                    {% include "core/partials/_topic_card.html" with topic=topic%}
+                {% endfor %}
+            </div>
+        </div>
 
     </div>
 

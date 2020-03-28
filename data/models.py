@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.db.models import Q
+from django.utils.dateparse import parse_date
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
@@ -30,6 +31,7 @@ class Category(models.Model):
 
 
 class Paper(models.Model):
+
     doi = models.CharField(max_length=100, primary_key=True)
 
     title = models.CharField(max_length=200)
@@ -54,4 +56,29 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @staticmethod
+    def get_paper_for_query(search_query, start_date, end_date, categories):
+        try:
+            start_date = parse_date(start_date)
+        except ValueError:
+            start_date = None
+
+        try:
+            end_date = parse_date(end_date)
+        except ValueError:
+            end_date = None
+
+        papers = Paper.objects.filter(Q(category__in=categories) & (Q(title__contains=search_query) |
+                                                                    Q(authors__first_name__contains=search_query) |
+                                                                    Q(authors__last_name__contains=search_query))
+                                      ).distinct()
+
+        if start_date:
+            papers = papers.filter(published_at__gte=start_date)
+
+        if end_date:
+            papers = papers.filter(published_at__lte=end_date)
+
+        return papers
 
