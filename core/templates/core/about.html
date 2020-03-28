@@ -1,0 +1,99 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+
+    <div class="bg-light">
+        <div class="container py-5">
+            <div class="row h-100 align-items-center py-5">
+                <div class="col-lg-12">
+                    <h1 class="display-4">About Us</h1>
+                    <p class="lead text-muted mb-0">This page was created during <a
+                            href="https://covid-global-hackathon.devpost.com/">#BuildforCOVID19</a> Global Online Hackathon.</p>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white py-5">
+        <div class="container py-5">
+            <div class="row mb-4">
+                <div class="col-lg-5">
+                    <h2 class="display-4 font-weight-light">Our Team</h2>
+                    <p class="font-italic text-muted"></p>
+                </div>
+            </div>
+
+            <div class="row text-center">
+                <!-- Team item-->
+                <div class="col-3 mb-5">
+                    <div class="bg-white rounded shadow-sm py-5 px-4"><img
+                            src="{% static "core/img/jonas.jpg" %}" alt=""
+                            width="200" class="img-fluid rounded-circle mb-3 img-thumbnail shadow-sm">
+                        <h5 class="mb-0">Jonas Dippel</h5><span class="small text-uppercase text-muted">Student TU Berlin</span>
+                        <ul class="social mb-0 list-inline mt-3">
+                            <li class="list-inline-item"><a href="https://linkedin.com/in/jdippel/" class="social-link"><i
+                                    class="fab fa-linkedin"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-3 mb-5">
+                    <div class="bg-white rounded shadow-sm py-5 px-4">
+                        <img src="https://thumbs.dreamstime.com/b/businessman-programmer-avatar-profile-userpic-white-background-vector-illustration-66140549.jpg" alt="" width="200"
+                             class="img-fluid rounded-circle mb-3 img-thumbnail shadow-sm">
+                        <h5 class="mb-0">Yannic Lieder</h5><span
+                            class="small text-uppercase text-muted">Student TU Braunschweig</span>
+                        <ul class="social mb-0 list-inline mt-3">
+                            <li class="list-inline-item"><a href=""
+                                                            class="social-link"><i class="fab fa-linkedin"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- End-->
+
+                <!-- Team item-->
+                <div class="col-3 mb-5">
+                    <div class="bg-white rounded shadow-sm py-5 px-4">
+                        <img src="{% static "core/img/michael.jpg" %}" alt="" width="200"
+                             class="img-fluid rounded-circle mb-3 img-thumbnail shadow-sm">
+                        <h5 class="mb-0">Michael Perk</h5><span
+                            class="small text-uppercase text-muted">Student TU Braunschweig</span>
+                        <ul class="social mb-0 list-inline mt-3">
+                            <li class="list-inline-item"><a href="https://www.linkedin.com/in/michael-perk"
+                                                            class="social-link"><i class="fab fa-linkedin"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-3 mb-5">
+                    <div class="bg-white rounded shadow-sm py-5 px-4">
+                        <img src="https://thumbs.dreamstime.com/b/businessman-programmer-avatar-profile-userpic-white-background-vector-illustration-66140549.jpg" alt="" width="200"
+                             class="img-fluid rounded-circle mb-3 img-thumbnail shadow-sm">
+                        <h5 class="mb-0">Moritz Pfister</h5><span
+                            class="small text-uppercase text-muted">Student TU Braunschweig</span>
+                        <ul class="social mb-0 list-inline mt-3">
+                            <li class="list-inline-item"><a href=""
+                                                            class="social-link"><i class="fab fa-linkedin"></i></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
+                <!-- End-->
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
