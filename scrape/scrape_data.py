@@ -21,14 +21,20 @@ def get_data(detailed: bool = True, count=None):
         )
         host.save()
 
-        paper = Paper(
-            doi=item['rel_doi'],
-            title=item['rel_title'],
-            url=item['rel_link'],
-            abstract=item['rel_abs'],
-            host=host,
-            published_at=item['rel_date']
-        )
+        try:
+            paper = Paper.objects.get(
+                doi=item['rel_doi']
+            )
+        except Paper.DoesNotExist:
+            paper = Paper(
+                doi=item['rel_doi']
+            )
+
+        paper.title = item['rel_title']
+        paper.url = item['rel_link']
+        paper.abstract = item['rel_abs']
+        paper.host = host
+        paper.published_at = item['rel_date']
 
         if detailed:
             url = item['rel_link']
