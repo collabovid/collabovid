@@ -57,6 +57,10 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def cleaned_doi(self):
+        return self.doi
+
     @staticmethod
     def get_paper_for_query(search_query, start_date, end_date, categories):
         try:
