@@ -48,6 +48,7 @@ class Paper(models.Model):
     abstract = models.TextField()
 
     url = models.URLField()
+    pdf_url = models.URLField()
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField()
@@ -59,7 +60,11 @@ class Paper(models.Model):
 
     @property
     def cleaned_doi(self):
-        return self.doi
+        return self.doi.replace("/", "").replace(".", "")
+
+    @property
+    def image_name(self):
+        return self.cleaned_doi + '.jpg'
 
     @staticmethod
     def get_paper_for_query(search_query, start_date, end_date, categories):

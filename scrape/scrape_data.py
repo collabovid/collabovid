@@ -7,6 +7,15 @@ from bs4 import BeautifulSoup
 from data.models import PaperHost, Category, Paper, Author
 
 
+def extract_pdf_url(url:str, host:PaperHost):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    dl_element = soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
+    relative_link = dl_element['href']
+    complete_url = host.url + relative_link
+    return complete_url
+
+
 def get_data(detailed: bool = True, count=None):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
@@ -50,6 +59,7 @@ def get_data(detailed: bool = True, count=None):
             paper.abstract = item['rel_abs']
             paper.host = host
             paper.published_at = item['rel_date']
+            paper.pdf_url = extract_pdf_url(item['rel_link'], host)
 
             if detailed:
                 url = item['rel_link']
