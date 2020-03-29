@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-12">
+                        <div class="col-8">
                             <select name="categories"
                                     id="chose-category"
                                     class="selectpicker"
@@ -39,6 +39,15 @@
                                     <option value="{{ category.name }}" selected>{{ category.name }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+
+                        <div class="col-4">
+                            <a href="all" id="toggle-category-select"
+                               class="btn btn-danger delete w-50 mx-auto"
+                               data-text-switch="<i class='fas fa-plus'></i>">
+                                <i class='fas fa-times'></i>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -69,30 +78,7 @@
                     </div>
                 </div>
 
-                {% if topics %}
-
-                <div class="col-md-4">
-                    <div class="row">
-                        <div class="col-12">
-                            <label for="chose-category">What topic are you interested in?</label>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-12">
-                            <select name="topics" id="chose-cluster" class="selectpicker" data-live-search="true"
-                                    multiple="multiple">
-                                {% for topic in topics %}
-                                    <option value="{{ topic.pk }}" selected>{{ topic.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {% endif %}
-
-                <div class="{% if topics %}col-md-2{% else %}col-md-6{% endif %}">
+                <div class="col-md-5">
                     <div class="row">
                         <div class="col-12">
                             <label for="sorted-by">Sort by</label>
@@ -102,18 +88,18 @@
                     <div class="row">
                         <div class="col-12">
                             <select class="form-control" name="sorted_by" id="sorted-by">
-                                {% if not topics %}
+                                {% if best_matching %}
                                     <option value="matching" selected>Best matching</option>
                                 {% endif %}
                                 <option value="greatest">Greatest</option>
-                                <option value="newest" {% if topics %}selected{% endif %}>Newest</option>
+                                <option value="newest" {% if not best_matching %}selected{% endif %}>Newest</option>
                                 <option value="title">Title</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-1 pt-2">
+                <div class="col-md-2 pt-2">
                     <button class="btn btn-primary float-right mt-4">
                         <i class="fas fa-search"></i>
                     </button>
@@ -148,8 +134,30 @@
             let paper_container = $("#{{ result_container_id }}");
             let form = $("#paper-search-form");
             let pagination_container = $("#pagination-container");
+            let chose_category_select = $("#chose-category");
 
             let next_page_item = $("#page-item-next");
+
+            $("#toggle-category-select").click(function (e) {
+                e.preventDefault();
+
+                let new_text = $(this).data("text-switch");
+                let old_text = $(this).html();
+
+
+                if ($(this).hasClass('delete')) {
+                    chose_category_select.find('option').attr("selected", false);
+                    $(this).removeClass('delete').removeClass('btn-danger').addClass('add').addClass('btn-success');
+                } else if ($(this).hasClass('add')) {
+                    chose_category_select.find('option').attr("selected", "selected");
+                    $(this).removeClass('add').removeClass('btn-success').addClass('delete').addClass('btn-danger');
+                }
+
+                $(this).data("text-switch", old_text);
+                $(this).html(new_text);
+
+                chose_category_select.selectpicker('refresh');
+            });
 
             function search_query(data, page, on_success) {
                 data += "&page=" + page;
@@ -216,7 +224,6 @@
             }
 
             $('#chose-category').selectpicker();
-            $('#chose-cluster').selectpicker();
             $('#start-date').datepicker({
                 uiLibrary: 'bootstrap4',
                 format: 'yyyy-mm-dd'

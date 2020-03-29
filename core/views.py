@@ -55,14 +55,12 @@ def explore(request):
 
     elif request.method == "POST":
         category_names = request.POST.getlist("categories")
-        topic_ids = request.POST.getlist("topics")
         search_query = request.POST.get("search", "")
 
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
         categories = Category.objects.filter(name__in=category_names)
-        topics = Topic.objects.filter(pk__in=topic_ids)
 
         sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
 
@@ -70,7 +68,7 @@ def explore(request):
                                            start_date,
                                            end_date,
                                            categories,
-                                           topics,
+                                           Topic.objects.all(),
                                            sorted_by)
 
         if papers.count() > PAPER_PAGE_COUNT:
