@@ -8,10 +8,10 @@ import os
 from django.conf import settings
 
 class Topic(models.Model):
-    name = models.CharField(default="Unknown", max_length=60)
+    name = models.CharField(default="Unknown", max_length=100)
     description = models.TextField()
     description_html = models.TextField()
-    icon_path = models.CharField(max_length=60, default="")
+    icon_path = models.CharField(max_length=100, default="")
 
     latent_topic_score = models.BinaryField(null=True)
 
