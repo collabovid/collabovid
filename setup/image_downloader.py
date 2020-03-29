@@ -18,9 +18,9 @@ if __name__ == "__main__":
     FILE_PATH = os.path.join(TMP_DIR, TMP_FILENAME)
     EXTRACTED_FOLDER_PATH = os.path.join(TMP_DIR, IMAGES_FOLDER)
 
-    if os.path.isdir(IMAGES_FOLDER):
-        print(f'Removing current image folder {IMAGES_FOLDER}')
-        shutil.rmtree(IMAGES_FOLDER)
+    if os.path.isdir(os.path.join("static", IMAGES_FOLDER)):
+        print(f'Image Folder already present, ending..', os.path.join("static", IMAGES_FOLDER))
+        exit(0)
 
     if not os.path.isdir(TMP_DIR):
         print('Creating tmp directory')
@@ -37,6 +37,8 @@ if __name__ == "__main__":
         z.extractall(path=TMP_DIR)
 
     print(f'Moving {EXTRACTED_FOLDER_PATH} to {IMAGES_FOLDER}')
-    shutil.move(EXTRACTED_FOLDER_PATH, IMAGES_FOLDER)
+
+    shutil.move(EXTRACTED_FOLDER_PATH, os.path.join("static", IMAGES_FOLDER))
+
     print(f'Cleaning up: Removing temp directory {TMP_DIR}')
     shutil.rmtree(TMP_DIR)

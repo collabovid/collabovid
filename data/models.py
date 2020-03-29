@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models import Q
 from django.utils.dateparse import parse_date
+from django.templatetags.static import static
+
 
 import os
 from django.conf import settings
@@ -10,9 +12,7 @@ class Topic(models.Model):
     description = models.TextField()
     description_html = models.TextField()
 
-
     latent_topic_score = models.BinaryField(null=True)
-
 
 class PaperHost(models.Model):
     name = models.CharField(max_length=60)
@@ -24,6 +24,9 @@ class Author(models.Model):
     last_name = models.CharField(max_length=50)
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
+
+    class Meta:
+        ordering = ['-citation_count']
 
 
 class Category(models.Model):
@@ -76,7 +79,7 @@ class Paper(models.Model):
 
     @property
     def image_path(self):
-        return os.path.join(settings.PDF_IMAGE_FOLDER, self.image_name)
+        return static(os.path.join(settings.RELATIVE_PDF_IMAGE_FOLDER, self.image_name))
 
     @property
     def percentage_topic_score(self):

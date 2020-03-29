@@ -129,4 +129,9 @@ FIXTURE_DIRS = (
    '/data/fixtures/',
 )
 
-PDF_IMAGE_FOLDER = os.path.join(BASE_DIR, 'pdf_images/')
+STATICFILES_DIRS = (
+    'static/',
+)
+
+RELATIVE_PDF_IMAGE_FOLDER = 'pdf_images'
+PDF_IMAGE_FOLDER = os.path.join(os.path.join(BASE_DIR, 'static'), RELATIVE_PDF_IMAGE_FOLDER)
