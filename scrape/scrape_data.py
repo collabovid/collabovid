@@ -5,6 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from data.models import PaperHost, Category, Paper, Author
+from scrape.citation_refresher import CitationRefresher
+from scrape.pdf_image_scraper import PdfImageScraper
 
 
 def extract_pdf_url(url:str, host:PaperHost):
@@ -16,7 +18,7 @@ def extract_pdf_url(url:str, host:PaperHost):
     return complete_url
 
 
-def get_data(detailed: bool = True, count=None):
+def get_data(detailed: bool = True, citations=True, images=True):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
     response = requests.get(biorxiv_corona_json)
@@ -87,8 +89,18 @@ def get_data(detailed: bool = True, count=None):
 
             paper.save()
 
-        if count and i >= count - 1:
-            break
+    print("Scraped new papers successfully")
+
+    if images:
+        image_scraper = PdfImageScraper()
+        image_scraper.load_images()
+
+    if citations:
+        citation_refresher = CitationRefresher()
+        if citation_refresher.refresh_citations(only_new=True):
+            print("Updates citations succesfully")
+        else:
+            print("Error while updating citations")
 
 
 def get_detailed_information(url: str) -> Tuple[List[Tuple[str, str, bool]], str]:

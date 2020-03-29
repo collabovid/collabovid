@@ -7,7 +7,7 @@ from django.conf import settings
 
 class PdfImageScraper:
 
-    def load_images(self, count=None):
+    def load_images(self):
         if not os.path.exists(settings.PDF_IMAGE_FOLDER):
             os.mkdir(settings.PDF_IMAGE_FOLDER)
 
@@ -22,5 +22,3 @@ class PdfImageScraper:
                 pages[0].save(paper.image_path, 'JPEG')
 
                 print(f"Successfully created image for file {i}: {paper.doi}")
-            if count and i - 1 >= count:
-                break
