@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Max
 from django.utils.dateparse import parse_date
 from django.templatetags.static import static
 
@@ -103,7 +103,7 @@ class Paper(models.Model):
         if sorted_by == Paper.SORTED_BY_TITLE:
             papers = papers.order_by("-title")
         elif sorted_by == Paper.SORTED_BY_GREATEST:
-            papers = papers.order_by("-title")
+            papers = papers.annotate(score=Max('authors__citation_count')).order_by("-score")
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
         elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
