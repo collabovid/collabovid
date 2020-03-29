@@ -1,0 +1,8 @@
+{% for paper, score in relations %}
+    <div class="my-5">
+        {% include 'core/partials/_paper_card.html' with paper=paper %}
+    </div>
+
+{% empty %}
+    <div class="text-white my-5 text-center font-weight-bold">No results were found for your query.</div>
+{% endfor %}

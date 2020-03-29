@@ -8,10 +8,10 @@ import os
 from django.conf import settings
 
 class Topic(models.Model):
-    name = models.CharField(default="Unknown", max_length=60)
+    name = models.CharField(default="Unknown", max_length=300)
     description = models.TextField()
     description_html = models.TextField()
-    icon_path = models.CharField(max_length=60, default="")
+    icon_path = models.CharField(max_length=100, default="")
 
     latent_topic_score = models.BinaryField(null=True)
 
@@ -48,7 +48,7 @@ class Paper(models.Model):
 
     doi = models.CharField(max_length=100, primary_key=True)
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
@@ -101,7 +101,7 @@ class Paper(models.Model):
             papers = papers.filter(published_at__lte=end_date)
 
         if sorted_by == Paper.SORTED_BY_TITLE:
-            papers = papers.order_by("-title")
+            papers = papers.order_by("title")
         elif sorted_by == Paper.SORTED_BY_GREATEST:
             papers = papers.annotate(score=Max('authors__citation_count')).order_by("-score")
         elif sorted_by == Paper.SORTED_BY_NEWEST:
