@@ -118,3 +118,11 @@ a.invisible-link, a.invisible-link:hover
     background-size: 200px 200px;
     background-position: 100% 0;
 }
+
+.topic_description {
+    max-height: 400px;
+    height: 400px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
