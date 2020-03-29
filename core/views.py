@@ -8,6 +8,15 @@ from data.models import Paper, Category, Topic
 
 PAPER_PAGE_COUNT = 10
 
+def get_sorted_by_from_string(sorted_by):
+
+    if sorted_by == "greatest":
+        return Paper.SORTED_BY_GREATEST
+    elif sorted_by == "newest":
+        return Paper.SORTED_BY_NEWEST
+    else:
+        return Paper.SORTED_BY_TITLE
+
 def home(request):
 
     if request.method == "GET":
@@ -31,6 +40,7 @@ def explore(request):
     if request.method == "GET":
         papers = Paper.objects.all()
         categories = Category.objects.all()
+        topics = Topic.objects.all()
 
         paginator = Paginator(papers, 25) # Show 25 contacts per page.
 
@@ -38,18 +48,30 @@ def explore(request):
         page_obj = paginator.get_page(page_number)
 
         return render(request, "core/explore.html",
-                      {'papers': page_obj, 'categories': categories, 'search_url': reverse("explore")})
+                      {'papers': page_obj,
+                       'categories': categories,
+                       'topics': topics,
+                       'search_url': reverse("explore")})
 
     elif request.method == "POST":
         category_names = request.POST.getlist("categories")
+        topic_ids = request.POST.getlist("topics")
         search_query = request.POST.get("search", "")
 
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
         categories = Category.objects.filter(name__in=category_names)
+        topics = Topic.objects.filter(pk__in=topic_ids)
 
-        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories).all().order_by("-title")
+        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
+
+        papers = Paper.get_paper_for_query(search_query,
+                                           start_date,
+                                           end_date,
+                                           categories,
+                                           topics,
+                                           sorted_by)
 
         if papers.count() > PAPER_PAGE_COUNT:
             paginator = Paginator(papers, PAPER_PAGE_COUNT)
@@ -94,7 +116,14 @@ def topic(request, id):
 
         categories = Category.objects.filter(name__in=category_names)
 
-        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories).filter(topic=topic)
+        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
+
+        papers = Paper.get_paper_for_query(search_query,
+                                           start_date,
+                                           end_date,
+                                           categories,
+                                           [topic],
+                                           sorted_by)
 
         if papers.count() > PAPER_PAGE_COUNT:
             paginator = Paginator(papers, PAPER_PAGE_COUNT)

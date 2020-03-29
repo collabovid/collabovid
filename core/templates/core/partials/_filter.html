@@ -69,7 +69,9 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                {% if topics %}
+
+                <div class="col-md-4">
                     <div class="row">
                         <div class="col-12">
                             <label for="chose-category">What topic are you interested in?</label>
@@ -80,8 +82,32 @@
                         <div class="col-12">
                             <select name="topics" id="chose-cluster" class="selectpicker" data-live-search="true"
                                     multiple="multiple">
-                                <option value="micro">Cluster1</option>
-                                <option value="study">Cluster2</option>
+                                {% for topic in topics %}
+                                    <option value="{{ topic.pk }}" selected>{{ topic.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {% endif %}
+
+                <div class="{% if topics %}col-md-2{% else %}col-md-6{% endif %}">
+                    <div class="row">
+                        <div class="col-12">
+                            <label for="sorted-by">Sort by</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <select class="form-control" name="sorted_by" id="sorted-by">
+                                {% if not topics %}
+                                    <option value="matching" selected>Best matching</option>
+                                {% endif %}
+                                <option value="greatest">Greatest</option>
+                                <option value="newest" {% if topics %}selected{% endif %}>Newest</option>
+                                <option value="title">Title</option>
                             </select>
                         </div>
                     </div>

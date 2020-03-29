@@ -35,6 +35,10 @@ class Category(models.Model):
 
 class Paper(models.Model):
 
+    SORTED_BY_TITLE = 0
+    SORTED_BY_GREATEST = 1
+    SORTED_BY_NEWEST = 2
+
     doi = models.CharField(max_length=100, primary_key=True)
 
     title = models.CharField(max_length=200)
@@ -78,7 +82,7 @@ class Paper(models.Model):
         return round(self.topic_score * 100)
 
     @staticmethod
-    def get_paper_for_query(search_query, start_date, end_date, categories):
+    def get_paper_for_query(search_query, start_date, end_date, categories, topics, sorted_by=SORTED_BY_TITLE):
         try:
             start_date = parse_date(start_date)
         except ValueError:
@@ -89,10 +93,11 @@ class Paper(models.Model):
         except ValueError:
             end_date = None
 
-        papers = Paper.objects.filter(Q(category__in=categories) & (Q(title__contains=search_query) |
-                                                                    Q(authors__first_name__contains=search_query) |
-                                                                    Q(authors__last_name__contains=search_query))
-                                      ).distinct()
+        papers = Paper.objects.filter(
+            Q(topic__in=topics) & Q(category__in=categories) & (Q(title__contains=search_query) |
+                                                                Q(authors__first_name__contains=search_query) |
+                                                                Q(authors__last_name__contains=search_query))
+            ).distinct()
 
         if start_date:
             papers = papers.filter(published_at__gte=start_date)
@@ -100,5 +105,11 @@ class Paper(models.Model):
         if end_date:
             papers = papers.filter(published_at__lte=end_date)
 
-        return papers
+        if sorted_by == Paper.SORTED_BY_TITLE:
+            papers = papers.order_by("-title")
+        elif sorted_by == Paper.SORTED_BY_GREATEST:
+            papers = papers.order_by("-title")
+        elif sorted_by == Paper.SORTED_BY_NEWEST:
+            papers = papers.order_by("-published_at")
 
+        return papers
