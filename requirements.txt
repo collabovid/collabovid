@@ -30,3 +30,4 @@ tqdm==4.44.0
 urllib3==1.25.8
 wasabi==0.6.0
 zipp==3.1.0
+psycopg2
