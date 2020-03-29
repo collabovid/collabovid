@@ -2,6 +2,8 @@ from django.db import models
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 
+import os
+from django.conf import settings
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
@@ -66,6 +68,10 @@ class Paper(models.Model):
     @property
     def image_name(self):
         return self.cleaned_doi + '.jpg'
+
+    @property
+    def image_path(self):
+        return os.path.join(settings.PDF_IMAGE_FOLDER, self.image_name)
 
     @property
     def percentage_topic_score(self):
