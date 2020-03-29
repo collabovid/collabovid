@@ -2,9 +2,15 @@
 
 {% block object-tools %}
     <div>
-        <form action="citations/" method="POST">
+        <form action="update_citations/" method="POST">
             {% csrf_token %}
-            <button type="submit">Update Citations</button>
+            <button type="submit">Update Citations (100 oldest ones)</button>
+        </form>
+    </div>
+    <div>
+        <form action="get_new_citations/" method="POST">
+            {% csrf_token %}
+            <button type="submit">Get New Citations</button>
         </form>
     </div>
     <br/>

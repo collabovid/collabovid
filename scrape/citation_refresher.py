@@ -3,16 +3,21 @@ import html
 import requests
 
 from bs4 import BeautifulSoup
+from django.utils import timezone
+
 from data.models import Author
 
 
 class CitationRefresher:
+    def __init__(self):
+        self.SUCCESS = 0
+        self.NO_AUTHOR_FOUND = 1
+        self.MULTIPLE_AUTHORS_FOUND = 2
+        self.HTTP_ERROR = 3
+        self.UNKNOWN = 4
 
-    NO_AUTHOR_FOUND = -1
-    MULTIPLE_AUTHORS_FOUND = -2
-    TOO_MANY_REQUESTS = -429
-
-    def escape(self, s: str) -> str:
+    @staticmethod
+    def escape(s: str) -> str:
         return html.escape(s).replace(' ', '%20')
 
     def get_scholar_citations(self, firstname: str, lastname: str):
@@ -24,31 +29,27 @@ class CitationRefresher:
 
         if response.status_code != 200:
             print(f"Request error: {response.status_code} ({response.reason})")
-            return self.TOO_MANY_REQUESTS
+            return None, self.HTTP_ERROR
 
         authors = soup.find_all('div', {'class': 'gsc_1usr'})
 
         if len(authors) == 0:
-            print(f"Found no author profile for '{firstname} {lastname}' on Google Scholar")
-            return self.NO_AUTHOR_FOUND
+            return None, self.NO_AUTHOR_FOUND
 
         if len(authors) > 1:
-            print(f"Found multiple profiles ({len(authors)}) for '{firstname} {lastname}' on Google Scholar")
-            return self.MULTIPLE_AUTHORS_FOUND
+            return None, self.MULTIPLE_AUTHORS_FOUND
 
         for author in authors:
             citations_string = author.find('div', {'class': 'gs_ai_cby'}).text
             m = re.search(r'\d+$', citations_string)
             if m:
                 citations = int(m.group())
-                print(f"Found citations information ({citations}) for '{firstname} {lastname}' on Google Scholar")
-                return citations
+                return citations, self.SUCCESS
             else:
-                print(f"Found no citations information for '{firstname} {lastname}' on Google Scholar")
-                return self.NO_AUTHOR_FOUND
+                return None, self.NO_AUTHOR_FOUND
 
-
-    def remove_shortened_names(self, name: str):
+    @staticmethod
+    def remove_shortened_names(name: str):
         final_name = ""
         names = name.split(" ")
         for name in names:
@@ -56,35 +57,29 @@ class CitationRefresher:
                 final_name += " " + name
         return final_name.strip()
 
+    def refresh_citations(self, only_new=False, count=None):
+        if only_new:
+            authors = [a for a in Author.objects.all() if not a.citations_last_update]
+        else:
+            authors = Author.objects.all()
 
-    def refresh_citations(self):
-        authors = Author.objects.all()
+        if count:
+            authors = sorted(authors, key=lambda a: a.citations_last_update)[0:count]
 
         for author in authors:
-            if author.citation_count == Author.CITATIONS_NOT_SCRAPED:
-                print(f"Trying to scrape citations of {author.first_name} {author.last_name}")
+            citations, status = self.get_scholar_citations(author.first_name, author.last_name)
 
-                citations = self.get_scholar_citations(author.first_name, author.last_name)
-                if citations == self.TOO_MANY_REQUESTS:
-                    print("Too many requests. Stopping..")
-                    break
+            if status == self.HTTP_ERROR:
+                break
 
-                elif citations == self.NO_AUTHOR_FOUND:
-                    # try again with shortened name
-                    shortened_first_name = self.remove_shortened_names(author.first_name)
-                    if shortened_first_name != author.first_name:
-                        citations = self.get_scholar_citations(shortened_first_name, author.last_name)
-                        if citations < 0:
-                            print(f"Name shortening did not help for {author.first_name} {author.last_name}")
-                            author.citation_count = Author.CITATIONS_AUTHOR_NOT_FOUND
-                        else:
-                            print(f"Name shortening helped for {author.first_name} {author.last_name}")
-                            author.citation_count = citations
-
-                    else:
-                        author.citation_count = Author.CITATIONS_AUTHOR_NOT_FOUND
-                else:
-                    author.citation_count = citations
-
+            author.citations_last_update = timezone.now()
+            if status == self.SUCCESS:
+                author.citation_count = citations
                 author.save()
-                print(f"Scraped citations of {author.first_name} {author.last_name}: {author.citation_count}")
+            elif status == self.NO_AUTHOR_FOUND:
+                shortened_first_name = self.remove_shortened_names(author.first_name)
+                if shortened_first_name != author.first_name:
+                    citations, status = self.get_scholar_citations(shortened_first_name, author.last_name)
+                    if status == self.SUCCESS:
+                        author.citation_count = citations
+                        author.save()

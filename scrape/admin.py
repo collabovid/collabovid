@@ -14,14 +14,21 @@ class AuthorAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         my_urls = [
-            path('citations/', self.refresh_citations),
+            path('update_citations/', self.refresh_citations),
+            path('get_new_citations/', self.get_new_citations),
         ]
         return my_urls + urls
 
     def refresh_citations(self, request):
         citation_refresher = CitationRefresher()
-        citation_refresher.refresh_citations()
-        self.message_user(request, "All citations inserted")
+        citation_refresher.refresh_citations(count=100)
+        self.message_user(request, "100 oldest citations updated")
+        return HttpResponseRedirect("../")
+
+    def get_new_citations(self, request):
+        citation_refresher = CitationRefresher()
+        citation_refresher.refresh_citations(only_new=True)
+        self.message_user(request, "All new citations inserted")
         return HttpResponseRedirect("../")
 
 @admin.register(Paper)
