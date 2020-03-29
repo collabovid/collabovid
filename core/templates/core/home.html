@@ -2,31 +2,103 @@
 {% load static %}
 {% block content %}
 
-    <div class="">
-        <div class="container">
-            {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories %}
+    <div class="text-white">
+        <div class="container py-5">
+            <div class="row h-100 align-items-center py-5">
+                <div class="col-lg-8">
+                    <h1 class="display-4">Explore CoVid-19 Publications</h1>
+                    <p class="muted-white lead mb-0">This page was created during <a
+                            href="https://covid-global-hackathon.devpost.com/">#BuildforCOVID19</a> Global Online
+                        Hackathon.
+                    </p>
+                </div>
+
+                <div class="col-lg-4">
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div id="paper-container" class="container">
-
+    <div class="container">
+        <br/>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-10 col-lg-8">
+                <form class="card card-sm" action="{% url "home" %}" method="POST" id="topic-search-form">
+                    {% csrf_token %}
+                    <div class="card-body row no-gutters align-items-center">
+                        <div class="col-auto">
+                            <i class="fas fa-search fa-2x text-body"></i>
+                        </div>
+                        <!--end of col-->
+                        <div class="col">
+                            <input name="query"
+                                   class="form-control form-control-lg form-control-borderless" type="search"
+                                   placeholder="E.g.: What do we know about vaccines and therapeutics?">
+                        </div>
+                        <!--end of col-->
+                        <div class="col-auto">
+                            <button class="btn btn-lg btn-info" type="submit">Search</button>
+                        </div>
+                        <!--end of col-->
+                    </div>
+                </form>
+            </div>
+            <!--end of col-->
         </div>
+    </div>
+
+    <div id="paper-container" class="container">
+    </div>
 
 
-        <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">
-            <i class="fas fa-spinner fa-spin"></i>
-        </div>
-
-        {% include "core/partials/_filter.html" with pagination=True %}
-
+    <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i>
     </div>
 
 
 {% endblock %}
 
 {% block script %}
-    {% include "core/partials/_filter.html" with load_default=True script=True result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            window.Pagination = {};
+
+            let indicator = $("#paper-loading-indicator");
+            let paper_container = $("#paper-container");
+            let form = $("#topic-search-form");
+
+            function search_query(data) {
+
+                $.ajax({
+                    url: form.attr("action"),
+                    type: 'POST',
+                    data: data,
+                    success: function (data) {
+                        paper_container.html(data);
+
+                        indicator.hide();
+                        paper_container.fadeIn();
+                    },
+                    error: function (request, error) {
+                        console.log("Request: " + JSON.stringify(request));
+                        console.log("Error: " + error);
+                    }
+                });
+            }
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                paper_container.hide();
+                indicator.show();
+
+                search_query(form.serialize());
+            });
+
+        });
+    </script>
 {% endblock %}
 
 {% block css %}
-    {% include "core/partials/_filter.html" with css=True %}
 {% endblock %}

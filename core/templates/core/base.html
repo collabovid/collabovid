@@ -47,16 +47,18 @@
         <div class="collapse navbar-collapse" id="navbarResponsive">
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item {% if request.resolver_match.url_name == "home" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "home" %}">Home
-                        <span class="sr-only">(current)</span>
-                    </a>
+                    <a class="nav-link" href="{% url "home" %}">Home</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "explore" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "explore" %}">Explore</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "topic-overview" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "topic-overview" %}">Topics</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
                     <a class="nav-link" href="{% url "about" %}">About</a>
                 </li>
-                <li class="nav-item {% if request.resolver_match.url_name == "scrape" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "scrape" %}">Scrape</a>
-                </li>
+
             </ul>
         </div>
     </div>
@@ -119,9 +121,9 @@
 {% endblock %}
 
 <script>
-$(document).ready(function(){
-    $(".need-tooltip").tooltip();
-});
+    $(document).ready(function () {
+        $(".need-tooltip").tooltip();
+    });
 </script>
 
 </body>

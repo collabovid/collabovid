@@ -1,34 +1,46 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
-from django.db.models import Q
-from django.utils.dateparse import parse_date
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
-from scrape.scrape_data import get_data
 from data.models import Paper, Category, Topic
+from analyze import PaperAnalyzer
+
+#analyzer = PaperAnalyzer()
 
 PAPER_PAGE_COUNT = 10
 
 def home(request):
-    papers = Paper.objects.all()
-    categories = Category.objects.all()
 
-    paginator = Paginator(papers, 25) # Show 25 contacts per page.
+    if request.method == "GET":
+        return render(request, "core/home.html")
+    elif request.method == "POST":
 
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+        search_query = request.POST.get("query", "")
 
-    return render(request, "core/home.html",
-                  {'papers': page_obj, 'categories': categories, 'search_url': reverse("search")})
+        #related = analyzer.related(search_query, top=10)
+
+        #new_related = list()
+        #
+        #for paper, score in related:
+        #    new_related.append((paper, score*100))
+
+        return render(request, "core/partials/_custom_topic_search_result.html", {'relations': []})
 
 
-def search(request):
-    """
-    Returns a (HTML) list of the requested papers.
-    :param request:
-    :return:
-    """
-    if request.method == "POST":
+
+def explore(request):
+    if request.method == "GET":
+        papers = Paper.objects.all()
+        categories = Category.objects.all()
+
+        paginator = Paginator(papers, 25) # Show 25 contacts per page.
+
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+        return render(request, "core/explore.html",
+                      {'papers': page_obj, 'categories': categories, 'search_url': reverse("explore")})
+
+    elif request.method == "POST":
         category_names = request.POST.getlist("categories")
         search_query = request.POST.get("search", "")
 
@@ -58,11 +70,6 @@ def search(request):
 
 def about(request):
     return render(request, "core/about.html")
-
-
-def scrape(request):
-    get_data(count=50)
-    return HttpResponse("Scrape successfully.")
 
 
 def topic(request, id):
