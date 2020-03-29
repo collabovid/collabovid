@@ -9,7 +9,7 @@ from scrape.citation_refresher import CitationRefresher
 from scrape.pdf_image_scraper import PdfImageScraper
 
 
-def extract_pdf_url(url:str, host:PaperHost):
+def extract_pdf_url(url: str, host: PaperHost):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     dl_element = soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
@@ -18,7 +18,7 @@ def extract_pdf_url(url:str, host:PaperHost):
     return complete_url
 
 
-def get_data(detailed: bool = True, citations=True, images=True):
+def scrape_articles(detailed: bool = True, citations: bool = True, images: bool = True):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
     response = requests.get(biorxiv_corona_json)
