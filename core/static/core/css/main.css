@@ -71,18 +71,50 @@ body {
     border-radius: 4rem;
 }
 
-.gj-datepicker.gj-datepicker-bootstrap button:not(:hover)
-{
+.gj-datepicker.gj-datepicker-bootstrap button:not(:hover) {
     background: white !important;
 }
 
-.gj-datepicker.gj-datepicker-bootstrap button:hover
-{
+.gj-datepicker.gj-datepicker-bootstrap button:hover {
     background: rgb(248, 249, 250) !important;
     color: #212529 !important;
 }
 
-.btn.dropdown-toggle.btn-light
-{
+.btn.dropdown-toggle.btn-light {
     background: white !important;
+}
+
+.card-text-preview {
+    max-height: 200px;
+    height: 200px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+}
+
+.topic_card {
+    background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-origin: content-box;
+
+    background-position: 10px 0;
+}
+
+.topic_card.odd {
+    background-position: 100% 0;
+}
+
+a.invisible-link, a.invisible-link:hover
+{
+    color: inherit !important;
+    text-decoration: none;
+}
+
+.topic_header
+{
+    background-repeat: no-repeat;
+    background-origin: content-box;
+    background-size: 200px 200px;
+    background-position: 100% 0;
 }

@@ -4,14 +4,25 @@
 
     <div>
         <div class="gradient-header">
-            <div class="container">
-                <div class="row h-100 align-items-center py-5">
+            <div class="topic_header" style="background-image: url();">
+                <div class="container">
+                    <div class="row">
 
-                    <div class="col-12">
-                        <h2 class="text-white display-4">{{ topic.name }}</h2>
+                        <div class="col-12">
+                            <h2 class="text-white display-4">{{ topic.name }}</h2>
 
-                        <div class="muted-white">
-                            {{ topic.description_html | safe }}
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <div class="muted-white">
+                                {{ topic.description_html | safe }}
+                            </div>
+                        </div>
+
+                        <div class="col-4">
+                            <img src="{% static topic.icon_path %}" class="img-fluid">
                         </div>
                     </div>
                 </div>
