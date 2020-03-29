@@ -1,5 +1,5 @@
 {% if filter %}
-    <div class="filter-container my-4 px-5 py-3 bg-light z-1 rounded shadow">
+    <div class="filter-container my-4 px-5 py-3 z-1 {% if card %} bg-light rounded shadow {% else %} text-white {% endif %}">
 
         <form id="paper-search-form" method="POST" action="{{ action }}">
             {% csrf_token %}

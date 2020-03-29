@@ -3,31 +3,32 @@
 {% block content %}
 
     <div>
+        <div class="gradient-header">
+            <div class="container">
+                <div class="row h-100 align-items-center py-5">
 
-        <div class="container">
-            <div class="row h-100 align-items-center py-5">
+                    <div class="col-12">
+                        <h2 class="text-white display-4">{{ topic.name }}</h2>
 
-                <div class="col-12">
-                    <h2 class="text-white display-4">{{ topic.name }}</h2>
+                        <div class="muted-white"><ul>{% for point in points %} <li>{{ point }}</li>{% endfor %}</ul></div>
 
-                    <div class="muted-white">{{ topic.description }}</div>
-
+                    </div>
                 </div>
             </div>
-            <div class="container">
-                {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories best_matching=True %}
-            </div>
-
-            <div id="paper-container" class="container">
-            </div>
-
-            <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i>
-            </div>
-
-            {% include "core/partials/_filter.html" with pagination=True %}
-
+            {% include 'core/partials/_rounded_bottom.html' %}
         </div>
+        <div class="container">
+            {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories best_matching=True card=True %}
+        </div>
+
+        <div id="paper-container" class="container">
+        </div>
+
+        <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
+
+        {% include "core/partials/_filter.html" with pagination=True %}
 
     </div>
 

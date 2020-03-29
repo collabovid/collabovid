@@ -2,9 +2,10 @@ from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
-#from analyze import PaperAnalyzer
+from analyze import PaperAnalyzer
+from sentence_splitter import SentenceSplitter
 
-#analyzer = PaperAnalyzer()
+#analyzer = PaperAnalyzer('biobert')
 
 PAPER_PAGE_COUNT = 10
 
@@ -101,8 +102,12 @@ def topic(request, id):
             categories.add(paper.category)
 
         papers = topic.papers.order_by('-topic_score')
+
+        splitter = SentenceSplitter(language='en')
+        points = splitter.split(topic.description)
+
         return render(request, "core/topic.html",
-                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,)), 'papers': papers})
+                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,)), 'papers': papers, 'points': points})
 
     elif request.method == "POST":
 

@@ -2,8 +2,7 @@
 {% load static %}
 {% block content %}
 
-    <div class="">
-
+    <div class="gradient-header">
         <div class="container">
             <div class="row h-100 align-items-center py-5">
 
@@ -19,14 +18,16 @@
 
                 </div>
             </div>
-            <div id="paper-container" class="container">
-                {% for topic in topics %}
-                    {% include "core/partials/_topic_card.html" with topic=topic%}
-                {% endfor %}
-            </div>
         </div>
-
+        {% include 'core/partials/_rounded_bottom.html' %}
     </div>
+
+    <div id="paper-container" class="container">
+        {% for topic in topics %}
+            {% include "core/partials/_topic_card.html" with topic=topic %}
+        {% endfor %}
+    </div>
+
 
 
 {% endblock %}

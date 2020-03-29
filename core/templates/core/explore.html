@@ -2,10 +2,12 @@
 {% load static %}
 {% block content %}
 
-    <div class="">
+    <div class="gradient-header">
         <div class="container">
             {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories best_matching=False %}
         </div>
+    {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
 
         <div id="paper-container" class="container">
 
@@ -17,8 +19,6 @@
         </div>
 
         {% include "core/partials/_filter.html" with pagination=True %}
-
-    </div>
 
 
 {% endblock %}

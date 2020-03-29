@@ -7,22 +7,30 @@ body {
     background-size: 100% auto;
     height: 100%;
     position: relative;
+    background: #F5F5F5;
 }
 
-.bg {
+.gradient-header {
     background-color: #75a5f2;
-    background-image: linear-gradient(135deg, #75A5F2 0%, #5475a1 100%);
-    position: absolute;
-    height: 550px;
+    position: relative;
+    margin-top: -72px;
+    padding-top: 72px;
     width: 100%;
+    padding-bottom: 4rem;
 }
 
 .svg-border-rounded svg {
     position: absolute;
     bottom: 0;
     left: 0;
+    color: #F5F5F5;
     height: 3rem;
     width: 100%;
+}
+
+.navbar {
+    z-index: 1;
+    background: transparent;
 }
 
 .bg-light-semi-transparent {
@@ -38,14 +46,14 @@ body {
 
 #content {
     min-height: 100vh; /* will cover the 100% of viewport */
-    overflow: hidden;
+    overflow: visible;
     display: block;
     position: relative;
     padding-bottom: 100px;
 }
 
 .muted-white {
-    color: rgba(255, 255, 255, 0.76);
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .form-control-borderless {
@@ -56,4 +64,8 @@ body {
     border: none;
     outline: none;
     box-shadow: none;
+}
+
+.rounded-corners {
+    border-radius: 4rem;
 }
