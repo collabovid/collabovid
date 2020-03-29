@@ -4,6 +4,9 @@ from data.models import Paper, Topic, PaperHost, Author
 from django.urls import path
 from django.http import HttpResponseRedirect
 
+from .pdf_image_scraper import PdfImageScraper
+from .scrape_articles import scrape_articles
+
 admin.site.register(Topic)
 admin.site.register(PaperHost)
 
@@ -48,11 +51,12 @@ class PaperAdmin(admin.ModelAdmin):
         return my_urls + urls
 
     def refresh_papers(self, request):
-        # todo
+        scrape_articles()
         self.message_user(request, "Papers updated")
         return HttpResponseRedirect("../")
 
     def refresh_images(self, request):
-        # todo
+        image_scraper = PdfImageScraper()
+        image_scraper.load_images()
         self.message_user(request, "PDF thumbnails updated")
         return HttpResponseRedirect("../")
