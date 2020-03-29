@@ -5,7 +5,7 @@ catalogue==1.0.0
 certifi==2019.11.28
 chardet==3.0.4
 cymem==2.0.3
-Django==3.0.4
+Django==2.1.0
 https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.2.4/en_core_sci_md-0.2.4.tar.gz
 idna==2.9
 importlib-metadata==1.6.0
@@ -26,4 +26,3 @@ tqdm==4.44.0
 urllib3==1.25.8
 wasabi==0.6.0
 zipp==3.1.0
-sqlite3==3.22.0
