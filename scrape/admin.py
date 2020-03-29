@@ -21,6 +21,5 @@ class AuthorAdmin(admin.ModelAdmin):
     def refresh_citations(self, request):
         citation_refresher = CitationRefresher()
         citation_refresher.refresh_citations()
-
         self.message_user(request, "All citations inserted")
         return HttpResponseRedirect("../")
