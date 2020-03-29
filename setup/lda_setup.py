@@ -18,6 +18,7 @@ def download_file(down, path):
     if os.path.exists(path):
         print(path, "exists, skipping...")
     else:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
         r = requests.get(down)
         with open(path, 'wb') as f:
             f.write(r.content)
