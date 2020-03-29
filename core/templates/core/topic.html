@@ -19,7 +19,7 @@
             </div>
 
             <div id="paper-container" class="container">
-                {% include "core/partials/_search_results.html" with papers=topic.papers.all score=50 %}
+                {% include "core/partials/_search_results.html" with papers=papers %}
             </div>
 
             <div id="paper-loading-indicator" class="text-center fa-5x" style="display: none;">

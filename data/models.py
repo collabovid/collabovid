@@ -44,7 +44,7 @@ class Paper(models.Model):
                               null=True,
                               default=None,
                               on_delete=models.SET_DEFAULT)
-
+    topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
     url = models.URLField()
@@ -65,6 +65,10 @@ class Paper(models.Model):
     @property
     def image_name(self):
         return self.cleaned_doi + '.jpg'
+
+    @property
+    def percentage_topic_score(self):
+        return round(self.topic_score * 100)
 
     @staticmethod
     def get_paper_for_query(search_query, start_date, end_date, categories):

@@ -54,8 +54,9 @@ def topic(request, id):
         for paper in topic.papers.all():
             categories.add(paper.category)
 
+        papers = topic.papers.order_by('-topic_score')
         return render(request, "core/topic.html",
-                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,))})
+                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,)), 'papers': papers})
 
     elif request.method == "POST":
 

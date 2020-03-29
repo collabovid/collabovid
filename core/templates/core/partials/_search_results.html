@@ -1,6 +1,6 @@
 {% for paper in papers %}
     <div class="my-5">
-        {% include 'core/partials/_paper_card.html' with title=paper.title authors=paper.authors date=paper.published_at description=paper.abstract pdf="#" ext="#" img_src="static/core/img/paper-sample.png" %}
+        {% include 'core/partials/_paper_card.html' with title=paper.title authors=paper.authors date=paper.published_at description=paper.abstract pdf="#" ext="#" img_src="static/core/img/paper-sample.png" score=paper.percentage_topic_score %}
     </div>
 
 {% empty %}
