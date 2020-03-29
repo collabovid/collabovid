@@ -69,3 +69,19 @@ body {
 .rounded-corners {
     border-radius: 4rem;
 }
+
+.gj-datepicker.gj-datepicker-bootstrap button:not(:hover)
+{
+    background: white !important;
+}
+
+.gj-datepicker.gj-datepicker-bootstrap button:hover
+{
+    background: rgb(248, 249, 250) !important;
+    color: #212529 !important;
+}
+
+.btn.dropdown-toggle.btn-light
+{
+    background: white !important;
+}

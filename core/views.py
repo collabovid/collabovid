@@ -2,8 +2,8 @@ from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
-from analyze import PaperAnalyzer
-from sentence_splitter import SentenceSplitter
+#from analyze import PaperAnalyzer
+#from sentence_splitter import SentenceSplitter
 
 #analyzer = PaperAnalyzer('biobert')
 
@@ -15,6 +15,8 @@ def get_sorted_by_from_string(sorted_by):
         return Paper.SORTED_BY_GREATEST
     elif sorted_by == "newest":
         return Paper.SORTED_BY_NEWEST
+    elif sorted_by == "matching":
+        return Paper.SORTED_BY_TOPIC_SCORE
     else:
         return Paper.SORTED_BY_TITLE
 
@@ -103,11 +105,12 @@ def topic(request, id):
 
         papers = topic.papers.order_by('-topic_score')
 
-        splitter = SentenceSplitter(language='en')
-        points = splitter.split(topic.description)
 
         return render(request, "core/topic.html",
-                      {'topic': topic, 'categories': categories, 'search_url': reverse("topic", args=(topic.pk,)), 'papers': papers, 'points': points})
+                      {'topic': topic,
+                       'categories': categories,
+                       'search_url': reverse("topic", args=(topic.pk,)),
+                       'papers': papers})
 
     elif request.method == "POST":
 
@@ -140,7 +143,7 @@ def topic(request, id):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj})
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'show_topic_score': True})
 
     return HttpResponseNotFound()
 

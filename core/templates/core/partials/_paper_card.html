@@ -3,14 +3,14 @@
 <div class="card p-4 rounded shadow">
     <div class="row d-flex flex-wrap align-items-center">
         <div class="col-md-2">
-            <img src="{{ img_src }}" style="max-height: 200px"
+            <img src="{{ paper.image_path }}" style="max-height: 200px"
                  class="img-fluid mx-auto d-block">
         </div>
         <div class="col-md-8">
             <div class="card-block">
-                <h5 class="card-title" style="font-size: 1.2em">{{ title }}</h5>
+                <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
                 <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
-                    {% for author in authors.all %}
+                    {% for author in paper.authors.all|slice:":5"%}
                         {% if not forloop.first %}&nbsp;&nbsp;&nbsp;{% endif %}
                         <span class="need-tooltip text-nowrap text-muted"
                               data-toggle="tooltip"
@@ -24,7 +24,7 @@
 
                 </h6>
                 <p class="card-text" style="font-size: 0.8em">
-                    <span class="short">{{ description|slice:":400" }}</span><span class="dots">...</span><span class="long" style="display: none;">{{ description|slice:"400:" }}</span>
+                    <span class="short">{{ paper.abstract|slice:":400" }}</span><span class="dots">...</span><span class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
 
                     <a href="#" class="btn
                     d-block
@@ -32,38 +32,39 @@
                     mt-2
                     btn-outline-secondary
                     py-0 text-center mx-auto
-                    expand-description" style="font-size: 10px;">
-                        <i class="fas fa-arrow-circle-down"></i> show full abstract
+                    toggle-description" style="font-size: 10px;"
+                       data-text-switch="<i class='fas fa-arrow-circle-up'></i> hide full abstract">
+                        <i class='fas fa-arrow-circle-down'></i> show full abstract
                     </a>
                 </p>
             </div>
         </div>
         <div class="col-md-2 text-center align-self-start">
-            <span class="text-muted small float-right">{{ date }}</span>
+            <span class="text-muted small float-right">{{ paper.date }}</span>
 
             <div class="clearfix mb-3"></div>
 
-            {% if score %}
+            {% if show_topic_score %}
                 <div class="progress">
                     <div class="progress-bar
-                        {% if score >= 70 %}
+                        {% if paper.percentage_topic_score >= 70 %}
                             bg-success
-                        {% elif score >= 40 %}
+                        {% elif paper.percentage_topic_score >= 40 %}
                             bg-info
                         {% else %}
                             bg-danger
                         {% endif %}"
                          role="progressbar"
-                         style="width: {{ score }}%"
-                         aria-valuenow="{{ score }}"
+                         style="width: {{ paper.percentage_topic_score }}%"
+                         aria-valuenow="{{ paper.percentage_topic_score }}"
                          aria-valuemin="0"
                          aria-valuemax="100"></div>
                 </div>
             {% endif %}
-            <a href="{{ pdf }}">
+            <a href="{{ paper.pdf_url }}">
                 <button class="btn btn-outline-primary mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
             </a>
-            <a href="{{ ext }}">
+            <a href="{{ paper.url }}">
                 <button class="btn btn-outline-success mt-2 w-100"><i
                         class="fa fa-external-link-alt"></i>
                     medrxiv

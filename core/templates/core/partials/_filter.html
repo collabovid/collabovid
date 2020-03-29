@@ -43,7 +43,7 @@
 
                         <div class="col-4">
                             <a href="all" id="toggle-category-select"
-                               class="btn btn-danger delete w-50 mx-auto"
+                               class="btn btn-danger delete w-50 ml-2"
                                data-text-switch="<i class='fas fa-plus'></i>">
                                 <i class='fas fa-times'></i>
                             </a>
@@ -101,7 +101,7 @@
 
                 <div class="col-md-2 pt-2">
                     <button class="btn btn-primary float-right mt-4">
-                        <i class="fas fa-search"></i>
+                        <i class="fas fa-search mr-2"></i> Find Papers
                     </button>
                 </div>
             </div>
@@ -224,14 +224,16 @@
             }
 
             $('#chose-category').selectpicker();
+
             $('#start-date').datepicker({
                 uiLibrary: 'bootstrap4',
                 format: 'yyyy-mm-dd'
-            });
+            }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
+
             $('#end-date').datepicker({
                 uiLibrary: 'bootstrap4',
                 format: 'yyyy-mm-dd'
-            });
+            }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
 
 
             form.submit(function (e) {
@@ -274,14 +276,27 @@
                 });
             });
 
-            $(document).on('click', '.expand-description', function (e) {
+            $(document).on('click', '.toggle-description', function (e) {
 
                 e.preventDefault();
 
-                $(this).parent().find('.dots').hide();
-                $(this).parent().find('.long').fadeIn();
-                $(this).remove();
+                if ($(this).hasClass('expanded')) {
+                    $(this).removeClass('expanded');
+                    $(this).parent().find('.long').hide();
+                    $(this).parent().find('.dots').show();
+                } else {
+                    $(this).addClass('expanded');
+                    $(this).parent().find('.dots').hide();
+                    $(this).parent().find('.long').fadeIn();
+                }
 
+
+                let new_text = $(this).data("text-switch");
+                let old_text = $(this).html();
+
+                console.log(new_text, old_text);
+                $(this).data("text-switch", old_text);
+                $(this).html(new_text);
             });
 
             {% if load_default %}

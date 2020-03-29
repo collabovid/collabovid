@@ -8,6 +8,8 @@ from django.conf import settings
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
     description = models.TextField()
+    description_html = models.TextField()
+
 
     latent_topic_score = models.BinaryField(null=True)
 
@@ -36,6 +38,7 @@ class Paper(models.Model):
     SORTED_BY_TITLE = 0
     SORTED_BY_GREATEST = 1
     SORTED_BY_NEWEST = 2
+    SORTED_BY_TOPIC_SCORE = 3
 
     doi = models.CharField(max_length=100, primary_key=True)
 
@@ -109,5 +112,7 @@ class Paper(models.Model):
             papers = papers.order_by("-title")
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
+        elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
+            papers = papers.order_by("-topic_score")
 
         return papers
