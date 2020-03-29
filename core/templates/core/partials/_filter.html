@@ -1,4 +1,4 @@
-{% if html %}
+{% if filter %}
     <div class="filter-container my-4 px-5 py-3 bg-light z-1 rounded shadow">
 
         <form id="paper-search-form" method="POST" action="{{ action }}">
@@ -97,56 +97,154 @@
         </form>
 
     </div>
+{% elif pagination %}
+    <nav>
+        <ul id="pagination-container" class="pagination my-3 justify-content-center" style="display: none;">
+            <li class="page-item page-item-fixed"><a class="page-link" href="#" data-page="-1" data-next="false"
+                                                     data-prev="true"><span
+                    aria-hidden="true">&laquo;</span></a></li>
 
+            <li id="page-item-next" class="page-item page-item-fixed"><a class="page-link" href="#"
+                                                                         data-page="-1" data-next="true"
+                                                                         data-prev="false"><span aria-hidden="true">&raquo;</span></a>
+            </li>
+        </ul>
+    </nav>
 {% elif script %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
     <script src="https://unpkg.com/gijgo@1.9.13/js/gijgo.min.js" type="text/javascript"></script>
     <script type="text/javascript">
-        type = "text/javascript" >
-            $(document).ready(function () {
-                let indicator = $("#{{ indicator_id }}");
-                let paper_container = $("#{{ result_container_id }}");
+        $(document).ready(function () {
+            window.Pagination = {};
 
+            let indicator = $("#{{ indicator_id }}");
+            let paper_container = $("#{{ result_container_id }}");
+            let form = $("#paper-search-form");
+            let pagination_container = $("#pagination-container");
 
-                $('#chose-category').selectpicker();
-                $('#chose-cluster').selectpicker();
-                $('#start-date').datepicker({
-                    uiLibrary: 'bootstrap4',
-                    format: 'yyyy-mm-dd'
+            let next_page_item = $("#page-item-next");
+
+            function search_query(data, page, on_success) {
+                data += "&page=" + page;
+
+                $.ajax({
+                    url: form.attr("action"),
+                    type: 'POST',
+                    data: data,
+                    success: function (data) {
+                        paper_container.html(data);
+
+                        indicator.hide();
+                        paper_container.fadeIn();
+
+                        update_pagination_container();
+                        on_success();
+                    },
+                    error: function (request, error) {
+                        console.log("Request: " + JSON.stringify(request));
+                        console.log("Error: " + error);
+                    }
                 });
-                $('#end-date').datepicker({
-                    uiLibrary: 'bootstrap4',
-                    format: 'yyyy-mm-dd'
+            }
+
+            function insert_page(i, last_page_added) {
+
+                if (i <= last_page_added) {
+                    return last_page_added;
+                }
+
+                if (i - 1 > last_page_added) {
+                    insert_page_placeholder();
+                }
+
+                let element = $("<li class=\"page-item\"><a class=\"page-link\" href=\"#\" data-next=\"false\" data-prev=\"false\" data-page=\"" + i + "\">" + i + "</a></li>").insertBefore(next_page_item);
+
+                if (i === Pagination.current_page) {
+                    element.addClass("active");
+                }
+
+                return i;
+            }
+
+            function insert_page_placeholder() {
+                let element = $("<li class=\"page-item disabled\"><a class=\"page-link\" data-next=\"false\" data-prev=\"false\" data-page=\"-1\" href=\"#\">...</a></li>").insertBefore(next_page_item);
+            }
+
+            function update_pagination_container() {
+                $(".page-item:not(.page-item-fixed)").remove();
+
+                if (Pagination.pagination_needed) {
+                    last_page_added = 0;
+
+                    last_page_added = insert_page(Pagination.first_page, last_page_added);
+                    last_page_added = insert_page(Pagination.previous_page, last_page_added);
+                    last_page_added = insert_page(Pagination.current_page, last_page_added);
+                    last_page_added = insert_page(Pagination.next_page, last_page_added);
+                    last_page_added = insert_page(Pagination.last_page, last_page_added);
+
+                    pagination_container.fadeIn();
+                }
+
+
+            }
+
+            $('#chose-category').selectpicker();
+            $('#chose-cluster').selectpicker();
+            $('#start-date').datepicker({
+                uiLibrary: 'bootstrap4',
+                format: 'yyyy-mm-dd'
+            });
+            $('#end-date').datepicker({
+                uiLibrary: 'bootstrap4',
+                format: 'yyyy-mm-dd'
+            });
+
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                paper_container.hide();
+                indicator.show();
+                pagination_container.hide();
+
+                search_query(form.serialize(), 1, function () {
+                    Pagination.last_request = form.serialize();
                 });
 
+            });
 
-                $("#paper-search-form").submit(function (e) {
-                    e.preventDefault();
+            $(this).on("click", ".page-item:not(.disabled) > a", function (e) {
+                e.preventDefault();
 
-                    paper_container.hide();
-                    indicator.show();
+                let is_prev = $(this).data("prev");
+                let is_next = $(this).data("next");
+
+                let page = -1;
 
 
-                    let form = $(this);
+                if (is_prev && Pagination.previous_page > 0) {
+                    page = Pagination.previous_page
 
-                    $.ajax({
-                        url: form.attr("action"),
-                        type: 'POST',
-                        data: form.serialize(),
-                        success: function (data) {
-                            paper_container.html(data);
+                } else if (is_next && Pagination.next_page > 0) {
+                    page = Pagination.next_page
+                } else if (is_next || is_prev) {
+                    return;
+                } else {
+                    page = $(this).data("page");
+                }
 
-                            indicator.hide();
-                            paper_container.fadeIn();
-                        },
-                        error: function (request, error) {
-                            console.log("Request: " + JSON.stringify(request));
-                            console.log("Error: " + error);
-                        }
-                    });
+                paper_container.hide();
+                indicator.show();
+
+                search_query(Pagination.last_request, page, function () {
                 });
             });
+
+            {% if load_default %}
+                form.submit();
+            {% endif %}
+        });
     </script>
 
 {% elif css %}

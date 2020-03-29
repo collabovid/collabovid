@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 
+
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
     description = models.TextField()

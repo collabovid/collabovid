@@ -6,3 +6,39 @@
 {% empty %}
     <div class="text-white my-5 text-center font-weight-bold">No results were found for your query.</div>
 {% endfor %}
+
+
+<script>
+
+    {% if papers.has_previous or papers.has_next %}
+        window.Pagination.pagination_needed = true;
+
+        window.Pagination.first_page = 1;
+        window.Pagination.current_page = {{ papers.number }};
+
+        {% if papers.has_previous %}
+            window.Pagination.previous_page = {{ papers.previous_page_number }};
+        {% else %}
+            window.Pagination.previous_page = -1;
+        {% endif %}
+
+        {% if papers.has_next %}
+            window.Pagination.next_page = {{ papers.next_page_number }};
+            window.Pagination.last_page = {{ papers.paginator.num_pages }};
+        {% else %}
+            window.Pagination.next_page = -1;
+        {% endif %}
+
+    {% else %}
+        window.Pagination.pagination_needed = false;
+    {% endif %}
+
+
+
+    console.log("First " + window.Pagination.first_page);
+    console.log("Last " + window.Pagination.last_page);
+    console.log("Current " + window.Pagination.current_page);
+    console.log("Prev " + window.Pagination.previous_page);
+    console.log("Next " + window.Pagination.next_page);
+
+</script>

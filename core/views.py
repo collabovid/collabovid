@@ -2,17 +2,24 @@ from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.db.models import Q
 from django.utils.dateparse import parse_date
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from scrape.scrape_data import get_data
 from data.models import Paper, Category, Topic
 
+PAPER_PAGE_COUNT = 10
 
 def home(request):
     papers = Paper.objects.all()
     categories = Category.objects.all()
 
+    paginator = Paginator(papers, 25) # Show 25 contacts per page.
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request, "core/home.html",
-                  {'papers': papers, 'categories': categories, 'search_url': reverse("search")})
+                  {'papers': page_obj, 'categories': categories, 'search_url': reverse("search")})
 
 
 def search(request):
@@ -30,9 +37,21 @@ def search(request):
 
         categories = Category.objects.filter(name__in=category_names)
 
-        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories)
+        papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories).all().order_by("-title")
 
-        return render(request, "core/partials/_search_results.html", {'papers': papers})
+        if papers.count() > PAPER_PAGE_COUNT:
+            paginator = Paginator(papers, PAPER_PAGE_COUNT)
+            try:
+                page_number = request.POST.get('page')
+                page_obj = paginator.get_page(page_number)
+            except PageNotAnInteger:
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                page_obj = None
+        else:
+            page_obj = papers
+
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj})
 
     return HttpResponseNotFound()
 
@@ -70,7 +89,19 @@ def topic(request, id):
 
         papers = Paper.get_paper_for_query(search_query, start_date, end_date, categories).filter(topic=topic)
 
-        return render(request, "core/partials/_search_results.html", {'papers': papers})
+        if papers.count() > PAPER_PAGE_COUNT:
+            paginator = Paginator(papers, PAPER_PAGE_COUNT)
+            try:
+                page_number = request.POST.get('page')
+                page_obj = paginator.get_page(page_number)
+            except PageNotAnInteger:
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                page_obj = None
+        else:
+            page_obj = papers
+
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj})
 
     return HttpResponseNotFound()
 
