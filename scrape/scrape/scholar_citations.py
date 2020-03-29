@@ -1,4 +1,6 @@
 import re
+from django.utils import timezone
+from time import sleep
 
 import django
 import requests
@@ -48,13 +50,17 @@ def get_scholar_citations(firstname: str, lastname: str):
 
 
 if __name__ == '__main__':
-    total = 0
-    found_citations = 0
     authors = Author.objects.all()
 
-    for author in authors:
-        citations = get_scholar_citations(author.first_name, author.last_name)
-        if citations:
-            found_citations += 1
-        total += 1
-        print(f"Found Citations/Total: {found_citations}/{total}")
+    for i, author in enumerate(authors):
+        if author.citation_count == -1:
+            author.citation_count = None
+            author.save()
+
+        if author.citations_last_update == None:
+            citations = get_scholar_citations(author.first_name, author.last_name)
+            author.citations_last_update = timezone.now()
+            if citations:
+                author.citation_count = citations
+            author.save()
+            sleep(5)
