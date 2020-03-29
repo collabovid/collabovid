@@ -1,4 +1,5 @@
 .idea/
+generated
 
 set_secret_envs.sh
 

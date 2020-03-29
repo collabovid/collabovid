@@ -103,3 +103,6 @@ STATIC_ROOT = 'static'
 FIXTURE_DIRS = (
     '/data/fixtures/',
 )
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'generated/'

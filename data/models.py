@@ -44,6 +44,8 @@ class Paper(models.Model):
     SORTED_BY_NEWEST = 2
     SORTED_BY_TOPIC_SCORE = 3
 
+    preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
+
     doi = models.CharField(max_length=100, primary_key=True)
 
     title = models.CharField(max_length=200)
@@ -69,22 +71,6 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    @property
-    def cleaned_doi(self):
-        return self.doi.replace("/", "").replace(".", "")
-
-    @property
-    def image_name(self):
-        return self.cleaned_doi + '.jpg'
-
-    @property
-    def image_url(self):
-        return static(os.path.join(settings.RELATIVE_PDF_IMAGE_FOLDER, self.image_name))
-
-    @property
-    def image_path(self):
-        return os.path.join(settings.PDF_IMAGE_FOLDER, self.image_name)
 
     @property
     def percentage_topic_score(self):
