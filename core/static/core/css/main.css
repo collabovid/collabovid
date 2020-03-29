@@ -12,6 +12,7 @@ body {
 
 .gradient-header {
     background-color: #75a5f2;
+    background-image: linear-gradient(135deg, #75A5F2 0%, #5475a1 100%);
     position: relative;
     margin-top: -72px;
     padding-top: 72px;
