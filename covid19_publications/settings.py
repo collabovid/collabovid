@@ -127,3 +127,5 @@ STATIC_URL = '/static/'
 FIXTURE_DIRS = (
    '/data/fixtures/',
 )
+
+PDF_IMAGE_FOLDER = os.path.join(BASE_DIR, 'pdf_images/')
