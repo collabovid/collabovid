@@ -8,7 +8,7 @@ import os
 from django.conf import settings
 
 class Topic(models.Model):
-    name = models.CharField(default="Unknown", max_length=100)
+    name = models.CharField(default="Unknown", max_length=300)
     description = models.TextField()
     description_html = models.TextField()
     icon_path = models.CharField(max_length=100, default="")
@@ -48,7 +48,7 @@ class Paper(models.Model):
 
     doi = models.CharField(max_length=100, primary_key=True)
 
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
