@@ -1,5 +1,6 @@
 from scipy.spatial.distance import jensenshannon
 import numpy as np
+import scipy
 
 
 class SimilarityComputer():
@@ -13,5 +14,8 @@ class JensonShannonSimilarity(SimilarityComputer):
 
 
 class CosineDistance(SimilarityComputer):
-    def similiarities(self, vectors, vec):
-        pass
+    def similarities(self, vectors, vec):
+        scores = np.apply_along_axis(lambda x: 1  - scipy.spatial.distance.cosine(x, vec), 1, vectors)
+        return scores
+
+

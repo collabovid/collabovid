@@ -13,6 +13,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class PaperAnalyzer():
 
     def __init__(self, type='lda'):
+        matrix_file_name = 'paper_matrix.pkl'
         if type == 'lda':
             self.vectorizer = PretrainedLDA(os.path.join(dir_path, 'res/lda.pkl'),
                                             os.path.join(dir_path, 'res/vectorizer.pkl'))
@@ -21,11 +22,12 @@ class PaperAnalyzer():
             from .bert_vectorizer import BioBertVectorizer
             self.vectorizer = BioBertVectorizer()
             self.similarity_computer = CosineDistance()
+            matrix_file_name = 'paper_matrix_biobert.pkl'
         else:
             raise ValueError('Unknown type')
 
         self.paper_matrix = None
-        matrix_path = os.path.join(dir_path, 'res/paper_matrix.pkl')
+        matrix_path = os.path.join(dir_path, os.path.join('res', matrix_file_name))
         if os.path.exists(matrix_path):
             self.paper_matrix = joblib.load(matrix_path)
 
