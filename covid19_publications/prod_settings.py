@@ -3,7 +3,7 @@ from .base_settings import *
 ALLOWED_HOSTS = ['django-env.eba-3yrfmfbq.us-east-1.elasticbeanstalk.com']
 SECRET_KEY = os.environ['SECRET_KEY']
 
-'''DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.environ['RDS_DB_NAME'],
@@ -12,14 +12,14 @@ SECRET_KEY = os.environ['SECRET_KEY']
         'HOST': os.environ['RDS_HOSTNAME'],
         'PORT': os.environ['RDS_PORT'],
     }
-}'''
+}
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
+}'''
 
 AWS_STORAGE_BUCKET_NAME = 'covid-publications'
 AWS_S3_REGION_NAME = 'us-east-1'  # e.g. us-east-2
