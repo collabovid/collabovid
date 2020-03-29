@@ -37,6 +37,10 @@ times a day.
 [COVID-19 Open Research Dataset Challenge (CORD-19)](https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge/tasks),
 initiated inter alia by the Allen Institue for AI (AI2) and the White House.
 
+### Why do not all authors have a citation number?
+
+Not for every author a profile could be found on Google Scholar or an unambiguous match was not possible.
+
 ### What's the difference between __category__ and __topic__?
 
 The category represents the subject area, the paper is assigned to on medRxiv/bioRxiv. 
