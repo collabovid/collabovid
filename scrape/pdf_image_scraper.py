@@ -14,7 +14,6 @@ class PdfImageScraper:
         all_papers = Paper.objects.all()
         for i, paper in enumerate(all_papers):
             if not os.path.isfile(paper.image_path):
-
                 res = requests.get(paper.pdf_url)
                 pages = convert_from_bytes(res.content, first_page=1, last_page=1)
                 if len(pages) != 1:
@@ -23,5 +22,5 @@ class PdfImageScraper:
                 pages[0].save(paper.image_path, 'JPEG')
 
                 print(f"Successfully created image for file {i}: {paper.doi}")
-            if count and i >= count:
+            if count and i - 1 >= count:
                 break

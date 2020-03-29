@@ -37,7 +37,6 @@ def get_data(detailed: bool = True, count=None):
                 doi=item['rel_doi']
             )
             if paper.category_id == 'unknown':
-                #print(f"{i}, update category")
                 url = item['rel_link']
                 authors, category = get_detailed_information(url)
 
@@ -49,7 +48,6 @@ def get_data(detailed: bool = True, count=None):
                 paper.category = db_category
                 paper.save()
         except Paper.DoesNotExist:
-            #print(f"{i}, add {item['rel_doi']}")
             paper = Paper(
                 doi=item['rel_doi']
             )
