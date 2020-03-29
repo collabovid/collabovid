@@ -78,8 +78,12 @@ class Paper(models.Model):
         return self.cleaned_doi + '.jpg'
 
     @property
-    def image_path(self):
+    def image_url(self):
         return static(os.path.join(settings.RELATIVE_PDF_IMAGE_FOLDER, self.image_name))
+
+    @property
+    def image_path(self):
+        return os.path.join(settings.PDF_IMAGE_FOLDER, self.image_name)
 
     @property
     def percentage_topic_score(self):
