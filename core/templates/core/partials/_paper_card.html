@@ -3,12 +3,20 @@
 <div class="card p-4 rounded shadow">
     <div class="row d-flex flex-wrap align-items-center">
         <div class="col-md-2">
-            <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
-                 class="img-fluid mx-auto d-block">
+
+            {% if paper.preview_image %}
+                <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                     class="img-fluid mx-auto d-block">
+            {% else %}
+                <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
+                     class="img-fluid mx-auto d-block">
+            {% endif %}
         </div>
         <div class="col-md-8">
             <div class="card-block">
+
                 <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
+
                 <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
                     {% for author in paper.authors.all|slice:":5"%}
                         {% if not forloop.first %}&nbsp;&nbsp;&nbsp;{% endif %}
