@@ -21,14 +21,18 @@ class AuthorAdmin(admin.ModelAdmin):
 
     def refresh_citations(self, request):
         citation_refresher = CitationRefresher()
-        citation_refresher.refresh_citations(count=100)
-        self.message_user(request, "100 oldest citations updated")
+        if citation_refresher.refresh_citations(count=100):
+            self.message_user(request, "100 oldest citations updated")
+        else:
+            self.message_user(request, "Error while scraping Google Scholar Citations")
         return HttpResponseRedirect("../")
 
     def get_new_citations(self, request):
         citation_refresher = CitationRefresher()
-        citation_refresher.refresh_citations(only_new=True)
-        self.message_user(request, "All new citations inserted")
+        if citation_refresher.refresh_citations(only_new=True):
+            self.message_user(request, self.message_user(request, "All new citations inserted"))
+        else:
+            self.message_user(request, "Error while scraping Google Scholar Citations")
         return HttpResponseRedirect("../")
 
 @admin.register(Paper)

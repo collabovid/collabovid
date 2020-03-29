@@ -53,7 +53,7 @@ class CitationRefresher:
         final_name = ""
         names = name.split(" ")
         for name in names:
-            if len(name) != 1:
+            if len(name) > 2 or (len(name) == 2 and name[1] != '.'):
                 final_name += " " + name
         return final_name.strip()
 
@@ -70,16 +70,17 @@ class CitationRefresher:
             citations, status = self.get_scholar_citations(author.first_name, author.last_name)
 
             if status == self.HTTP_ERROR:
-                break
+                return False
 
             author.citations_last_update = timezone.now()
             if status == self.SUCCESS:
                 author.citation_count = citations
-                author.save()
             elif status == self.NO_AUTHOR_FOUND:
                 shortened_first_name = self.remove_shortened_names(author.first_name)
                 if shortened_first_name != author.first_name:
                     citations, status = self.get_scholar_citations(shortened_first_name, author.last_name)
                     if status == self.SUCCESS:
                         author.citation_count = citations
-                        author.save()
+            author.save()
+
+        return True
