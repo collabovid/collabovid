@@ -1,44 +1,26 @@
 {% load static %}
 
-<div class="card p-4 rounded shadow my-3">
+<div class="card p-4 rounded shadow my-3 topic_card {% if odd %}odd{% endif %}"
+     style="background-image: url({% static topic.icon_path %});">
     <div class="row d-flex flex-wrap align-items-center">
+
+        {% if not odd %}
+            <div class="col-md-3"></div>
+        {% endif %}
+
         <div class="col-md-9">
-            <div class="card-block">
-                <h5 class="card-title" style="font-size: 1.2em">{{ topic.name }}</h5>
+            <a class="d-block card-block px-3 invisible-link" href="{% url "topic" topic.pk %}">
+                <h4 class="card-title">{{ topic.name }}</h4>
 
-                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em"></h6>
-                <p class="card-text" style="font-size: 0.8em">{{ topic.description|truncatechars:400 }}</p>
-            </div>
+                <div class="card-text card-text-preview">
+                    {{ topic.description_html|safe }}
+                </div>
+            </a>
         </div>
-        <div class="col-md-3 text-center align-self-start">
 
-            <div class="row">
-                <div class="col-12">
-                    <a class="mb-5 d" href="{% url "topic" topic.pk %}">
-                        <button class="btn btn-outline-info mt-2 w-75 float-right">
-                            <i class="fa fa-external-link-alt"></i>
-                            Assigned Papers
-                        </button>
-                    </a>
-                </div>
-            </div>
-
-
-            <div class="row mt-3">
-                <div class="col-12 text-right">
-                    <a class="" href="https://www.kaggle.com/covid19">
-                        <img class="w-25" src="{% static "core/img/kaggle-logo.png" %}">
-                    </a>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 text-right">
-                    <img class="w-75" src="{% static "core/img/kaggle-partners.png" %}">
-                </div>
-            </div>
-
-        </div>
+        {% if odd %}
+            <div class="col-md-3"></div>
+        {% endif %}
 
     </div>
 </div>

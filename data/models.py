@@ -11,6 +11,7 @@ class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=60)
     description = models.TextField()
     description_html = models.TextField()
+    icon_path = models.CharField(max_length=60, default="")
 
     latent_topic_score = models.BinaryField(null=True)
 
