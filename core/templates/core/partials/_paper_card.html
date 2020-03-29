@@ -13,9 +13,9 @@
                     {% for author in authors.all %}
                         {% if not forloop.first %}&nbsp;&nbsp;&nbsp;{% endif %}
                         <span class="need-tooltip text-nowrap text-muted"
-                           data-toggle="tooltip"
-                           data-placement="top"
-                           title="Citations: {{ author.citation_count }}">
+                              data-toggle="tooltip"
+                              data-placement="top"
+                              title="Citations: {{ author.citation_count }}">
                                 <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
                         </span>
 
@@ -23,7 +23,19 @@
 
 
                 </h6>
-                <p class="card-text" style="font-size: 0.8em">{{ description|truncatechars:400 }}</p>
+                <p class="card-text" style="font-size: 0.8em">
+                    <span class="short">{{ description|slice:":400" }}</span><span class="dots">...</span><span class="long" style="display: none;">{{ description|slice:"400:" }}</span>
+
+                    <a href="#" class="btn
+                    d-block
+                    w-25
+                    mt-2
+                    btn-outline-secondary
+                    py-0 text-center mx-auto
+                    expand-description" style="font-size: 10px;">
+                        <i class="fas fa-arrow-circle-down"></i> show full abstract
+                    </a>
+                </p>
             </div>
         </div>
         <div class="col-md-2 text-center align-self-start">
