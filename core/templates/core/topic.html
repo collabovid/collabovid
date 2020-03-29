@@ -4,7 +4,7 @@
 
     <div>
         <div class="gradient-header">
-            <div class="topic_header" style="background-image: url();">
+            <div class="topic_header">
                 <div class="container">
                     <div class="row">
 
@@ -16,7 +16,8 @@
 
                     <div class="row align-items-center">
                         <div class="col-8">
-                            <div class="muted-white topic_description">
+                            <div id="topic-description"
+                                 class="muted-white {% if topic.description|length > 1000 %}topic_description{% endif %}">
                                 {{ topic.description_html | safe }}
                             </div>
                         </div>
@@ -25,6 +26,16 @@
                             <img src="{% static topic.icon_path %}" class="img-fluid">
                         </div>
                     </div>
+
+                    {% if topic.description|length > 1000 %}
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <a class="muted-white" id="expand-description" href="#">
+                                    <i class="fas fa-2x fa-arrow-circle-down"></i>
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             {% include 'core/partials/_rounded_bottom.html' %}
@@ -49,6 +60,21 @@
 
 {% block script %}
     {% include "core/partials/_filter.html" with load_default=True script=True result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+
+    <script>
+        $(document).ready(function () {
+            $("#expand-description").click(function (e) {
+                e.preventDefault();
+                var el = $('#topic-description'),
+                    curHeight = el.height(),
+                    autoHeight = el.removeClass("topic_description").height();
+
+                $(this).parents(".row").slideUp();
+                el.height(curHeight).animate({height: autoHeight}, 1000);
+                el.removeClass('topic_description');
+            });
+        })
+    </script>
 {% endblock %}
 
 {% block css %}
