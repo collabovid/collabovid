@@ -32,6 +32,12 @@ class PaperAnalyzer():
             self.paper_matrix = joblib.load(matrix_path)
 
     def calculate_paper_matrix(self):
+
+        file_path = os.path.join(os.getcwd(), 'analyze/res/paper_matrix.pkl')
+
+        if os.path.exists(file_path):
+            print(file_path, "exists, overwirting..")
+
         paper = Paper.objects.all()
         texts = [p.abstract for p in paper]
         matrix = self.vectorizer.vectorize(texts)
@@ -44,7 +50,7 @@ class PaperAnalyzer():
             'index_arr': [p.doi for p in paper],
             'matrix': matrix
         }
-        joblib.dump(self.paper_matrix, 'res/paper_matrix.pkl')
+        joblib.dump(self.paper_matrix, file_path)
 
     def assign_to_topics(self):
         if self.paper_matrix is None:
