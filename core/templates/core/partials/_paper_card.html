@@ -17,9 +17,12 @@
 
                 <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
 
+
+
                 <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
+                    <i class="fas fa-layer-group"></i> {{ paper.category.name }}&nbsp;&nbsp;&middot;&nbsp;&nbsp;
                     {% for author in paper.authors.all|slice:":5"%}
-                        {% if not forloop.first %}&nbsp;&nbsp;&nbsp;{% endif %}
+                        {% if not forloop.first %}&nbsp;{% endif %}
                         <span class="{% if author.citation_count %}need-tooltip{% endif %} text-nowrap text-muted"
                               data-toggle="tooltip"
                               data-placement="top"
@@ -47,7 +50,7 @@
             </div>
         </div>
         <div class="col-md-2 text-center align-self-start">
-            <span class="text-muted small float-right">{{ paper.date }}</span>
+            <span class="text-muted small float-right">{{ paper.published_at }}</span>
 
             <div class="clearfix mb-3"></div>
 
