@@ -1,6 +1,7 @@
 import joblib
 import en_core_sci_md
 import sys
+import numpy as np
 
 
 class TextVectorizer():
@@ -21,9 +22,12 @@ def spacy_tokenizer(sentence):
 setattr(sys.modules['__main__'], 'spacy_tokenizer', spacy_tokenizer)
 
 
-class PretrainedCountVectorizer(TextVectorizer):
-    def __init__(self, file):
-        self.vectorizer = joblib.load(file)
+class PretrainedLDA(TextVectorizer):
+    def __init__(self, lda_file, vectorizer_file):
+        self.vectorizer = joblib.load(vectorizer_file)
+        self.lda = joblib.load(lda_file)
 
     def vectorize(self, texts):
-        return self.vectorizer.transform(texts)
+        vectors = self.vectorizer.transform(texts)
+        return self.lda.transform(vectors)
+
