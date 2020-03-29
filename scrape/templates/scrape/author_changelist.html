@@ -1,0 +1,12 @@
+{% extends 'admin/change_list.html' %}
+
+{% block object-tools %}
+    <div>
+        <form action="citations/" method="POST">
+            {% csrf_token %}
+            <button type="submit">Scrape new data</button>
+        </form>
+    </div>
+    <br/>
+    {{ block.super }}
+{% endblock %}

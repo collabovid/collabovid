@@ -2,7 +2,7 @@ from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
-from analyze import PaperAnalyzer
+#from analyze import PaperAnalyzer
 
 #analyzer = PaperAnalyzer()
 
