@@ -26,8 +26,14 @@ def get_data(detailed: bool = True, count=None):
         print(i)
 
         site = item['rel_site']
+        if site == "medrxiv":
+            name = "medRxiv"
+        elif site == "biorxiv":
+            name = "bioRxiv"
+        else:
+            name = site
         host, created = PaperHost.objects.get_or_create(
-            name=site,
+            name=name,
             url=f'https://www.{site}.org',
         )
         host.save()
