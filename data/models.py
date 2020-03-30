@@ -1,11 +1,8 @@
 from django.db import models
 from django.db.models import Q, Max
 from django.utils.dateparse import parse_date
-from django.templatetags.static import static
+from django.db.models import F
 
-
-import os
-from django.conf import settings
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
@@ -27,7 +24,7 @@ class Author(models.Model):
     citations_last_update = models.DateTimeField(null=True, default=None)
 
     class Meta:
-        ordering = ['-citation_count']
+        ordering = [F('citation_count').desc(nulls_last=True)]
 
 
 class Category(models.Model):
