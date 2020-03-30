@@ -1,6 +1,4 @@
 import os
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "covid19_publications.settings"
 import django
 django.setup()
 
