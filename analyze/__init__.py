@@ -77,8 +77,8 @@ class PaperAnalyzer():
         topics = Topic.objects.all()
         descriptions = [topic.name + " " + topic.description for topic in topics]
         latent_topic_scores = self.vectorizer.vectorize(descriptions)
-        #paper = [p for p in Paper.objects.all() if not p.topic_score]
-        paper = Paper.objects.all()
+        paper = [p for p in Paper.objects.all() if not p.topic_score]
+        #paper = Paper.objects.all()
         matrix = self.paper_matrix['matrix']
 
         print("Begining Paper asignment")
