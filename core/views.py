@@ -23,7 +23,7 @@ def get_sorted_by_from_string(sorted_by):
 
 def home(request):
     if request.method == "GET":
-        return render(request, "core/home.html")
+        return render(request, "core/home.html", {'papers': Paper.objects.all()})
     elif request.method == "POST":
 
         search_query = request.POST.get("query", "")
