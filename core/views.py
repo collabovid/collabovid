@@ -6,7 +6,6 @@ import os
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
-    analyzer = analyze.get_analyzer()
 
 PAPER_PAGE_COUNT = 10
 
@@ -31,6 +30,7 @@ def home(request):
 
         new_related = list()
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+            analyzer = analyze.get_analyzer()
             related = analyzer.related(search_query, top=10)
             for paper, score in related:
                 new_related.append((paper, score * 100))

@@ -9,8 +9,14 @@ from tqdm import tqdm
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+analyzer = None
 
 def get_analyzer():
+    global analyzer
+
+    if not analyzer:
+        analyzer = PaperAnalyzer('lda')
+
     return analyzer
 
 
@@ -80,6 +86,3 @@ class PaperAnalyzer():
         related_papers = zip(self.paper_matrix['index_arr'], similarity_scores)
         related_papers = heapq.nlargest(top, related_papers, key=lambda x: x[1])
         return [(Paper.objects.get(pk=p[0]), p[1]) for p in related_papers]
-
-
-analyzer = PaperAnalyzer()
