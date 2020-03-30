@@ -12,6 +12,7 @@ class Topic(models.Model):
 
     latent_topic_score = models.BinaryField(null=True)
 
+
 class PaperHost(models.Model):
     name = models.CharField(max_length=60)
     url = models.URLField()
@@ -35,7 +36,6 @@ class Category(models.Model):
 
 
 class Paper(models.Model):
-
     SORTED_BY_TITLE = 0
     SORTED_BY_GREATEST = 1
     SORTED_BY_NEWEST = 2
@@ -89,7 +89,7 @@ class Paper(models.Model):
             Q(topic__in=topics) & Q(category__in=categories) & (Q(title__contains=search_query) |
                                                                 Q(authors__first_name__contains=search_query) |
                                                                 Q(authors__last_name__contains=search_query))
-            ).distinct()
+        ).distinct()
 
         if start_date:
             papers = papers.filter(published_at__gte=start_date)
@@ -100,7 +100,8 @@ class Paper(models.Model):
         if sorted_by == Paper.SORTED_BY_TITLE:
             papers = papers.order_by("title")
         elif sorted_by == Paper.SORTED_BY_GREATEST:
-            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by("-score")
+            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by(
+                F('score').desc(nulls_last=True))
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
         elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
