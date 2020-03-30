@@ -1,6 +1,6 @@
 {% for paper, score in relations %}
     <div class="my-5">
-        {% include 'core/partials/_paper_card.html' with html=True paper=paper %}
+        {% include 'core/partials/_paper_card.html' with html=True paper=paper score=score show_score=True %}
     </div>
 
 {% empty %}

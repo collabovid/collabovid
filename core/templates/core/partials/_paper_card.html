@@ -62,19 +62,19 @@
 
                 <div class="clearfix mb-3"></div>
 
-                {% if show_topic_score %}
+                {% if show_score %}
                     <div class="progress">
                         <div class="progress-bar
-                        {% if paper.percentage_topic_score >= 70 %}
+                        {% if score >= 70 %}
                             bg-success
-                        {% elif paper.percentage_topic_score >= 40 %}
+                        {% elif score >= 40 %}
                             bg-info
                         {% else %}
                             bg-danger
                         {% endif %}"
                              role="progressbar"
-                             style="width: {{ paper.percentage_topic_score }}%"
-                             aria-valuenow="{{ paper.percentage_topic_score }}"
+                             style="width: {{ score }}%"
+                             aria-valuenow="{{ score }}"
                              aria-valuemin="0"
                              aria-valuemax="100"></div>
                     </div>
