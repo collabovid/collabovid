@@ -4,7 +4,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
 import os
 
-if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == 1:
+if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     from analyze import PaperAnalyzer
     analyzer = PaperAnalyzer()
 
@@ -30,7 +30,7 @@ def home(request):
         search_query = request.POST.get("query", "")
 
         new_related = list()
-        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == 1:
+        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             related = analyzer.related(search_query, top=10)
             for paper, score in related:
                 new_related.append((paper, score * 100))
