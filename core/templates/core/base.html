@@ -111,6 +111,21 @@
         crossorigin="anonymous"></script>
 
 
+<script>
+
+    var gradientHeader = $('.gradient-header');
+    var navbar = $('#navbarResponsive');
+
+    navbar.on('hidden.bs.collapse', function () {
+        gradientHeader.removeClass('gradient-header-extended');
+    });
+
+    navbar.on('show.bs.collapse', function () {
+        gradientHeader.addClass('gradient-header-extended');
+    });
+
+</script>
+
 {% block script %}
 {% endblock %}
 

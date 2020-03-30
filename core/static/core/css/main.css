@@ -20,6 +20,11 @@ body {
     padding-bottom: 4rem;
 }
 
+.gradient-header-extended {
+    margin-top: -360px;
+    padding-top: 360px;
+}
+
 .svg-border-rounded svg {
     position: absolute;
     bottom: 0;
