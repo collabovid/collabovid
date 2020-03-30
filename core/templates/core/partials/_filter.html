@@ -89,9 +89,9 @@
                         <div class="col-12">
                             <select class="form-control" name="sorted_by" id="sorted-by">
                                 {% if best_matching %}
-                                    <option value="matching" selected>Best matching</option>
+                                    <option value="matching" selected>Relevance</option>
                                 {% endif %}
-                                <option value="greatest">Greatest</option>
+                                <option value="number_of_author_citations">Number of authors' citations</option>
                                 <option value="newest" {% if not best_matching %}selected{% endif %}>Newest</option>
                                 <option value="title">Title</option>
                             </select>

@@ -11,8 +11,8 @@ PAPER_PAGE_COUNT = 10
 
 
 def get_sorted_by_from_string(sorted_by):
-    if sorted_by == "greatest":
-        return Paper.SORTED_BY_GREATEST
+    if sorted_by == "number_of_author_citations":
+        return Paper.SORTED_BY_AUTHOR_CITATIONS
     elif sorted_by == "newest":
         return Paper.SORTED_BY_NEWEST
     elif sorted_by == "matching":
