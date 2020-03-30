@@ -40,7 +40,6 @@ def home(request):
 
 def explore(request):
     if request.method == "GET":
-        papers = Paper.objects.all()
         categories = Category.objects.all()
         topics = Topic.objects.all()
 

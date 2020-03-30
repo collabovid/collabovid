@@ -5,6 +5,8 @@ import requests
 from data.models import Paper
 from django.conf import settings
 
+from PIL import Image
+
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
@@ -25,6 +27,7 @@ class PdfImageScraper:
                     continue
 
                 buffer = BytesIO()
+                pages[0].thumbnail((400,400), Image.ANTIALIAS)
                 pages[0].save(fp=buffer, format='JPEG')
 
                 pillow_image = ContentFile(buffer.getvalue())
