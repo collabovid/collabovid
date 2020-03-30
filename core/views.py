@@ -44,14 +44,8 @@ def explore(request):
         categories = Category.objects.all()
         topics = Topic.objects.all()
 
-        paginator = Paginator(papers, 25)  # Show 25 contacts per page.
-
-        page_number = request.GET.get('page')
-        page_obj = paginator.get_page(page_number)
-
         return render(request, "core/explore.html",
-                      {'papers': page_obj,
-                       'categories': categories,
+                      {'categories': categories,
                        'topics': topics,
                        'search_url': reverse("explore")})
 
