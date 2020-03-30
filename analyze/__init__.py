@@ -10,8 +10,11 @@ from tqdm import tqdm
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class PaperAnalyzer():
+def get_analyzer():
+    return analyzer
 
+
+class PaperAnalyzer():
     def __init__(self, type='lda'):
         matrix_file_name = 'paper_matrix.pkl'
         if type == 'lda':
@@ -58,7 +61,7 @@ class PaperAnalyzer():
         topics = Topic.objects.all()
         descriptions = [topic.description for topic in topics]
         latent_topic_scores = self.vectorizer.vectorize(descriptions)
-        paper = Paper.objects.all()
+        paper = [p for p in Paper.objects.all() if not p.topic_score]
         matrix = self.paper_matrix['matrix']
         for p in tqdm(paper):
             arr_index = self.paper_matrix['id_map'][p.doi]
@@ -77,3 +80,6 @@ class PaperAnalyzer():
         related_papers = zip(self.paper_matrix['index_arr'], similarity_scores)
         related_papers = heapq.nlargest(top, related_papers, key=lambda x: x[1])
         return [(Paper.objects.get(pk=p[0]), p[1]) for p in related_papers]
+
+
+analyzer = PaperAnalyzer()

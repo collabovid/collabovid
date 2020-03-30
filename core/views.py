@@ -5,8 +5,8 @@ from data.models import Paper, Category, Topic
 import os
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-    from analyze import PaperAnalyzer
-    analyzer = PaperAnalyzer()
+    import analyze
+    analyzer = analyze.get_analyzer()
 
 PAPER_PAGE_COUNT = 10
 

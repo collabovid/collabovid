@@ -1,4 +1,5 @@
 import json
+import os
 from typing import List, Tuple
 
 import requests
@@ -7,6 +8,9 @@ from bs4 import BeautifulSoup
 from data.models import PaperHost, Category, Paper, Author
 from scrape.citation_refresher import CitationRefresher
 from scrape.pdf_image_scraper import PdfImageScraper
+
+if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+    import analyze
 
 
 def extract_pdf_url(url: str, host: PaperHost):
@@ -18,12 +22,14 @@ def extract_pdf_url(url: str, host: PaperHost):
     return complete_url
 
 
-def scrape_articles(detailed: bool = True, citations: bool = True, images: bool = True):
+def scrape_articles(detailed: bool = True, citations: bool = True, images: bool = True, update_unknown_category = False):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
     response = requests.get(biorxiv_corona_json)
     data = json.loads(response.text)['rels']
 
+    print("Scrape new papers")
+    new_articles = 0
     for i, item in enumerate(data):
         print(i)
 
@@ -44,7 +50,7 @@ def scrape_articles(detailed: bool = True, citations: bool = True, images: bool 
             paper = Paper.objects.get(
                 doi=item['rel_doi']
             )
-            if paper.category_id == 'unknown':
+            if paper.category_id == 'unknown' and update_unknown_category:
                 url = item['rel_link']
                 authors, category = get_detailed_information(url)
 
@@ -88,8 +94,13 @@ def scrape_articles(detailed: bool = True, citations: bool = True, images: bool 
                     paper.authors.add(db_author)
 
             paper.save()
+            new_articles += 1
 
-    print("Scraped new papers successfully")
+    print(f"Scraped new papers successfully: {new_articles} new article(s)")
+
+    if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+        analyze.get_analyzer().calculate_paper_matrix()
+        analyze.get_analyzer().assign_to_topics()
 
     if images:
         image_scraper = PdfImageScraper()
