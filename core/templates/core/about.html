@@ -151,15 +151,11 @@
                         <h3 class="card-title px-4 pt-4 pb-0">How do we assign papers to a given topic?</h3>
                         <hr>
                         <div class="card-body mt-0 pt-0">
-                            We built our website using a Python backend with Django and a PostgreSQL database. It is
-                            deployed via Amazon Web Services on AWS Elastic Beanstalk. In order to classify papers to a
-                            given topic, we use natural language processing techniques to find correlations between the
-                            topic and the content of a papers' abstract. As proposed by <a href="https://www.kaggle.com/danielwolffram/topic-modeling-finding-related-articles">Daniel
-                                Wolffram</a> the classifier
-                            counts the occurrences of 800000 keywords that were extracted from the <a href="https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge">COVID-19
-                            Open Research Dataset Challenge (CORD-19)</a>. Afterward, an Latend Dirichlet Allocation
-                            is applied to calculate a distribution of the given text. The distance between the two
-                            distributions is the similarity between the texts.
+                            In order to classify papers to a given topic, we use natural language processing techniques to find correlations between the
+                            topic and the content of a papers' abstract. We based our model on the great work from
+                            <a href="https://www.kaggle.com/danielwolffram/topic-modeling-finding-related-articles">Daniel Wolffram</a>
+                            during the <a href="https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge">COVID-19
+                            Open Research Dataset Challenge (CORD-19)</a>.
                         </div>
 
                     </div>
