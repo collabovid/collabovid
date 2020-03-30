@@ -5,8 +5,6 @@ INSTALLED_APPS.append('storages')
 ALLOWED_HOSTS = ['django-env.eba-3yrfmfbq.us-east-1.elasticbeanstalk.com', 'www.collabovid.org', 'collabovid.org']
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG=True
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
