@@ -2,15 +2,16 @@ from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
-#from analyze import PaperAnalyzer
-#from sentence_splitter import SentenceSplitter
+import os
 
-#analyzer = PaperAnalyzer('biobert')
+if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == 1:
+    from analyze import PaperAnalyzer
+    analyzer = PaperAnalyzer()
 
 PAPER_PAGE_COUNT = 10
 
-def get_sorted_by_from_string(sorted_by):
 
+def get_sorted_by_from_string(sorted_by):
     if sorted_by == "greatest":
         return Paper.SORTED_BY_GREATEST
     elif sorted_by == "newest":
@@ -20,23 +21,21 @@ def get_sorted_by_from_string(sorted_by):
     else:
         return Paper.SORTED_BY_TITLE
 
-def home(request):
 
+def home(request):
     if request.method == "GET":
         return render(request, "core/home.html")
     elif request.method == "POST":
 
         search_query = request.POST.get("query", "")
 
-        #related = analyzer.related(search_query, top=10)
+        new_related = list()
+        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == 1:
+            related = analyzer.related(search_query, top=10)
+            for paper, score in related:
+                new_related.append((paper, score * 100))
 
-        #new_related = list()
-        #
-        #for paper, score in related:
-        #    new_related.append((paper, score*100))
-
-        return render(request, "core/partials/_custom_topic_search_result.html", {'relations': []})
-
+        return render(request, "core/partials/_custom_topic_search_result.html", {'relations': new_related})
 
 
 def explore(request):
@@ -45,7 +44,7 @@ def explore(request):
         categories = Category.objects.all()
         topics = Topic.objects.all()
 
-        paginator = Paginator(papers, 25) # Show 25 contacts per page.
+        paginator = Paginator(papers, 25)  # Show 25 contacts per page.
 
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
@@ -104,7 +103,6 @@ def topic(request, id):
             categories.add(paper.category)
 
         papers = topic.papers.order_by('-topic_score')
-
 
         return render(request, "core/topic.html",
                       {'topic': topic,
