@@ -2,8 +2,10 @@ from .base_settings import *
 
 INSTALLED_APPS.append('storages')
 
-ALLOWED_HOSTS = ['django-env.eba-3yrfmfbq.us-east-1.elasticbeanstalk.com', 'collabovid.org']
+ALLOWED_HOSTS = ['django-env.eba-3yrfmfbq.us-east-1.elasticbeanstalk.com', 'www.collabovid.org', 'collabovid.org']
 SECRET_KEY = os.environ['SECRET_KEY']
+
+DEBUG=True
 
 DATABASES = {
     'default': {
