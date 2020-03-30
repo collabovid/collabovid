@@ -19,5 +19,6 @@
  
     # Run setup scripts
     export DJANGO_SETTINGS_MODULE=covid19_publications.settings
+    export PYTHONPATH=$PYTHONPATH:$(pwd)
     python3 setup/image_downloader.py
     python3 setup/lda_setup.py
