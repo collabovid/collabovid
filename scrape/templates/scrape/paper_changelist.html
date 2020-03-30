@@ -2,6 +2,41 @@
 
 {% block object-tools %}
     <div>
+        <h3>Setup</h3>
+        <div>
+            <form action="load_data_from_fixture/" method="POST">
+                {% csrf_token %}
+                <select name="fixture">
+                    <option value="db-202003292022.json">db-202003292022.json</option>
+                    <option value="topics.json">topics.json</option>
+                </select>
+                <button type="submit">Load data</button>
+            </form>
+        </div>
+
+        <div>
+            <form action="setup_pdf_images/" method="POST">
+                {% csrf_token %}
+                <button type="submit">Setup PDF Images</button>
+            </form>
+        </div>
+
+        <div>
+            <form action="setup_s3_apply/" method="POST">
+                {% csrf_token %}
+                <button type="submit">Setup S3 Images</button>
+            </form>
+        </div>
+
+        <div>
+            <form action="setup_lda/" method="POST">
+                {% csrf_token %}
+                <button type="submit">Setup LDA</button>
+            </form>
+        </div>
+
+        <h3>Refresh</h3>
+
         <div>
             <form action="update_papers/" method="POST">
                 {% csrf_token %}
@@ -14,6 +49,8 @@
                 <button type="submit">Update PDF thumbnails</button>
             </form>
         </div>
+
+
     </div>
     <br/>
     {{ block.super }}
