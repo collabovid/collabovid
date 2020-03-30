@@ -62,14 +62,26 @@ class PaperAnalyzer():
         }
         joblib.dump(self.paper_matrix, file_path)
 
+        print("Paper matrix exported completely")
+        print("Paper matrix contains the following dois:", self.paper_matrix['index_arr'])
+
     def assign_to_topics(self):
+
+        print("Assigning to topics")
+
         if self.paper_matrix is None:
-            raise
+            raise Exception("Paper matrix empty")
+
+        print("Matrix not empty")
+
         topics = Topic.objects.all()
         descriptions = [topic.description for topic in topics]
         latent_topic_scores = self.vectorizer.vectorize(descriptions)
         paper = [p for p in Paper.objects.all() if not p.topic_score]
         matrix = self.paper_matrix['matrix']
+
+        print("Begining Paper asignment")
+
         for p in tqdm(paper):
             arr_index = self.paper_matrix['id_map'][p.doi]
             similarities = self.similarity_computer.similarities(latent_topic_scores, matrix[arr_index])
@@ -80,6 +92,8 @@ class PaperAnalyzer():
         for topic in topics:
             topic.save()
 
+        print("Finished asignment to topics")
+        
     def related(self, query, top=20):
         query_dist = self.vectorizer.vectorize([query])[0]
         matrix = self.paper_matrix['matrix']
