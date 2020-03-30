@@ -144,6 +144,23 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+
+                    <div class="card-block shadow bg-white rounded mt-4">
+
+                        <h3 class="card-title px-4 pt-4 pb-0">How do we assign papers to a given topic?</h3>
+                        <hr>
+                        <div class="card-body mt-0 pt-0">
+                            In order to assign papers to a given topic we use natural language processing techniques
+                            to find correlations between the topic and the content of a papers abstract.
+                            As proposed by
+                            <a href="https://www.kaggle.com/danielwolffram/topic-modeling-finding-related-articles">Daniel
+                                Wolffram</a>
+                            the classifier counts the occurrences of 800000 keywords that were extracted from
+                            the <a href="https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge">COVID-19
+                            Open Research Dataset Challenge (CORD-19)</a>. Afterwards an
+                            Latend Dirichlet Allocation is applied to calculate an distribution of the given text.
+                        </div>
 
                     </div>
                 </div>

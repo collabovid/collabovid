@@ -63,7 +63,7 @@ class PaperAnalyzer():
         joblib.dump(self.paper_matrix, file_path)
 
         print("Paper matrix exported completely")
-        print("Paper matrix contains the following dois:", self.paper_matrix['index_arr'])
+        #print("Paper matrix contains the following dois:", self.paper_matrix['index_arr'])
 
     def assign_to_topics(self):
 
@@ -93,7 +93,7 @@ class PaperAnalyzer():
             topic.save()
 
         print("Finished asignment to topics")
-        
+
     def related(self, query, top=20):
         query_dist = self.vectorizer.vectorize([query])[0]
         matrix = self.paper_matrix['matrix']
