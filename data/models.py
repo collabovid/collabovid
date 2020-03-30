@@ -100,7 +100,7 @@ class Paper(models.Model):
         if sorted_by == Paper.SORTED_BY_TITLE:
             papers = papers.order_by("title")
         elif sorted_by == Paper.SORTED_BY_GREATEST:
-            papers = papers.annotate(score=Max('authors__citation_count')).order_by("-score")
+            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by("-score")
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
         elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
