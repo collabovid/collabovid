@@ -1,62 +1,70 @@
 {% load static %}
 
-<div class="card p-4 rounded shadow">
-    <div class="row d-flex flex-wrap align-items-center">
-        <div class="col-md-2">
+{% if html %}
+    <div class="card p-4 rounded shadow">
+        <div class="row d-flex flex-wrap align-items-center">
+            <div class="col-md-2">
 
-            {% if paper.preview_image %}
-                <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
-                     class="img-fluid mx-auto d-block">
-            {% else %}
-                <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
-                     class="img-fluid mx-auto d-block">
-            {% endif %}
-        </div>
-        <div class="col-md-8">
-            <div class="card-block">
+                {% if paper.preview_image %}
+                    <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                         class="img-fluid mx-auto d-block">
+                {% else %}
+                    <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
+                         class="img-fluid mx-auto d-block">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card-block">
 
-                <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
+                    <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
 
 
-
-                <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
-                    <i class="fas fa-layer-group"></i> {{ paper.category.name }}&nbsp;&nbsp;&middot;&nbsp;&nbsp;
-                    {% for author in paper.authors.all|slice:":5"%}
-                        {% if not forloop.first %}&nbsp;{% endif %}
-                        <span class="{% if author.citation_count %}need-tooltip{% endif %} text-nowrap text-muted"
-                              data-toggle="tooltip"
-                              data-placement="top"
-                              title="Citations: {{ author.citation_count }}">
+                    <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
+                        <i class="fas fa-layer-group"></i> {{ paper.category.name }}&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+                        {% for author in paper.authors.all|slice:":5" %}
+                            {% if not forloop.first %}&nbsp;{% endif %}
+                            <span class="{% if author.citation_count %}need-tooltip{% endif %} text-nowrap text-muted"
+                                  data-toggle="tooltip"
+                                  data-placement="top"
+                                  title="Citations: {{ author.citation_count }}">
                                 <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
                         </span>
-                    {% endfor %}
+                        {% endfor %}
 
 
-                </h6>
-                <p class="card-text" style="font-size: 0.8em">
-                    <span class="short">{{ paper.abstract|slice:":400" }}</span><span class="dots">...</span><span class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
+                    </h6>
 
-                    <a href="#" class="btn
-                    d-block
-                    w-25
-                    mt-2
-                    btn-outline-secondary
-                    py-0 text-center mx-auto
-                    toggle-description" style="font-size: 10px;"
-                       data-text-switch="<i class='fas fa-arrow-circle-up'></i> hide full abstract">
-                        <i class='fas fa-arrow-circle-down'></i> show full abstract
-                    </a>
-                </p>
+                    <div class="abstract-container card-text">
+                        <span style="font-size: 0.8em">
+                            <span class="short">{{ paper.abstract|slice:":400" }}</span><span
+                                class="dots">...</span><span
+                                class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
+                        </span>
+
+                        <div class="abstract-controls text-center">
+                            <a href="#"
+                               class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
+                               style="font-size: 10px;">
+                                <i class='fas fa-arrow-circle-down'></i> show full abstract
+                            </a>
+
+                            <a href="#"
+                               class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
+                               style="font-size: 10px; display: none;">
+                                <i class='fas fa-arrow-circle-up'></i> hide full abstract
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-        <div class="col-md-2 text-center align-self-start">
-            <span class="text-muted small float-right">{{ paper.published_at }}</span>
+            <div class="col-md-2 text-center align-self-start">
+                <span class="text-muted small float-right">{{ paper.published_at }}</span>
 
-            <div class="clearfix mb-3"></div>
+                <div class="clearfix mb-3"></div>
 
-            {% if show_topic_score %}
-                <div class="progress">
-                    <div class="progress-bar
+                {% if show_topic_score %}
+                    <div class="progress">
+                        <div class="progress-bar
                         {% if paper.percentage_topic_score >= 70 %}
                             bg-success
                         {% elif paper.percentage_topic_score >= 40 %}
@@ -64,23 +72,45 @@
                         {% else %}
                             bg-danger
                         {% endif %}"
-                         role="progressbar"
-                         style="width: {{ paper.percentage_topic_score }}%"
-                         aria-valuenow="{{ paper.percentage_topic_score }}"
-                         aria-valuemin="0"
-                         aria-valuemax="100"></div>
-                </div>
-            {% endif %}
-            <a href="{{ paper.pdf_url }}">
-                <button class="btn btn-outline-primary mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
-            </a>
-            <a href="{{ paper.url }}">
-                <button class="btn btn-outline-success mt-2 w-100"><i
-                        class="fa fa-external-link-alt"></i>
-                    {{ paper.host.name }}
-                </button>
-            </a>
-        </div>
+                             role="progressbar"
+                             style="width: {{ paper.percentage_topic_score }}%"
+                             aria-valuenow="{{ paper.percentage_topic_score }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100"></div>
+                    </div>
+                {% endif %}
+                <a href="{{ paper.pdf_url }}">
+                    <button class="btn btn-outline-primary mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
+                </a>
+                <a href="{{ paper.url }}">
+                    <button class="btn btn-outline-success mt-2 w-100"><i
+                            class="fa fa-external-link-alt"></i>
+                        {{ paper.host.name }}
+                    </button>
+                </a>
+            </div>
 
+        </div>
     </div>
-</div>
+{% elif script %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document).on('click', '.toggle-description', function (e) {
+
+                e.preventDefault();
+
+                if ($(this).hasClass('hide')) {
+                    $(this).closest('.abstract-container').find('.long').hide();
+                    $(this).closest('.abstract-container').find('.dots').show();
+                    $(this).parent().find('.toggle-description.show').show();
+                    $(this).hide();
+                } else {
+                    $(this).closest('.abstract-container').find('.dots').hide();
+                    $(this).closest('.abstract-container').find('.long').fadeIn();
+                    $(this).parent().find('.toggle-description.hide').show();
+                    $(this).hide();
+                }
+            });
+        })
+    </script>
+{% endif %}

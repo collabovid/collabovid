@@ -276,29 +276,6 @@
                 });
             });
 
-            $(document).on('click', '.toggle-description', function (e) {
-
-                e.preventDefault();
-
-                if ($(this).hasClass('expanded')) {
-                    $(this).removeClass('expanded');
-                    $(this).parent().find('.long').hide();
-                    $(this).parent().find('.dots').show();
-                } else {
-                    $(this).addClass('expanded');
-                    $(this).parent().find('.dots').hide();
-                    $(this).parent().find('.long').fadeIn();
-                }
-
-
-                let new_text = $(this).data("text-switch");
-                let old_text = $(this).html();
-
-                console.log(new_text, old_text);
-                $(this).data("text-switch", old_text);
-                $(this).html(new_text);
-            });
-
             {% if load_default %}
                 form.submit();
             {% endif %}

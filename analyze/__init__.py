@@ -15,6 +15,7 @@ def get_analyzer():
     global analyzer
 
     if not analyzer:
+        print("Initializing LDA")
         analyzer = PaperAnalyzer('lda')
 
     return analyzer

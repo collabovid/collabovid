@@ -25,6 +25,7 @@
 
 {% block script %}
     {% include "core/partials/_filter.html" with load_default=True script=True result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+    {% include 'core/partials/_paper_card.html' with script=True %}
 {% endblock %}
 
 {% block css %}

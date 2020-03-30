@@ -1,6 +1,6 @@
 {% for paper in papers %}
     <div class="my-5">
-        {% include 'core/partials/_paper_card.html' with paper=paper show_topic_score=show_topic_score %}
+        {% include 'core/partials/_paper_card.html' with html=True paper=paper show_topic_score=show_topic_score %}
     </div>
 
 {% empty %}
@@ -8,7 +8,7 @@
 {% endfor %}
 
 
-<script>
+<script type="text/javascript">
 
     {% if papers.has_previous or papers.has_next %}
         window.Pagination.pagination_needed = true;
