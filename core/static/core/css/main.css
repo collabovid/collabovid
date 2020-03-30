@@ -54,12 +54,12 @@ body {
 }
 
 .muted-white {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(201, 218, 226);
 }
 
 a.muted-white, a.muted-white:hover
 {
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(255, 255, 255);
 }
 
 .form-control-borderless {
