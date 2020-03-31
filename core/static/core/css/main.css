@@ -177,3 +177,23 @@ a.invisible-link, a.invisible-link:hover {
         padding: 1.25rem;
     }
 }
+
+.button-host {
+    color: #00796B;
+    border-color: #00796B;
+}
+.button-host:hover {
+    color: #fff;
+    background-color: #00796B;
+    border-color: #00796B;
+}
+
+.button-pdf {
+    color: #5475a1;
+    border-color: #5475a1;
+}
+.button-pdf:hover {
+    color: #fff;
+    background-color: #5475a1;
+    border-color: #5475a1;
+}
