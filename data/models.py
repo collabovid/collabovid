@@ -86,9 +86,9 @@ class Paper(models.Model):
             end_date = None
 
         papers = Paper.objects.filter(
-            Q(topic__in=topics) & Q(category__in=categories) & (Q(title__contains=search_query) |
-                                                                Q(authors__first_name__contains=search_query) |
-                                                                Q(authors__last_name__contains=search_query))
+            Q(topic__in=topics) & Q(category__in=categories) & (Q(title__icontains=search_query) |
+                                                                Q(authors__first_name__icontains=search_query) |
+                                                                Q(authors__last_name__icontains=search_query))
         ).distinct()
 
         if start_date:
