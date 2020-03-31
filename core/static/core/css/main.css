@@ -20,9 +20,9 @@ body {
     padding-bottom: 4rem;
 }
 
-@media (max-device-width: 420px) {
-    .gradient-header-bottom {
-        display: none !important;
+@media (max-width: 992px) {
+    .svg-border-rounded {
+        display: none;
     }
 }
 
