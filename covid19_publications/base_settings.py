@@ -112,6 +112,8 @@ CRONTAB_LOCK_JOBS = True
 CRONTAB_COMMAND_SUFFIX = ' 2>&1'
 CRONTAB_DJANGO_SETTINGS_MODULE = 'covid19_publications.prod_settings'
 
+CRONTAB_COMMAND_PREFIX="source /opt/python/run/venv/bin/activate && cd /opt/python/current/app/ && "
+
 CRONJOBS = [
     ('* * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
 ]
