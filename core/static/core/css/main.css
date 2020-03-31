@@ -20,6 +20,12 @@ body {
     padding-bottom: 4rem;
 }
 
+@media (max-device-width: 420px) {
+    .gradient-header-bottom {
+        display: none !important;
+    }
+}
+
 .gradient-header-extended {
     margin-top: -360px;
     padding-top: 360px;
@@ -62,8 +68,7 @@ body {
     color: rgb(201, 218, 226);
 }
 
-a.muted-white, a.muted-white:hover
-{
+a.muted-white, a.muted-white:hover {
     color: rgb(255, 255, 255);
 }
 
@@ -115,14 +120,12 @@ a.muted-white, a.muted-white:hover
     background-position: 100% 0;
 }
 
-a.invisible-link, a.invisible-link:hover
-{
+a.invisible-link, a.invisible-link:hover {
     color: inherit !important;
     text-decoration: none;
 }
 
-.topic_header
-{
+.topic_header {
     background-repeat: no-repeat;
     background-origin: content-box;
     background-size: 200px 200px;

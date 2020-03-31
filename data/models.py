@@ -32,7 +32,7 @@ class Category(models.Model):
     """
     e.g. Microbiology
     """
-    name = models.CharField(max_length=60, primary_key=True)
+    name = models.CharField(max_length=200, primary_key=True)
 
 
 class Paper(models.Model):
