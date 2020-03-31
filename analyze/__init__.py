@@ -6,6 +6,7 @@ from data.models import Paper, Topic
 import joblib
 import heapq
 from tqdm import tqdm
+from django.db import models
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
@@ -100,5 +101,16 @@ class PaperAnalyzer():
         matrix = self.paper_matrix['matrix']
         similarity_scores = self.similarity_computer.similarities(matrix, query_dist)
         related_papers = zip(self.paper_matrix['index_arr'], similarity_scores)
+
         related_papers = heapq.nlargest(top, related_papers, key=lambda x: x[1])
-        return [(Paper.objects.get(pk=p[0]), p[1]) for p in related_papers]
+        paper_ids, scores = zip(*related_papers)
+
+        papers = Paper.objects.filter(pk__in=paper_ids)
+        whens = list()
+
+        for pk, score in related_papers:
+            whens.append(models.When(pk=pk, then=score*100))
+
+        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField())).order_by("-search_score")
+
+        return papers

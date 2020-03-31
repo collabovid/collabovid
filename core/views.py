@@ -28,14 +28,28 @@ def home(request):
 
         search_query = request.POST.get("query", "")
 
-        new_related = list()
+        papers = list()
+        scores = list()
+
+        page_obj = papers
+
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             analyzer = analyze.get_analyzer()
-            related = analyzer.related(search_query, top=10)
-            for paper, score in related:
-                new_related.append((paper, score * 100))
+            papers = analyzer.related(search_query, top=50)
 
-        return render(request, "core/partials/_custom_topic_search_result.html", {'relations': new_related})
+            if papers.count() > PAPER_PAGE_COUNT:
+                paginator = Paginator(papers, PAPER_PAGE_COUNT)
+                try:
+                    page_number = request.POST.get('page')
+                    page_obj = paginator.get_page(page_number)
+                except PageNotAnInteger:
+                    page_obj = paginator.page(1)
+                except EmptyPage:
+                    page_obj = None
+            else:
+                page_obj = papers
+
+        return render(request, "core/partials/_custom_topic_search_result.html", {'papers': page_obj})
 
 
 def explore(request):

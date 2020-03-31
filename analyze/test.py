@@ -11,7 +11,7 @@ texts = ['Estimation of SARS-CoV-2 Infection Prevalence in Santa Clara County',
 analyzer = PaperAnalyzer('lda')
 analyzer.calculate_paper_matrix()
 analyzer.assign_to_topics()
-rel = analyzer.related('Estimation of SARS-CoV-2 Infection Prevalence in Santa Clara County')
-rel = analyzer.related('social impacts')
-print([(r[0].title, r[1]) for r in rel])
+#rel = analyzer.related('Estimation of SARS-CoV-2 Infection Prevalence in Santa Clara County')
+#rel = analyzer.related('social impacts')
+#print([(r[0].title, r[1]) for r in rel])
 

@@ -6,20 +6,19 @@
         <div class="container">
             {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories best_matching=False %}
         </div>
-    {% include 'core/partials/_rounded_bottom.html' %}
+        {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
-        <div id="paper-container" class="container">
+    <div id="paper-container" class="container">
 
-        </div>
+    </div>
 
 
-        <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5" style="display: none;">
-            <i class="fas fa-circle-notch fa-spin"></i>
-        </div>
+    <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5" style="display: none;">
+        <i class="fas fa-circle-notch fa-spin"></i>
+    </div>
 
-        {% include "core/partials/_filter.html" with pagination=True %}
-
+    <nav id="pagination-container"></nav>
 
 {% endblock %}
 
