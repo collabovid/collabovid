@@ -30,7 +30,8 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'data.apps.DataConfig',
     'scrape.apps.ScrapeConfig',
-    'visualization.apps.VisualizationConfig'
+    'visualization.apps.VisualizationConfig',
+    'django_crontab'
 ]
 
 MIDDLEWARE = [
@@ -106,3 +107,9 @@ FIXTURE_DIRS = (
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'generated/'
+
+CRONTAB_LOCK_JOBS = True
+
+CRONJOBS = [
+    ('* * * * *', 'covid19_publications.cron.update_paper', '>> ~/opt/python/log/cron_log')
+]
