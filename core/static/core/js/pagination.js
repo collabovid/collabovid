@@ -100,9 +100,13 @@
                 for (let i = 0; i < pages.length; i++) {
                     last_page_added = insert_page(pages[i], last_page_added);
                 }
+
+                plugin.fadeIn();
+            }else
+            {
+                plugin.hide();
             }
 
-            plugin.fadeIn();
         }
 
         return update_pagination_container;
