@@ -57,7 +57,7 @@ body {
 }
 
 #content {
-    min-height: 100vh; /* will cover the 100% of viewport */
+    min-height: 90vh; /* will cover the 100% of viewport */
     overflow: visible;
     display: block;
     position: relative;
