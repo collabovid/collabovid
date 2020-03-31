@@ -8,12 +8,15 @@
                 <div class="col-lg-8">
                     <h1 class="display-4">Explore COVID-19 Preprints</h1>
                     <p class="muted-white lead mb-0">
-                        Since 13th January 2019, {{ papers|length }} articles concerning the COVID-19 virus are published on preprint
+                        Since 13th January 2019, {{ papers|length }} articles concerning the COVID-19 virus are
+                        published on preprint
                         servers and collected by <strong>Collabovid</strong>. Most of
                         these papers are not reviewed in a professional reviewing process at the time of publication on
                         the preprint server. You can search for any topic you want below.
-                        Visit <a class="muted-white" href="{% url "explore" %}">explore</a> to review all articles or browse a list of
-                        predefined <a class="muted-white" href="{% url "topic-overview" %}">topics</a>. For additional help visit the
+                        Visit <a class="muted-white" href="{% url "explore" %}">explore</a> to review all articles or
+                        browse a list of
+                        predefined <a class="muted-white" href="{% url "topic-overview" %}">topics</a>. For additional
+                        help visit the
                         <a class="muted-white" href="{% url "about" %}">frequently asked questions</a>.
 
                     </p>
@@ -29,24 +32,46 @@
             <br/>
             <div class="row justify-content-center">
                 <div class="col-12 col-md-10 col-lg-8">
-                    <form class="card card-sm rounded-corners" action="{% url "home" %}" method="POST"
+                    <form action="{% url "home" %}" method="POST"
                           id="topic-search-form">
                         {% csrf_token %}
-                        <div class="card-body row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <i class="fas fa-search fa-2x text-body"></i>
+
+                        <div class="search-bar-rounded-corners card card-sm">
+                            <div class="search-form-card-body row no-gutters align-items-center">
+
+                                <div class="col-lg-10 col-md-10 col-sm-11 col">
+
+                                    <div class="row align-items-center">
+
+                                        <div class="col-0 col-sm-0 col-md-1 col-lg-1 col-xl-1">
+                                            <span class="d-none d-sm-none d-md-inline d-lg-inline d-xl-inline">
+                                                <i class="fas fa-search fa-2x text-body"></i>
+                                            </span>
+                                        </div>
+                                        <!--end of col-->
+                                        <div class="col">
+                                            <input name="query"
+                                                   class="form-control search-form-control form-control-borderless"
+                                                   type="search"
+                                                   placeholder="E.g.: What do we know about vaccines and therapeutics?">
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!--end of col-->
+                                <div class="col-lg-2 col-md-2 col-sm-1 col-auto text-center">
+                                    <button class="btn btn-lg btn-info
+                                    d-none d-sm-none d-md-block d-lg-block d-xl-block" type="submit">
+                                        <span class="">Search</span>
+                                    </button>
+                                    <button class="btn btn-lg btn-info
+                                    d-block d-sm-block d-md-none d-lg-none d-xl-none rounded-circle" type="submit">
+                                        <i class="fas fa-search text-body"></i>
+                                    </button>
+
+                                </div>
+                                <!--end of col-->
                             </div>
-                            <!--end of col-->
-                            <div class="col">
-                                <input name="query"
-                                       class="form-control form-control-lg form-control-borderless" type="search"
-                                       placeholder="E.g.: What do we know about vaccines and therapeutics?">
-                            </div>
-                            <!--end of col-->
-                            <div class="col-auto">
-                                <button class="btn btn-lg btn-info" type="submit">Search</button>
-                            </div>
-                            <!--end of col-->
                         </div>
                     </form>
                 </div>

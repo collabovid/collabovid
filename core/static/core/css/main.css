@@ -157,3 +157,23 @@ a.invisible-link, a.invisible-link:hover {
     width: 100%;
     height: 100%;
 }
+
+@media (min-width: 576px) {
+    .search-bar-rounded-corners {
+        border-radius: 4rem;
+    }
+
+    .search-form-control {
+        height: calc(1.5em + 1rem + 2px);
+        padding: .5rem 1rem;
+        font-size: 1.25rem;
+        line-height: 1.5;
+        border-radius: .3rem;
+    }
+
+    .search-form-card-body {
+        flex: 1 1 auto;
+        min-height: 1px;
+        padding: 1.25rem;
+    }
+}
