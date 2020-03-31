@@ -111,5 +111,5 @@ MEDIA_ROOT = 'generated/'
 CRONTAB_LOCK_JOBS = True
 
 CRONJOBS = [
-    ('* * * * *', 'covid19_publications.cron.update_paper', '>> ~/opt/python/log/cron_log')
+    ('* * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
 ]
