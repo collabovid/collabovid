@@ -182,18 +182,64 @@ a.invisible-link, a.invisible-link:hover {
     color: #00796B;
     border-color: #00796B;
 }
-.button-host:hover {
+
+.button-host:hover, .button-host:active, .button-host:focus {
     color: #fff;
     background-color: #00796B;
     border-color: #00796B;
+}
+
+.button-host:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0, 121, 107, 0.5);
 }
 
 .button-pdf {
     color: #5475a1;
     border-color: #5475a1;
 }
-.button-pdf:hover {
+
+.button-pdf:hover, .button-pdf:active, .button-pdf:focus {
     color: #fff;
     background-color: #5475a1;
     border-color: #5475a1;
+}
+
+.button-pdf:focus {
+    box-shadow: 0 0 0 0.2rem rgba(84, 117, 161, 0.5);
+}
+
+.btn-pink {
+    background: #EC407A;
+    color: #ffffff;
+    border-color: #bf355f;
+}
+
+.btn-pink:hover, .btn-pink:active, .btn-pink:focus {
+    background: #cc3767;
+    color: #ffffff;
+    border-color: #bf355f;
+}
+
+.btn-pink:focus {
+    box-shadow: 0 0 0 0.2rem rgba(236, 64, 122, 0.1);
+}
+
+
+.bootstrap-select:not([class*="col-"]):not([class*="form-control"]):not(.input-group-btn) {
+    width: 100% !important;
+
+    min-width: 100%;
+    max-width: 100%;
+}
+
+
+.bootstrap-select .dropdown-menu {
+    max-width: inherit !important;
+    min-width: inherit !important;
+}
+
+
+.bootstrap-select .dropdown-menu ul li .text {
+    white-space: normal !important;
+    word-break: normal !important;
 }
