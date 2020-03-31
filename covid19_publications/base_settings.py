@@ -113,3 +113,25 @@ CRONTAB_LOCK_JOBS = True
 CRONJOBS = [
     ('* * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
 ]
+
+if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+        },
+        'loggers': {
+            'django': {
+                'handlers': ['console'],
+                'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+                'propagate': False,
+            },
+        },
+    }

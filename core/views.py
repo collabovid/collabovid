@@ -92,7 +92,7 @@ def explore(request):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj})
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'show_topic_score': False})
 
     return HttpResponseNotFound()
 

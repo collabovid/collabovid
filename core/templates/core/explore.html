@@ -4,7 +4,7 @@
 
     <div class="gradient-header">
         <div class="container">
-            {% include "core/partials/_filter.html" with filter=True action=search_url categories=categories best_matching=False %}
+            {% include "core/partials/_filter.html" with filter=True script=False css=False card=False action=search_url categories=categories best_matching=False %}
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
@@ -23,10 +23,10 @@
 {% endblock %}
 
 {% block script %}
-    {% include "core/partials/_filter.html" with load_default=True script=True result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
-    {% include 'core/partials/_paper_card.html' with script=True %}
+    {% include "core/partials/_filter.html" with load_default=True script=True filter=False css=False result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+    {% include 'core/partials/_paper_card.html' with script=True html=False %}
 {% endblock %}
 
 {% block css %}
-    {% include "core/partials/_filter.html" with css=True %}
+    {% include "core/partials/_filter.html" with css=True script=False filter=False %}
 {% endblock %}
