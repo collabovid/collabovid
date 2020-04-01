@@ -88,14 +88,7 @@
 
                     <div class="row">
                         <div class="col-12">
-                            <select class="form-control w-100" name="sorted_by" id="sorted-by">
-                                {% if best_matching %}
-                                    <option value="matching" selected>Relevance</option>
-                                {% endif %}
-                                <option value="number_of_author_citations">Number of authors' citations</option>
-                                <option value="newest" {% if not best_matching %}selected{% endif %}>Newest</option>
-                                <option value="title">Title</option>
-                            </select>
+                            {% include "core/partials/_sort_select.html" with best_machting=best_matching %}
                         </div>
                     </div>
                 </div>

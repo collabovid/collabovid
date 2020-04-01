@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Q, Max
 from django.utils.dateparse import parse_date
 from django.db.models import F
-
+import logging
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
@@ -74,6 +74,24 @@ class Paper(models.Model):
         return round(self.topic_score * 100)
 
     @staticmethod
+    def sort_papers(papers, sorted_by):
+
+        if sorted_by == Paper.SORTED_BY_TITLE:
+            papers = papers.order_by("title")
+        elif sorted_by == Paper.SORTED_BY_AUTHOR_CITATIONS:
+            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by(
+                F('score').desc(nulls_last=True))
+        elif sorted_by == Paper.SORTED_BY_NEWEST:
+            papers = papers.order_by("-published_at")
+        elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
+            papers = papers.order_by("-topic_score")
+        else:
+            logger = logging.getLogger(__name__)
+            logger.warning("Unknown sorted by", sorted_by)
+
+        return papers
+
+    @staticmethod
     def get_paper_for_query(search_query, start_date, end_date, categories, topics, sorted_by=SORTED_BY_TITLE):
         try:
             start_date = parse_date(start_date)
@@ -97,14 +115,4 @@ class Paper(models.Model):
         if end_date:
             papers = papers.filter(published_at__lte=end_date)
 
-        if sorted_by == Paper.SORTED_BY_TITLE:
-            papers = papers.order_by("title")
-        elif sorted_by == Paper.SORTED_BY_AUTHOR_CITATIONS:
-            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by(
-                F('score').desc(nulls_last=True))
-        elif sorted_by == Paper.SORTED_BY_NEWEST:
-            papers = papers.order_by("-published_at")
-        elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
-            papers = papers.order_by("-topic_score")
-
-        return papers
+        return Paper.sort_papers(papers, sorted_by)

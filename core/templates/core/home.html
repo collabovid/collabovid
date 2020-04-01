@@ -81,14 +81,29 @@
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
-    <div id="paper-container" class="container">
+    <div class="container">
+        <div id="sorted-by-container" class="row align-items-center mt-5 mb-0 pb-0" style="display: none;">
+
+            <div class="offset-lg-6 col-lg-2 col-2 text-right align-middle">
+                <label class="m-0" for="sorted-by">Sort by:</label>
+            </div>
+
+            <div class="col-lg-4">
+                {% include 'core/partials/_sort_select.html' with best_matching=True %}
+            </div>
+
+        </div>
+
+        <div id="paper-container">
+        </div>
+
+        <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5" style="display: none;">
+            <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+
+        <nav id="pagination-container"></nav>
     </div>
 
-    <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5" style="display: none;">
-        <i class="fas fa-circle-notch fa-spin"></i>
-    </div>
-
-    <nav id="pagination-container"></nav>
 
 
 {% endblock %}
@@ -107,6 +122,8 @@
             let paper_container = $("#paper-container");
             let pagination_container = $("#pagination-container");
             let form = $("#topic-search-form");
+            let sorted_by_select = $("#sorted-by");
+            let sorted_by_container = $("#sorted-by-container");
 
             update_pagination_container = pagination_container.paginate({
                 searchQuery: search_query,
@@ -118,6 +135,7 @@
                 indicator.show();
 
                 data += "&page=" + page;
+                data += "&" + sorted_by_select.attr('name') + "=" + sorted_by_select.val();
 
                 $.ajax({
                     url: form.attr("action"),
@@ -125,6 +143,12 @@
                     data: data,
                     success: function (data) {
                         paper_container.html(data);
+
+                        if (Pagination.result_size > 0) {
+                            sorted_by_container.show();
+                        } else {
+                            sorted_by_container.hide();
+                        }
 
                         indicator.hide();
                         paper_container.fadeIn();
@@ -144,10 +168,15 @@
 
             form.submit(function (e) {
                 e.preventDefault();
+                sorted_by_container.hide();
 
                 search_query(form.serialize(), 1, function () {
                     window.Pagination.last_request = form.serialize();
                 });
+            });
+
+            sorted_by_select.change(function (e) {
+                search_query(window.Pagination.last_request, 1);
             });
 
         });

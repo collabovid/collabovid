@@ -20,19 +20,17 @@
         plugin.create_modal = function () {
             plugin.hide().html("" +
                 "<ul class=\"pagination my-3 justify-content-center\">" +
-                "            <li class=\"page-item page-item-fixed\">" +
-                "               <a class=\"page-link\" href=\"#\" data-page=\"-1\" data-next=\"false\"" +
-                "                                                     data-prev=\"true\"><span" +
-                "                    aria-hidden=\"true\">&laquo;</span></a>" +
+                "<li class=\"page-item page-item-fixed\">" +
+                "<a class=\"page-link\" href=\"#\" data-page=\"-1\" data-next=\"false\" " +
+                "data-prev=\"true\"><span " +
+                "aria-hidden=\"true\">&laquo;</span></a>" +
                 "</li>" +
-                "" +
-                "            <li id=\"page-item-next\" class=\"page-item page-item-fixed\"><a class=\"page-link\" href=\"#\"" +
-                "                                                                         data-page=\"-1\" data-next=\"true\"" +
-                "                                                                         data-prev=\"false\"><span aria-hidden=\"true\">&raquo;</span></a>" +
-                "            </li>" +
-                "        </ul>");
-
-            console.log("created model.")
+                "<li id=\"page-item-next\" class=\"page-item page-item-fixed\">" +
+                "<a class=\"page-link\" href=\"#\" " +
+                "data-page=\"-1\" data-next=\"true\" " +
+                "data-prev=\"false\"><span aria-hidden=\"true\">&raquo;</span></a>" +
+                "</li>" +
+                "</ul>");
         };
 
         plugin.init();
