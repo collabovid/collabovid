@@ -116,7 +116,7 @@ CRONTAB_LOCK_JOBS = True
 CRONTAB_COMMAND_SUFFIX = ' 2>&1'
 
 CRONJOBS = [
-    ('* * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
+    ('0 * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
 ]
 
 if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:

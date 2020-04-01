@@ -1,6 +1,8 @@
 from scrape.scrape_articles import scrape_articles
+from datetime import datetime
 
 
 def update_paper():
-    #scrape_articles()
-    print('Test')
+    now = datetime.now().strftime("[%d/%m/%Y %H:%M:%S]")
+    print(now)
+    scrape_articles()
