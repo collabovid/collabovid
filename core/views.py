@@ -16,7 +16,7 @@ def get_sorted_by_from_string(sorted_by):
     elif sorted_by == "newest":
         return Paper.SORTED_BY_NEWEST
     elif sorted_by == "matching":
-        return Paper.SORTED_BY_TOPIC_SCORE
+        return Paper.SORTED_BY_SCORE
     else:
         return Paper.SORTED_BY_TITLE
 
@@ -38,7 +38,7 @@ def home(request):
             papers = analyzer.related(search_query, top=50)
 
             sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
-            papers = Paper.sort_papers(papers, sorted_by)
+            papers = Paper.sort_papers(papers, sorted_by, score_field="search_score")
 
             if papers.count() > PAPER_PAGE_COUNT:
                 paginator = Paginator(papers, PAPER_PAGE_COUNT)

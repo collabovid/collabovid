@@ -84,11 +84,15 @@
     <div class="container">
         <div id="sorted-by-container" class="row align-items-center mt-5 mb-0 pb-0" style="display: none;">
 
-            <div class="offset-lg-6 col-lg-2 col-2 text-right align-middle">
+            <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+                <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-4">Results</h3>
+                <h3 class="text-muted d-md-inline-block d-none">Results</h3>
+            </div>
+            <div class="col-lg-2 col-md-2 col-sm-6 col-12 text-center">
                 <label class="m-0" for="sorted-by">Sort by:</label>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-12">
                 {% include 'core/partials/_sort_select.html' with best_matching=True %}
             </div>
 

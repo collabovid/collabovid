@@ -39,7 +39,7 @@ class Paper(models.Model):
     SORTED_BY_TITLE = 0
     SORTED_BY_AUTHOR_CITATIONS = 1
     SORTED_BY_NEWEST = 2
-    SORTED_BY_TOPIC_SCORE = 3
+    SORTED_BY_SCORE = 3
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
@@ -74,7 +74,7 @@ class Paper(models.Model):
         return round(self.topic_score * 100)
 
     @staticmethod
-    def sort_papers(papers, sorted_by):
+    def sort_papers(papers, sorted_by, score_field="topic_score"):
 
         if sorted_by == Paper.SORTED_BY_TITLE:
             papers = papers.order_by("title")
@@ -83,11 +83,11 @@ class Paper(models.Model):
                 F('score').desc(nulls_last=True))
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
-        elif sorted_by == Paper.SORTED_BY_TOPIC_SCORE:
-            papers = papers.order_by("-topic_score")
+        elif sorted_by == Paper.SORTED_BY_SCORE:
+            papers = papers.order_by("-"+score_field)
         else:
             logger = logging.getLogger(__name__)
-            logger.warning("Unknown sorted by", sorted_by)
+            logger.warning("Unknown sorted by" + sorted_by)
 
         return papers
 

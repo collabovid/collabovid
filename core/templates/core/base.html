@@ -4,8 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description"
+          content="Researchers from all over the world are working hard on the investigation of the SARS-CoV-2 virus, resulting in many new publications in so-called preprint versions per day, e.g. at medRxiv or bioRxiv.  Time is short and thus Collabovid provides, a good interface to access, sort and classify the huge amount of preprint papers.">
+    <meta name="author" content="Jonas Dippel, Yannic Lieder, Michael Perk, Moritz Pfister">
+    <meta http-equiv="content-language" content="en-us">
 
     <title>Collabovid</title>
 
@@ -14,15 +16,12 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static "core/img/favicon/favicon-16x16.png" %}">
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static "core/include/bootstrap-4.4.1/css/bootstrap.css" %}">
 
-    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <script defer src="{% static "core/include/fontawesome-5.13.0/js/all.js" %}"></script>
 
-    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jQRangeSlider/5.7.2/css/classic.min.css"/>
+    <link href="{% static "core/css/roboto.css" %}" rel="stylesheet">
+
     <link rel="stylesheet" href="{% static "core/css/main.css" %}"/>
 
     {% block css %}
@@ -94,15 +93,11 @@
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="{% static "core/include/jquery-3.4.1/js/jquery.min.js" %}"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-        crossorigin="anonymous"></script>
+<script src="{% static "core/include/popper-core-1.16.0/umd/popper.min.js" %}"></script>
 
+<script src="{% static "core/include/bootstrap-4.4.1/js/bootstrap.js" %}"></script>
 
 <script>
 
