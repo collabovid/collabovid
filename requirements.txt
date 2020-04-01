@@ -34,3 +34,4 @@ psycopg2
 django-storages
 boto3
 django-crontab==0.7.1
+django-health-check==3.12.1
