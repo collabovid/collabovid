@@ -133,9 +133,10 @@
                 searchQuery: search_query,
             });
 
-            function search_query(data, page, on_success) {
+            function search_query(data, page, scroll = false, on_success) {
 
                 paper_container.hide();
+                pagination_container.hide();
                 indicator.show();
 
                 data += "&page=" + page;
@@ -157,6 +158,11 @@
                         indicator.hide();
                         paper_container.fadeIn();
 
+                        if (scroll) {
+                            $('html, body').scrollTop(sorted_by_container.offset().top);
+                        }
+
+
                         update_pagination_container();
 
                         if (on_success) {
@@ -174,13 +180,15 @@
                 e.preventDefault();
                 sorted_by_container.hide();
 
-                search_query(form.serialize(), 1, function () {
+                search_query(form.serialize(), 1, false, function () {
                     window.Pagination.last_request = form.serialize();
+
+                    $('html, body').animate({scrollTop: sorted_by_container.offset().top}, 1500);
                 });
             });
 
             sorted_by_select.change(function (e) {
-                search_query(window.Pagination.last_request, 1);
+                search_query(window.Pagination.last_request, true, 1);
             });
 
         });

@@ -82,7 +82,7 @@
                 page = $(this).data("page");
             }
 
-            plugin.settings.searchQuery(window.Pagination.last_request, page);
+            plugin.settings.searchQuery(window.Pagination.last_request, page, true);
 
         });
 
