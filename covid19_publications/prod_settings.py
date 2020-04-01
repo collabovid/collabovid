@@ -57,6 +57,9 @@ LOGGING = {
     },
 }
 
+CRONTAB_DJANGO_SETTINGS_MODULE = 'covid19_publications.prod_settings'
+CRONTAB_COMMAND_PREFIX = "source /opt/python/run/venv/bin/activate && source /opt/python/current/env && cd /opt/python/current/app/ && "
+
 CORS_REPLACE_HTTPS_REFERER = True
 HOST_SCHEME = "https://"
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
