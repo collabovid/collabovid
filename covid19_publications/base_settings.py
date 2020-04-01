@@ -31,7 +31,11 @@ INSTALLED_APPS = [
     'data.apps.DataConfig',
     'scrape.apps.ScrapeConfig',
     'visualization.apps.VisualizationConfig',
-    'django_crontab'
+    'django_crontab',
+    'health_check',
+    'health_check.db',
+    'health_check.cache',
+    'health_check.storage',
 ]
 
 MIDDLEWARE = [
