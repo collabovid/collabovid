@@ -28,7 +28,6 @@ class PaperAnalyzer:
 
 
 class CombinedPaperAnalyzer(PaperAnalyzer):
-
     class PaperAnalyzerDefinition(PaperAnalyzer):
         """
         This wrapper class handles the paper analyzer objects within this class and gives them additional
@@ -119,9 +118,9 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         whens = list()
 
-        for pk, scores, weights in zip(paper_ids,zip(*scores_lists), zip([analyzer.weight for analyzer in self.analyzers])):
-
-            score = 100 * sum((score*weight for score, weight in zip(scores, weights)))
+        weights = [analyzer.weight for analyzer in self.analyzers]
+        for pk, scores in zip(paper_ids, zip(*scores_lists)):
+            score = 100 * sum((score * weight for score, weight in zip(scores, weights)))
             whens.append(models.When(pk=pk, then=score))
 
         papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
@@ -166,7 +165,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
                                    os.path.join('res', self.matrix_file_name))
 
         if os.path.exists(matrix_path):
-            print(matrix_path, "exists, overwirting..")
+            print(matrix_path, "exists, overwriting..")
 
         paper = Paper.objects.all()
         matrix = self.vectorizer.vectorize_paper(paper)
@@ -194,8 +193,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         print("Matrix not empty")
 
         topics = Topic.objects.all()
-        descriptions = [topic.name for topic in topics]
-        latent_topic_scores = self.vectorizer.vectorize(descriptions)
+        latent_topic_scores = self.vectorizer.vectorize_topics(topics)
         paper = [p for p in Paper.objects.all() if recompute_all or not p.topic_score]
         matrix = self.paper_matrix['matrix']
 

@@ -10,4 +10,5 @@ texts = ['Estimation of SARS-CoV-2 Infection Prevalence in Santa Clara County',
 
 analyzer = analyze.get_analyzer()
 analyzer.calculate_paper_matrix()
+analyzer.assign_to_topics()
 

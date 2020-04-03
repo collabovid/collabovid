@@ -13,6 +13,10 @@ class TextVectorizer:
         texts = [p.title + ". " + p.abstract for p in paper]
         return self.vectorize(texts)
 
+    def vectorize_topics(self, topics):
+        texts = [t.name + ". " + t.description for t in topics]
+        return self.vectorize(texts)
+
 
 class PretrainedLDA(TextVectorizer):
     def __init__(self, lda_file, vectorizer_file):
@@ -28,6 +32,7 @@ class PretrainedLDA(TextVectorizer):
         def spacy_tokenizer(sentence):
             return [word.lemma_ for word in self.nlp(sentence) if
                     not (word.like_num or word.is_stop or word.is_punct or word.is_space or len(word) == 1)]
+
         # add missing
         setattr(sys.modules['__main__'], 'spacy_tokenizer', spacy_tokenizer)
 
@@ -38,10 +43,14 @@ class PretrainedLDA(TextVectorizer):
 
 class TitleSentenceVectorizer(TextVectorizer):
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens'):
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, device='cpu')
 
     def vectorize(self, texts):
         return self.model.encode(texts)
 
     def vectorize_paper(self, papers):
         return np.array(self.model.encode([paper.title for paper in papers]))
+
+    def vectorize_topics(self, topics):
+        texts = [t.name for t in topics]
+        return np.array(self.model.encode(texts))

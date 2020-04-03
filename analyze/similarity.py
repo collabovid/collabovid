@@ -15,5 +15,6 @@ class JensonShannonSimilarity(SimilarityComputer):
 
 class CosineDistance(SimilarityComputer):
     def similarities(self, vectors, vec):
+        print(vectors.shape)
         scores = 1 - dist.cdist(vectors, np.array([vec]), metric='cosine')
         return [score.item() for score in scores]
