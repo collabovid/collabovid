@@ -17,7 +17,7 @@ def get_analyzer():
 
     if not analyzer:
         print("Initializing Paper Analyzer")
-        analyzer = PaperAnalyzer('sentence-transformer')
+        analyzer = PaperAnalyzer('lda')
 
     return analyzer
 
@@ -70,7 +70,7 @@ class PaperAnalyzer():
 
         print("Paper matrix exported completely")
 
-    def assign_to_topics(self):
+    def assign_to_topics(self, recompute_all=False):
 
         print("Assigning to topics")
 
@@ -80,9 +80,9 @@ class PaperAnalyzer():
         print("Matrix not empty")
 
         topics = Topic.objects.all()
-        descriptions = [topic.name + " " + topic.description for topic in topics]
+        descriptions = [topic.name for topic in topics]
         latent_topic_scores = self.vectorizer.vectorize(descriptions)
-        paper = [p for p in Paper.objects.all() if not p.topic_score]
+        paper = [p for p in Paper.objects.all() if recompute_all or not p.topic_score]
         matrix = self.paper_matrix['matrix']
 
         print("Begining Paper asignment")
