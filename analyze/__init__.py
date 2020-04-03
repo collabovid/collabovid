@@ -16,15 +16,15 @@ def get_analyzer():
     global analyzer
 
     if not analyzer:
-        print("Initializing LDA")
-        analyzer = PaperAnalyzer('lda')
+        print("Initializing Paper Analyzer")
+        analyzer = PaperAnalyzer('sentence-transformer')
 
     return analyzer
 
 
 class PaperAnalyzer():
     def __init__(self, type='lda'):
-        matrix_file_name = 'paper_matrix.pkl'
+        self.matrix_file_name = 'paper_matrix.pkl'
         if type == 'lda':
             self.vectorizer = PretrainedLDA(os.path.join(dir_path, 'res/lda.pkl'),
                                             os.path.join(dir_path, 'res/vectorizer.pkl'))
@@ -33,25 +33,30 @@ class PaperAnalyzer():
             from .bert_vectorizer import BioBertVectorizer
             self.vectorizer = BioBertVectorizer()
             self.similarity_computer = CosineDistance()
-            matrix_file_name = 'paper_matrix_biobert.pkl'
+            self.matrix_file_name = 'paper_matrix_biobert.pkl'
+        elif type == 'sentence-transformer':
+            from .vectorizer import SentenceTransformerVectorizer
+            self.vectorizer = SentenceTransformerVectorizer()
+            self.similarity_computer = CosineDistance()
+            self.matrix_file_name = 'paper_matrix_sentence_transformer.pkl'
         else:
             raise ValueError('Unknown type')
 
         self.paper_matrix = None
-        matrix_path = os.path.join(dir_path, os.path.join('res', matrix_file_name))
+        matrix_path = os.path.join(dir_path, os.path.join('res', self.matrix_file_name))
         if os.path.exists(matrix_path):
             self.paper_matrix = joblib.load(matrix_path)
 
     def calculate_paper_matrix(self):
 
-        file_path = os.path.join(os.getcwd(), 'analyze/res/paper_matrix.pkl')
+        matrix_path = os.path.join(dir_path, os.path.join('res', self.matrix_file_name))
 
-        if os.path.exists(file_path):
-            print(file_path, "exists, overwirting..")
+        if os.path.exists(matrix_path):
+            print(matrix_path, "exists, overwirting..")
 
         paper = Paper.objects.all()
-        texts = [p.title + " " + p.abstract for p in paper]
-        matrix = self.vectorizer.vectorize(texts)
+        matrix = self.vectorizer.vectorize_paper(paper)
+        print(matrix.shape)
         id_map = {}
         for index, p in enumerate(paper):
             id_map[p.doi] = index
@@ -61,10 +66,9 @@ class PaperAnalyzer():
             'index_arr': [p.doi for p in paper],
             'matrix': matrix
         }
-        joblib.dump(self.paper_matrix, file_path)
+        joblib.dump(self.paper_matrix, matrix_path)
 
         print("Paper matrix exported completely")
-        #print("Paper matrix contains the following dois:", self.paper_matrix['index_arr'])
 
     def assign_to_topics(self):
 
@@ -79,7 +83,6 @@ class PaperAnalyzer():
         descriptions = [topic.name + " " + topic.description for topic in topics]
         latent_topic_scores = self.vectorizer.vectorize(descriptions)
         paper = [p for p in Paper.objects.all() if not p.topic_score]
-        #paper = Paper.objects.all()
         matrix = self.paper_matrix['matrix']
 
         print("Begining Paper asignment")
@@ -109,8 +112,9 @@ class PaperAnalyzer():
         whens = list()
 
         for pk, score in related_papers:
-            whens.append(models.When(pk=pk, then=score*100))
+            whens.append(models.When(pk=pk, then=score * 100))
 
-        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField())).order_by("-search_score")
+        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField())).order_by(
+            "-search_score")
 
         return papers

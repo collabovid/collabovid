@@ -35,3 +35,4 @@ django-storages
 boto3
 django-crontab==0.7.1
 django-health-check==3.12.1
+sentence-transformers==0.2.5.1

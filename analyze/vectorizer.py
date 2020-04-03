@@ -2,11 +2,16 @@ import joblib
 import en_core_sci_md
 import sys
 import numpy as np
+from sentence_transformers import SentenceTransformer
 
 
 class TextVectorizer():
     def vectorize(self, texts):
         raise NotImplementedError()
+
+    def vectorize_paper(self, paper):
+        texts = [p.title + ". " + p.abstract for p in paper]
+        return self.vectorize(texts)
 
 
 nlp = en_core_sci_md.load(disable=["tagger", "parser", "ner"])
@@ -31,3 +36,18 @@ class PretrainedLDA(TextVectorizer):
         vectors = self.vectorizer.transform(texts)
         return self.lda.transform(vectors)
 
+
+class SentenceTransformerVectorizer(TextVectorizer):
+    def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens'):
+        self.model = SentenceTransformer(model_name)
+
+    def vectorize(self, texts):
+        return self.model.encode(texts)
+
+    def vectorize_paper(self, papers):
+        titles = [paper.title for paper in papers]
+        abstracts = [paper.abstract for paper in papers]
+        title_embeds = self.model.encode(titles)
+        abstract_embeds = self.model.encode(abstracts)
+        embeds = 0.7 * np.array(title_embeds) + 0.3 * np.array(abstract_embeds)
+        return embeds
