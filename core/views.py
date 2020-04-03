@@ -35,7 +35,7 @@ def home(request):
 
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             analyzer = analyze.get_analyzer()
-            papers = analyzer.related(search_query, top=50)
+            papers = analyzer.related(search_query).filter(search_score__gt=50)
 
             sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
             papers = Paper.sort_papers(papers, sorted_by, score_field="search_score")

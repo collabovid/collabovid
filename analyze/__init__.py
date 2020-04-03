@@ -1,120 +1,31 @@
 from .vectorizer import PretrainedLDA
 from .similarity import JensonShannonSimilarity, CosineDistance
 import os
-import numpy as np
-from data.models import Paper, Topic
-import joblib
-import heapq
-from tqdm import tqdm
-from django.db import models
+from .paper_analyzer import CombinedPaperAnalyzer, BasicPaperAnalyzer
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 analyzer = None
+
 
 def get_analyzer():
     global analyzer
 
     if not analyzer:
         print("Initializing Paper Analyzer")
-        analyzer = PaperAnalyzer('lda')
+        analyzer = CombinedPaperAnalyzer(
+            {
+                "lda":
+                    {
+                        "analyzer": BasicPaperAnalyzer('lda'),
+                        "weight": .3
+                    },
+                "title_sentence":
+                    {
+                        "analyzer": BasicPaperAnalyzer('sentence-transformer'),
+                        "weight": .7
+                    }
+            }
+        )
 
     return analyzer
-
-
-class PaperAnalyzer():
-    def __init__(self, type='lda'):
-        self.matrix_file_name = 'paper_matrix.pkl'
-        if type == 'lda':
-            self.vectorizer = PretrainedLDA(os.path.join(dir_path, 'res/lda.pkl'),
-                                            os.path.join(dir_path, 'res/vectorizer.pkl'))
-            self.similarity_computer = JensonShannonSimilarity()
-        elif type == 'biobert':
-            from .bert_vectorizer import BioBertVectorizer
-            self.vectorizer = BioBertVectorizer()
-            self.similarity_computer = CosineDistance()
-            self.matrix_file_name = 'paper_matrix_biobert.pkl'
-        elif type == 'sentence-transformer':
-            from .vectorizer import SentenceTransformerVectorizer
-            self.vectorizer = SentenceTransformerVectorizer()
-            self.similarity_computer = CosineDistance()
-            self.matrix_file_name = 'paper_matrix_sentence_transformer.pkl'
-        else:
-            raise ValueError('Unknown type')
-
-        self.paper_matrix = None
-        matrix_path = os.path.join(dir_path, os.path.join('res', self.matrix_file_name))
-        if os.path.exists(matrix_path):
-            self.paper_matrix = joblib.load(matrix_path)
-
-    def calculate_paper_matrix(self):
-
-        matrix_path = os.path.join(dir_path, os.path.join('res', self.matrix_file_name))
-
-        if os.path.exists(matrix_path):
-            print(matrix_path, "exists, overwirting..")
-
-        paper = Paper.objects.all()
-        matrix = self.vectorizer.vectorize_paper(paper)
-        print(matrix.shape)
-        id_map = {}
-        for index, p in enumerate(paper):
-            id_map[p.doi] = index
-
-        self.paper_matrix = {
-            'id_map': id_map,
-            'index_arr': [p.doi for p in paper],
-            'matrix': matrix
-        }
-        joblib.dump(self.paper_matrix, matrix_path)
-
-        print("Paper matrix exported completely")
-
-    def assign_to_topics(self, recompute_all=False):
-
-        print("Assigning to topics")
-
-        if self.paper_matrix is None:
-            raise Exception("Paper matrix empty")
-
-        print("Matrix not empty")
-
-        topics = Topic.objects.all()
-        descriptions = [topic.name for topic in topics]
-        latent_topic_scores = self.vectorizer.vectorize(descriptions)
-        paper = [p for p in Paper.objects.all() if recompute_all or not p.topic_score]
-        matrix = self.paper_matrix['matrix']
-
-        print("Begining Paper asignment")
-
-        for p in tqdm(paper):
-            arr_index = self.paper_matrix['id_map'][p.doi]
-            similarities = self.similarity_computer.similarities(latent_topic_scores, matrix[arr_index])
-            most_similar_idx = np.argmax(similarities).item()
-            p.topic = topics[most_similar_idx]
-            p.topic_score = similarities[most_similar_idx]
-            p.save()
-        for topic in topics:
-            topic.save()
-
-        print("Finished asignment to topics")
-
-    def related(self, query, top=20):
-        query_dist = self.vectorizer.vectorize([query])[0]
-        matrix = self.paper_matrix['matrix']
-        similarity_scores = self.similarity_computer.similarities(matrix, query_dist)
-        related_papers = zip(self.paper_matrix['index_arr'], similarity_scores)
-
-        related_papers = heapq.nlargest(top, related_papers, key=lambda x: x[1])
-        paper_ids, scores = zip(*related_papers)
-
-        papers = Paper.objects.filter(pk__in=paper_ids)
-        whens = list()
-
-        for pk, score in related_papers:
-            whens.append(models.When(pk=pk, then=score * 100))
-
-        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField())).order_by(
-            "-search_score")
-
-        return papers
