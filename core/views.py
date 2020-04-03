@@ -158,3 +158,6 @@ def topic(request, id):
 
 def topic_overview(request):
     return render(request, "core/topic_overview.html", {'topics': Topic.objects.all()})
+
+def imprint(request):
+    return render(request, "core/imprint.html")

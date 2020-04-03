@@ -1,7 +1,7 @@
 def run(output):
     import os
     import requests
-    from analyze import PaperAnalyzer
+    from analyze import get_analyzer
 
     VECTORIZER_DOWNLOAD_URL = 'https://dl.dropboxusercontent.com/s/rlx75dmyl4rn9v2/vectorizer.csv'
     LDA_DOWNLOAD_URL = 'https://dl.dropboxusercontent.com/s/7aaoq40qgiagsrb/lda.csv'
@@ -21,7 +21,7 @@ def run(output):
     download_file(VECTORIZER_DOWNLOAD_URL, VECTORIZER_PATH)
     download_file(LDA_DOWNLOAD_URL, LDA_PATH)
 
-    analyzer = PaperAnalyzer('lda')
+    analyzer = get_analyzer()
     analyzer.calculate_paper_matrix()
     analyzer.assign_to_topics()
 
