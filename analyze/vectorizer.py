@@ -11,7 +11,6 @@ from data.models import Paper
 
 
 class TextVectorizer:
-
     VECTORIZE_DEFAULT = 0
     VECTORIZE_TOPIC = 1
     VECTORIZE_PAPER = 2
@@ -144,7 +143,6 @@ class SentenceVectorizer(TextVectorizer):
     def compute_similarity_scores(self, query, vectorizer_type=TextVectorizer.VECTORIZE_DEFAULT):
 
         query_dist = self._vectorize_for_type(query, vectorizer_type)
-
         title_matrix = self.paper_matrix['title_matrix']
         abstract_matrix = self.paper_matrix['abstract_matrix']
 
@@ -164,12 +162,9 @@ class SentenceVectorizer(TextVectorizer):
 
         for paper in papers:
             sentences = self.splitter.split(paper.abstract)
-
             start = len(all_sentences)
             length = len(sentences)
-
             all_sentences += sentences
-
             positions.append((start, length))
 
         print("Extracted all sentences, calculating embedding")
@@ -181,7 +176,7 @@ class SentenceVectorizer(TextVectorizer):
             if length == 0:
                 abstract_embeddings.append(np.zeros(1024))
             else:
-                abstract_embeddings.append(np.mean(np.array(sentence_embeddings[start:length]), axis=0))
+                abstract_embeddings.append(np.mean(np.array(sentence_embeddings[start:start + length]), axis=0))
 
         print("Calculate Title Embedding")
 
