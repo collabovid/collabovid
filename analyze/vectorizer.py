@@ -88,7 +88,7 @@ class TextVectorizer:
         if len(filtered_papers) > 0:
             # construct index array based on id map
             index_arr = [''] * len(id_map)
-            for doi, idx in id_map:
+            for doi, idx in id_map.items():
                 index_arr[idx] = doi
             paper_matrix = {
                 'id_map': id_map,
@@ -96,7 +96,7 @@ class TextVectorizer:
             }
 
             # for every new embedding matrix that is computed, we extend the old one
-            for key, computed_matrix in self._calculate_paper_matrix(filtered_papers):
+            for key, computed_matrix in self._calculate_paper_matrix(filtered_papers).items():
                 # dimension of newly computed values
                 matrix = np.zeros((newly_added, computed_matrix.shape[1]))
 
@@ -162,13 +162,19 @@ class PretrainedLDA(TextVectorizer):
 
 
 class SentenceVectorizer(TextVectorizer):
-    def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens', *args, **kwargs):
+    def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens',
+                 title_similarity_factor=0.7,
+                 abstract_similarity_factor=0.3,
+                 *args, **kwargs):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
         self.model = SentenceTransformer(model_name, device='cpu')
         self.splitter = SentenceSplitter(language='en')
 
         self.similarity_computer = CosineDistance()
+
+        self.title_similarity_factor = title_similarity_factor
+        self.abstract_similarity_factor = abstract_similarity_factor
 
     def compute_similarity_scores(self, embedding_vec):
         title_matrix = self.paper_matrix['title_matrix']
@@ -177,7 +183,8 @@ class SentenceVectorizer(TextVectorizer):
         title_similarity_scores = np.array(self.similarity_computer.similarities(title_matrix, embedding_vec))
         abstract_similarity_scores = np.array(self.similarity_computer.similarities(abstract_matrix, embedding_vec))
 
-        return self.paper_matrix['index_arr'], title_similarity_scores * 0.3 + abstract_similarity_scores * 0.7
+        return self.paper_matrix['index_arr'], title_similarity_scores * self.title_similarity_factor + \
+               abstract_similarity_scores * self.abstract_similarity_factor
 
     def _vectorize(self, texts):
         return self.model.encode(texts)

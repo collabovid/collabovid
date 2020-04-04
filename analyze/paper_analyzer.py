@@ -1,12 +1,8 @@
-from .vectorizer import PretrainedLDA, TextVectorizer
-from .similarity import JensonShannonSimilarity, CosineDistance
+from analyze.vectorizer import PretrainedLDA
 import os
 
 import numpy as np
 from data.models import Paper, Topic
-import joblib
-import heapq
-from tqdm import tqdm
 from django.db import models
 from collections import defaultdict
 
@@ -168,7 +164,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
         topic_scores = defaultdict(list)
         topic_embeddings = self.vectorizer._vectorize_topics(topics)
-        for idx, topic in topics:
+        for idx, topic in enumerate(topics):
             paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_embeddings[idx])
             for id, score in zip(paper_ids, similarities):
                 topic_scores[id].append(score)
