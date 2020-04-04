@@ -13,20 +13,20 @@ def get_analyzer():
 
     if not analyzer:
         print("Initializing Paper Analyzer")
-        """analyzer = CombinedPaperAnalyzer(
-            {
-                "lda":
-                    {
-                        "analyzer": BasicPaperAnalyzer('lda'),
-                        "weight": .3
-                    },
-                "title_sentence":
-                    {
-                        "analyzer": BasicPaperAnalyzer('sentence-transformer'),
-                        "weight": .7
-                    }
-            }
-        )"""
+        ##analyzer = CombinedPaperAnalyzer(
+        #    {
+        #        "lda":
+        #            {
+        #                "analyzer": BasicPaperAnalyzer('lda'),
+        #                "weight": .3
+        #            },
+        #        "title_sentence":
+        #            {
+        #                "analyzer": BasicPaperAnalyzer('sentence-transformer'),
+        #                "weight": .7
+        #            }
+        #    }
+        #)
         analyzer = BasicPaperAnalyzer('sentence-transformer')
 
     return analyzer

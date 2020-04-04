@@ -3,6 +3,7 @@ import en_core_sci_md
 import sys
 import numpy as np
 from sentence_transformers import SentenceTransformer
+from sentence_splitter import SentenceSplitter
 
 
 class TextVectorizer:
@@ -41,15 +42,46 @@ class PretrainedLDA(TextVectorizer):
         return self.lda.transform(vectors)
 
 
-class TitleSentenceVectorizer(TextVectorizer):
+class SentenceVectorizer(TextVectorizer):
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens'):
         self.model = SentenceTransformer(model_name, device='cpu')
+        self.splitter = SentenceSplitter(language='en')
 
     def vectorize(self, texts):
         return self.model.encode(texts)
 
     def vectorize_paper(self, papers):
-        return np.array(self.model.encode([paper.title for paper in papers]))
+        abstract_embeddings = []
+
+        all_sentences = []
+        positions = []
+
+        for paper in papers:
+            sentences = self.splitter.split(paper.abstract)
+
+            start = len(all_sentences)
+            length = len(sentences)
+
+            all_sentences += sentences
+
+            positions.append((start, length))
+
+        print("Extracted all sentences, calculating embedding")
+        sentence_embeddings = self.model.encode(all_sentences, batch_size=32, show_progress_bar=True)
+
+        print("Extracting Embedding")
+
+        for start, length in positions:
+            if length == 0:
+                abstract_embeddings.append(np.zeros(1024))
+            else:
+                abstract_embeddings.append(np.mean(np.array(sentence_embeddings[start:length]), axis=0))
+
+        print("Calculate Title Embedding")
+
+        title_embedding = np.array(self.model.encode([paper.title for paper in papers], show_progress_bar=True))
+
+        return 0.5 * title_embedding + 0.5 * np.array(abstract_embeddings)
 
     def vectorize_topics(self, topics):
         texts = [t.name for t in topics]

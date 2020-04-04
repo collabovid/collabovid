@@ -145,8 +145,8 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
             print("Loaded lda vectorizer")
         elif type == 'sentence-transformer':
-            from .vectorizer import TitleSentenceVectorizer
-            self.vectorizer = TitleSentenceVectorizer()
+            from .vectorizer import SentenceVectorizer
+            self.vectorizer = SentenceVectorizer()
             self.similarity_computer = CosineDistance()
             self.matrix_file_name = 'paper_matrix_sentence_transformer.pkl'
 

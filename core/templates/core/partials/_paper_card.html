@@ -36,24 +36,30 @@
 
                     <div class="abstract-container card-text">
                         <span style="font-size: 0.8em">
-                            <span class="short">{{ paper.abstract|slice:":400" }}</span><span
-                                class="dots">...</span><span
-                                class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
+                            {% if paper.abstract|length >= 420 %}
+                                <span class="short">{{ paper.abstract|slice:":400" }}</span><span
+                                    class="dots">...</span><span
+                                    class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
+                            {% else %}
+                                <span class="short">{{ paper.abstract }}</span>
+                            {% endif %}
                         </span>
 
-                        <div class="abstract-controls text-center">
-                            <a href="#"
-                               class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
-                               style="font-size: 10px;">
-                                <i class='fas fa-arrow-circle-down'></i> show full abstract
-                            </a>
+                        {% if paper.abstract|length >= 420 %}
+                            <div class="abstract-controls text-center">
+                                <a href="#"
+                                   class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
+                                   style="font-size: 10px;">
+                                    <i class='fas fa-arrow-circle-down'></i> show full abstract
+                                </a>
 
-                            <a href="#"
-                               class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
-                               style="font-size: 10px; display: none;">
-                                <i class='fas fa-arrow-circle-up'></i> hide full abstract
-                            </a>
-                        </div>
+                                <a href="#"
+                                   class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
+                                   style="font-size: 10px; display: none;">
+                                    <i class='fas fa-arrow-circle-up'></i> hide full abstract
+                                </a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
