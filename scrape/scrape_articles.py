@@ -99,7 +99,7 @@ def scrape_articles(detailed: bool = True, citations: bool = True, images: bool 
     print(f"Scraped new papers successfully: {new_articles} new article(s)")
 
     if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-        analyze.get_analyzer().calculate_paper_matrix()
+        analyze.get_analyzer().save_paper_matrix()
         analyze.get_analyzer().assign_to_topics()
 
     if images:

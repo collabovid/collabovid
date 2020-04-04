@@ -1,4 +1,4 @@
-from .vectorizer import PretrainedLDA
+from .vectorizer import PretrainedLDA, TextVectorizer
 from .similarity import JensonShannonSimilarity, CosineDistance
 import os
 
@@ -51,8 +51,8 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
         def related(self, query: str):
             return self.analyzer.related(query)
 
-        def _compute_similarity_scores(self, query: str):
-            return self.analyzer._compute_similarity_scores(query)
+        def compute_similarity_scores(self, query: str):
+            return self.analyzer.vectorizer.compute_similarity_scores(query)
 
     def __init__(self, analyzers: dict, *args, **kwargs):
         """
@@ -98,7 +98,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         for analyzer in self.analyzers:
             print("Computing Similarity for", analyzer.name)
-            paper_ids, scores = analyzer._compute_similarity_scores(query)
+            paper_ids, scores = analyzer.compute_similarity_scores(query)
 
             paper_ids_lists.append(paper_ids)
             scores_lists.append(scores)
@@ -133,78 +133,42 @@ class BasicPaperAnalyzer(PaperAnalyzer):
     def __init__(self, type='lda', *args, **kwargs):
 
         super(BasicPaperAnalyzer, self).__init__(*args, **kwargs)
-
-        self.matrix_file_name = 'paper_matrix.pkl'
-
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
         if type == 'lda':
             self.vectorizer = PretrainedLDA(os.path.join(dir_path, 'res/lda.pkl'),
-                                            os.path.join(dir_path, 'res/vectorizer.pkl'))
-            self.similarity_computer = JensonShannonSimilarity()
-
+                                            os.path.join(dir_path, 'res/vectorizer.pkl'),
+                                            matrix_file_name="paper_matrix.pkl")
             print("Loaded lda vectorizer")
         elif type == 'sentence-transformer':
             from .vectorizer import SentenceVectorizer
-            self.vectorizer = SentenceVectorizer()
-            self.similarity_computer = CosineDistance()
-            self.matrix_file_name = 'paper_matrix_sentence_transformer.pkl'
-
+            self.vectorizer = SentenceVectorizer(matrix_file_name="paper_matrix_sentence_transformer.pkl")
             print("Loaded paper matrix sentence transformer")
         else:
             raise ValueError('Unknown type')
-
-        self.paper_matrix = None
-        matrix_path = os.path.join(dir_path, os.path.join('res', self.matrix_file_name))
-        if os.path.exists(matrix_path):
-            self.paper_matrix = joblib.load(matrix_path)
-
-    def calculate_paper_matrix(self):
-
-        matrix_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   os.path.join('res', self.matrix_file_name))
-
-        if os.path.exists(matrix_path):
-            print(matrix_path, "exists, overwriting..")
-
-        paper = Paper.objects.all()
-        matrix = self.vectorizer.vectorize_paper(paper)
-        print(matrix.shape)
-        id_map = {}
-        for index, p in enumerate(paper):
-            id_map[p.doi] = index
-
-        self.paper_matrix = {
-            'id_map': id_map,
-            'index_arr': [p.doi for p in paper],
-            'matrix': matrix
-        }
-        joblib.dump(self.paper_matrix, matrix_path)
-
-        print("Paper matrix exported completely")
 
     def assign_to_topics(self, recompute_all=False):
 
         print("Assigning to topics")
 
-        if self.paper_matrix is None:
+        if self.vectorizer.paper_matrix is None:
             raise Exception("Paper matrix empty")
 
         print("Matrix not empty")
 
         topics = Topic.objects.all()
-        latent_topic_scores = self.vectorizer.vectorize_topics(topics)
         paper = [p for p in Paper.objects.all() if recompute_all or not p.topic_score]
-        matrix = self.paper_matrix['matrix']
 
         print("Begining Paper asignment")
 
+        paper_ids, similarities = self.vectorizer.compute_similarity_scores(topics, TextVectorizer.VECTORIZE_TOPIC)
+
         for p in tqdm(paper):
-            arr_index = self.paper_matrix['id_map'][p.doi]
-            similarities = self.similarity_computer.similarities(latent_topic_scores, matrix[arr_index])
-            most_similar_idx = np.argmax(similarities).item()
+
+            current_similarities = similarities[paper_ids.index(p.doi)]
+            most_similar_idx = np.argmax(current_similarities).item()
             p.topic = topics[most_similar_idx]
-            p.topic_score = similarities[most_similar_idx]
+            p.topic_score = current_similarities[most_similar_idx]
             p.save()
         for topic in topics:
             topic.save()
@@ -212,7 +176,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         print("Finished asignment to topics")
 
     def related(self, query: str):
-        paper_ids, scores = self._compute_similarity_scores(query)
+        paper_ids, scores = self.vectorizer.compute_similarity_scores(query)
 
         papers = Paper.objects.filter(pk__in=paper_ids)
         whens = list()
@@ -224,8 +188,3 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
         return papers
 
-    def _compute_similarity_scores(self, query: str):
-        query_dist = self.vectorizer.vectorize([query])[0]
-        matrix = self.paper_matrix['matrix']
-        similarity_scores = self.similarity_computer.similarities(matrix, query_dist)
-        return self.paper_matrix['index_arr'], similarity_scores
