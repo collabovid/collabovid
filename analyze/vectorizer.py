@@ -136,7 +136,7 @@ class SentenceVectorizer(TextVectorizer):
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens', *args, **kwargs):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
-        self.model = SentenceTransformer(model_name, device='cpu')
+        self.model = SentenceTransformer(model_name)
         self.splitter = SentenceSplitter(language='en')
 
         self.similarity_computer = CosineDistance()
