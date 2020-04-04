@@ -14,7 +14,7 @@ class PaperAnalyzer:
     def __init__(self, *args, **kwargs):
         pass
 
-    def calculate_paper_matrix(self):
+    def preprocess(self):
         raise NotImplementedError("Calculate paper matrix not implemented")
 
     def assign_to_topics(self, recompute_all=False):
@@ -23,7 +23,7 @@ class PaperAnalyzer:
     def related(self, query: str):
         raise NotImplementedError("Related not implemented")
 
-    def _compute_similarity_scores(self, query: str):
+    def query(self, query: str):
         raise NotImplementedError("Compute Similarity Scores not implemented")
 
 
@@ -42,8 +42,8 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
             print("Definition", name, analyzer, weight)
 
-        def calculate_paper_matrix(self):
-            self.analyzer.calculate_paper_matrix()
+        def preprocess(self):
+            self.analyzer.preprocess()
 
         def assign_to_topics(self, recompute_all=False):
             self.analyzer.assign_to_topics(recompute_all)
@@ -51,8 +51,8 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
         def related(self, query: str):
             return self.analyzer.related(query)
 
-        def compute_similarity_scores(self, query: str):
-            return self.analyzer.vectorizer.compute_similarity_scores(query)
+        def query(self, query: str):
+            return self.analyzer.query(query)
 
     def __init__(self, analyzers: dict, *args, **kwargs):
         """
@@ -84,7 +84,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
     def calculate_paper_matrix(self):
         for analyzer in self.analyzers:
             print("Calculating paper matrix for", analyzer.name)
-            analyzer.calculate_paper_matrix()
+            analyzer.preprocess()
 
     def assign_to_topics(self, recompute_all=False):
         for analyzer in self.analyzers:
@@ -98,7 +98,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         for analyzer in self.analyzers:
             print("Computing Similarity for", analyzer.name)
-            paper_ids, scores = analyzer.compute_similarity_scores(query)
+            paper_ids, scores = analyzer.query(query)
 
             paper_ids_lists.append(paper_ids)
             scores_lists.append(scores)
@@ -147,6 +147,12 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         else:
             raise ValueError('Unknown type')
 
+    def preprocess(self):
+        self.vectorizer.generate_paper_matrix()
+
+    def query(self, query: str):
+        return self.vectorizer.compute_similarity_scores(query)
+
     def assign_to_topics(self, recompute_all=False):
 
         print("Assigning to topics")
@@ -176,7 +182,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         print("Finished asignment to topics")
 
     def related(self, query: str):
-        paper_ids, scores = self.vectorizer.compute_similarity_scores(query)
+        paper_ids, scores = self.query(query)
 
         papers = Paper.objects.filter(pk__in=paper_ids)
         whens = list()
