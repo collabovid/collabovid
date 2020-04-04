@@ -117,24 +117,10 @@ class TextVectorizer:
         else:
             print("No recomputing of matrix necessary")
 
-    def compute_similarity_scores(self, query: str, vectorizer_type=VECTORIZE_DEFAULT):
-        query_dist = self._vectorize([query])[0]
+    def compute_similarity_scores(self, embedding_vec):
         matrix = self.paper_matrix['matrix']
-        similarity_scores = self.similarity_computer.similarities(matrix, query_dist)
+        similarity_scores = self.similarity_computer.similarities(matrix, embedding_vec)
         return self.paper_matrix['index_arr'], similarity_scores
-
-    def _vectorize_for_type(self, query, vectorizer_type):
-
-        if vectorizer_type == TextVectorizer.VECTORIZE_DEFAULT:
-            if isinstance(query, str):
-                return self._vectorize([query])[0]
-            return self._vectorize(query)
-        elif vectorizer_type == TextVectorizer.VECTORIZE_PAPER:
-            return self._vectorize_paper(query)
-        elif vectorizer_type == TextVectorizer.VECTORIZE_TOPIC:
-            return self._vectorize_topics(query)
-        else:
-            raise ValueError("Invalid vectorizer type")
 
     def _vectorize(self, texts):
         raise NotImplementedError()
@@ -184,14 +170,12 @@ class SentenceVectorizer(TextVectorizer):
 
         self.similarity_computer = CosineDistance()
 
-    def compute_similarity_scores(self, query, vectorizer_type=TextVectorizer.VECTORIZE_DEFAULT):
-
-        query_dist = self._vectorize_for_type(query, vectorizer_type)
+    def compute_similarity_scores(self, embedding_vec):
         title_matrix = self.paper_matrix['title_matrix']
         abstract_matrix = self.paper_matrix['abstract_matrix']
 
-        title_similarity_scores = np.array(self.similarity_computer.similarities(title_matrix, query_dist))
-        abstract_similarity_scores = np.array(self.similarity_computer.similarities(abstract_matrix, query_dist))
+        title_similarity_scores = np.array(self.similarity_computer.similarities(title_matrix, embedding_vec))
+        abstract_similarity_scores = np.array(self.similarity_computer.similarities(abstract_matrix, embedding_vec))
 
         return self.paper_matrix['index_arr'], title_similarity_scores * 0.3 + abstract_similarity_scores * 0.7
 

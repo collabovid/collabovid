@@ -8,6 +8,7 @@ import joblib
 import heapq
 from tqdm import tqdm
 from django.db import models
+from collections import defaultdict
 
 
 class PaperAnalyzer:
@@ -151,9 +152,10 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         self.vectorizer.generate_paper_matrix()
 
     def query(self, query: str):
-        return self.vectorizer.compute_similarity_scores(query)
+        embedding = self.vectorizer._vectorize([query])[0]
+        return self.vectorizer.compute_similarity_scores(embedding)
 
-    def assign_to_topics(self, recompute_all=False):
+    def assign_to_topics(self):
 
         print("Assigning to topics")
 
@@ -161,21 +163,23 @@ class BasicPaperAnalyzer(PaperAnalyzer):
             raise Exception("Paper matrix empty")
 
         print("Matrix not empty")
-
-        topics = Topic.objects.all()
-        paper = [p for p in Paper.objects.all() if recompute_all or not p.topic_score]
-
+        topics = list(Topic.objects.all())
         print("Begining Paper asignment")
 
-        paper_ids, similarities = self.vectorizer.compute_similarity_scores(topics, TextVectorizer.VECTORIZE_TOPIC)
+        topic_scores = defaultdict(list)
+        topic_embeddings = self.vectorizer._vectorize_topics(topics)
+        for idx, topic in topics:
+            paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_embeddings[idx])
+            for id, score in zip(paper_ids, similarities):
+                topic_scores[id].append(score)
 
-        for p in tqdm(paper):
+        papers = Paper.objects.all()
+        for paper in papers:
+            topic_idx = np.argmax(topic_scores[paper.doi]).item()
+            paper.topic = topics[topic_idx]
+            paper.topic_score = topic_scores[paper.doi][topic_idx]
+            paper.save()
 
-            current_similarities = similarities[paper_ids.index(p.doi)]
-            most_similar_idx = np.argmax(current_similarities).item()
-            p.topic = topics[most_similar_idx]
-            p.topic_score = current_similarities[most_similar_idx]
-            p.save()
         for topic in topics:
             topic.save()
 
