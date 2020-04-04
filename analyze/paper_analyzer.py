@@ -15,7 +15,7 @@ class PaperAnalyzer:
         pass
 
     def preprocess(self):
-        raise NotImplementedError("Calculate paper matrix not implemented")
+        raise NotImplementedError("Preprocess not implemented")
 
     def assign_to_topics(self, recompute_all=False):
         raise NotImplementedError("Assign to topics not implemented")
@@ -81,7 +81,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         assert total_weights == 1.0
 
-    def calculate_paper_matrix(self):
+    def preprocess(self):
         for analyzer in self.analyzers:
             print("Calculating paper matrix for", analyzer.name)
             analyzer.preprocess()

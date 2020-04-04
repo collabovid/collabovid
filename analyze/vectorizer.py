@@ -68,7 +68,7 @@ class TextVectorizer:
             'index_arr': [p.doi for p in papers],
         }
 
-        self.paper_matrix = {**paper_matrix, **self._calculate_paper_matrix}
+        self.paper_matrix = {**paper_matrix, **self._calculate_paper_matrix(papers)}
 
         joblib.dump(self.paper_matrix, matrix_path)
 

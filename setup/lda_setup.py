@@ -22,7 +22,8 @@ def run(output):
     download_file(LDA_DOWNLOAD_URL, LDA_PATH)
 
     analyzer = get_analyzer()
-    analyzer.save_paper_matrix()
+    analyzer.preprocess()
+
     analyzer.assign_to_topics()
 
     output("Assigned lda to topics")
