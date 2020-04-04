@@ -50,28 +50,72 @@ class TextVectorizer:
         print(matrix.shape)
         return {'matrix': matrix}
 
-    def generate_paper_matrix(self):
+    def generate_paper_matrix(self, force_recompute=False):
         matrix_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
                                    os.path.join('res', self.matrix_file_name))
 
-        if os.path.exists(matrix_path):
+        # initialize the id_map with saved values if possible
+        if self.paper_matrix is not None and os.path.exists(matrix_path):
             print(matrix_path, "exists, overwriting..")
+            id_map = self._paper_matrix['id_map']
+        else:
+            id_map = {}
 
+        # determines if a paper needs an update
+        def needs_update(paper):
+            return force_recompute
+
+        # all papers
         papers = Paper.objects.all()
-        id_map = {}
-        for index, p in enumerate(papers):
-            id_map[p.doi] = index
 
-        paper_matrix = {
-            'id_map': id_map,
-            'index_arr': [p.doi for p in papers],
-        }
+        # papers that need to be recomputed
+        filtered_papers = []
 
-        self.paper_matrix = {**paper_matrix, **self._calculate_paper_matrix(papers)}
+        # represents the index where the paper should be inserted in the final matrix
+        new_matrix_idx = len(id_map)
+        newly_added = 0
+        for p in papers:
+            if p.doi not in id_map:
+                # paper was not in existing matrix, it needs recomputation and we will append the result
+                id_map[p.doi] = new_matrix_idx
+                filtered_papers.append(p)
+                new_matrix_idx += 1
+                newly_added += 1
+            elif needs_update(p):
+                # paper is in existing matrix, so just mark it for recomputing. An index is already saved in the id_map.
+                filtered_papers.append(p)
 
-        joblib.dump(self.paper_matrix, matrix_path)
+        if len(filtered_papers) > 0:
+            # construct index array based on id map
+            index_arr = [''] * len(id_map)
+            for doi, idx in id_map:
+                index_arr[idx] = doi
+            paper_matrix = {
+                'id_map': id_map,
+                'index_arr': index_arr,
+            }
 
-        print("Paper matrix exported completely")
+            # for every new embedding matrix that is computed, we extend the old one
+            for key, computed_matrix in self._calculate_paper_matrix(filtered_papers):
+                # dimension of newly computed values
+                matrix = np.zeros((newly_added, computed_matrix.shape[1]))
+
+                if self.paper_matrix is not None:
+                    # extend old matrix with dimensions of newly computed values
+                    matrix = np.append(self.paper_matrix[key], computed_matrix, axis=0)
+
+                for i, paper in enumerate(filtered_papers):
+                    # get the matrix index for the computed value from the id map
+                    matrix_idx = id_map[paper.doi]
+                    # replace it with the new computed value
+                    matrix[matrix_idx] = computed_matrix[i]
+                paper_matrix[key] = matrix
+
+            self.paper_matrix = paper_matrix
+            joblib.dump(self.paper_matrix, matrix_path)
+            print("Paper matrix exported completed")
+        else:
+            print("No recomputing of matrix necessary")
 
     def compute_similarity_scores(self, query: str, vectorizer_type=VECTORIZE_DEFAULT):
         query_dist = self._vectorize([query])[0]
@@ -135,7 +179,7 @@ class SentenceVectorizer(TextVectorizer):
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens', *args, **kwargs):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, device='cpu')
         self.splitter = SentenceSplitter(language='en')
 
         self.similarity_computer = CosineDistance()
@@ -149,7 +193,7 @@ class SentenceVectorizer(TextVectorizer):
         title_similarity_scores = np.array(self.similarity_computer.similarities(title_matrix, query_dist))
         abstract_similarity_scores = np.array(self.similarity_computer.similarities(abstract_matrix, query_dist))
 
-        return self.paper_matrix['index_arr'], title_similarity_scores * 0.7 + abstract_similarity_scores * 0.3
+        return self.paper_matrix['index_arr'], title_similarity_scores * 0.3 + abstract_similarity_scores * 0.7
 
     def _vectorize(self, texts):
         return self.model.encode(texts)
