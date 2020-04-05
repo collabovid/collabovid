@@ -11,7 +11,7 @@ class PaperAnalyzer:
     def __init__(self, *args, **kwargs):
         pass
 
-    def preprocess(self):
+    def preprocess(self, force_recompute=False):
         raise NotImplementedError("Preprocess not implemented")
 
     def assign_to_topics(self):
@@ -39,8 +39,8 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
             print("Definition", name, analyzer, weight)
 
-        def preprocess(self):
-            self.analyzer.preprocess()
+        def preprocess(self, force_recompute=False):
+            self.analyzer.preprocess(force_recompute)
 
         def assign_to_topics(self):
             self.analyzer.assign_to_topics()
@@ -149,8 +149,8 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         else:
             raise ValueError('Unknown type')
 
-    def preprocess(self):
-        self.vectorizer.generate_paper_matrix()
+    def preprocess(self, force_recompute=False):
+        self.vectorizer.generate_paper_matrix(force_recompute)
 
     def query(self, query: str):
         embedding = self.vectorizer.vectorize([query])[0]
