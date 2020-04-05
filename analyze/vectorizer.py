@@ -8,7 +8,7 @@ import os
 
 from analyze.similarity import JensonShannonSimilarity, CosineDistance
 from data.models import Paper
-
+from analyze.splitter import TextToChunksSplitter
 
 class TextVectorizer:
 
@@ -166,7 +166,7 @@ class SentenceVectorizer(TextVectorizer):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
         self.model = SentenceTransformer(model_name, device='cpu')
-        self.splitter = SentenceSplitter(language='en')
+        self.splitter = TextToChunksSplitter()
 
         self.similarity_computer = CosineDistance()
 
@@ -189,18 +189,18 @@ class SentenceVectorizer(TextVectorizer):
     def vectorize_paper(self, papers):
         abstract_embeddings = []
 
-        all_sentences = []
+        all_chunks = []
         positions = []
 
         for paper in papers:
-            sentences = self.splitter.split(paper.abstract)
-            start = len(all_sentences)
-            length = len(sentences)
-            all_sentences += sentences
+            chunks = self.splitter.split_into_chunks(paper.abstract)
+            start = len(all_chunks)
+            length = len(chunks)
+            all_chunks += chunks
             positions.append((start, length))
 
         print("Extracted all sentences, calculating embedding")
-        sentence_embeddings = self.model.encode(all_sentences, batch_size=32, show_progress_bar=True)
+        chunk_embeddings = self.model.encode(all_chunks, batch_size=32, show_progress_bar=True)
 
         print("Extracting Embedding")
 
@@ -208,7 +208,7 @@ class SentenceVectorizer(TextVectorizer):
             if length == 0:
                 abstract_embeddings.append(np.zeros(1024))
             else:
-                abstract_embeddings.append(np.mean(np.array(sentence_embeddings[start:start + length]), axis=0))
+                abstract_embeddings.append(np.mean(np.array(chunk_embeddings[start:start + length]), axis=0))
 
         print("Calculate Title Embedding")
 
@@ -218,17 +218,17 @@ class SentenceVectorizer(TextVectorizer):
 
     def vectorize_topics(self, topics):
 
-        all_sentences = []
+        all_chunks = []
         positions = []
 
         for topic in topics:
-            sentences = self.splitter.split(topic.description)
-            start = len(all_sentences)
-            length = len(sentences)
-            all_sentences += sentences
+            chunks = self.splitter.split_into_chunks(topic.description)
+            start = len(all_chunks)
+            length = len(chunks)
+            all_chunks += chunks
             positions.append((start, length))
 
-        sentence_embeddings = self.model.encode(all_sentences, batch_size=32, show_progress_bar=True)
+        chunk_embeddings = self.model.encode(all_chunks, batch_size=32, show_progress_bar=True)
 
         description_embeddings = list()
 
@@ -236,7 +236,7 @@ class SentenceVectorizer(TextVectorizer):
             if length == 0:
                 description_embeddings.append(np.zeros(1024))
             else:
-                description_embeddings.append(sentence_embeddings[start:start + length])
+                description_embeddings.append(chunk_embeddings[start:start + length])
 
         title_embeddings = np.array(self.model.encode([t.name for t in topics]))
 

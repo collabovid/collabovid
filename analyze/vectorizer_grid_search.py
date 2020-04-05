@@ -4,9 +4,11 @@ django.setup()
 
 import numpy as np
 import itertools
-from data.models import Topic
+from data.models import Topic, Paper
 from matplotlib import pyplot as plt
-
+from sklearn.manifold import TSNE
+from sklearn.decomposition import KernelPCA
+from sklearn.metrics import pairwise_distances
 
 from analyze import get_analyzer
 
@@ -67,30 +69,82 @@ def topic_discordance(analyzer):
 
 analyzer = get_analyzer()
 
-title_factor_values = [.1, .2, .3, .4, .5, .6, .7, .8, .9]
+#title_factor_values = [0.0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.0]
+title_factor_values = [0.0, 0.5, 1.0]
 
 intra_title_avgs = list()
 intra_abstract_avgs = list()
 inter_title_avgs = list()
 inter_abstract_avgs = list()
 
+perplexity = 5
+
+def get_dim_reduction_tsne():
+    X = analyzer.vectorizer.paper_matrix['title_matrix']
+    distance_matrix = pairwise_distances(X, X, metric='cosine')
+    tsne = TSNE(metric='precomputed', n_components=2, verbose=1, perplexity=perplexity, n_iter=300)
+    tsne_title_results = tsne.fit_transform(distance_matrix)
+
+    X = analyzer.vectorizer.paper_matrix['abstract_matrix']
+    distance_matrix = pairwise_distances(X, X, metric='cosine')
+    tsne = TSNE(metric='precomputed', n_components=2, verbose=1, perplexity=perplexity, n_iter=300)
+    tsne_abstract_results = tsne.fit_transform(distance_matrix)
+
+    return tsne_title_results, tsne_abstract_results
+
+def get_dim_reduction_pca():
+    tsne = KernelPCA(kernel='cosine', n_components=2)
+    pca_title_results = tsne.fit_transform(analyzer.vectorizer.paper_matrix['title_matrix'])
+
+    tsne = KernelPCA(kernel='cosine', n_components=2)
+    pca_abstract_results = tsne.fit_transform(analyzer.vectorizer.paper_matrix['abstract_matrix'])
+
+    return pca_title_results, pca_abstract_results
+
+#dim_reduced_titles, dim_reduced_abstracts = get_dim_reduction_tsne()
+dim_reduced_titles, dim_reduced_abstracts = get_dim_reduction_pca()
+
 for factor in title_factor_values:
     analyzer.vectorizer.title_similarity_factor = factor
     analyzer.vectorizer.abstract_similarity_factor = 1 - factor
     analyzer.assign_to_topics()
+#
+    #intra_title_avg, intra_abstract_avg, inter_title_avg, inter_abstract_avg = topic_discordance(analyzer)
+#
+    #intra_title_avgs.append(intra_title_avg)
+    #intra_abstract_avgs.append(intra_abstract_avg)
+    #inter_title_avgs.append(inter_title_avg)
+    #inter_abstract_avgs.append(inter_abstract_avg)
 
-    intra_title_avg, intra_abstract_avg, inter_title_avg, inter_abstract_avg = topic_discordance(analyzer)
+    topics = list(Topic.objects.all())
+    #tsne_abstract_results = tsne.fit_transform(analyzer.vectorizer.paper_matrix['abstract_matrix'])
 
-    intra_title_avgs.append(intra_title_avg)
-    intra_abstract_avgs.append(intra_abstract_avg)
-    inter_title_avgs.append(inter_title_avg)
-    inter_abstract_avgs.append(inter_abstract_avg)
+    topics_for_index = [(paper.topic.pk,
+               analyzer.vectorizer.paper_matrix['id_map'][paper.doi])
+              for paper in Paper.objects.all()]
+
+    topics_for_index = sorted(topics_for_index, key=lambda x: x[1])
+
+    colors = [color for color, idx in topics_for_index]
+
+    plt.scatter(
+        list(dim_reduced_titles[:, 0]),
+        list(dim_reduced_titles[:, 1]), c=colors, cmap='Set1', alpha=.3)
+    plt.title("Title title influence: " + str(analyzer.vectorizer.title_similarity_factor))
+    plt.show()
+
+    plt.scatter(
+        list(dim_reduced_abstracts[:, 0]),
+        list(dim_reduced_abstracts[:, 1]), c=colors, cmap='Set1', alpha=.3)
+    plt.title("Abstracts title influence: " + str(analyzer.vectorizer.title_similarity_factor))
+    plt.show()
 
 
-plt.plot(title_factor_values, intra_title_avgs, label="Title Intra")
-plt.plot(title_factor_values, intra_abstract_avgs, label="Abstract Intra")
-plt.plot(title_factor_values, inter_title_avgs, label="Title Inter")
-plt.plot(title_factor_values, inter_abstract_avgs, label="Abstract Inter")
 
-plt.legend()
-plt.show()
+
+
+#plt.plot(title_factor_values, intra_title_avgs, label="Title Intra")
+#plt.plot(title_factor_values, intra_abstract_avgs, label="Abstract Intra")
+#plt.plot(title_factor_values, inter_title_avgs, label="Title Inter")
+#plt.plot(title_factor_values, inter_abstract_avgs, label="Abstract Inter")
+#plt.legend()

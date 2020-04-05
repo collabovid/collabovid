@@ -212,20 +212,17 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
             paper_ids, title_similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
 
-            similarities = 1.0 * title_similarities
+            description_similarities_raw = list()
 
-            if False:
-                description_similarities_raw = list()
+            for vec in topic_description_embeddings[idx]:
+                _, similarities = self.vectorizer.compute_similarity_scores(vec)
+                description_similarities_raw.append(similarities)
 
-                for vec in topic_description_embeddings[idx]:
-                    _, similarities = self.vectorizer.compute_similarity_scores(vec)
-                    description_similarities_raw.append(similarities)
+            description_similarities = np.array([sum(similarities_for_paper) / len(similarities_for_paper)
+                                                 for similarities_for_paper in zip(*description_similarities_raw)])
+            title_similarities = np.array(title_similarities)
 
-                description_similarities = np.array([sum(similarities_for_paper) / len(similarities_for_paper)
-                                                     for similarities_for_paper in zip(*description_similarities_raw)])
-                title_similarities = np.array(title_similarities)
-
-                similarities = 1.0 * title_similarities + 0.0 * description_similarities
+            similarities = .5 * title_similarities + 0.5 * description_similarities
 
             for id, score in zip(paper_ids, similarities):
                 topic_scores[id].append(score)
