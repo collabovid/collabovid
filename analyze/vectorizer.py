@@ -11,9 +11,6 @@ from data.models import Paper
 
 
 class TextVectorizer:
-    VECTORIZE_DEFAULT = 0
-    VECTORIZE_TOPIC = 1
-    VECTORIZE_PAPER = 2
 
     def __init__(self, matrix_file_name, *args, **kwargs):
         self.matrix_file_name = matrix_file_name
@@ -46,7 +43,7 @@ class TextVectorizer:
         self._paper_matrix = value
 
     def _calculate_paper_matrix(self, papers):
-        matrix = self._vectorize_paper(papers)
+        matrix = self.vectorize_paper(papers)
         print(matrix.shape)
         return {'matrix': matrix}
 
@@ -122,16 +119,16 @@ class TextVectorizer:
         similarity_scores = self.similarity_computer.similarities(matrix, embedding_vec)
         return self.paper_matrix['index_arr'], similarity_scores
 
-    def _vectorize(self, texts):
+    def vectorize(self, texts):
         raise NotImplementedError()
 
-    def _vectorize_paper(self, paper):
+    def vectorize_paper(self, paper):
         texts = [p.title + ". " + p.abstract for p in paper]
-        return self._vectorize(texts)
+        return self.vectorize(texts)
 
-    def _vectorize_topics(self, topics):
+    def vectorize_topics(self, topics):
         texts = [t.name + ". " + t.description for t in topics]
-        return self._vectorize(texts)
+        return self.vectorize(texts)
 
 
 class PretrainedLDA(TextVectorizer):
@@ -156,15 +153,15 @@ class PretrainedLDA(TextVectorizer):
         # add missing
         setattr(sys.modules['__main__'], 'spacy_tokenizer', spacy_tokenizer)
 
-    def _vectorize(self, texts):
+    def vectorize(self, texts):
         vectors = self.vectorizer.transform(texts)
         return self.lda.transform(vectors)
 
 
 class SentenceVectorizer(TextVectorizer):
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens',
-                 title_similarity_factor=0.7,
-                 abstract_similarity_factor=0.3,
+                 title_similarity_factor=0.5,
+                 abstract_similarity_factor=0.5,
                  *args, **kwargs):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
@@ -186,10 +183,10 @@ class SentenceVectorizer(TextVectorizer):
         return self.paper_matrix['index_arr'], title_similarity_scores * self.title_similarity_factor + \
                abstract_similarity_scores * self.abstract_similarity_factor
 
-    def _vectorize(self, texts):
+    def vectorize(self, texts):
         return self.model.encode(texts)
 
-    def _vectorize_paper(self, papers):
+    def vectorize_paper(self, papers):
         abstract_embeddings = []
 
         all_sentences = []
@@ -219,13 +216,35 @@ class SentenceVectorizer(TextVectorizer):
 
         return title_embedding, np.array(abstract_embeddings)
 
-    def _vectorize_topics(self, topics):
-        texts = [t.name for t in topics]
-        return np.array(self.model.encode(texts))
+    def vectorize_topics(self, topics):
+
+        all_sentences = []
+        positions = []
+
+        for topic in topics:
+            sentences = self.splitter.split(topic.description)
+            start = len(all_sentences)
+            length = len(sentences)
+            all_sentences += sentences
+            positions.append((start, length))
+
+        sentence_embeddings = self.model.encode(all_sentences, batch_size=32, show_progress_bar=True)
+
+        description_embeddings = list()
+
+        for start, length in positions:
+            if length == 0:
+                description_embeddings.append(np.zeros(1024))
+            else:
+                description_embeddings.append(sentence_embeddings[start:start + length])
+
+        title_embeddings = np.array(self.model.encode([t.name for t in topics]))
+
+        return title_embeddings, np.array(description_embeddings)
 
     def _calculate_paper_matrix(self, papers):
 
-        title_embeddings, abstract_embeddings = self._vectorize_paper(papers)
+        title_embeddings, abstract_embeddings = self.vectorize_paper(papers)
 
         print('title embeddings', title_embeddings.shape)
         print('abstract embeddings', abstract_embeddings.shape)

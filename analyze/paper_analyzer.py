@@ -14,7 +14,7 @@ class PaperAnalyzer:
     def preprocess(self):
         raise NotImplementedError("Preprocess not implemented")
 
-    def assign_to_topics(self, recompute_all=False):
+    def assign_to_topics(self):
         raise NotImplementedError("Assign to topics not implemented")
 
     def related(self, query: str):
@@ -42,8 +42,8 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
         def preprocess(self):
             self.analyzer.preprocess()
 
-        def assign_to_topics(self, recompute_all=False):
-            self.analyzer.assign_to_topics(recompute_all)
+        def assign_to_topics(self):
+            self.analyzer.assign_to_topics()
 
         def related(self, query: str):
             return self.analyzer.related(query)
@@ -83,10 +83,10 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
             print("Calculating paper matrix for", analyzer.name)
             analyzer.preprocess()
 
-    def assign_to_topics(self, recompute_all=False):
+    def assign_to_topics(self):
         for analyzer in self.analyzers:
             print("Assigning topics for", analyzer.name)
-            analyzer.assign_to_topics(recompute_all)
+            analyzer.assign_to_topics()
 
     def related(self, query: str):
 
@@ -148,7 +148,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         self.vectorizer.generate_paper_matrix()
 
     def query(self, query: str):
-        embedding = self.vectorizer._vectorize([query])[0]
+        embedding = self.vectorizer.vectorize([query])[0]
         return self.vectorizer.compute_similarity_scores(embedding)
 
     def assign_to_topics(self):
@@ -163,9 +163,23 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         print("Begining Paper asignment")
 
         topic_scores = defaultdict(list)
-        topic_embeddings = self.vectorizer._vectorize_topics(topics)
+        topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
+
         for idx, topic in enumerate(topics):
-            paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_embeddings[idx])
+            paper_ids, title_similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+
+            description_similarities_raw = list()
+
+            for vec in topic_description_embeddings[idx]:
+                _, similarities = self.vectorizer.compute_similarity_scores(vec)
+                description_similarities_raw.append(similarities)
+
+            description_similarities = np.array([max(similarities_for_paper)
+                                                 for similarities_for_paper in zip(*description_similarities_raw)])
+            title_similarities = np.array(title_similarities)
+
+            similarities = .5 * title_similarities + .5 * description_similarities
+
             for id, score in zip(paper_ids, similarities):
                 topic_scores[id].append(score)
 
