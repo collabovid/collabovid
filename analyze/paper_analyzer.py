@@ -98,7 +98,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
             paper_ids, scores = analyzer.query(query)
 
             paper_ids_lists.append(paper_ids)
-            scores_lists.append(scores)
+            scores_lists.append(list(scores))
 
         print("All similarities computed")
 
