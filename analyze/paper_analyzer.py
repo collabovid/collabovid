@@ -127,17 +127,22 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
 class BasicPaperAnalyzer(PaperAnalyzer):
 
-    def __init__(self, type='lda', *args, **kwargs):
+    TYPE_LDA = 'lda'
+    TYPE_SENTENCE_TRANSFORMER = 'sentence-transformer'
+
+    def __init__(self, type=TYPE_LDA, *args, **kwargs):
 
         super(BasicPaperAnalyzer, self).__init__(*args, **kwargs)
         dir_path = os.path.dirname(os.path.realpath(__file__))
 
-        if type == 'lda':
+        self.type = type
+
+        if type == BasicPaperAnalyzer.TYPE_LDA:
             self.vectorizer = PretrainedLDA(os.path.join(dir_path, 'res/lda.pkl'),
                                             os.path.join(dir_path, 'res/vectorizer.pkl'),
                                             matrix_file_name="paper_matrix.pkl")
             print("Loaded lda vectorizer")
-        elif type == 'sentence-transformer':
+        elif type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
             from .vectorizer import SentenceVectorizer
             self.vectorizer = SentenceVectorizer(matrix_file_name="paper_matrix_sentence_transformer.pkl")
             print("Loaded paper matrix sentence transformer")
@@ -162,26 +167,17 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         topics = list(Topic.objects.all())
         print("Begining Paper asignment")
 
-        topic_scores = defaultdict(list)
-        topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
+        if self.type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
+            topic_scores = self._topics_scores_sentence_transofrmer(topics)
+        else:
+            topic_scores = defaultdict(list)
+            topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
 
-        for idx, topic in enumerate(topics):
-            paper_ids, title_similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+            for idx, topic in enumerate(topics):
+                paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
 
-            description_similarities_raw = list()
-
-            for vec in topic_description_embeddings[idx]:
-                _, similarities = self.vectorizer.compute_similarity_scores(vec)
-                description_similarities_raw.append(similarities)
-
-            description_similarities = np.array([max(similarities_for_paper)
-                                                 for similarities_for_paper in zip(*description_similarities_raw)])
-            title_similarities = np.array(title_similarities)
-
-            similarities = .5 * title_similarities + .5 * description_similarities
-
-            for id, score in zip(paper_ids, similarities):
-                topic_scores[id].append(score)
+                for id, score in zip(paper_ids, similarities):
+                    topic_scores[id].append(score)
 
         papers = Paper.objects.all()
         for paper in papers:
@@ -208,3 +204,30 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
         return papers
 
+    def _topics_scores_sentence_transofrmer(self, topics):
+        topic_scores = defaultdict(list)
+        topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
+
+        for idx, topic in enumerate(topics):
+
+            paper_ids, title_similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+
+            similarities = 1.0 * title_similarities
+
+            if False:
+                description_similarities_raw = list()
+
+                for vec in topic_description_embeddings[idx]:
+                    _, similarities = self.vectorizer.compute_similarity_scores(vec)
+                    description_similarities_raw.append(similarities)
+
+                description_similarities = np.array([sum(similarities_for_paper) / len(similarities_for_paper)
+                                                     for similarities_for_paper in zip(*description_similarities_raw)])
+                title_similarities = np.array(title_similarities)
+
+                similarities = 1.0 * title_similarities + 0.0 * description_similarities
+
+            for id, score in zip(paper_ids, similarities):
+                topic_scores[id].append(score)
+
+        return topic_scores
