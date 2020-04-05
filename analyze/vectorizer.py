@@ -165,7 +165,9 @@ class SentenceVectorizer(TextVectorizer):
                  *args, **kwargs):
         super(SentenceVectorizer, self).__init__(*args, **kwargs)
 
-        self.model = SentenceTransformer(model_name, device='cpu')
+        device = os.getenv('SENTENCE_TRANSFORMER_DEVICE', 'cpu')
+
+        self.model = SentenceTransformer(model_name, device=device)
         self.splitter = TextToChunksSplitter()
 
         self.similarity_computer = CosineDistance()
