@@ -21,26 +21,29 @@ class PdfImageScraper:
         for i, paper in enumerate(all_papers):
             if not paper.preview_image:
                 res = requests.get(paper.pdf_url)
-                pages = convert_from_bytes(res.content, first_page=1, last_page=1)
-                if len(pages) != 1:
-                    print(f"Error creating image for file {i}: {paper.doi}")
-                    continue
+                self.load_image_from_pdf_response(paper, res)
 
-                buffer = BytesIO()
-                pages[0].thumbnail((400,400), Image.ANTIALIAS)
-                pages[0].save(fp=buffer, format='JPEG')
+    def load_image_from_pdf_response(self, paper, response):
+        pages = convert_from_bytes(response.content, first_page=1, last_page=1)
+        if len(pages) != 1:
+            print(f"Error creating image for file {i}: {paper.doi}")
+            return
 
-                pillow_image = ContentFile(buffer.getvalue())
+        buffer = BytesIO()
+        pages[0].thumbnail((400,400), Image.ANTIALIAS)
+        pages[0].save(fp=buffer, format='JPEG')
 
-                img_name = self.cleaned_doi(paper) + ".jpg"
-                paper.preview_image.save(img_name, InMemoryUploadedFile(
-                    pillow_image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    pillow_image.tell,  # size
-                    None))
+        pillow_image = ContentFile(buffer.getvalue())
 
-                paper.save()
+        img_name = self.cleaned_doi(paper) + ".jpg"
+        paper.preview_image.save(img_name, InMemoryUploadedFile(
+            pillow_image,  # file
+            None,  # field_name
+            img_name,  # file name
+            'image/jpeg',  # content_type
+            pillow_image.tell,  # size
+            None))
 
-                print(f"Successfully created image for file {i}: {paper.doi}")
+        paper.save()
+
+        print(f"Successfully created image for file {i}: {paper.doi}")

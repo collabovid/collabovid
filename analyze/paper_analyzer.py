@@ -171,10 +171,10 @@ class BasicPaperAnalyzer(PaperAnalyzer):
             topic_scores = self._topics_scores_sentence_transofrmer(topics)
         else:
             topic_scores = defaultdict(list)
-            topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
+            topic_embeddings = self.vectorizer.vectorize_topics(topics)
 
             for idx, topic in enumerate(topics):
-                paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+                paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_embeddings[idx])
 
                 for id, score in zip(paper_ids, similarities):
                     topic_scores[id].append(score)
