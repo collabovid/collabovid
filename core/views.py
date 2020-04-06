@@ -101,7 +101,7 @@ def explore(request):
 
 
 def about(request):
-    return render(request, "core/about.html")
+    return render(request, "core/about.html", {'papers': Paper.objects.all()})
 
 
 def topic(request, id):
