@@ -168,7 +168,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         print("Begining Paper asignment")
 
         if self.type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
-            topic_scores = self._topics_scores_sentence_transofrmer(topics)
+            topic_scores = self._topics_scores_sentence_transformer(topics)
         else:
             topic_scores = defaultdict(list)
             topic_embeddings = self.vectorizer.vectorize_topics(topics)
@@ -204,7 +204,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
         return papers
 
-    def _topics_scores_sentence_transofrmer(self, topics):
+    def _topics_scores_sentence_transformer(self, topics):
         topic_scores = defaultdict(list)
         topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
 
