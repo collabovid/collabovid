@@ -38,7 +38,7 @@ class PdfContentScraper:
         safe_text = str(safe_text).replace('\\', '\\\\').replace('"', '\\"')
 
         safe_text = safe_text[2:-1]
-        safe_text = re.sub(r"\\\\n|\\\\x\S\S", '', safe_text)
+        safe_text = re.sub(r"\\\\t|\\\\n|\\\\x\S\S", '', safe_text)
         safe_text = re.sub(r"http[^\s\\]*", '', safe_text)
         safe_text = re.sub(r"\.", '. ', safe_text)
         safe_text = re.sub(r"\s+", ' ', safe_text)
