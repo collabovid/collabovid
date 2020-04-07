@@ -39,7 +39,8 @@
                             {% if paper.abstract|length >= 420 %}
                                 <span class="short">{{ paper.abstract|slice:":400" }}</span><span
                                     class="dots">...</span><span
-                                    class="long" style="display: none;">{{ paper.abstract|slice:"400:" }}</span>
+                                    class="long"
+                                    style="{% if not extended %}display: none; {% endif %}">{{ paper.abstract|slice:"400:" }}</span>
                             {% else %}
                                 <span class="short">{{ paper.abstract }}</span>
                             {% endif %}
@@ -49,13 +50,13 @@
                             <div class="abstract-controls text-center">
                                 <a href="#"
                                    class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
-                                   style="font-size: 10px;">
+                                   style="font-size: 10px; {% if extended %} display: none; {% endif %}">
                                     <i class='fas fa-arrow-circle-down'></i> show full abstract
                                 </a>
 
                                 <a href="#"
                                    class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
-                                   style="font-size: 10px; display: none;">
+                                   style="font-size: 10px; {% if not extended %} display: none; {% endif %}">
                                     <i class='fas fa-arrow-circle-up'></i> hide full abstract
                                 </a>
                             </div>
@@ -102,9 +103,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
             $(document).on('click', '.toggle-description', function (e) {
-
                 e.preventDefault();
-
                 if ($(this).hasClass('hide')) {
                     $(this).closest('.abstract-container').find('.long').hide();
                     $(this).closest('.abstract-container').find('.dots').show();
