@@ -38,7 +38,11 @@ paper_contents_embed = lda.vectorizer.vectorize(paper_contents)
 
 for idx, topic in enumerate(tqdm(topics)):
     similarities = lda.vectorizer.similarity_computer.similarities(np.array(paper_contents_embed), topic_embeddings[idx])
-    _, bert_similarities = sentence_vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+
+    paper_ids, bert_similarities = sentence_vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
+
+    bert_similarities = [x for _, x in sorted(zip(paper_ids,bert_similarities), key=lambda x: paper_dois.index(x[0]))]
+
     for id, content_score, title_score in zip(paper_dois, similarities, bert_similarities):
         topic_scores[id].append(np.array(content_score, dtype='float64') * .5 + np.array(title_score, dtype='float64') * .5)
 
