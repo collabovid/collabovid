@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from data.models import PaperHost, Category, Paper, Author
 from scrape.citation_refresher import CitationRefresher
 from scrape.pdf_image_scraper import PdfImageScraper
+from scrape.pdf_content_scraper import PdfContentScraper
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
@@ -22,7 +23,11 @@ def extract_pdf_url(url: str, host: PaperHost):
     return complete_url
 
 
-def scrape_articles(detailed: bool = True, citations: bool = True, images: bool = True, update_unknown_category = False):
+def scrape_articles(detailed: bool = True,
+                    citations: bool = True,
+                    images: bool = True,
+                    contents: bool = True,
+                    update_unknown_category = False):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
     response = requests.get(biorxiv_corona_json)
@@ -98,13 +103,29 @@ def scrape_articles(detailed: bool = True, citations: bool = True, images: bool 
 
     print(f"Scraped new papers successfully: {new_articles} new article(s)")
 
+    if images or contents:
+        image_scraper = PdfImageScraper()
+        content_scraper = PdfContentScraper()
+        all_papers = Paper.objects.all()
+
+        for i, paper in enumerate(all_papers):
+
+            response = None
+
+            if images and not paper.preview_image:
+                response = requests.get(paper.pdf_url)
+                image_scraper.load_image_from_pdf_response(paper, response)
+                print(f"Image {i} finished")
+
+            if contents and (not paper.data or not paper.data.content):
+                if response is None:
+                    response = requests.get(paper.pdf_url)
+                content_scraper.parse_response(paper, response)
+                print(f"Content {i} finished")
+
     if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
         analyze.get_analyzer().save_paper_matrix()
         analyze.get_analyzer().assign_to_topics()
-
-    if images:
-        image_scraper = PdfImageScraper()
-        image_scraper.load_images()
 
     if citations:
         citation_refresher = CitationRefresher()

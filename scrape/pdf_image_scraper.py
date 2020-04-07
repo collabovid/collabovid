@@ -26,7 +26,7 @@ class PdfImageScraper:
     def load_image_from_pdf_response(self, paper, response):
         pages = convert_from_bytes(response.content, first_page=1, last_page=1)
         if len(pages) != 1:
-            print(f"Error creating image for file {i}: {paper.doi}")
+            print(f"Error creating image for file: {paper.doi}")
             return
 
         buffer = BytesIO()
@@ -46,4 +46,4 @@ class PdfImageScraper:
 
         paper.save()
 
-        print(f"Successfully created image for file {i}: {paper.doi}")
+        print(f"Successfully created image for: {paper.doi}")
