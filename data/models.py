@@ -114,8 +114,8 @@ class Paper(models.Model):
 
         papers = Paper.objects.filter(
             Q(topic__in=topics) & Q(category__in=categories) & (search_query |
-                                                                Q(authors__first_name__icontains=search_query) |
-                                                                Q(authors__last_name__icontains=search_query))
+                                                                Q(authors__first_name__icontains=search_text) |
+                                                                Q(authors__last_name__icontains=search_text))
         ).distinct()
 
         if start_date:
