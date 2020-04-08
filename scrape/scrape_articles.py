@@ -124,8 +124,8 @@ def scrape_articles(detailed: bool = True,
                 print(f"Content {i} finished")
 
     if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-        analyze.get_analyzer().save_paper_matrix()
-        analyze.get_analyzer().assign_to_topics()
+        analyze.get_topic_assignment_analyzer().save_paper_matrix()
+        analyze.get_topic_assignment_analyzer().assign_to_topics()
 
     if citations:
         citation_refresher = CitationRefresher()
