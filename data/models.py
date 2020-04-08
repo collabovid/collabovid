@@ -3,7 +3,7 @@ from django.db.models import Q, Max
 from django.utils.dateparse import parse_date
 from django.db.models import F
 import logging
-
+import re
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
     description = models.TextField()
@@ -92,7 +92,7 @@ class Paper(models.Model):
         return papers
 
     @staticmethod
-    def get_paper_for_query(search_query, start_date, end_date, categories, topics, sorted_by=SORTED_BY_TITLE):
+    def get_paper_for_query(search_text, start_date, end_date, categories, topics, sorted_by=SORTED_BY_TITLE):
         try:
             start_date = parse_date(start_date)
         except ValueError:
@@ -103,8 +103,17 @@ class Paper(models.Model):
         except ValueError:
             end_date = None
 
+        search_query = Q()  # empty Q object
+        words = [word for word in re.split(r"[^A-Za-z1-9']+", search_text) if len(word) > 0]
+
+        if len(words) > 0:
+            for word in words:
+                search_query |= Q(title__icontains=word)
+        else:
+            search_query = Q(title__icontains='')
+
         papers = Paper.objects.filter(
-            Q(topic__in=topics) & Q(category__in=categories) & (Q(title__icontains=search_query) |
+            Q(topic__in=topics) & Q(category__in=categories) & (search_query |
                                                                 Q(authors__first_name__icontains=search_query) |
                                                                 Q(authors__last_name__icontains=search_query))
         ).distinct()
