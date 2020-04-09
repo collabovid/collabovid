@@ -129,7 +129,7 @@ def scrape_articles(detailed: bool = True,
 
     if citations:
         citation_refresher = CitationRefresher()
-        if citation_refresher.refresh_citations(only_new=True):
+        if citation_refresher.refresh_citations(only_new=True, count=100):
             print("Updates citations succesfully")
         else:
             print("Error while updating citations")
