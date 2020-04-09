@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from .pdf_image_scraper import PdfImageScraper
 from .scrape_articles import scrape_articles
 from setup.image_downloader import run as run_image_downloader
-from setup.lda_setup import run as run_lda_setup
+from setup.setup_vectorizers import run as run_vectorizer_setup
 from setup.image_s3_apply import run as run_s3_apply
 
 from django.core.management import call_command
@@ -15,6 +15,7 @@ from django.core.management import call_command
 admin.site.register(Topic)
 admin.site.register(PaperHost)
 
+#TODO: Change URL Of LDA
 
 class Container:
     def __init__(self, data):
@@ -104,7 +105,7 @@ class PaperAdmin(admin.ModelAdmin):
             output = " ".join(list(args))
             container.append(str(output) + "\n")
 
-        run_lda_setup(output)
+        run_vectorizer_setup(output)
 
         self.message_user(request, self.message_user(request, container.data))
         return HttpResponseRedirect("../")

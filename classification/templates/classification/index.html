@@ -1,0 +1,57 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="gradient-header">
+        <h2 class="text-white text-center">{{ done }} of {{ total }} classified</h2>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+    <div class="px-5">
+        {% if paper %}
+        <div id="paper-container">
+            <div class="row my-5 paper">
+                <div class="col-7">
+                    {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True extended=True %}
+                </div>
+                <div class="col-5">
+                    <div class="card" style="height: 100%">
+                        <div class="card-body">
+                            <form action="{% url 'classify' %}" method="POST" class="topic-select-form">
+                                {% csrf_token %}
+                                <div class="input-group mb-3">
+                                    {% for topic in topics %}
+                                        <div class="radio">
+                                            <label><input type="radio" name="topic"
+                                                          value="{{ topic.pk }}"> {{ topic.name }}</label>
+                                        </div>
+                                    {% endfor %}
+                                    <div class="radio">
+                                        <label><input type="radio" name="topic"
+                                                      value="-1"> Other</label>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <input name="paper" style="display: none" value="{{ paper.doi }}"/>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <div class="my-5 text-center font-weight-bold">Everything classified.</div>
+        {% endif %}
+
+        <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5" style="display: none;">
+            <i class="fas fa-circle-notch fa-spin"></i>
+        </div>
+
+        <nav id="pagination-container"></nav>
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+    {% include 'core/partials/_paper_card.html' with script=True html=False %}
+{% endblock %}

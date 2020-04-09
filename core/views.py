@@ -57,7 +57,7 @@ def home(request):
 
 def explore(request):
     if request.method == "GET":
-        categories = Category.objects.all()
+        categories = Category.objects.order_by('name')
         topics = Topic.objects.all()
 
         return render(request, "core/explore.html",

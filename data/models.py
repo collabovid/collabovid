@@ -35,6 +35,13 @@ class Category(models.Model):
     name = models.CharField(max_length=200, primary_key=True)
 
 
+class PaperData(models.Model):
+    """
+    Model to store large data which should not be loaded on each select on a regular Paper
+    """
+
+    content = models.TextField(null=True, default=None)
+
 class Paper(models.Model):
     SORTED_BY_TITLE = 0
     SORTED_BY_AUTHOR_CITATIONS = 1
@@ -49,6 +56,8 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
+
+    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
     topic = models.ForeignKey(Topic,
                               related_name="papers",
@@ -125,3 +134,4 @@ class Paper(models.Model):
             papers = papers.filter(published_at__lte=end_date)
 
         return Paper.sort_papers(papers, sorted_by)
+
