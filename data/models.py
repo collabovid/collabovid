@@ -78,6 +78,7 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)

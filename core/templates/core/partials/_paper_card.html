@@ -95,6 +95,13 @@
                         {{ paper.host.name }}
                     </button>
                 </a>
+
+                <a href="{% url "paper" paper.doi %}">
+                    <button class="btn button-host mt-2 w-100"><i
+                            class="fa fa-external-link-alt"></i>
+                        More Details
+                    </button>
+                </a>
             </div>
 
         </div>
