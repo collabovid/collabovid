@@ -159,5 +159,16 @@ def topic(request, id):
 def topic_overview(request):
     return render(request, "core/topic_overview.html", {'topics': Topic.objects.all()})
 
+
 def imprint(request):
     return render(request, "core/imprint.html")
+
+
+def paper(request, doi):
+
+    paper = get_object_or_404(Paper, doi=doi)
+
+    return render(request, "core/paper.html", {
+        "paper": paper,
+        "similar_papers": Paper.objects.all()[:50]
+    })

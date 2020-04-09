@@ -1,0 +1,36 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="gradient-header">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="text-white display-4">{{ paper.title }}</h1>
+                </div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+    <div id="paper-container" class="container">
+
+        {% for current_paper in similar_papers %}
+            <div class="my-5">
+                {% include 'core/partials/_paper_card.html' with html=True paper=current_paper score=paper.percentage_topic_score show_score=show_topic_score %}
+            </div>
+
+        {% empty %}
+            <div class="my-5 text-center font-weight-bold">No similar papers found</div>
+        {% endfor %}
+
+    </div>
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block css %}
+{% endblock %}
