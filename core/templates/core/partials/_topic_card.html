@@ -1,14 +1,15 @@
 {% load static %}
 
-<div class="card p-4 rounded shadow my-3 topic_card {% if odd %}odd{% endif %}"
-     style="background-image: url({% static topic.icon_path %});">
+<div class="card p-4 rounded shadow my-3 topic_card {% if odd %}odd{% endif %}" style="background: transparent;">
     <div class="row d-flex flex-wrap align-items-center">
 
         {% if not odd %}
-            <div class="col-md-3"></div>
+            <div class="col-md-3 text-center">
+                <img src="{% static topic.icon_path %}" class="w-100 d-none d-lg-block">
+            </div>
         {% endif %}
 
-        <div class="col-md-9">
+        <div class="col-lg-9 col-md-12">
             <a class="d-block card-block px-3 invisible-link" href="{% url "topic" topic.pk %}">
                 <h4 class="card-title">{{ topic.name }}</h4>
 
@@ -19,7 +20,9 @@
         </div>
 
         {% if odd %}
-            <div class="col-md-3"></div>
+            <div class="col-md-3 text-center">
+                <img src="{% static topic.icon_path %}" class="w-100 d-none d-lg-block">
+            </div>
         {% endif %}
 
     </div>
