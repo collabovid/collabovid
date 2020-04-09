@@ -37,3 +37,4 @@ django-crontab==0.7.1
 django-health-check==3.12.1
 sentence-transformers==0.2.5.1
 sentence-splitter==1.4
+tika==1.24
