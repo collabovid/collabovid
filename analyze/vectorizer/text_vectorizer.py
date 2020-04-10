@@ -25,11 +25,8 @@ class TextVectorizer:
     def paper_matrix(self):
 
         if not self._paper_matrix:
-            dir_path = os.path.join(settings.BASE_DIR, "analyze/res")
-
-            matrix_path = os.path.join(dir_path, self.matrix_file_name)
-            if os.path.exists(matrix_path):
-                self._paper_matrix = joblib.load(matrix_path)
+            if os.path.exists(self.matrix_file_name):
+                self._paper_matrix = joblib.load(self.matrix_file_name)
 
         return self._paper_matrix
 
