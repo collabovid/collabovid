@@ -10,6 +10,8 @@ from scrape.citation_refresher import CitationRefresher
 from scrape.pdf_image_scraper import PdfImageScraper
 from scrape.pdf_content_scraper import PdfContentScraper
 
+from django.conf import settings
+
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
 
@@ -27,7 +29,7 @@ def scrape_articles(detailed: bool = True,
                     citations: bool = True,
                     images: bool = True,
                     contents: bool = True,
-                    update_unknown_category = False):
+                    update_unknown_category=False):
     biorxiv_corona_json = 'https://connect.biorxiv.org/relate/collection_json.php?grp=181'
 
     response = requests.get(biorxiv_corona_json)
@@ -103,6 +105,9 @@ def scrape_articles(detailed: bool = True,
 
     print(f"Scraped new papers successfully: {new_articles} new article(s)")
 
+    if not settings.ALLOW_IMAGE_SCRAPING:
+        print("Image scraping was disabled in the settings..")
+
     if images or contents:
         image_scraper = PdfImageScraper()
         content_scraper = PdfContentScraper()
@@ -112,7 +117,7 @@ def scrape_articles(detailed: bool = True,
 
             response = None
 
-            if images and not paper.preview_image:
+            if settings.ALLOW_IMAGE_SCRAPING and images and not paper.preview_image:
                 response = requests.get(paper.pdf_url)
                 image_scraper.load_image_from_pdf_response(paper, response)
                 print(f"Image {i} finished")
