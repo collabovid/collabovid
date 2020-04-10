@@ -2,6 +2,7 @@
 generated
 
 set_secret_envs.sh
+set_db_envs.sh
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
