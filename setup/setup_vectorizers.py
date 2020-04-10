@@ -8,31 +8,31 @@ def run(output):
     URLS = {
         "lda-model":
             {
-                "download": "https://transfer.sh/4G3qB/lda.pkl",
+                "download": "https://covid-publications.s3.amazonaws.com/resources/lda/lda.pkl",
                 "destination": os.path.join(PretrainedLDA.LDA_BASE_DIR,
                                             "lda.pkl")
             },
         "lda-vectorizer":
             {
-                "download": "https://transfer.sh/ltYp2/vectorizer.pkl",
+                "download": "https://covid-publications.s3.amazonaws.com/resources/lda/vectorizer.pkl",
                 "destination": os.path.join(PretrainedLDA.LDA_BASE_DIR,
                                             "vectorizer.pkl")
             },
         "lda-paper-matrix":
             {
-                "download": "https://transfer.sh/x7qND/paper_matrix.pkl",
+                "download": "https://covid-publications.s3.amazonaws.com/resources/lda/paper_matrix.pkl",
                 "destination": os.path.join(PretrainedLDA.LDA_BASE_DIR,
                                             "paper_matrix.pkl")
             },
         "title-sentence-paper-matrix":
             {
-                "download": "https://transfer.sh/ddy7t/paper_matrix.pkl",
+                "download": "https://covid-publications.s3.amazonaws.com/resources/title_sentence_vectorizer/paper_matrix.pkl",
                 "destination": os.path.join(TitleSentenceVectorizer.TITLE_SENTENCE_VECTORIZER_BASE_DIR,
                                             "paper_matrix.pkl")
             },
         "sentence-chunk-paper-matrix":
             {
-                "download": "https://transfer.sh/UFxca/paper_matrix.pkl",
+                "download": "https://covid-publications.s3.amazonaws.com/resources/sentence_chunk_vectorizer/paper_matrix.pkl",
                 "destination": os.path.join(SentenceChunkVectorizer.SENTENCE_CHUNK_VECTORIZER_BASE_DIR,
                                             "paper_matrix.pkl")
             }
