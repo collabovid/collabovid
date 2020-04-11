@@ -3,6 +3,8 @@ generated
 
 set_secret_envs.sh
 set_db_envs.sh
+set_db_envs_master.sh
+set_test_config.sh
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
