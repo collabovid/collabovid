@@ -1,6 +1,6 @@
 {% for paper in papers %}
     <div class="my-5">
-        {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True %}
+        {% include 'core/partials/_paper_card.html' with html=True extended=False paper=paper score=paper.search_score show_score=True %}
     </div>
 
 {% empty %}
