@@ -7,7 +7,7 @@ AVAILABLE_TASKS = dict()
 # noinspection PyPep8Naming
 def register_task(cls):
     global AVAILABLE_TASKS
-    AVAILABLE_TASKS[cls.task_name] = cls
+    AVAILABLE_TASKS[cls.task_name()] = cls
     return cls
 
 
