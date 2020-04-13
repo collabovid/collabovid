@@ -1,20 +1,36 @@
+import pathlib
+
+
 AVAILABLE_TASKS = dict()
 
 
 # noinspection PyPep8Naming
-class register_task:
-
-    def __init__(self, name):
-        self.name = name
-
-    def __call__(self, cls, *args, **kwargs):
-        global AVAILABLE_TASKS
-        AVAILABLE_TASKS[self.name] = cls
+def register_task(cls):
+    global AVAILABLE_TASKS
+    AVAILABLE_TASKS[cls.task_name] = cls
+    return cls
 
 
 class Runnable:
-    def __init__(self, *args, **kwargs):
-        pass
+    def __init__(self, log_file, *args, **kwargs):
+        self._log_file = log_file
+
+        path = pathlib.Path(self._log_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        self._file_handler = open(self._log_file, 'w')
+
+    def log(self, *args):
+        message = " ".join([str(x) for x in list(args)])
+        self._file_handler.write(message + "\n")
 
     def run(self):
         pass
+
+    def __del__(self):
+        if self._file_handler:
+            self._file_handler.close()
+
+    @staticmethod
+    def task_name():
+        raise NotImplementedError("Task has no name")

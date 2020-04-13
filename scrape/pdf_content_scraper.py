@@ -4,16 +4,36 @@ from data.models import Paper, PaperData
 from tqdm import tqdm
 import re
 
-class PdfContentScraper:
+from tasks import Runnable, register_task
 
-    def load_contents(self):
-        all_papers = list(Paper.objects.all())
-        for i, paper in enumerate(tqdm(all_papers)):
+
+@register_task
+class PdfContentScraper(Runnable):
+
+    @staticmethod
+    def task_name():
+        return "scrape-pdf-content"
+
+    def __init__(self, papers, *args, **kwargs):
+        super(PdfContentScraper, self).__init__(*args, **kwargs)
+
+        self.papers = papers
+
+    def run(self):
+        skipped_papers = 0
+        for i, paper in enumerate(self.papers):
             if not paper.data or not paper.data.content:
+                self.log("Scraping content of", paper.doi)
                 res = requests.get(paper.pdf_url)
-                self.parse_response(paper, res)
+                PdfContentScraper.parse_response(paper, res)
+                self.log("Got content of", paper.doi, "with length", len(paper.data.content))
+            else:
+                skipped_papers += 1
 
-    def parse_response(self, paper, response):
+        self.log("Skipped", skipped_papers)
+
+    @staticmethod
+    def parse_response(paper, response):
         """
         Todo: this methods does some unnecessary conversion.
         :param paper:
@@ -50,5 +70,3 @@ class PdfContentScraper:
 
         paper.data.save()
         paper.save()
-
-

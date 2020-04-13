@@ -1,14 +1,10 @@
-def run(output):
-    from scrape.pdf_content_scraper import PdfContentScraper
-
-    pdf_content_scraper = PdfContentScraper()
-
-    pdf_content_scraper.load_contents()
-    output("Assigned lda to topics")
-
-
 if __name__ == "__main__":
     import django
     django.setup()
 
-    run(print)
+    from scrape.pdf_content_scraper import PdfContentScraper
+    from tasks.task_runner import TaskRunner
+    from data.models import Paper
+
+    print(PdfContentScraper)
+    TaskRunner.run_task_async(cls=PdfContentScraper, papers=Paper.objects.all())
