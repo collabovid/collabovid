@@ -40,3 +40,7 @@ class Runnable:
     @staticmethod
     def task_name():
         raise NotImplementedError("Task has no name")
+
+    @staticmethod
+    def description():
+        return 'Description'
