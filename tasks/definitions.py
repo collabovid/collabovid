@@ -1,5 +1,6 @@
 import pathlib
 from django.conf import settings
+import datetime
 
 AVAILABLE_TASKS = dict()
 
@@ -21,7 +22,8 @@ class Runnable:
         self._file_handler = open(self._log_file, 'w')
 
     def log(self, *args):
-        message = " ".join([str(x) for x in list(args)])
+        message = '[' + datetime.datetime.now().strftime("%d.%b %Y %H:%M:%S") + ']\t'
+        message += " ".join([str(x) for x in list(args)])
         self._file_handler.write(message + "\n")
         self._file_handler.flush()
 
