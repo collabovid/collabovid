@@ -1,3 +1,5 @@
+{% load tz %}
+
 <div class="card h-100">
     <div class="card-body d-flex flex-column">
         <h5 class="card-title">{{ task.name }}</h5>
@@ -11,12 +13,12 @@
             {% endif %}
         </h6>
         <div class="card-text mb-2 text-muted">
-            <div><i class="fa fa-hourglass-start"></i> {{ task.started_at }}</div>
+            <div><i class="fa fa-hourglass-start"></i> {{ task.started_at | localtime }}</div>
             {% if task.status != 0 %}
                 <div><i class="fa fa-hourglass-end mt-2"></i> {{ task.ended_at }}</div>{% endif %}
         </div>
         <div class="mt-auto">
-            <a href="#" class="card-link">View</a>
+            <a href="{% url 'task_detail' id=task.pk %}" class="card-link">View</a>
             <a href="#" class="card-link">Delete</a>
         </div>
     </div>
