@@ -30,6 +30,6 @@ class TaskRunner:
     @staticmethod
     def run_task_async(cls, *args, **kwargs):
         thread = Thread(target=TaskRunner.run_task, args=args, kwargs=dict(kwargs, cls=cls))
-        thread.run()
+        thread.start()
 
 
