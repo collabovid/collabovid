@@ -5,12 +5,14 @@ from django.urls import path
 from django.http import HttpResponseRedirect
 
 from .pdf_image_scraper import PdfImageScraper
-from .scrape_articles import scrape_articles
+from .scrape import Scrape
 from setup.image_downloader import run as run_image_downloader
 from setup.setup_vectorizers import run as run_vectorizer_setup
 from setup.image_s3_apply import run as run_s3_apply
 
 from django.core.management import call_command
+
+from tasks.task_runner import TaskRunner
 
 admin.site.register(Topic)
 admin.site.register(PaperHost)
@@ -30,27 +32,8 @@ class AuthorAdmin(admin.ModelAdmin):
 
     def get_urls(self):
         urls = super().get_urls()
-        my_urls = [
-            path('update_citations/', self.refresh_citations),
-            path('get_new_citations/', self.get_new_citations),
-        ]
+        my_urls = []
         return my_urls + urls
-
-    def refresh_citations(self, request):
-        citation_refresher = CitationRefresher()
-        if citation_refresher.refresh_citations(count=100):
-            self.message_user(request, "100 oldest citations updated")
-        else:
-            self.message_user(request, "Error while scraping Google Scholar Citations")
-        return HttpResponseRedirect("../")
-
-    def get_new_citations(self, request):
-        citation_refresher = CitationRefresher()
-        if citation_refresher.refresh_citations(only_new=True):
-            self.message_user(request, self.message_user(request, "All new citations inserted"))
-        else:
-            self.message_user(request, "Error while scraping Google Scholar Citations")
-        return HttpResponseRedirect("../")
 
 
 @admin.register(Paper)
@@ -61,23 +44,13 @@ class PaperAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         my_urls = [
             path('update_papers/', self.refresh_papers),
-            path('update_images/', self.refresh_images),
-            path('setup_pdf_images/', self.setup_pdf_images),
             path('load_data_from_fixture/', self.loaddata),
-            path('setup_lda/', self.setup_lda),
-            path('setup_s3_apply/', self.setup_s3_apply),
         ]
         return my_urls + urls
 
     def refresh_papers(self, request):
-        scrape_articles()
+        TaskRunner.run_task_async(Scrape)
         self.message_user(request, "Papers updated")
-        return HttpResponseRedirect("../")
-
-    def refresh_images(self, request):
-        image_scraper = PdfImageScraper()
-        image_scraper.load_images()
-        self.message_user(request, "PDF thumbnails updated")
         return HttpResponseRedirect("../")
 
     def loaddata(self, request):
@@ -85,40 +58,4 @@ class PaperAdmin(admin.ModelAdmin):
         call_command('loaddata', fixture)
 
         self.message_user(request, "Loaded fixture")
-        return HttpResponseRedirect("../")
-
-    def setup_pdf_images(self, request):
-        container = Container("")
-
-        def output(output, container=container):
-            container.append(str(output) + "\n")
-
-        run_image_downloader(output)
-
-        self.message_user(request, self.message_user(request, container.data))
-        return HttpResponseRedirect("../")
-
-    def setup_lda(self, request):
-        container = Container("")
-
-        def output(*args, container=container):
-            output = " ".join(list(args))
-            container.append(str(output) + "\n")
-
-        run_vectorizer_setup(output)
-
-        self.message_user(request, self.message_user(request, container.data))
-        return HttpResponseRedirect("../")
-
-    def setup_s3_apply(self, request):
-        container = Container("")
-
-        def output(*args, container=container):
-            output = " ".join(list(args))
-
-            container.append(str(output) + "\n")
-
-        run_s3_apply(output)
-
-        self.message_user(request, self.message_user(request, container.data))
         return HttpResponseRedirect("../")

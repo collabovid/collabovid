@@ -1,5 +1,5 @@
 import pathlib
-
+from django.conf import settings
 
 AVAILABLE_TASKS = dict()
 
@@ -23,12 +23,16 @@ class Runnable:
     def log(self, *args):
         message = " ".join([str(x) for x in list(args)])
         self._file_handler.write(message + "\n")
+        self._file_handler.flush()
+
+        if settings.DEBUG:
+            print(message)
 
     def run(self):
         pass
 
     def __del__(self):
-        if self._file_handler:
+        if hasattr(self, "_file_handler") and self._file_handler:
             self._file_handler.close()
 
     @staticmethod

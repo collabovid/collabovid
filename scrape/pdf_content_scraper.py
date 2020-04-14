@@ -1,7 +1,6 @@
 from tika import parser
 import requests
 from data.models import Paper, PaperData
-from tqdm import tqdm
 import re
 
 from tasks import Runnable, register_task
@@ -25,7 +24,7 @@ class PdfContentScraper(Runnable):
             if not paper.data or not paper.data.content:
                 self.log("Scraping content of", paper.doi)
                 res = requests.get(paper.pdf_url)
-                PdfContentScraper.parse_response(paper, res)
+                PdfContentScraper.parse_response(self, paper, res)
                 self.log("Got content of", paper.doi, "with length", len(paper.data.content))
             else:
                 skipped_papers += 1
@@ -33,7 +32,7 @@ class PdfContentScraper(Runnable):
         self.log("Skipped", skipped_papers)
 
     @staticmethod
-    def parse_response(paper, response):
+    def parse_response(runnable: Runnable, paper, response):
         """
         Todo: this methods does some unnecessary conversion.
         :param paper:
@@ -49,7 +48,9 @@ class PdfContentScraper(Runnable):
         if 'content' in content:
             text = content['content']
         else:
+            runnable.log("No Content found for", paper.doi)
             return
+
         # Convert to string
         text = str(text)
         # Ensure text is utf-8 formatted

@@ -25,7 +25,7 @@ class PdfImageScraper(Runnable):
         for i, paper in enumerate(self.papers):
             if not paper.preview_image:
                 res = requests.get(paper.pdf_url)
-                self.load_image_from_pdf_response(paper, res)
+                self.load_image_from_pdf_response(self, paper, res)
             else:
                 skipped_papers += 1
 
@@ -36,10 +36,10 @@ class PdfImageScraper(Runnable):
         return paper.doi.replace("/", "").replace(".", "")
 
     @staticmethod
-    def load_image_from_pdf_response(paper, response):
+    def load_image_from_pdf_response(runnable: Runnable, paper, response):
         pages = convert_from_bytes(response.content, first_page=1, last_page=1)
         if len(pages) != 1:
-            print(f"Error creating image for file: {paper.doi}")
+            runnable.log(f"Error creating image for file: {paper.doi}")
             return
 
         buffer = BytesIO()
@@ -59,4 +59,4 @@ class PdfImageScraper(Runnable):
 
         paper.save()
 
-        print(f"Successfully created image for: {paper.doi}")
+        runnable.log(f"Successfully created image for: {paper.doi}")

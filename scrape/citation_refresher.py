@@ -6,15 +6,54 @@ from bs4 import BeautifulSoup
 from django.utils import timezone
 
 from data.models import Author
+from tasks import Runnable
 
+class CitationRefresher(Runnable):
+    
+    SUCCESS = 0
+    NO_AUTHOR_FOUND = 1
+    MULTIPLE_AUTHORS_FOUND = 2
+    HTTP_ERROR = 3
+    UNKNOWN = 4
+    
+    @staticmethod
+    def task_name():
+        return "refresh-citations"
 
-class CitationRefresher:
-    def __init__(self):
-        self.SUCCESS = 0
-        self.NO_AUTHOR_FOUND = 1
-        self.MULTIPLE_AUTHORS_FOUND = 2
-        self.HTTP_ERROR = 3
-        self.UNKNOWN = 4
+    def __init__(self, only_new=False, count=None, *args, **kwargs):
+        super(CitationRefresher, self).__init__(*args, **kwargs)
+
+        self._only_new = only_new
+        self._count = count
+
+    def run(self):
+        if self._only_new:
+            authors = [a for a in Author.objects.all() if not a.citations_last_update]
+        else:
+            authors = Author.objects.all()
+
+        if self._count:
+            authors = sorted(authors, key=lambda a: a.citations_last_update)[0:self._count]
+
+        for author in authors:
+            citations, status = self.get_scholar_citations(author.first_name, author.last_name)
+
+            if status == CitationRefresher.HTTP_ERROR:
+                self.log("Encountered HTTP Error. Aborting")
+                return
+
+            author.citations_last_update = timezone.now()
+            if status == CitationRefresher.SUCCESS:
+                author.citation_count = citations
+            elif status == CitationRefresher.NO_AUTHOR_FOUND:
+                shortened_first_name = self.remove_shortened_names(author.first_name)
+                if shortened_first_name != author.first_name:
+                    citations, status = self.get_scholar_citations(shortened_first_name, author.last_name)
+                    if status == CitationRefresher.SUCCESS:
+                        author.citation_count = citations
+            author.save()
+
+        self.log("Finished Citation Refresh")
 
     @staticmethod
     def escape(s: str) -> str:
@@ -28,25 +67,25 @@ class CitationRefresher:
         soup = BeautifulSoup(response.text, 'html.parser')
 
         if response.status_code != 200:
-            print(f"Request error: {response.status_code} ({response.reason})")
-            return None, self.HTTP_ERROR
+            self.log(f"Request error: {response.status_code} ({response.reason})")
+            return None, CitationRefresher.HTTP_ERROR
 
         authors = soup.find_all('div', {'class': 'gsc_1usr'})
 
         if len(authors) == 0:
-            return None, self.NO_AUTHOR_FOUND
+            return None, CitationRefresher.NO_AUTHOR_FOUND
 
         if len(authors) > 1:
-            return None, self.MULTIPLE_AUTHORS_FOUND
+            return None, CitationRefresher.MULTIPLE_AUTHORS_FOUND
 
         for author in authors:
             citations_string = author.find('div', {'class': 'gs_ai_cby'}).text
             m = re.search(r'\d+$', citations_string)
             if m:
                 citations = int(m.group())
-                return citations, self.SUCCESS
+                return citations, CitationRefresher.SUCCESS
             else:
-                return None, self.NO_AUTHOR_FOUND
+                return None, CitationRefresher.NO_AUTHOR_FOUND
 
     @staticmethod
     def remove_shortened_names(name: str):
@@ -57,30 +96,3 @@ class CitationRefresher:
                 final_name += " " + name
         return final_name.strip()
 
-    def refresh_citations(self, only_new=False, count=None):
-        if only_new:
-            authors = [a for a in Author.objects.all() if not a.citations_last_update]
-        else:
-            authors = Author.objects.all()
-
-        if count:
-            authors = sorted(authors, key=lambda a: a.citations_last_update)[0:count]
-
-        for author in authors:
-            citations, status = self.get_scholar_citations(author.first_name, author.last_name)
-
-            if status == self.HTTP_ERROR:
-                return False
-
-            author.citations_last_update = timezone.now()
-            if status == self.SUCCESS:
-                author.citation_count = citations
-            elif status == self.NO_AUTHOR_FOUND:
-                shortened_first_name = self.remove_shortened_names(author.first_name)
-                if shortened_first_name != author.first_name:
-                    citations, status = self.get_scholar_citations(shortened_first_name, author.last_name)
-                    if status == self.SUCCESS:
-                        author.citation_count = citations
-            author.save()
-
-        return True
