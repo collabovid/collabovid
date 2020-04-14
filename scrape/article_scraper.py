@@ -41,7 +41,7 @@ class ArticleScraper(Runnable):
             else:
                 skipped_articles += 1
 
-        self.log(f"Skipped {new_articles} old article(s).")
+        self.log(f"Skipped {skipped_articles} old article(s).")
         self.log(f"Scraped new papers successfully: {new_articles} new article(s)")
 
     def scrape_item(self, item):
@@ -85,7 +85,13 @@ class ArticleScraper(Runnable):
             paper.abstract = item['rel_abs']
             paper.host = host
             paper.published_at = item['rel_date']
-            paper.pdf_url = self.extract_pdf_url(item['rel_link'], host)
+
+            pdf_url = self.extract_pdf_url(item['rel_link'], host)
+
+            if pdf_url:
+                paper.pdf_url = pdf_url
+            else:
+                return False
 
             url = item['rel_link']
             authors, category = self.get_detailed_information(url)
@@ -140,6 +146,10 @@ class ArticleScraper(Runnable):
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         dl_element = soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
-        relative_link = dl_element['href']
-        complete_url = host.url + relative_link
-        return complete_url
+
+        if dl_element and 'href' in dl_element:
+            relative_link = dl_element['href']
+            complete_url = host.url + relative_link
+            return complete_url
+        else:
+            return None

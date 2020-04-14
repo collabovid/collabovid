@@ -9,12 +9,13 @@ class TaskRunner:
     def run_task(cls, *args, **kwargs):
         task = Task(name=cls.task_name(), started_at=timezone.now(), status=Task.STATUS_PENDING)
         task.save()
-
         runnable = cls(*args, **dict(kwargs, log_file=task.log_file))
 
         try:
             runnable.run()
         except (KeyboardInterrupt, SystemExit):
+            runnable.log("Task was aborted by system exit or keyboard interrupt")
+            task.status = Task.STATUS_ERROR
             raise
         except Exception as e:
             runnable.log("Error during execution:", str(e))
