@@ -8,6 +8,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
 from tasks import register_task, Runnable
 
+from data.models import Paper
 
 @register_task
 class PdfImageScraper(Runnable):
@@ -16,9 +17,13 @@ class PdfImageScraper(Runnable):
     def task_name():
         return "scrape-pdf-image"
 
-    def __init__(self, papers, *args, **kwargs):
+    def __init__(self, papers=None, *args, **kwargs):
         super(PdfImageScraper, self).__init__(*args, **kwargs)
-        self.papers = papers
+
+        if papers:
+            self.papers = papers
+        else:
+            self.papers = Paper.objects.all()
 
     def run(self):
         skipped_papers = 0

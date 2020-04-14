@@ -3,6 +3,7 @@ import requests
 from tasks import Runnable, register_task
 from scrape.pdf_content_scraper import PdfContentScraper
 from scrape.pdf_image_scraper import PdfImageScraper
+from data.models import Paper
 
 @register_task
 class PdfScraper(Runnable):
@@ -11,9 +12,13 @@ class PdfScraper(Runnable):
     def task_name():
         return "scrape-pdf"
 
-    def __init__(self, papers, scrape_content, scrape_images, *args, **kwargs):
+    def __init__(self, papers=None, scrape_content=True, scrape_images=True, *args, **kwargs):
         super(PdfScraper, self).__init__(*args, **kwargs)
-        self.papers = papers
+
+        if papers:
+            self.papers = papers
+        else:
+            self.papers = Paper.objects.all()
 
         self._scrape_content = scrape_content
         self._scrape_images = scrape_images
