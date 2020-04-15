@@ -1,7 +1,7 @@
 def run(output):
     import os
     import requests
-    from analyze import get_analyzer, get_topic_assignment_analyzer
+    from analyze import get_sentence_transformer_analyzer, get_topic_assignment_analyzer
 
     from analyze.vectorizer import TitleSentenceVectorizer, SentenceChunkVectorizer, PretrainedLDA
 
@@ -51,7 +51,7 @@ def run(output):
         output("Downloading", key)
         download_file(config["download"], config["destination"])
 
-    analyzer = get_analyzer()
+    analyzer = get_sentence_transformer_analyzer()
     analyzer.preprocess()
 
     topic_analyzer = get_topic_assignment_analyzer()

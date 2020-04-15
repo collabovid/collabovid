@@ -99,9 +99,30 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         print("Finished asignment to topics")
 
+    def compute_weighted_papers(self, paper_ids_lists, scores_lists):
+        papers = Paper.objects.all()
+
+        for paper_ids, scores in paper_ids_lists, scores_lists:
+            assert len(paper_ids) == papers.count()
+
+            # We now sort the paper ids so that the scores and ids match.
+            paper_ids.sort()
+            scores.sort(key=dict(zip(scores, paper_ids)).get)
+
+        paper_ids = paper_ids_lists[0]  # All paper ids are the same
+
+        whens = list()
+
+        weights = [analyzer.weight for analyzer in self.analyzers]
+        for pk, scores in zip(paper_ids, zip(*scores_lists)):
+            score = 100 * sum((score * weight for score, weight in zip(scores, weights)))
+            whens.append(models.When(pk=pk, then=score))
+
+        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
+
+        return papers
 
     def related(self, query: str):
-
         paper_ids_lists = list()
         scores_lists = list()
 
@@ -114,24 +135,19 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         print("All similarities computed")
 
-        papers = Paper.objects.all()
+        return self.compute_weighted_papers(paper_ids_lists, scores_lists)
 
-        for paper_ids, scores in paper_ids_lists, scores_lists:
-            assert len(paper_ids) == papers.count()
+    def get_similar_papers(self, paper_doi: str):
+        paper_ids_lists = list()
+        scores_lists = list()
 
-            # We now sort the paper ids so that the scores and ids match.
-            paper_ids.sort()
-            scores.sort(key=dict(zip(scores, paper_ids)).get)
+        for analyzer in self.analyzers:
+            print("Computing Similarity for", analyzer.name)
+            paper_ids, scores = analyzer.analyzer.vectorizer.paper_distances(paper_doi)
 
-        paper_ids = paper_ids_lists[0] # All paper ids are the same
+            paper_ids_lists.append(paper_ids)
+            scores_lists.append(list(scores))
 
-        whens = list()
+        print("All similarities computed")
 
-        weights = [analyzer.weight for analyzer in self.analyzers]
-        for pk, scores in zip(paper_ids, zip(*scores_lists)):
-            score = 100 * sum((score * weight for score, weight in zip(scores, weights)))
-            whens.append(models.When(pk=pk, then=score))
-
-        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
-
-        return papers
+        return self.compute_weighted_papers(paper_ids_lists, scores_lists)
