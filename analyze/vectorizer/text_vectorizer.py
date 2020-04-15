@@ -4,6 +4,7 @@ import os
 from data.models import Paper
 from django.conf import settings
 
+
 class TextVectorizer:
 
     def __init__(self, matrix_file_name, *args, **kwargs):
@@ -121,3 +122,10 @@ class TextVectorizer:
     def vectorize_topics(self, topics):
         texts = [t.name + ". " + t.description for t in topics]
         return self.vectorize(texts)
+
+    def paper_distances(self, paper_doi):
+        matrix = self.paper_matrix['matrix']
+        id_map = self.paper_matrix['id_map']
+        matrix_index = id_map[paper_doi]
+        similarity_scores = self.similarity_computer.similarities(matrix, matrix[matrix_index])
+        return self.paper_matrix['index_arr'], similarity_scores
