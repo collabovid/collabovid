@@ -34,7 +34,7 @@ def home(request):
         page_obj = papers
 
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-            analyzer = analyze.get_analyzer()
+            analyzer = analyze.get_sentence_transformer_analyzer()
             papers = analyzer.related(search_query).filter(search_score__gt=40)
 
             sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
@@ -165,10 +165,17 @@ def imprint(request):
 
 
 def paper(request, doi):
+    current_paper = get_object_or_404(Paper, doi=doi)
 
-    paper = get_object_or_404(Paper, doi=doi)
+    if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+        similar_papers = analyze.get_paper_similarities_analyzer().get_similar_papers(current_paper.doi)
+
+        sorted_by = Paper.SORTED_BY_SCORE
+        similar_papers = Paper.sort_papers(similar_papers, sorted_by, score_field="search_score")
+    else:
+        similar_papers = []
 
     return render(request, "core/paper.html", {
-        "paper": paper,
-        "similar_papers": Paper.objects.all()[:50]
+        "paper": current_paper,
+        "similar_papers": similar_papers[:10]
     })

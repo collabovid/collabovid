@@ -66,18 +66,20 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
         print("Finished asignment to topics")
 
-    def related(self, query: str):
-        paper_ids, scores = self.query(query)
-
-        papers = Paper.objects.filter(pk__in=paper_ids)
+    def get_closest_papers(self, paper_dois, distances):
+        papers = Paper.objects.filter(pk__in=paper_dois)
         whens = list()
 
-        for pk, score in zip(paper_ids, scores):
+        for pk, score in zip(paper_dois, distances):
             whens.append(models.When(pk=pk, then=score * 100))
 
-        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
+        closest_papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
 
-        return papers
+        return closest_papers
+
+    def related(self, query: str):
+        paper_dois, distances = self.query(query)
+        return self.get_closest_papers(paper_dois, distances)
 
     def compute_topic_score(self, topics):
         if self.vectorizer.paper_matrix is None:
@@ -121,3 +123,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
                 topic_scores[id].append(score)
 
         return topic_scores
+
+    def get_similar_papers(self, paper_doi: str):
+        paper_dois, distances = self.vectorizer.paper_distances(paper_doi)
+        return self.get_closest_papers(paper_dois, distances)

@@ -16,3 +16,6 @@ class PaperAnalyzer:
 
     def query(self, query: str):
         raise NotImplementedError("Compute Similarity Scores not implemented")
+
+    def get_similar_papers(self, paper_id: str):
+        raise NotImplementedError("Compute Similarity Scores between papers not implemented")
