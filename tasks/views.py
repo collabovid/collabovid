@@ -43,3 +43,17 @@ def create_task(request):
             messages.add_message(request, messages.ERROR, 'Unknown Task name')
             return redirect('task_create')
     return HttpResponseNotFound()
+
+
+def delete_task(request):
+    if request.method == 'POST':
+        id = request.POST.get('id')
+        print(id)
+        query = Task.objects.filter(pk=id)
+        if query.count() > 0:
+            query.delete()
+            messages.add_message(request, messages.SUCCESS, 'Deleted Task.')
+        else:
+            messages.add_message(request, messages.ERROR, 'Failed to delete Task: Unknown Task.')
+        return redirect('tasks')
+    return HttpResponseNotFound()

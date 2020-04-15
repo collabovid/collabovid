@@ -19,7 +19,7 @@
         </div>
         <div class="mt-auto">
             <a href="{% url 'task_detail' id=task.pk %}" class="card-link">View</a>
-            <a href="#" class="card-link">Delete</a>
+            <a href="#" class="card-link" data-toggle="modal" data-target="#modal" data-id="{{ task.pk }}">Delete</a>
         </div>
     </div>
 </div>

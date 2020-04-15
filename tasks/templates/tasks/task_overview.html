@@ -23,4 +23,9 @@
         </div>
     </div>
 
+    {% include 'tasks/partials/_task_delete_modal.html' %}
+{% endblock %}
+
+{% block script %}
+    <script src="{% static 'tasks/delete.js' %}"></script>
 {% endblock %}
