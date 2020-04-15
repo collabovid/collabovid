@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from .models import Task
 from .definitions import AVAILABLE_TASKS
 from tasks.task_runner import TaskRunner
+from django.contrib import messages
 
 
 # Create your views here.
@@ -36,7 +37,9 @@ def create_task(request):
         if task_name in AVAILABLE_TASKS:
             cls = AVAILABLE_TASKS[task_name]
             TaskRunner.run_task_async(cls)
+            messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
         else:
+            messages.add_message(request, messages.ERROR, 'Unknown Task name')
             return redirect('task_create')
     return HttpResponseNotFound()
