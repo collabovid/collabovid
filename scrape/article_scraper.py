@@ -147,7 +147,7 @@ class ArticleScraper(Runnable):
         soup = BeautifulSoup(response.text, 'html.parser')
         dl_element = soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
 
-        if dl_element and 'href' in dl_element:
+        if dl_element and dl_element.has_attr('href'):
             relative_link = dl_element['href']
             complete_url = host.url + relative_link
             return complete_url
