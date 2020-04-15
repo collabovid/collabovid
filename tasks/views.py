@@ -4,16 +4,16 @@ from .models import Task
 from .definitions import AVAILABLE_TASKS
 from tasks.task_runner import TaskRunner
 from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
 
 
-# Create your views here.
-
-
+@staff_member_required
 def tasks(request):
     tasks = Task.objects.all().order_by('-started_at')
     return render(request, 'tasks/task_overview.html', {'tasks': tasks})
 
 
+@staff_member_required
 def task_detail(request, id):
     task = Task.objects.get(pk=id)
     with open(task.log_file, 'r') as f:
@@ -21,6 +21,7 @@ def task_detail(request, id):
     return render(request, 'tasks/task_detail.html', {'task': task, 'log': log})
 
 
+@staff_member_required
 def create_task(request):
     if request.method == 'GET':
         tasks = []
@@ -45,6 +46,7 @@ def create_task(request):
     return HttpResponseNotFound()
 
 
+@staff_member_required
 def delete_task(request):
     if request.method == 'POST':
         id = request.POST.get('id')
