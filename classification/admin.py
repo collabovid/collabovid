@@ -1,3 +1,6 @@
 from django.contrib import admin
-
-# Register your models here.
+from .models import Token, Category, Subcategory, Classification
+admin.site.register(Token)
+admin.site.register(Category)
+admin.site.register(Subcategory)
+admin.site.register(Classification)

@@ -8,36 +8,85 @@
     </div>
     <div class="px-5">
         {% if paper %}
-        <div id="paper-container">
-            <div class="row my-5 paper">
-                <div class="col-7">
-                    {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True extended=True %}
-                </div>
-                <div class="col-5">
-                    <div class="card" style="height: 100%">
-                        <div class="card-body">
-                            <form action="{% url 'classify' %}" method="POST" class="topic-select-form">
-                                {% csrf_token %}
-                                <div class="input-group mb-3">
-                                    {% for topic in topics %}
-                                        <div class="radio">
-                                            <label><input type="radio" name="topic"
-                                                          value="{{ topic.pk }}"> {{ topic.name }}</label>
+            <div id="paper-container">
+                <div class="row my-5 paper">
+                    <div class="col-12">
+                        {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True extended=True %}
+                    </div>
+                    <div class="col-12 mt-2">
+                        <div class="card" style="height: 100%">
+                            <div class="card-body">
+                                <form action="{% url 'classify' token_str=token.token %}" method="POST"
+                                      class="topic-select-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paper" value="{{ paper.doi }}"/>
+
+
+                                    <div class="category-container">
+
+                                        <h4 class="title">Chose a category</h4>
+
+                                        <div class="input-group mb-3">
+                                            {% for category in categories.all %}
+                                                <div class="w-100">
+                                                    <label>
+                                                        <input class="category-radio" data-id="{{ category.pk }}"
+                                                               type="radio" name="category"
+                                                               value="{{ category.pk }}"> {{ category.text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                            <div class="radio">
+                                                <label><input class="category-radio" type="radio" name="category"
+                                                              value="-1" checked="checked"> Other</label>
+                                            </div>
                                         </div>
-                                    {% endfor %}
-                                    <div class="radio">
-                                        <label><input type="radio" name="topic"
-                                                      value="-1"> Other</label>
                                     </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                                <input name="paper" style="display: none" value="{{ paper.doi }}"/>
-                            </form>
+
+                                    <div class="subcategory-container" style="display: none;">
+
+                                        <h4 class="title">Other</h4>
+
+                                        {% for category in categories.all %}
+                                            <div id="subcategory-select-{{ category.pk }}"
+                                                 class="subcategory-select input-group mt-3" style="display: none;">
+                                                {% for sub_category in category.sub_categories.all %}
+                                                    <div class="w-100">
+                                                        <label>
+                                                            <input type="radio" name="sub_category"
+                                                                   value="{{ sub_category.pk }}"> {{ sub_category.text }}
+                                                        </label>
+                                                    </div>
+                                                {% endfor %}
+                                                <div class="w-100">
+                                                    <label><input type="radio" name="sub_category"
+                                                                  value="-1"> Other</label>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+
+                                        <div id="subcategory-select--1"
+                                             class="subcategory-select input-group mt-3">
+                                            <div class="w-100">
+                                                <label><input type="radio" name="sub_category"
+                                                              value="-1" checked="checked"> Other</label>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
+                                    <a href="#" id="switch-btn" class="btn btn-primary float-right"
+                                       data-alt="Back">Next</a>
+
+                                    <button id="submit-button" type="submit" class="btn btn-success float-right"
+                                            style="display: none;">Submit
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% else %}
             <div class="my-5 text-center font-weight-bold">Everything classified.</div>
         {% endif %}
@@ -54,4 +103,36 @@
 
 {% block script %}
     {% include 'core/partials/_paper_card.html' with script=True html=False %}
+
+    <script>
+        $(".category-radio").change(function () {
+            let id = $(this).data('id');
+            $(".subcategory-select").hide();
+
+            $("#subcategory-select-" + id).show();
+
+            $(".subcategory-container .title").html($("input[name='category']:checked").parent().text());
+        });
+
+        $("#switch-btn").click(function (e) {
+            e.preventDefault();
+
+            $(this).toggleClass('btn-primary');
+            $(this).toggleClass('btn-secondary');
+            $(this).toggleClass('float-right');
+
+            $(".category-container").toggle();
+            $(".subcategory-container").toggle();
+
+            $("#submit-button").toggle();
+
+            let new_text = $(this).data('alt');
+            let old_text = $(this).text();
+
+            $(this).html(new_text);
+            $(this).data('alt', old_text);
+
+
+        })
+    </script>
 {% endblock %}
