@@ -7,15 +7,18 @@
         <div class="container">
             <div class="row">
                 <div class="col-12">
-                    <h1 class="text-white display-4">{{ paper.title }}</h1>
+                    <h3 class="text-white display-6 mt-3">{{ paper.title }}</h3>
                 </div>
             </div>
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
-    <div id="paper-container" class="container">
-
+    <div id="paper-container" class="container mt-4">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-4">Similar Paper</h3>
+            <h3 class="text-muted d-md-inline-block d-none">Similar Paper</h3>
+        </div>
         {% for current_paper in similar_papers %}
             <div class="my-5">
                 {% include 'core/partials/_paper_card.html' with html=True paper=current_paper score=paper.percentage_topic_score show_score=show_topic_score %}
