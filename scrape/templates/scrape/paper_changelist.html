@@ -14,27 +14,6 @@
             </form>
         </div>
 
-        <div>
-            <form action="setup_pdf_images/" method="POST">
-                {% csrf_token %}
-                <button type="submit">Setup PDF Images</button>
-            </form>
-        </div>
-
-        <div>
-            <form action="setup_s3_apply/" method="POST">
-                {% csrf_token %}
-                <button type="submit">Setup S3 Images</button>
-            </form>
-        </div>
-
-        <div>
-            <form action="setup_lda/" method="POST">
-                {% csrf_token %}
-                <button type="submit">Setup Vectorizers</button>
-            </form>
-        </div>
-
         <h3>Refresh</h3>
 
         <div>
@@ -43,14 +22,6 @@
                 <button type="submit">Update Papers</button>
             </form>
         </div>
-        <div>
-            <form action="update_images/" method="POST">
-                {% csrf_token %}
-                <button type="submit">Update PDF thumbnails</button>
-            </form>
-        </div>
-
-
     </div>
     <br/>
     {{ block.super }}

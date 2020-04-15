@@ -1,19 +1,41 @@
 from tika import parser
 import requests
 from data.models import Paper, PaperData
-from tqdm import tqdm
 import re
 
-class PdfContentScraper:
+from tasks import Runnable, register_task
 
-    def load_contents(self):
-        all_papers = list(Paper.objects.all())
-        for i, paper in enumerate(tqdm(all_papers)):
+
+@register_task
+class PdfContentScraper(Runnable):
+
+    @staticmethod
+    def task_name():
+        return "scrape-pdf-content"
+
+    def __init__(self, papers = None, *args, **kwargs):
+        super(PdfContentScraper, self).__init__(*args, **kwargs)
+
+        if papers:
+            self.papers = papers
+        else:
+            self.papers = Paper.objects.all()
+
+    def run(self):
+        skipped_papers = 0
+        for i, paper in enumerate(self.papers):
             if not paper.data or not paper.data.content:
+                self.log("Scraping content of", paper.doi)
                 res = requests.get(paper.pdf_url)
-                self.parse_response(paper, res)
+                PdfContentScraper.parse_response(self, paper, res)
+                self.log("Got content of", paper.doi, "with length", len(paper.data.content))
+            else:
+                skipped_papers += 1
 
-    def parse_response(self, paper, response):
+        self.log("Skipped", skipped_papers)
+
+    @staticmethod
+    def parse_response(runnable: Runnable, paper, response):
         """
         Todo: this methods does some unnecessary conversion.
         :param paper:
@@ -29,7 +51,9 @@ class PdfContentScraper:
         if 'content' in content:
             text = content['content']
         else:
+            runnable.log("No Content found for", paper.doi)
             return
+
         # Convert to string
         text = str(text)
         # Ensure text is utf-8 formatted
@@ -50,5 +74,3 @@ class PdfContentScraper:
 
         paper.data.save()
         paper.save()
-
-

@@ -1,32 +1,50 @@
 from pdf2image import convert_from_bytes
-import os
 import requests
-
-from data.models import Paper
-from django.conf import settings
 
 from PIL import Image
 
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
+from tasks import register_task, Runnable
 
-class PdfImageScraper:
+from data.models import Paper
 
-    def cleaned_doi(self, paper):
-        return paper.doi.replace("/", "").replace(".", "")
+@register_task
+class PdfImageScraper(Runnable):
 
-    def load_images(self):
-        all_papers = Paper.objects.all()
-        for i, paper in enumerate(all_papers):
+    @staticmethod
+    def task_name():
+        return "scrape-pdf-image"
+
+    def __init__(self, papers=None, *args, **kwargs):
+        super(PdfImageScraper, self).__init__(*args, **kwargs)
+
+        if papers:
+            self.papers = papers
+        else:
+            self.papers = Paper.objects.all()
+
+    def run(self):
+        skipped_papers = 0
+        for i, paper in enumerate(self.papers):
             if not paper.preview_image:
                 res = requests.get(paper.pdf_url)
-                self.load_image_from_pdf_response(paper, res)
+                self.load_image_from_pdf_response(self, paper, res)
+            else:
+                skipped_papers += 1
 
-    def load_image_from_pdf_response(self, paper, response):
+        self.log("Skipped", skipped_papers)
+
+    @staticmethod
+    def cleaned_doi(paper):
+        return paper.doi.replace("/", "").replace(".", "")
+
+    @staticmethod
+    def load_image_from_pdf_response(runnable: Runnable, paper, response):
         pages = convert_from_bytes(response.content, first_page=1, last_page=1)
         if len(pages) != 1:
-            print(f"Error creating image for file: {paper.doi}")
+            runnable.log(f"Error creating image for file: {paper.doi}")
             return
 
         buffer = BytesIO()
@@ -35,7 +53,7 @@ class PdfImageScraper:
 
         pillow_image = ContentFile(buffer.getvalue())
 
-        img_name = self.cleaned_doi(paper) + ".jpg"
+        img_name = PdfImageScraper.cleaned_doi(paper) + ".jpg"
         paper.preview_image.save(img_name, InMemoryUploadedFile(
             pillow_image,  # file
             None,  # field_name
@@ -46,4 +64,4 @@ class PdfImageScraper:
 
         paper.save()
 
-        print(f"Successfully created image for: {paper.doi}")
+        runnable.log(f"Successfully created image for: {paper.doi}")

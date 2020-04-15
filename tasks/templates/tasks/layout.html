@@ -1,0 +1,87 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description"
+          content="Researchers from all over the world are working hard on the investigation of the SARS-CoV-2 virus, resulting in many new publications in so-called preprint versions per day, e.g. at medRxiv or bioRxiv.  Time is short and thus Collabovid provides, a good interface to access, sort and classify the huge amount of preprint papers.">
+    <meta name="author" content="Jonas Dippel, Yannic Lieder, Michael Perk, Moritz Pfister">
+    <meta http-equiv="content-language" content="en-us">
+
+    <title>Collabovid</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static "core/img/favicon/apple-touch-icon.png" %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static "core/img/favicon/favicon-32x32.png" %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static "core/img/favicon/favicon-16x16.png" %}">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="{% static "core/include/bootstrap-4.4.1/css/bootstrap.css" %}">
+
+    <script defer src="{% static "core/include/fontawesome-5.13.0/js/all.js" %}"></script>
+
+    <link href="{% static "core/css/roboto.css" %}" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static "tasks/dashboard.css" %}"/>
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body>
+
+<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+    <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Collabovid</a>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tasks' %}">
+                            <i class="fa fa-tasks"></i>
+                            Tasks <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div role="alert"
+                             class="alert alert-dismissible fade show {% if message.tags == 'error' %} alert-danger {% else %} alert-{{ message.tags }}{% endif %}">{{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div id="content" class="">
+                <!-- Page Content -->
+                {% block content %}
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="{% static "core/include/jquery-3.4.1/js/jquery.min.js" %}"></script>
+
+<script src="{% static "core/include/popper-core-1.16.0/umd/popper.min.js" %}"></script>
+
+<script src="{% static "core/include/bootstrap-4.4.1/js/bootstrap.js" %}"></script>
+
+{% block script %}
+{% endblock %}
+
+</body>
+</html>

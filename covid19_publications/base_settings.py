@@ -36,7 +36,8 @@ INSTALLED_APPS = [
     'health_check.db',
     'health_check.cache',
     'health_check.storage',
-    'classification.apps.ClassificationConfig'
+    'classification.apps.ClassificationConfig',
+    'tasks.apps.TasksConfig'
 ]
 
 MIDDLEWARE = [
@@ -144,3 +145,4 @@ if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CON
 
 # For certain test cases we might not allow image scraping.
 ALLOW_IMAGE_SCRAPING = False
+TASK_LOGGING_PATH = os.path.join(BASE_DIR, "log/tasks/")
