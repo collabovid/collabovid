@@ -62,10 +62,31 @@ class PdfContentScraper(Runnable):
         safe_text = str(safe_text).replace('\\', '\\\\').replace('"', '\\"')
 
         safe_text = safe_text[2:-1]
-        safe_text = re.sub(r"\\\\t|\\\\n|\\\\x\S\S", '', safe_text)
+
+        safe_text = safe_text.replace('author/funder. All rights reserved. No reuse allowed without permission.',
+                                      '')
+        safe_text = safe_text.replace('(which was not peer-reviewed) is the', '')
+        safe_text = safe_text.replace('bioRxiv preprint', '')
+
+        safe_text = safe_text.replace('. CC-BY-NC-ND 4.0 International license', '')
+        safe_text = safe_text.replace('It is made available under a', '')
+        safe_text = safe_text.replace(
+            'is the author/funder, who has granted medRxiv a license to display the preprint in perpetuity.', '')
+        safe_text = safe_text.replace('(which was not peer-reviewed)', '')
+        safe_text = safe_text.replace('The copyright holder for this preprint', '')
+        safe_text = safe_text.replace('medRxiv preprint', '')
+
+        #  if enabled, try to remove everything after "References" line
+        # match = re.match(r"(.*)\\\\n\s*(R|r)eferences:?\s*\\\\n")
+        # if match:
+        #     safe_text = match.group(1)
+
+        safe_text = re.sub(r"\\\\t|\\\\n|\\\\x\S\S", ' ', safe_text)
         safe_text = re.sub(r"http[^\s\\]*", '', safe_text)
+        safe_text = re.sub(r"[\w\.-]+@[\w\.-]+(\.[\w]+)+", '', safe_text)  # remove e-mail adresses
         safe_text = re.sub(r"\.", '. ', safe_text)
         safe_text = re.sub(r"\s+", ' ', safe_text)
+        safe_text = re.sub(r"\[\d+\]", '', safe_text)  # Delete all references like [12])
 
         if not paper.data:
             paper.data = PaperData(content=safe_text)
