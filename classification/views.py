@@ -12,20 +12,16 @@ def classify_index(request, token_str):
 
     token = get_object_or_404(Token, token=token_str)
 
-
     if request.method == 'POST':
         chosen_category_id = int(request.POST.get('category'))
-        chosen_sub_category_id = int(request.POST.get('sub_category'))
         paper_id = request.POST.get('paper')
 
         paper = get_object_or_404(Paper, pk=paper_id)
         category = None
         sub_category = None
+
         if chosen_category_id != -1:
             category = get_object_or_404(Category, pk=chosen_category_id)
-
-        if chosen_sub_category_id != -1:
-            sub_category = get_object_or_404(Subcategory, pk=chosen_sub_category_id)
 
         classification = Classification(token=token, paper=paper, category=category, sub_category=sub_category)
         classification.save()
