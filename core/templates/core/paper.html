@@ -21,7 +21,7 @@
         </div>
         {% for current_paper in similar_papers %}
             <div class="my-5">
-                {% include 'core/partials/_paper_card.html' with html=True paper=current_paper score=paper.percentage_topic_score show_score=show_topic_score %}
+                {% include 'core/partials/_paper_card.html' with html=True paper=current_paper score=current_paper.search_score show_score=True %}
             </div>
 
         {% empty %}

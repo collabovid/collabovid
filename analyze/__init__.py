@@ -42,12 +42,12 @@ def get_paper_similarities_analyzer():
                 "lda":
                     {
                         "analyzer": get_lda_analyzer(),
-                        "weight": 0
+                        "weight": 0.5
                     },
                 "title_sentence":
                     {
                         "analyzer": get_sentence_transformer_analyzer(),
-                        "weight": 1
+                        "weight": 0.5
                     }
             }
         )

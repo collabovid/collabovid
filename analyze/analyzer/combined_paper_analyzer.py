@@ -3,6 +3,7 @@ from django.db import models
 
 from data.models import Topic
 from . import PaperAnalyzer
+from collections import defaultdict
 import numpy as np
 
 class CombinedPaperAnalyzer(PaperAnalyzer):
@@ -102,20 +103,14 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
     def compute_weighted_papers(self, paper_ids_lists, scores_lists):
         papers = Paper.objects.all()
 
-        for paper_ids, scores in paper_ids_lists, scores_lists:
-            assert len(paper_ids) == papers.count()
-
-            # We now sort the paper ids so that the scores and ids match.
-            paper_ids.sort()
-            scores.sort(key=dict(zip(scores, paper_ids)).get)
-
-        paper_ids = paper_ids_lists[0]  # All paper ids are the same
+        all_scores = defaultdict(list)
+        for paper_ids, scores, analyzer in zip(paper_ids_lists, scores_lists, self.analyzers):
+            for doi, score in zip(paper_ids, scores):
+                all_scores[doi].append(score * analyzer.weight)
 
         whens = list()
-
-        weights = [analyzer.weight for analyzer in self.analyzers]
-        for pk, scores in zip(paper_ids, zip(*scores_lists)):
-            score = 100 * sum((score * weight for score, weight in zip(scores, weights)))
+        for pk, scores in all_scores.items():
+            score = 100 * sum(scores)
             whens.append(models.When(pk=pk, then=score))
 
         papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
