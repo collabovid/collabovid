@@ -173,7 +173,7 @@ def paper(request, doi):
         sorted_by = Paper.SORTED_BY_SCORE
         similar_papers = Paper.sort_papers(similar_papers, sorted_by, score_field="search_score")
     else:
-        similar_papers = []
+        similar_papers = Paper.objects.all()
 
     return render(request, "core/paper.html", {
         "paper": current_paper,
