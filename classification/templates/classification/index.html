@@ -8,36 +8,50 @@
     </div>
     <div class="px-5">
         {% if paper %}
-        <div id="paper-container">
-            <div class="row my-5 paper">
-                <div class="col-7">
-                    {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True extended=True %}
-                </div>
-                <div class="col-5">
-                    <div class="card" style="height: 100%">
-                        <div class="card-body">
-                            <form action="{% url 'classify' %}" method="POST" class="topic-select-form">
-                                {% csrf_token %}
-                                <div class="input-group mb-3">
-                                    {% for topic in topics %}
-                                        <div class="radio">
-                                            <label><input type="radio" name="topic"
-                                                          value="{{ topic.pk }}"> {{ topic.name }}</label>
+            <div id="paper-container">
+                <div class="row my-5 paper">
+                    <div class="col-md-7 col-12">
+                        {% include 'core/partials/_paper_card.html' with html=True paper=paper score=paper.search_score show_score=True extended=True %}
+                    </div>
+                    <div class="col-md-5 col-12">
+                        <div class="card sticky-top" style="top: 30px">
+                            <div class="card-body">
+                                <form action="{% url 'classify' token_str=token.token %}" method="POST"
+                                      class="topic-select-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="paper" value="{{ paper.doi }}"/>
+
+
+                                    <div class="category-container">
+
+                                        <button id="submit-button" type="submit" class="btn btn-success float-right">
+                                            Submit
+                                        </button>
+
+                                        <h4 class="title">Chose a category</h4>
+
+                                        <div class="input-group mt-4">
+                                            {% for category in categories.all %}
+                                                <div class="w-100">
+                                                    <label>
+                                                        <input class="category-radio" data-id="{{ category.pk }}"
+                                                               type="radio" name="category"
+                                                               value="{{ category.pk }}"> {{ category.text }}
+                                                    </label>
+                                                </div>
+                                            {% endfor %}
+                                            <div class="radio">
+                                                <label><input class="category-radio" type="radio" name="category"
+                                                              value="-1" checked="checked"> Other</label>
+                                            </div>
                                         </div>
-                                    {% endfor %}
-                                    <div class="radio">
-                                        <label><input type="radio" name="topic"
-                                                      value="-1"> Other</label>
                                     </div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                                <input name="paper" style="display: none" value="{{ paper.doi }}"/>
-                            </form>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         {% else %}
             <div class="my-5 text-center font-weight-bold">Everything classified.</div>
         {% endif %}

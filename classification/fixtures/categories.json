@@ -1,0 +1,873 @@
+[
+  {
+    "model": "classification.subcategory",
+    "pk": 0,
+    "fields": {
+      "text": "Range of incubation periods for the disease in humans and how long individuals are contagious, even after recovery. ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 1,
+    "fields": {
+      "text": "Prevalence of asymptomatic shedding and transmission (e.g., particularly children). ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 2,
+    "fields": {
+      "text": "Seasonality of transmission.",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 3,
+    "fields": {
+      "text": "Physical science of the coronavirus (e.g., charge distribution, adhesion to hydrophilic/phobic surfaces, environmental survival to inform decontamination efforts for affected areas and provide information about viral shedding). ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 4,
+    "fields": {
+      "text": "Persistence and stability on a multitude of substrates and sources (e.g., nasal discharge, sputum, urine, fecal matter, blood). ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 5,
+    "fields": {
+      "text": "Persistence of virus on surfaces of different materials (e,g., copper, stainless steel, plastic). ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 6,
+    "fields": {
+      "text": "Natural history of the virus and shedding of it from an infected person",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 7,
+    "fields": {
+      "text": "Implementation of diagnostics and products to improve clinical processes",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 8,
+    "fields": {
+      "text": "Disease models, including animal models for infection, disease and transmission",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 9,
+    "fields": {
+      "text": "Tools and studies to monitor phenotypic change and potential adaptation of the virus ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 10,
+    "fields": {
+      "text": "Immune response and immunity",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 11,
+    "fields": {
+      "text": "Effectiveness of movement control strategies to prevent secondary transmission in health care and community settings ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 12,
+    "fields": {
+      "text": "Effectiveness of personal protective equipment (PPE) and its usefulness to reduce potential transmission in health care and community settings ",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 13,
+    "fields": {
+      "text": "Role of the environment in transmission",
+      "parent_id": 0
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 0,
+    "fields": {
+      "text": "What is known about transmission, incubation, and environmental stability?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 28,
+    "fields": {
+      "text": "Data on potential risks factors  ",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 29,
+    "fields": {
+      "text": "Smoking, pre-existing pulmonary disease",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 30,
+    "fields": {
+      "text": "Co-infections (determine whether co-existing respiratory/viral infections make the virus more transmissible or virulent) and other co-morbidities ",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 31,
+    "fields": {
+      "text": "Neonates and pregnant women",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 32,
+    "fields": {
+      "text": "Socio-economic and behavioral factors to understand the economic impact of the virus and whether there were differences. ",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 33,
+    "fields": {
+      "text": "Severity of disease, including risk of fatality among symptomatic hospitalized patients, and high-risk patient groups ",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 34,
+    "fields": {
+      "text": "Susceptibility of populations",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 35,
+    "fields": {
+      "text": "Public health mitigation measures that could be effective for control",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 36,
+    "fields": {
+      "text": "Age-adjusted mortality data for Acute Respiratory Distress Syndrome (ARDS) with/without other organ failure – particularly for viral etiologies",
+      "parent_id": 1
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 1,
+    "fields": {
+      "text": "What do we know about COVID-19 risk factors?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 37,
+    "fields": {
+      "text": "Real-time tracking of whole genomes and a mechanism for coordinating the rapid dissemination of that information. ",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 38,
+    "fields": {
+      "text": "Access to geographic and temporal diverse sample sets to understand geographic distribution and genomic differences, and determine whether there is more than one strain in circulation. Multi-lateral agreements such as the Nagoya Protocol could be leveraged. ",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 39,
+    "fields": {
+      "text": "Evidence that livestock could be infected (e.g., field surveillance, genetic sequencing, receptor binding) and serve as a reservoir after the epidemic appears to be over.  ",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 40,
+    "fields": {
+      "text": "Evidence of whether farmers are infected, and whether farmers could have played a role in the origin. ",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 41,
+    "fields": {
+      "text": "Surveillance of mixed wildlife- livestock farms for SARS-CoV-2 and other coronaviruses in Southeast Asia. ",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 42,
+    "fields": {
+      "text": "Experimental infections to test host range for this pathogen.",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 43,
+    "fields": {
+      "text": "Animal host(s) and any evidence of continued spill-over to humans",
+      "parent_id": 2
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 2,
+    "fields": {
+      "text": "What do we know about virus genetics, origin, and evolution?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 44,
+    "fields": {
+      "text": "Guidance on ways to scale up NPIs in a more coordinated way (e.g., establish funding, infrastructure and authorities to support real time, authoritative (qualified participants) collaboration with all states to gain consensus on consistent guidance and to mobilize resources to geographic areas where critical shortfalls are identified) to give us time to enhance our health care delivery system capacity to respond to an increase in cases.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 45,
+    "fields": {
+      "text": "Rapid design and execution of experiments to examine and compare NPIs currently being implemented. DHS Centers for Excellence could potentially be leveraged to conduct these experiments.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 46,
+    "fields": {
+      "text": "Rapid assessment of the likely efficacy of school closures, travel bans, bans on mass gatherings of various sizes, and other social distancing approaches.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 47,
+    "fields": {
+      "text": "Methods to control the spread in communities, barriers to compliance and how these vary among different populations..",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 48,
+    "fields": {
+      "text": "Models of potential interventions to predict costs and benefits that take account of such factors as race, income, disability, age, geographic location, immigration status, housing status, employment status, and health insurance status.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 49,
+    "fields": {
+      "text": "Policy changes necessary to enable the compliance of individuals with limited resources and the underserved with NPIs.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 50,
+    "fields": {
+      "text": "Research on the economic impact of this or any pandemic. This would include identifying policy and programmatic alternatives that lessen/mitigate risks to critical government services, food distribution and supplies, access to critical household supplies, and access to health diagnoses, treatment, and needed care, regardless of ability to pay.",
+      "parent_id": 3
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 3,
+    "fields": {
+      "text": "What do we know about non-pharmaceutical interventions?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 51,
+    "fields": {
+      "text": "Effectiveness of drugs being developed and tried to treat COVID-19 patients.  ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 52,
+    "fields": {
+      "text": "Clinical and bench trials to investigate less common viral inhibitors against COVID-19 such as naproxen, clarithromycin, and minocyclinethat that may exert effects on viral replication. ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 53,
+    "fields": {
+      "text": "Methods evaluating potential complication of Antibody-Dependent Enhancement (ADE) in vaccine recipients. ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 54,
+    "fields": {
+      "text": "Exploration of use of best animal models and their predictive value for a human vaccine. ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 55,
+    "fields": {
+      "text": "Capabilities to discover a therapeutic (not vaccine) for the disease, and clinical effectiveness studies to discover therapeutics, to include antiviral agents. ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 56,
+    "fields": {
+      "text": "Alternative models to aid decision makers in determining how to prioritize and distribute scarce, newly proven therapeutics as production ramps up. This could include identifying approaches for expanding production capacity to ensure equitable and timely distribution to populations in need. ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 57,
+    "fields": {
+      "text": "Efforts targeted at a universal coronavirus vaccine.",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 58,
+    "fields": {
+      "text": "Efforts to develop animal models and standardize challenge studies",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 59,
+    "fields": {
+      "text": "Efforts to develop prophylaxis clinical studies and prioritize in healthcare workers ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 60,
+    "fields": {
+      "text": "Approaches to evaluate risk for enhanced disease after vaccination",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 61,
+    "fields": {
+      "text": "Assays to evaluate vaccine immune response and process development for vaccines, alongside suitable animal models [in conjunction with therapeutics] ",
+      "parent_id": 4
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 4,
+    "fields": {
+      "text": "What do we know about vaccines and therapeutics?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 62,
+    "fields": {
+      "text": "Efforts to articulate and translate existing ethical principles and standards to salient issues in COVID-2019",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 63,
+    "fields": {
+      "text": "Efforts to embed ethics across all thematic areas, engage with novel ethical issues that arise and coordinate to minimize duplication of oversight",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 64,
+    "fields": {
+      "text": "Efforts to support sustained education, access, and capacity building in the area of ethics",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 65,
+    "fields": {
+      "text": "Efforts to establish a team at WHO that will be integrated within multidisciplinary research and operational platforms and that will connect with existing and expanded global networks of social sciences.",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 66,
+    "fields": {
+      "text": "Efforts to develop qualitative assessment frameworks to systematically collect information related to local barriers and enablers for the uptake and adherence to public health measures for prevention and control. This includes the rapid identification of the secondary impacts of these measures. (e.g. use of surgical masks, modification of health seeking behaviors for SRH, school closures)",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 67,
+    "fields": {
+      "text": "Efforts to identify how the burden of responding to the outbreak and implementing public health measures affects the physical and psychological health of those providing care for Covid-19 patients and identify the immediate needs that must be addressed.",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 68,
+    "fields": {
+      "text": "Efforts to identify the underlying drivers of fear, anxiety and stigma that fuel misinformation and rumor, particularly through social media.",
+      "parent_id": 5
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 5,
+    "fields": {
+      "text": "What has been published about ethical and social science considerations?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 69,
+    "fields": {
+      "text": "How widespread current exposure is to be able to make immediate policy recommendations on mitigation measures. Denominators for testing and a mechanism for rapidly sharing that information, including demographics, to the extent possible. Sampling methods to determine asymptomatic disease (e.g., use of serosurveys (such as convalescent samples) and early detection of disease (e.g., use of screening of neutralizing antibodies such as ELISAs).",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 70,
+    "fields": {
+      "text": "Efforts to increase capacity on existing diagnostic platforms and tap into existing surveillance platforms.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 71,
+    "fields": {
+      "text": "Recruitment, support, and coordination of local expertise and capacity (public, private—commercial, and non-profit, including academic), including legal, ethical, communications, and operational issues.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 72,
+    "fields": {
+      "text": "National guidance and guidelines about best practices to states (e.g., how states might leverage universities and private laboratories for testing purposes, communications to public health officials and the public).",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 73,
+    "fields": {
+      "text": "Development of a point-of-care test (like a rapid influenza test) and rapid bed-side tests, recognizing the tradeoffs between speed, accessibility, and accuracy.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 74,
+    "fields": {
+      "text": "Rapid design and execution of targeted surveillance experiments calling for all potential testers using PCR in a defined area to start testing and report to a specific entity. These experiments could aid in collecting longitudinal samples, which are critical to understanding the impact of ad hoc local interventions (which also need to be recorded).",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 75,
+    "fields": {
+      "text": "Separation of assay development issues from instruments, and the role of the private sector to help quickly migrate assays onto those devices.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 76,
+    "fields": {
+      "text": "Efforts to track the evolution of the virus (i.e., genetic drift or mutations) and avoid locking into specific reagents and surveillance/detection schemes.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 77,
+    "fields": {
+      "text": "Latency issues and when there is sufficient viral load to detect the pathogen, and understanding of what is needed in terms of biological and environmental sampling.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 78,
+    "fields": {
+      "text": "Use of diagnostics such as host response markers (e.g., cytokines) to detect early disease or predict severe disease progression, which would be important to understanding best clinical practice and efficacy of therapeutic interventions.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 79,
+    "fields": {
+      "text": "Policies and protocols for screening and testing.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 80,
+    "fields": {
+      "text": "Policies to mitigate the effects on supplies associated with mass testing, including swabs and reagents.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 81,
+    "fields": {
+      "text": "Technology roadmap for diagnostics.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 82,
+    "fields": {
+      "text": "Barriers to developing and scaling up new diagnostic tests (e.g., market forces), how future coalition and accelerator models (e.g., Coalition for Epidemic Preparedness Innovations) could provide critical funding for diagnostics, and opportunities for a streamlined regulatory environment.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 83,
+    "fields": {
+      "text": "New platforms and technology (e.g., CRISPR) to improve response times and employ more holistic approaches to COVID-19 and future diseases.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 84,
+    "fields": {
+      "text": "Enhance capabilities for rapid sequencing and bioinformatics to target regions of the genome that will allow specificity for a particular variant.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 85,
+    "fields": {
+      "text": "Enhance capacity (people, technology, data) for sequencing with advanced analytics for unknown pathogens, and explore capabilities for distinguishing naturally-occurring pathogens from intentional.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 86,
+    "fields": {
+      "text": "One Health surveillance of humans and potential sources of future spillover or ongoing exposure for this organism and future pathogens, including both evolutionary hosts (e.g., bats) and transmission hosts (e.g., heavily trafficked and farmed wildlife and domestic food and companion species), inclusive of environmental, demographic, and occupational risk factors.",
+      "parent_id": 6
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 6,
+    "fields": {
+      "text": "What do we know about diagnostics and surveillance?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 87,
+    "fields": {
+      "text": "Resources to support skilled nursing facilities and long term care facilities.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 88,
+    "fields": {
+      "text": "Mobilization of surge medical staff to address shortages in overwhelmed communities",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 89,
+    "fields": {
+      "text": "Extracorporeal membrane oxygenation (ECMO) outcomes data of COVID-19 patients",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 90,
+    "fields": {
+      "text": "Outcomes data for COVID-19 after mechanical ventilation adjusted for age.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 91,
+    "fields": {
+      "text": "Knowledge of the frequency, manifestations, and course of extrapulmonary manifestations of COVID-19, including, but not limited to, possible cardiomyopathy and cardiac arrest.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 92,
+    "fields": {
+      "text": "Application of regulatory standards (e.g., EUA, CLIA) and ability to adapt care to crisis standards of care level.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 93,
+    "fields": {
+      "text": "Approaches for encouraging and facilitating the production of elastomeric respirators, which can save thousands of N95 masks.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 94,
+    "fields": {
+      "text": "Best telemedicine practices, barriers and faciitators, and specific actions to remove/expand them within and across state boundaries.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 95,
+    "fields": {
+      "text": "Guidance on the simple things people can do at home to take care of sick people and manage disease.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 96,
+    "fields": {
+      "text": "Oral medications that might potentially work.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 97,
+    "fields": {
+      "text": "Use of AI in real-time health care delivery to evaluate interventions, risk factors, and outcomes in a way that could not be done manually.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 98,
+    "fields": {
+      "text": "Best practices and critical challenges and innovative solutions and technologies in hospital flow and organization, workforce protection, workforce allocation, community-based support resources, payment, and supply chain management to enhance capacity, efficiency, and outcomes.",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 99,
+    "fields": {
+      "text": "Efforts to develop a core clinical outcome set to maximize usability of data across a range of trials",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 100,
+    "fields": {
+      "text": "Efforts to determine adjunctive and supportive interventions that can improve the clinical outcomes of infected patients (e.g. steroids, high flow oxygen)",
+      "parent_id": 7
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 7,
+    "fields": {
+      "text": "What has been published about medical care?"
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 101,
+    "fields": {
+      "text": "Methods for coordinating data-gathering with standardized nomenclature.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 102,
+    "fields": {
+      "text": "Sharing response information among planners, providers, and others.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 103,
+    "fields": {
+      "text": "Understanding and mitigating barriers to information-sharing.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 104,
+    "fields": {
+      "text": "How to recruit, support, and coordinate local (non-Federal) expertise and capacity relevant to public health emergency response (public, private, commercial and non-profit, including academic).",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 105,
+    "fields": {
+      "text": "Integration of federal/state/local public health surveillance systems.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 106,
+    "fields": {
+      "text": "Value of investments in baseline public health response infrastructure preparedness",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 107,
+    "fields": {
+      "text": "Modes of communicating with target high-risk populations (elderly, health care workers).",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 108,
+    "fields": {
+      "text": "Problem communication and guidelines that are easy to understand and follow.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 109,
+    "fields": {
+      "text": "Communication that indicates potential danger of disease to all population groups.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 110,
+    "fields": {
+      "text": "Misunderstanding around containment and mitigation.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 111,
+    "fields": {
+      "text": "Action plan to mitigate gaps and problems of inequity in the Nation’s public health capability, capacity, and funding to ensure all citizens in need are supported and can access information, surveillance, and treatment.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 112,
+    "fields": {
+      "text": "Measures to reach marginalized and disadvantaged populations.Data systems and research priorities and agendas incorporate attention to the needs and circumstances of disadvantaged populations and underrepresented minorities.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 113,
+    "fields": {
+      "text": "Mitigating threats to incarcerated people from COVID-19, assuring access to information, prevention, diagnosis, and treatment.",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.subcategory",
+    "pk": 114,
+    "fields": {
+      "text": "Understanding coverage policies (barriers and opportunities) related to testing, treatment, and care",
+      "parent_id": 8
+    }
+  },
+  {
+    "model": "classification.category",
+    "pk": 8,
+    "fields": {
+      "text": "What has been published about information sharing and inter-sectoral collaboration?"
+    }
+  }
+]
