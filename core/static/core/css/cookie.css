@@ -66,8 +66,8 @@ button#ihavecookiesBtn {
 #gdpr-cookie-message button,
 button#ihavecookiesBtn {
     border: none;
-    background: #5475a1;
-    color: white;
+    background: white;
+    color: #444951;
     font-size: 15px;
     padding: 7px;
     border-radius: 3px;
@@ -79,7 +79,7 @@ button#ihavecookiesBtn {
 }
 
 #gdpr-cookie-message button:hover {
-    background: #395272;
+    background: #dedede;
 }
 
 button#gdpr-cookie-advanced {
@@ -88,7 +88,7 @@ button#gdpr-cookie-advanced {
 }
 
 button#gdpr-cookie-advanced:hover {
-    background: #464e64;
+    background: white;
 }
 
 #gdpr-cookie-message button:disabled {
