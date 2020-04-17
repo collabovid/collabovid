@@ -1,5 +1,5 @@
 {% load static %}
-
+{% load progress_helper %}
 {% if html %}
     <div class="card p-4 rounded shadow">
         <div class="row d-flex flex-wrap align-items-center">
@@ -71,17 +71,11 @@
 
                 {% if show_score %}
                     <div class="progress">
-                        <div class="progress-bar
-                        {% if score >= 70 %}
-                            bg-success
-                        {% elif score >= 40 %}
-                            bg-info
-                        {% else %}
-                            bg-danger
-                        {% endif %}"
+
+                        <div class="progress-bar"
                              role="progressbar"
-                             style="width: {{ score }}%"
-                             aria-valuenow="{{ score }}"
+                             style="width: {{ score|calculate_score:search_score_limit }}%; background: {{ score|calculate_score:search_score_limit|progress_color }};"
+                             aria-valuenow="{{ score|calculate_score:search_score_limit }}"
                              aria-valuemin="0"
                              aria-valuemax="100"></div>
                     </div>
