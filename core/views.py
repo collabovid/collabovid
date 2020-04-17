@@ -33,9 +33,11 @@ def home(request):
 
         page_obj = papers
 
+        search_score_limit = 60
+
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             analyzer = analyze.get_analyzer()
-            papers = analyzer.related(search_query).filter(search_score__gt=40)
+            papers = analyzer.related(search_query).filter(search_score__gt=search_score_limit)
 
             sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
             papers = Paper.sort_papers(papers, sorted_by, score_field="search_score")
@@ -52,7 +54,8 @@ def home(request):
             else:
                 page_obj = papers
 
-        return render(request, "core/partials/_custom_topic_search_result.html", {'papers': page_obj})
+        return render(request, "core/partials/_custom_topic_search_result.html",
+                      {'papers': page_obj, 'search_score_limit': search_score_limit/2})
 
 
 def explore(request):
@@ -95,7 +98,7 @@ def explore(request):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'show_topic_score': False})
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': False})
 
     return HttpResponseNotFound()
 
@@ -151,13 +154,14 @@ def topic(request, id):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'show_topic_score': True})
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
 
     return HttpResponseNotFound()
 
 
 def topic_overview(request):
     return render(request, "core/topic_overview.html", {'topics': Topic.objects.all()})
+
 
 def imprint(request):
     return render(request, "core/imprint.html")

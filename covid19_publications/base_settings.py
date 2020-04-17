@@ -67,6 +67,7 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'covid19_publications.wsgi.application'
 
 # Password validation
