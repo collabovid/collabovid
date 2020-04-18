@@ -77,3 +77,5 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_REDIRECT_EXEMPT = [r'^system-health/$']
 
 ALLOW_IMAGE_SCRAPING = True
+
+TASK_LOGGING_PATH = "/var/log/app-logs/tasks/"
