@@ -1,8 +1,13 @@
+from pathlib import Path
+
+import requests
 from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
 import os
+
+from scrape.references_extractor import extract_references
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
@@ -167,6 +172,17 @@ def imprint(request):
 def paper(request, doi):
     current_paper = get_object_or_404(Paper, doi=doi)
 
+    Path("pdfs").mkdir(parents=True, exist_ok=True)
+    print(current_paper.pdf_url)
+
+    pdf_path = f"pdfs/{current_paper.doi.replace('/', '_')}.pdf"
+    if not os.path.exists(pdf_path):
+        response = requests.get(current_paper.pdf_url)
+        with open(pdf_path, 'wb') as pdf_file:
+            pdf_file.write(response.content)
+
+    references = extract_references(pdf_path)
+
     if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
         similar_papers = analyze.get_paper_similarities_analyzer().get_similar_papers(current_paper.doi)
 
@@ -177,5 +193,6 @@ def paper(request, doi):
 
     return render(request, "core/paper.html", {
         "paper": current_paper,
-        "similar_papers": similar_papers[:10]
+        "similar_papers": similar_papers[:10],
+        "references": references,
     })

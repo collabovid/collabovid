@@ -14,6 +14,31 @@
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
+    <div class="container mt-4">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12">
+            <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-4">Citations</h3>
+            <h3 class="text-muted d-md-inline-block d-none">Citations</h3>
+        </div>
+    {% for current_reference in references %}
+        <div class="card p-4 rounded shadow">
+            <div class="row d-flex flex-wrap align-items-center">
+                <div class="col-md-12">
+                    <div class="card-block">
+                        {{ current_reference.0 }}
+                    </div>
+                        {% if current_reference.1 != None %}
+                            <div class="card-block">
+                                <a href="{{ current_reference.1 }}">Link</a>
+                            </div>
+                        {% endif %}
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <div class="my-5 text-center font-weight-bold">No references found</div>
+    {% endfor %}
+    </div>
+
     <div id="paper-container" class="container mt-4">
         <div class="col-lg-6 col-md-6 col-sm-12 col-12">
             <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-4">Similar Paper</h3>
