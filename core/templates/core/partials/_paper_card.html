@@ -23,12 +23,9 @@
                         <i class="fas fa-layer-group"></i> {{ paper.category.name }}&nbsp;&nbsp;&middot;&nbsp;&nbsp;
                         {% for author in paper.authors.all|slice:":5" %}
                             {% if not forloop.first %}&nbsp;{% endif %}
-                            <span class="{% if author.citation_count %}need-tooltip{% endif %} text-nowrap text-muted"
-                                  data-toggle="tooltip"
-                                  data-placement="top"
-                                  title="Citations: {{ author.citation_count }}">
+                            <span class="text-nowrap text-muted">
                                 <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
-                        </span>
+                            </span>
                         {% endfor %}
 
 
