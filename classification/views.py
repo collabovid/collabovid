@@ -5,11 +5,11 @@ import os
 from random import randint
 from classification.models import Token, Category, Classification, Subcategory
 
+
 # Create your views here.
 
 
 def classify_index(request, token_str):
-
     token = get_object_or_404(Token, token=token_str)
 
     if request.method == 'POST':
@@ -32,7 +32,8 @@ def classify_index(request, token_str):
     left = paper_query.count()
     paper = None
     if left > 0:
-        #idx = randint(0, left - 1)
-        paper = paper_query[0]
+        # idx = randint(0, left - 1)
+        paper = paper_query.first()
     categories = Category.objects.all()
-    return render(request, "classification/index.html", {'token':token, 'paper': paper, 'categories': categories, 'done': done, 'total': left + done})
+    return render(request, "classification/index.html",
+                  {'token': token, 'paper': paper, 'categories': categories, 'done': done, 'total': left + done})
