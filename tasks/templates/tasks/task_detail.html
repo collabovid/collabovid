@@ -12,7 +12,13 @@
                 <span class="text-danger"><i class="fa fa-times-circle"></i> Error</span>
             {% elif task.status == 1 %}
                 <span class="text-success"><i class="fa fa-check-circle"></i> Finished</span>
+            {% elif task.status == -2 %}
+                <span class="text-secondary"><i class="fa fa-times-circle"></i> Aborted</span>
             {% endif %}
+
+        </div>
+        <div class="ml-3">
+            <span class="text-secondary"><i class="fas fa-user"></i> {{ task.started_by }}</span>
         </div>
         <div class="ml-3"><i class="fa fa-hourglass-start"></i> {{ task.started_at | localtime }}</div>
         {% if task.status != 0 %}

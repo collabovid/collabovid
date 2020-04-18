@@ -7,7 +7,10 @@ class TaskRunner:
 
     @staticmethod
     def run_task(cls, *args, **kwargs):
-        task = Task(name=cls.task_name(), started_at=timezone.now(), status=Task.STATUS_PENDING)
+        task = Task(name=cls.task_name(),
+                    started_at=timezone.now(),
+                    status=Task.STATUS_PENDING,
+                    started_by=kwargs['started_by'])
         task.save()
         runnable = cls(*args, **dict(kwargs, log_file=task.log_file))
 

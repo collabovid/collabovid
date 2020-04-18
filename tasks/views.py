@@ -37,7 +37,7 @@ def create_task(request):
         task_name = request.POST.get('task')
         if task_name in AVAILABLE_TASKS:
             cls = AVAILABLE_TASKS[task_name]
-            TaskRunner.run_task_async(cls)
+            TaskRunner.run_task_async(cls, started_by=request.user.username)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
         else:

@@ -1,8 +1,6 @@
-def run(output):
+def download_files():
     import os
     import requests
-    from analyze import get_analyzer, get_topic_assignment_analyzer
-
     from analyze.vectorizer import TitleSentenceVectorizer, SentenceChunkVectorizer, PretrainedLDA
 
     URLS = {
@@ -40,7 +38,7 @@ def run(output):
 
     def download_file(down, path):
         if os.path.exists(path):
-            output(path, "exists, skipping...")
+            print(path, "exists, skipping...")
         else:
             os.makedirs(os.path.dirname(path), exist_ok=True)
             r = requests.get(down)
@@ -48,20 +46,19 @@ def run(output):
                 f.write(r.content)
 
     for key, config in URLS.items():
-        output("Downloading", key)
+        print("Downloading", key)
         download_file(config["download"], config["destination"])
 
-    analyzer = get_analyzer()
-    analyzer.preprocess()
-
-    topic_analyzer = get_topic_assignment_analyzer()
-    topic_analyzer.preprocess()
-
-    topic_analyzer.assign_to_topics()
-    output("Vectorizer Setup Completed")
 
 if __name__ == "__main__":
     import django
     django.setup()
 
-    run(print)
+    download_files()
+
+    from tasks.task_runner import TaskRunner
+    from analyze.setup_vectorizer import SetupVectorizer
+    from analyze.update_topic_assignment import UpdateTopicAssignment
+
+    TaskRunner.run_task(SetupVectorizer, started_by="Setup Script")
+    TaskRunner.run_task(UpdateTopicAssignment, started_by="Setup Script")
