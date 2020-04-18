@@ -23,6 +23,7 @@ class Author(models.Model):
     last_name = models.CharField(max_length=50)
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
+    scholar_url = models.URLField(null=True, default=None)
 
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
