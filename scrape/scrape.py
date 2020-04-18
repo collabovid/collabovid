@@ -52,6 +52,5 @@ class Scrape(Runnable):
         else:
             self.log("Paper matrix update and topic assignment skipped.")
 
-        self.log("Updating citations...")
-        TaskRunner.run_task(CitationRefresher, only_new=True, count=100, started_by=self._started_by)
-        self.log("Finished updating citations...")
+        self.log("Citation update skipped..")
+

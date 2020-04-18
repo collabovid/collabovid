@@ -45,7 +45,6 @@ class PaperData(models.Model):
 
 class Paper(models.Model):
     SORTED_BY_TITLE = 0
-    SORTED_BY_AUTHOR_CITATIONS = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
@@ -88,9 +87,6 @@ class Paper(models.Model):
 
         if sorted_by == Paper.SORTED_BY_TITLE:
             papers = papers.order_by("title")
-        elif sorted_by == Paper.SORTED_BY_AUTHOR_CITATIONS:
-            papers = papers.annotate(score=Max('authors__citation_count', nulls_last=True)).order_by(
-                F('score').desc(nulls_last=True))
         elif sorted_by == Paper.SORTED_BY_NEWEST:
             papers = papers.order_by("-published_at")
         elif sorted_by == Paper.SORTED_BY_SCORE:
