@@ -163,3 +163,4 @@ def topic_overview(request):
 
 def imprint(request):
     return render(request, "core/imprint.html")
+
