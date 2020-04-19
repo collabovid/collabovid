@@ -10,6 +10,16 @@ body {
     background: #F5F5F5;
 }
 
+.feedback-bar {
+    background-color: #5b73aa;
+    color: #fff;
+}
+
+.feedback-bar a {
+    color: #fff5b1;
+
+}
+
 .gradient-header {
     background-color: #75a5f2;
     background-image: linear-gradient(135deg, #75A5F2 0%, #5475a1 100%);
