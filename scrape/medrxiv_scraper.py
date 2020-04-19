@@ -1,5 +1,6 @@
 import json
 import re
+from typing import Callable, List, Dict, Tuple
 
 import requests
 from bs4 import BeautifulSoup
@@ -11,9 +12,12 @@ _MEDRXIV_URL = 'https://www.medrxiv.org/content/{0}'
 _BIORXIV_URL = 'https://www.biorxiv.org/content/{0}'
 
 
-def _get_article_json():
+def _get_article_json() -> List[Dict[str, str]]:
     """
-    Downloads the list of all COVID-19 related articles from medRxiv in JSON format.
+    Downloads the list of all COVID-19 related articles from medRxiv in JSON format (which also includes articles on
+    bioRxiv).
+
+    :return: Dict of information, provided in JSON.
     """
     try:
         response = requests.get(_COVID_JSON_URL)
@@ -22,19 +26,24 @@ def _get_article_json():
         raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
 
-def _get_or_create_paperhost(name):
-    if name == "medrxiv":
-        paperhost = "medRxiv"
+def _get_or_create_paperhost(paperhost_name: str) -> PaperHost:
+    """
+    Gets or creates a paper host DB object from its name and saves to DB.
+
+    :param paperhost_name: Name of the paper host. Should be either 'medrxiv' or 'biorxiv'.
+    :return: Created or gotten paper host DB object.
+    """
+    if paperhost_name == "medrxiv":
+        paperhost_name = "medRxiv"
         url = 'https://www.medrxiv.org'
-    elif name == "biorxiv":
-        paperhost = "bioRxiv"
+    elif paperhost_name == "biorxiv":
+        paperhost_name = "bioRxiv"
         url = 'https://www.biorxiv.org'
     else:
-        paperhost = name
         url = None
 
     host, created = PaperHost.objects.get_or_create(
-        name=paperhost,
+        name=paperhost_name,
         url=url,
     )
     if created:
@@ -43,7 +52,13 @@ def _get_or_create_paperhost(name):
     return host
 
 
-def _extract_authors_information(soup):
+def _extract_authors_information(soup: BeautifulSoup) -> List[Tuple[str, str, bool]]:
+    """
+    Extracts authors information from HTML soup.
+
+    :param soup: HTML soup of detailed article page.
+    :return: List of tuples of first name, last name and bool, if author is first author of article.
+    """
     author_webelements = soup.find(
         'span', attrs={'class': 'highwire-citation-authors'}
     ).find_all('span', recursive=False)
@@ -62,7 +77,13 @@ def _extract_authors_information(soup):
     return authors
 
 
-def _extract_category(soup):
+def _extract_category(soup: BeautifulSoup) -> str:
+    """
+    Extracts article category from HTML soup.
+
+    :param soup: HTML soup of detailed article page.
+    :return: Category name, provided on detailed page. "Unknown", if not provided.
+    """
     categories = soup.find_all('span', {'class': 'highwire-article-collection-term'})
     if len(categories) == 0:
         return "unknown"
@@ -74,7 +95,13 @@ class _PdfUrlNotFoundException(Exception):
     pass
 
 
-def _extract_relative_pdf_url(soup):
+def _extract_relative_pdf_url(soup: BeautifulSoup) -> str:
+    """
+    Extracts PRF URL from HTML soup. Throws Exception, if URL cannot be extracted.
+
+    :param soup: HTML soup of detailed article page.
+    :return: URL to article PDF.
+    """
     dl_element = soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
 
     if dl_element and dl_element.has_attr('href'):
@@ -84,8 +111,18 @@ def _extract_relative_pdf_url(soup):
         raise _PdfUrlNotFoundException
 
 
-def _update_detailed_information(db_article, article_url, log_function):
-    response = requests.get(article_url)
+def _update_detailed_information(db_article: Paper, log_function: Callable[[str], None]) -> bool:
+    """
+    Given a DB article object and an article URL, detailed information from the articles detail page are extracted.
+    The log function is used for log output.
+
+    :param db_article: DB article object.
+    :param log_function: Function, called for logging output.
+    :return: True, if article was updated.
+    """
+    updated = False
+
+    response = requests.get(db_article.url)
     redirected_url = response.url
 
     version_match = re.match('^\S+v(\d+)$', redirected_url)
@@ -97,35 +134,58 @@ def _update_detailed_information(db_article, article_url, log_function):
 
     soup = BeautifulSoup(response.text, 'html.parser')
     authors = _extract_authors_information(soup)
+    if not db_article.pdf_url:
+        db_article.pdf_url = db_article.host.url + _extract_relative_pdf_url(soup)
+        updated = True
+
     category = _extract_category(soup)
-    db_article.pdf_url = db_article.host.url + _extract_relative_pdf_url(soup)
-
-    db_category, created = Category.objects.get_or_create(
-        name=category,
-    )
-    db_category.save()
-    db_article.category = db_category
-    db_article.save() # Has to be saved before adding authors
-
-    db_article.authors.clear()
-    for author in authors:
-        db_author, created = Author.objects.get_or_create(
-            first_name=author[0],
-            last_name=author[1],
+    if category != db_article.category.name:
+        db_category, created = Category.objects.get_or_create(
+            name=category,
         )
-        db_author.save()
-        db_article.authors.add(db_author)
+        db_category.save()
+        db_article.category = db_category
+        updated = True
+
+    db_article.save()  # Has to be saved before adding authors
+
+    if db_article.authors.count() == 0:
+        db_article.authors.clear()
+        for author in authors:
+            db_author, created = Author.objects.get_or_create(
+                first_name=author[0],
+                last_name=author[1],
+            )
+            db_author.save()
+            db_article.authors.add(db_author)
+        updated = True
     db_article.save()
 
+    return updated
 
-def _get_or_create_article(article, update_unknown_category, log_function):
+
+def _get_or_create_article(
+        article: Dict[str, str], update_unknown_category: bool, log_function: Callable[[str], None]
+) -> Tuple[bool, bool]:
+    """
+    Gets or create a DB article object.
+
+    :param article: Article information, extracted from medRxiv JSON.
+    :param update_unknown_category: If true, the detailed information of all articles with category 'Unkown' are
+    updated.
+    :param log_function: Function, called for logging output.
+    :return: First bool is True, iff article object was created, second one is True, if already existing article object
+    was updated.
+    """
     try:
         db_article = Paper.objects.get(doi=article['rel_doi'])
 
         if db_article.category_id == 'Unknown' and update_unknown_category:
-            _update_detailed_information(db_article, article['rel_link'], log_function)
+            updated = _update_detailed_information(db_article, log_function)
+        else:
+            updated = False
 
-        return False
+        return False, updated
     except Paper.DoesNotExist:
         db_article = Paper(
             doi=article['rel_doi']
@@ -136,34 +196,46 @@ def _get_or_create_article(article, update_unknown_category, log_function):
         db_article.abstract = article['rel_abs']
         db_article.published_at = article['rel_date']
         db_article.host = _get_or_create_paperhost(article['rel_site'])
-        _update_detailed_information(db_article, article['rel_link'], log_function)
 
-        return True
+        try:
+            _update_detailed_information(db_article, log_function)
+        except _PdfUrlNotFoundException:
+            log_function(f"Could not find PDF URL for {db_article.doi}, skip article")
 
-def scrape_articles(update_unknown_category=True, log_function=print):
+        return True, False
+
+
+def scrape_articles(update_unknown_category: bool = True, log_function: Callable[[str], None] = print) -> None:
+    """
+    Scrapes all new articles from medRxiv/bioRxiv.
+
+    :param update_unknown_category: If true, the detailed information of all articles with category 'Unkown' are
+    updated.
+    :param log_function: Function, called for logging output.
+    """
     article_json = _get_article_json()
     count_created = 0
     count_updated = 0
     for article in article_json:
         doi = article['rel_doi']
-        try:
-            if _get_or_create_article(article, update_unknown_category, log_function):
-                log_function(f"Created DB record for {doi}")
-                count_created += 1
-            elif update_unknown_category:
-                log_function(f"Updated DB record for {doi}")
-                count_updated += 1
-            else:
-                log_function(f"Skipped article {doi}")
-        except _PdfUrlNotFoundException:
-            log_function(f"Could not find PDF URL for {doi}, skip article")
+        modify_status = _get_or_create_article(article, update_unknown_category, log_function)
+        if modify_status[0]:
+            log_function(f"Created DB record for {doi}")
+            count_created += 1
+        elif modify_status[1]:
+            log_function(f"Updated DB record for {doi}")
+            count_updated += 1
+        else:
+            log_function(f"Skipped article {doi}")
 
     log_function(f"Created/Updated: {count_created}/{count_updated}")
 
 
-def delete_revoked_articles():
+def delete_revoked_articles() -> List[str]:
     """
     Remove all revoked articles (no longer in JSON file) from DB.
+
+    :return: List of dois of removed articles.
     """
     json_dois = [article['rel_doi'] for article in _get_article_json()]
     revoked_articles = []
