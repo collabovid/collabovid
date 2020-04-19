@@ -1,9 +1,10 @@
 import json
 import re
-from typing import Callable, List, Dict, Tuple
+from typing import Callable, List, Dict, Tuple, Any
 
 import requests
 from bs4 import BeautifulSoup
+from django.utils import timezone
 
 from data.models import PaperHost, Paper, Author, Category
 
@@ -111,7 +112,7 @@ def _extract_relative_pdf_url(soup: BeautifulSoup) -> str:
         raise _PdfUrlNotFoundException
 
 
-def _update_detailed_information(db_article: Paper, log_function: Callable[[str], None]) -> bool:
+def _update_detailed_information(db_article: Paper, log_function: Callable[[Tuple[Any, ...]], Any]) -> bool:
     """
     Given a DB article object and an article URL, detailed information from the articles detail page are extracted.
     The log function is used for log output.
@@ -131,6 +132,10 @@ def _update_detailed_information(db_article: Paper, log_function: Callable[[str]
     else:
         log_function(f'{db_article.doi}: Could not extract version')
         article_version = None
+
+    if db_article.version != article_version:
+        db_article.version = article_version
+        updated = True
 
     soup = BeautifulSoup(response.text, 'html.parser')
     authors = _extract_authors_information(soup)
@@ -159,13 +164,14 @@ def _update_detailed_information(db_article: Paper, log_function: Callable[[str]
             db_author.save()
             db_article.authors.add(db_author)
         updated = True
+    db_article.last_scrape = timezone.now()
     db_article.save()
 
     return updated
 
 
 def _get_or_create_article(
-        article: Dict[str, str], update_unknown_category: bool, log_function: Callable[[str], None]
+        article: Dict[str, str], update_unknown_category: bool, log_function: Callable[[Tuple[Any, ...]], Any]
 ) -> Tuple[bool, bool]:
     """
     Gets or create a DB article object.
@@ -197,15 +203,12 @@ def _get_or_create_article(
         db_article.published_at = article['rel_date']
         db_article.host = _get_or_create_paperhost(article['rel_site'])
 
-        try:
-            _update_detailed_information(db_article, log_function)
-        except _PdfUrlNotFoundException:
-            log_function(f"Could not find PDF URL for {db_article.doi}, skip article")
+        _update_detailed_information(db_article, log_function)
 
         return True, False
 
 
-def scrape_articles(update_unknown_category: bool = True, log_function: Callable[[str], None] = print) -> None:
+def scrape_articles(update_unknown_category: bool = True, log_function: Callable[[Tuple[Any, ...]], Any] = print) -> None:
     """
     Scrapes all new articles from medRxiv/bioRxiv.
 
@@ -214,11 +217,21 @@ def scrape_articles(update_unknown_category: bool = True, log_function: Callable
     :param log_function: Function, called for logging output.
     """
     article_json = _get_article_json()
+
     count_created = 0
     count_updated = 0
+    errors = 0
+
     for article in article_json:
         doi = article['rel_doi']
-        modify_status = _get_or_create_article(article, update_unknown_category, log_function)
+        try:
+            modify_status = _get_or_create_article(article, update_unknown_category, log_function)
+        except _PdfUrlNotFoundException:
+            # Article is not created, if the PDF URL is not available.
+            log_function(f"Could not find PDF URL for {doi}, skip article")
+            errors += 1
+            continue
+
         if modify_status[0]:
             log_function(f"Created DB record for {doi}")
             count_created += 1
@@ -228,7 +241,31 @@ def scrape_articles(update_unknown_category: bool = True, log_function: Callable
         else:
             log_function(f"Skipped article {doi}")
 
-    log_function(f"Created/Updated: {count_created}/{count_updated}")
+    log_function(f"\nCreated/Updated: {count_created}/{count_updated}")
+    if errors > 0:
+        log_function(f"Finished with {errors} errors")
+        raise Exception()
+
+
+def update_articles(count: int = None, log_function: Callable[[Tuple[Any, ...]], Any] = print):
+    """
+    Update detailed article information in DB.
+
+    :param count: Number of article updates, begin with earliest updated ones.
+    :param log_function: Function, called for logging output.
+    """
+    updated = 0
+
+    articles = Paper.objects.all().order_by('last_scrape')
+    if count:
+        articles = articles[:count]
+
+    for article in articles:
+        if _update_detailed_information(article, log_function):
+            updated += 1
+            log_function(f"Updated article {article.doi}")
+
+    log_function(f"\nUpdated {updated} articles")
 
 
 def delete_revoked_articles() -> List[str]:
