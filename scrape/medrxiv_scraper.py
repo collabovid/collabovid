@@ -87,7 +87,7 @@ def _extract_category(soup: BeautifulSoup) -> str:
     """
     categories = soup.find_all('span', {'class': 'highwire-article-collection-term'})
     if len(categories) == 0:
-        return "unknown"
+        return "Unknown"
     else:
         return categories[0].text.strip()
 
