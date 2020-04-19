@@ -37,4 +37,4 @@ class DeleteRevokedArticlesTask(Runnable):
         return "delete-revoked-articles"
 
     def run(self):
-        delete_revoked_articles()
+        delete_revoked_articles(self.log)

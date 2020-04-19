@@ -268,7 +268,7 @@ def update_articles(count: int = None, log_function: Callable[[Tuple[Any, ...]],
     log_function(f"\nUpdated {updated} articles")
 
 
-def delete_revoked_articles() -> List[str]:
+def delete_revoked_articles(log_function: Callable[[Tuple[Any, ...]], Any] = print) -> List[str]:
     """
     Remove all revoked articles (no longer in JSON file) from DB.
 
@@ -282,6 +282,8 @@ def delete_revoked_articles() -> List[str]:
 
     removed_articles = [article.doi for article in revoked_articles]
     for db_article in revoked_articles:
+        log_function(f"Deleted article {db_article.doi}")
         db_article.delete()
 
+    log_function(f"\nDeleted {len(removed_articles)} articles")
     return removed_articles
