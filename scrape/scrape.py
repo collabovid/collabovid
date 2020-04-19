@@ -9,9 +9,7 @@ from analyze.setup_vectorizer import SetupVectorizer
 from tasks import Runnable
 from data.models import Paper
 
-if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-    import analyze
-
+from django.conf import settings
 
 class Scrape(Runnable):
 
@@ -40,8 +38,14 @@ class Scrape(Runnable):
                             started_by=self._started_by)
         self.log("Finished scraping articles...")
         self.log("Scraping pdf images and content...")
+
+        scrape_images = self._scrape_images
+        if not settings.ALLOW_IMAGE_SCRAPING:
+            scrape_images = False
+            self.log("Scraping images disabled in settings...")
+
         TaskRunner.run_task(PdfScraper, papers=Paper.objects.all(), scrape_content=self._scrape_contents,
-                            scrape_images=self._scrape_images, started_by=self._started_by)
+                            scrape_images=scrape_images, started_by=self._started_by)
         self.log("Finished scraping pdf images and content...")
 
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':

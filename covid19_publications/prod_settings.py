@@ -2,7 +2,14 @@ from .base_settings import *
 
 INSTALLED_APPS.append('storages')
 
+
 ALLOWED_HOSTS = ['www.collabovid.org', 'collabovid.org']
+
+EXTRA_HOST = os.getenv('ALLOWED_TEST_HOST', '')
+
+if len(EXTRA_HOST) > 0:
+    ALLOWED_HOSTS.append(EXTRA_HOST)
+
 SECRET_KEY = os.environ['SECRET_KEY']
 
 DATABASES = {
@@ -79,3 +86,8 @@ SECURE_REDIRECT_EXEMPT = [r'^system-health/$']
 ALLOW_IMAGE_SCRAPING = True
 
 TASK_LOGGING_PATH = "/var/log/app-logs/tasks/"
+
+if int(os.getenv('ALLOW_IMAGE_SCRAPING', 0)) > 0:
+    ALLOW_IMAGE_SCRAPING = True
+else:
+    ALLOW_IMAGE_SCRAPING = False
