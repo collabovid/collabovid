@@ -16,7 +16,7 @@
                     <p class="muted-white lead mb-0">
                         Since 13th January 2020, {{ papers|length }} articles concerning SARS-CoV-2 are published on preprint
                         servers (as of 2020/03/30).
-                        This is an average of <strong>more than eleven papers per day</strong>. Most of these papers are
+                        Most of these papers are
                         not reviewed
                         in a professional
                         reviewing process at the time of publication on the preprint server.
@@ -60,9 +60,6 @@
                                 </li>
                                 <li>Get a list of recommended papers related to a specific question
                                 </li>
-                                <li>Sort papers by authors credits <a href="https://scholar.google.com">Google
-                                    Scholar</a>
-                                </li>
                             </ul>
                         </div>
                     </div>
@@ -74,11 +71,9 @@
                         <div class="card-body mt-0 pt-0">
                             This website was created during the
                             <a href="https://covid-global-hackathon.devpost.com">COVID-19 Global Hackathon</a>
-                            and is just a proof-of-concept.
-                            In the current state, we cannot guarantee that the list of papers is always complete.
-                            The number of citations per author is collected automatically and the correctness of the
-                            author
-                            mapping is not verified yet.
+                            and is still under development. We are always looking for feedback to improve the site.
+                            We kindly ask you to fill out our <a href="https://collabovid-feedback.limequery.org/317471?lang=en">feedback survey</a>
+        or write an <a href="mailto:y.lieder@tu-bs.de?Subject=Collabovid%20Feedback">email</a>.
                         </div>
 
                     </div>
@@ -106,10 +101,16 @@
                         <div class="card-body mt-0 pt-0">
                             <ul>
                                 <li>
+                                    List similar papers for a publication
+                                </li>
+                                <li>
                                     Allow verified experts to evaluate and review the papers informally to introduce a
                                     discussion before the paper is published officially and provide indications for the
                                     quality
                                     of the articles
+                                </li>
+                                <li>
+                                   Integrate new data sources
                                 </li>
                             </ul>
                         </div>
@@ -130,8 +131,6 @@
                                     times a day.
                                 </li>
 
-                                <li>The number of citations per author is taken from Google Scholar.</li>
-
                                 <li>The different topics are taken from the
                                     <a href="https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge/tasks">COVID-19
                                         Open Research Dataset Challenge (CORD-19)</a>,
@@ -143,12 +142,13 @@
 
                     <div class="card-block shadow bg-white rounded mt-4">
 
-                        <h3 class="card-title px-4 pt-4 pb-0">How do we assign papers to a given topic?</h3>
+                        <h3 class="card-title px-4 pt-4 pb-0">How does it work?</h3>
                         <hr>
                         <div class="card-body mt-0 pt-0">
-                            In order to classify papers to a given topic, we use natural language processing techniques
-                            to find correlations between the
-                            topic and the content of a papers' abstract. We based our model on the great work from
+                            We use natural language processing techniques
+                            to find correlations between a given query and the content of a paper. For semantic analysis,
+                            we use a combination of a pretrained BERT <a href="https://github.com/UKPLab/sentence-transformers">model</a>
+                            and a LDA model which is based  on the great work from
                             <a href="https://www.kaggle.com/danielwolffram/topic-modeling-finding-related-articles">Daniel
                                 Wolffram</a>
                             during the <a
@@ -156,28 +156,6 @@
                             Open Research Dataset Challenge (CORD-19)</a>.
                         </div>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="py-5">
-
-        <div class="container">
-
-            <div class="row mt-2 mb-5">
-                <div class="col-12">
-                    <h2 class="display-4 font-weight-light">Pitchvideo</h2>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12 text-center">
-                    <div class="video-container">
-                        <iframe class="" src="https://www.youtube.com/embed/xQE_7cvPhSs">
-                        </iframe>
                     </div>
                 </div>
             </div>

@@ -150,24 +150,6 @@ a.invisible-link, a.invisible-link:hover {
     mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
 
-.video-container {
-    position: relative;
-    padding-bottom: 56.25%;
-    padding-top: 0;
-    height: 0;
-    overflow: hidden;
-}
-
-.video-container iframe,
-.video-container object,
-.video-container embed {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-
 @media (min-width: 576px) {
     .search-bar-rounded-corners {
         border-radius: 4rem;
