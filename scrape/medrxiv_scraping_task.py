@@ -22,7 +22,7 @@ class ArticleUpdater(Runnable):
     def task_name():
         return "update-articles"
 
-    def __init__(self, count=30, *args, **kwargs):
+    def __init__(self, count=200, *args, **kwargs):
         super(ArticleUpdater, self).__init__(*args, **kwargs)
         self._count = count
 
