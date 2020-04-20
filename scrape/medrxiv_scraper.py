@@ -241,7 +241,7 @@ def scrape_articles(update_unknown_category: bool = True, log_function: Callable
         else:
             log_function(f"Skipped article {doi}")
 
-    log_function(f"\nCreated/Updated: {count_created}/{count_updated}")
+    log_function(f"Created/Updated: {count_created}/{count_updated}")
     if errors > 0:
         log_function(f"Finished with {errors} errors")
         raise Exception()
@@ -265,7 +265,7 @@ def update_articles(count: int = None, log_function: Callable[[Tuple[Any, ...]],
             updated += 1
             log_function(f"Updated article {article.doi}")
 
-    log_function(f"\nUpdated {updated} articles")
+    log_function(f"Updated {updated} articles")
 
 
 def delete_revoked_articles(log_function: Callable[[Tuple[Any, ...]], Any] = print) -> List[str]:
@@ -275,15 +275,14 @@ def delete_revoked_articles(log_function: Callable[[Tuple[Any, ...]], Any] = pri
     :return: List of dois of removed articles.
     """
     json_dois = [article['rel_doi'] for article in _get_article_json()]
+
     revoked_articles = []
     for db_article in Paper.objects.all():
         if db_article.doi not in json_dois:
-            revoked_articles.append(db_article)
+            revoked_articles.append(db_article.doi)
+            log_function(f"Deleting article {db_article.doi}")
 
-    removed_articles = [article.doi for article in revoked_articles]
-    for db_article in revoked_articles:
-        log_function(f"Deleted article {db_article.doi}")
-        db_article.delete()
+    Paper.objects.filter(doi__in=revoked_articles).delete()
 
-    log_function(f"\nDeleted {len(removed_articles)} articles")
-    return removed_articles
+    log_function(f"Deleted {len(revoked_articles)} articles")
+    return revoked_articles
