@@ -144,7 +144,7 @@ def _update_detailed_information(db_article: Paper, log_function: Callable[[Tupl
         updated = True
 
     category = _extract_category(soup)
-    if category != db_article.category.name:
+    if not db_article.category or category != db_article.category.name:
         db_category, created = Category.objects.get_or_create(
             name=category,
         )
