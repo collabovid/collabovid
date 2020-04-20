@@ -68,7 +68,6 @@ TEMPLATES = [
     },
 ]
 
-
 WSGI_APPLICATION = 'covid19_publications.wsgi.application'
 
 # Password validation
@@ -119,7 +118,8 @@ CRONTAB_LOCK_JOBS = True
 CRONTAB_COMMAND_SUFFIX = ' 2>&1'
 
 CRONJOBS = [
-    ('10 * * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
+    ('10 * * * *', 'covid19_publications.cron.scrape_new_paper', '>> /var/log/app-logs/cron.log'),
+    ('40 4 * * *', 'covid19_publications.cron.update_paper', '>> /var/log/app-logs/cron.log')
 ]
 
 if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:
