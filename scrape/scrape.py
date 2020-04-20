@@ -2,7 +2,7 @@ import os
 
 from scrape.citation_refresher import CitationRefresher
 from tasks.task_runner import TaskRunner
-from scrape.article_scraper import ArticleScraper
+from scrape.medrxiv_scraping_task import ArticleScraper
 from scrape.pdf_scraper import PdfScraper
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
@@ -12,7 +12,6 @@ from data.models import Paper
 from django.conf import settings
 
 class Scrape(Runnable):
-
     @staticmethod
     def task_name():
         return "scrape"

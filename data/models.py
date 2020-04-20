@@ -56,6 +56,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
+    version = models.IntegerField(default=1, null=False)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
@@ -77,6 +78,7 @@ class Paper(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    last_scrape = models.DateTimeField(null=True, default=None)
 
     @property
     def percentage_topic_score(self):
