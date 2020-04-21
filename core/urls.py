@@ -8,4 +8,5 @@ urlpatterns = [
     path('topic/<int:id>', topic, name='topic'),
     path('topics/', topic_overview, name='topic-overview'),
     path('imprint/', imprint, name='imprint'),
+    path('privacy/', privacy, name='privacy'),
 ]

@@ -3,6 +3,9 @@ from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
 import os
+import requests
+
+from django.conf import settings
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
@@ -162,5 +165,19 @@ def topic_overview(request):
 
 
 def imprint(request):
-    return render(request, "core/imprint.html")
+    if settings.IMPRINT_URL is None or len(settings.IMPRINT_URL) == 0:
+        return HttpResponseNotFound()
+
+    content = requests.get(settings.IMPRINT_URL).text
+
+    return render(request, "core/imprint.html", {"content": content})
+
+
+def privacy(request):
+    if settings.DATA_PROTECTION_URL is None or len(settings.DATA_PROTECTION_URL) == 0:
+        return HttpResponseNotFound()
+
+    content = requests.get(settings.DATA_PROTECTION_URL).text
+    return render(request, "core/data_protection.html", {"content": content})
+
 
