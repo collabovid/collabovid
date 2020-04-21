@@ -1,0 +1,22 @@
+<div class="modal" id="delete-all-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete All Finished Tasks</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Do you really want to delete all finished tasks older than 1 day?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="delete-all-form" action="{% url 'task_delete_all' %}" method="post">
+                    {% csrf_token %}
+                    <input id="modal-delete-btn" type="submit" class="btn btn-primary" value="Yes"/>
+                </form>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -5,6 +5,7 @@ set_secret_envs.sh
 set_db_envs.sh
 set_db_envs_master.sh
 set_test_config.sh
+set_prod_config.sh
 
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template

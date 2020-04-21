@@ -5,6 +5,8 @@ from .definitions import AVAILABLE_TASKS
 from tasks.task_runner import TaskRunner
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from datetime import timedelta
+from django.utils import timezone
 
 
 @staff_member_required
@@ -57,5 +59,20 @@ def delete_task(request):
             messages.add_message(request, messages.SUCCESS, 'Deleted Task.')
         else:
             messages.add_message(request, messages.ERROR, 'Failed to delete Task: Unknown Task.')
+        return redirect('tasks')
+    return HttpResponseNotFound()
+
+
+@staff_member_required
+def delete_all_finished(request):
+    if request.method == 'POST':
+        days = 1
+        date_limit = timezone.now() - timedelta(days=days)
+        query = Task.objects.filter(status=Task.STATUS_FINISHED, ended_at__lte=date_limit)
+        if query.count() > 0:
+            query.delete()
+            messages.add_message(request, messages.SUCCESS, 'Deleted All Finished Tasks.')
+        else:
+            messages.add_message(request, messages.WARNING, 'No Tasks to delete.')
         return redirect('tasks')
     return HttpResponseNotFound()
