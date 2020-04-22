@@ -1,11 +1,16 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Category, Topic
+from data.models import Paper, Category, Topic, Author, PaperHost
 import os
 import requests
 
 from django.conf import settings
+from collections import defaultdict
+from django.db.models import Count
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+from django.utils.timezone import datetime
 
 if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
     import analyze
@@ -56,7 +61,7 @@ def home(request):
                 page_obj = papers
 
         return render(request, "core/partials/_custom_topic_search_result.html",
-                      {'papers': page_obj, 'search_score_limit': search_score_limit/2})
+                      {'papers': page_obj, 'search_score_limit': search_score_limit / 2})
 
 
 def explore(request):
@@ -99,7 +104,8 @@ def explore(request):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': False})
+        return render(request, "core/partials/_search_results.html",
+                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': False})
 
     return HttpResponseNotFound()
 
@@ -155,9 +161,47 @@ def topic(request, id):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
+        return render(request, "core/partials/_search_results.html",
+                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
 
     return HttpResponseNotFound()
+
+
+def statistics(request):
+    published_counts = Paper.objects.filter(published_at__gt=datetime(2020, 1, 1)).values('published_at').annotate(
+        papers_added=Count('doi')).order_by('published_at')
+
+    published_at_plot_data = defaultdict(list)
+
+    total = 0
+    for published_count in published_counts.all():
+        total += published_count['papers_added']
+        published_at_plot_data['x'].append(published_count['published_at'])
+        published_at_plot_data['total'].append(total)
+        published_at_plot_data['added'].append(published_count['papers_added'])
+
+    published_at_plot_data = json.dumps(published_at_plot_data, cls=DjangoJSONEncoder)
+    print(published_at_plot_data)
+
+    authors = Author.objects.all().annotate(paper_count=Count("publications")).order_by("-paper_count")[:10]
+
+    stats = {
+        "paper_count": Paper.objects.count(),
+        "author_count": Author.objects.count(),
+        "paper_hosts": PaperHost.objects.count(),
+    }
+
+    paper_host_data = json.dumps({host.name: host.papers.count() for host in PaperHost.objects.all()},
+                                 cls=DjangoJSONEncoder)
+    category_data = json.dumps({category.name: category.papers.count() for category in Category.objects.all()},
+                               cls=DjangoJSONEncoder)
+    topics_data = json.dumps({topic.name: topic.papers.count() for topic in Topic.objects.all()}, cls=DjangoJSONEncoder)
+
+    print(paper_host_data)
+
+    return render(request, "core/statistics.html",
+                  {'plot_data': published_at_plot_data, "authors": authors, "stats": stats,
+                   'paper_host_data': paper_host_data, 'topics_data': topics_data, 'category_data': category_data})
 
 
 def topic_overview(request):
@@ -179,5 +223,3 @@ def privacy(request):
 
     content = requests.get(settings.DATA_PROTECTION_URL).text
     return render(request, "core/data_protection.html", {"content": content})
-
-

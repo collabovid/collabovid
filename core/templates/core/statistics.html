@@ -1,0 +1,173 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="gradient-header">
+        <div class="container py-3 text-white">
+            <div class="row h-100 align-items-center py-5">
+                <div class="col-lg-8">
+                    <h1 class="display-4">Statistics</h1>
+                    <p class="muted-white lead mb-0">
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                </div>
+            </div>
+
+        </div>
+
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card w-100 shadow rounded bg-white p-4 mt-3">
+                    <div class="card-title p-0">
+                        <h3>New publications over time</h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card w-100 shadow rounded bg-white pl-4 pr-4 pt-4 pb-1 mt-3">
+                    <div class="card-title"><h4>Top Authors</h4></div>
+                    <div class="card-body">
+                        <table class="table table-striped">
+                            <thead>
+                            <th style="width: 80%;">Author</th>
+                            <th class="text-center" style="width: 20%;">Papers</th>
+                            </thead>
+                            <tbody>
+                            {% for author in authors %}
+                                <tr>
+                                    <td>{{ author.first_name }} {{ author.last_name }}</td>
+                                    <td class="text-center">{{ author.paper_count }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-12">
+                <div class="card w-100 shadow rounded bg-white pl-4 pr-4 pt-4 pb-1 mt-3">
+
+                    <div class="card-title"><h3>Dataset information</h3></div>
+
+                    <div class="card-body" style="margin-top: -60px">
+
+                        <div class="row">
+                            <div class="col-4">
+                            </div>
+                            <div class="col-4 text-center">
+                                <h4>Sources</h4>
+                            </div>
+                            <div class="col-4 text-center">
+                                <h4>Categories</h4>
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+
+                            <div class="col-4">
+
+                                <table class="table table-striped mb-5">
+
+                                    <tbody>
+                                    <tr>
+                                        <td>Papers:</td>
+                                        <td class="text-center">{{ stats.paper_count }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Authors:</td>
+                                        <td class="text-center">{{ stats.author_count }}</td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>Dataset Sources:</td>
+                                        <td class="text-center">{{ stats.paper_hosts }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="col-4">
+
+                                <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
+
+                            </div>
+
+                            <div class="col-4">
+                                <canvas id="categoryDistribution" style="width: 100%;height:300px;"></canvas>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="card w-100 shadow rounded bg-white pl-4 pr-4 pt-4 pb-1 mt-3">
+                    <div class="card-title"><h4>Topic Distribution</h4></div>
+                    <div class="card-body">
+                        <canvas id="paperTopicDistribution" style="width: 100%;height:300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+
+    <script src="{% static "core/include/chart.js/Chart.min.js" %}"></script>
+    <script src="{% static "core/include/palette.js/palette.js" %}"></script>
+
+    <script src="{% static "core/js/collabovid_charts.js" %}"></script>
+
+
+    <script>
+        var plot_data = JSON.parse('{{ plot_data|escapejs }}');
+        var paper_host_data = JSON.parse('{{ paper_host_data|escapejs }}');
+        var topics_data = JSON.parse('{{ topics_data|escapejs }}');
+        var category_data = JSON.parse('{{ category_data|escapejs }}');
+
+        $(document).ready(function () {
+
+            $("#publicationsOverTimeChart").publicationsOverTime({plot_data: plot_data});
+            $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
+            $("#paperTopicDistribution").paperTopicDistribution({plot_data: topics_data});
+            $("#categoryDistribution").categoryDistribution({plot_data: category_data});
+
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+    <link rel="{% static "core/include/chart.js/Chart.min.css" %}" type="text/css">
+{% endblock %}

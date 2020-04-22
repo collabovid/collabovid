@@ -7,6 +7,7 @@ urlpatterns = [
     path('about', about, name='about'),
     path('topic/<int:id>', topic, name='topic'),
     path('topics/', topic_overview, name='topic-overview'),
+    path('statistics', statistics, name='statistics'),
     path('imprint/', imprint, name='imprint'),
     path('privacy/', privacy, name='privacy'),
 ]
