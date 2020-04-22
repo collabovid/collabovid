@@ -125,5 +125,5 @@ class BasicPaperAnalyzer(PaperAnalyzer):
         return topic_scores
 
     def get_similar_papers(self, paper_doi: str):
-        paper_dois, distances = self.vectorizer.paper_distances(paper_doi)
+        paper_dois, distances = self.vectorizer.paper_similarities(paper_doi)
         return self.get_closest_papers(paper_dois, distances)

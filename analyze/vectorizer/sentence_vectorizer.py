@@ -36,6 +36,8 @@ class TitleSentenceVectorizer(TextVectorizer):
 
 class SentenceChunkVectorizer(TextVectorizer):
     SENTENCE_CHUNK_VECTORIZER_BASE_DIR = os.path.join(settings.BASE_DIR, "analyze/res/sentence_chunk_vectorizer/")
+    TITLE_MATRIX_KEY = 'title_matrix'
+    ABSTRACT_MATRIX_KEY = 'abstract_matrix'
 
     def __init__(self, model_name='roberta-large-nli-stsb-mean-tokens',
                  title_similarity_factor=0.5,
@@ -55,8 +57,8 @@ class SentenceChunkVectorizer(TextVectorizer):
         self.abstract_similarity_factor = abstract_similarity_factor
 
     def compute_similarity_scores(self, embedding_vec):
-        title_matrix = self.paper_matrix['title_matrix']
-        abstract_matrix = self.paper_matrix['abstract_matrix']
+        title_matrix = self.paper_matrix[self.TITLE_MATRIX_KEY]
+        abstract_matrix = self.paper_matrix[self.ABSTRACT_MATRIX_KEY]
 
         title_similarity_scores = np.array(self.similarity_computer.similarities(title_matrix, embedding_vec))
         abstract_similarity_scores = np.array(self.similarity_computer.similarities(abstract_matrix, embedding_vec))
@@ -129,4 +131,20 @@ class SentenceChunkVectorizer(TextVectorizer):
 
         print('title embeddings', title_embeddings.shape)
         print('abstract embeddings', abstract_embeddings.shape)
-        return {'title_matrix': title_embeddings, 'abstract_matrix': abstract_embeddings}
+        return {self.TITLE_MATRIX_KEY: title_embeddings, self.ABSTRACT_MATRIX_KEY: abstract_embeddings}
+
+    def paper_similarities(self, paper_doi):
+        title_matrix = self.paper_matrix[self.TITLE_MATRIX_KEY]
+        abstract_matrix = self.paper_matrix[self.ABSTRACT_MATRIX_KEY]
+        id_map = self.paper_matrix['id_map']
+        matrix_index = id_map[paper_doi]
+
+        title_similarity_scores = np.array(
+            self.similarity_computer.similarities(title_matrix, title_matrix[matrix_index]))
+        abstract_similarity_scores = np.array(
+            self.similarity_computer.similarities(abstract_matrix, abstract_matrix[matrix_index]))
+
+        similarity_scores = title_similarity_scores * self.title_similarity_factor + \
+                            abstract_similarity_scores * self.abstract_similarity_factor
+
+        return self.paper_matrix['index_arr'], similarity_scores

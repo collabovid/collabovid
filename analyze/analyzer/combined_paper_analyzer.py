@@ -138,7 +138,7 @@ class CombinedPaperAnalyzer(PaperAnalyzer):
 
         for analyzer in self.analyzers:
             print("Computing Similarity for", analyzer.name)
-            paper_ids, scores = analyzer.analyzer.vectorizer.paper_distances(paper_doi)
+            paper_ids, scores = analyzer.analyzer.vectorizer.paper_similarities(paper_doi)
 
             paper_ids_lists.append(paper_ids)
             scores_lists.append(list(scores))

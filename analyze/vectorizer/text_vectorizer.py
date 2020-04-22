@@ -123,7 +123,7 @@ class TextVectorizer:
         texts = [t.name + ". " + t.description for t in topics]
         return self.vectorize(texts)
 
-    def paper_distances(self, paper_doi):
+    def paper_similarities(self, paper_doi):
         matrix = self.paper_matrix['matrix']
         id_map = self.paper_matrix['id_map']
         matrix_index = id_map[paper_doi]

@@ -6,10 +6,12 @@
             <div class="row">
                 <div class="col-md-2">
                     {% if paper.preview_image %}
-                        <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
-                             class="img-fluid mx-auto d-block">
+                        <div class="card p-1" style="height: 200px">
+                            <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                                 class="img-fluid mx-auto d-block">
+                        </div>
                     {% else %}
-                        <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 150px"
+                        <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 200px"
                              class="img-fluid mx-auto d-block">
                     {% endif %}
                 </div>
@@ -40,9 +42,9 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title text-muted mb-2">
+                        <h5 class="card-title text-muted mb-2">
                             Abstract
-                        </h4>
+                        </h5>
                         <p class="card-text mb-2" style="font-size: 15px">
                             {{ paper.abstract }}
                         </p>
@@ -62,9 +64,9 @@
                 </div>
                 <div class="card mt-4">
                     <div class="card-body">
-                        <h4 class="card-title text-muted mb-2">
+                        <h5 class="card-title text-muted mb-2">
                             Authors
-                        </h4>
+                        </h5>
                         <div class="authors-container card-text mb-2">
                             {% if paper.authors.all|length >= 4 %}
                                 <div class="short">
