@@ -181,3 +181,40 @@ def privacy(request):
     return render(request, "core/data_protection.html", {"content": content})
 
 
+def search(request):
+    if request.method == "POST":
+        category_names = request.POST.getlist("categories")
+        search_query = request.POST.get("search", "")
+
+        start_date = request.POST.get("published_at_start", "")
+        end_date = request.POST.get("published_at_end", "")
+
+        #categories = Category.objects.filter(name__in=category_names)
+        categories = Category.objects.all()
+
+        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
+
+        papers = Paper.get_paper_for_query(search_query,
+                                           start_date,
+                                           end_date,
+                                           categories,
+                                           Topic.objects.all(),
+                                           sorted_by)
+
+        if papers.count() > PAPER_PAGE_COUNT:
+            paginator = Paginator(papers, PAPER_PAGE_COUNT)
+            try:
+                page_number = request.POST.get('page')
+                page_obj = paginator.get_page(page_number)
+            except PageNotAnInteger:
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                page_obj = None
+        else:
+            page_obj = papers
+
+        return render(request, "core/partials/_search_results.html", {'papers': page_obj,
+                                                                      'search_score_limit': 0,
+                                                                      'show_topic_score': False})
+
+
