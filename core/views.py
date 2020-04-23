@@ -24,7 +24,9 @@ def get_sorted_by_from_string(sorted_by):
 
 def home(request):
     if request.method == "GET":
-        return render(request, "core/home.html", {'papers': Paper.objects.all()})
+        categories = Category.objects.order_by('name')
+
+        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
     elif request.method == "POST":
 
         search_query = request.POST.get("query", "")

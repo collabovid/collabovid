@@ -235,3 +235,26 @@ a.invisible-link, a.invisible-link:hover {
     white-space: normal !important;
     word-break: normal !important;
 }
+
+.nav-search-types .nav-item .nav-link {
+    background: #F5F5F5;
+    border-bottom: 1px solid #acacac;
+    color: #1b1e21;
+    font-weight: bold;
+    padding: 15px 15px 18px 15px;
+}
+
+.nav-search-types .nav-item .nav-link:hover:not(.active) {
+    background: #dbdbdb;
+}
+
+.nav-search-types .nav-item .nav-link.active {
+    color: #4c84d7;
+    border-bottom: 4px solid #4c84d7;
+    padding: 15px;
+}
+
+.nav-search-types .nav-link {
+}
+
+.nav-search-types
