@@ -24,6 +24,7 @@ class Author(models.Model):
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
     scholar_url = models.URLField(null=True, default=None)
+    orcid = models.TextField(null=True, default=None, unique=True)
 
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
@@ -43,6 +44,7 @@ class PaperData(models.Model):
 
     content = models.TextField(null=True, default=None)
 
+
 class Paper(models.Model):
     SORTED_BY_TITLE = 0
     SORTED_BY_NEWEST = 2
@@ -57,6 +59,8 @@ class Paper(models.Model):
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     version = models.IntegerField(default=1, null=False)
+    license = models.TextField(null=True, default=None)
+    withdrawn = models.BooleanField(default=False)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
@@ -70,6 +74,7 @@ class Paper(models.Model):
 
     url = models.URLField()
     pdf_url = models.URLField()
+
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField()
@@ -133,4 +138,3 @@ class Paper(models.Model):
             papers = papers.filter(published_at__lte=end_date)
 
         return Paper.sort_papers(papers, sorted_by)
-
