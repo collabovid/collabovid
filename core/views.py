@@ -26,6 +26,7 @@ def home(request):
 
         return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
 
+
 def explore(request):
     if request.method == "GET":
         categories = Category.objects.order_by('name')
@@ -164,10 +165,10 @@ def search(request):
         end_date = request.POST.get("published_at_end", "")
 
         search_query = request.POST.get("search", "").strip()
-        print(search_query)
         sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
         search_engine = get_default_search_engine()
-        paginator = search_engine.search(search_query).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+        paginator = search_engine.search(search_query, categories=category_names, start_date=start_date,
+                                         end_date=end_date).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
         try:
             page_number = request.POST.get('page')
             page_obj = paginator.get_page(page_number)
@@ -178,6 +179,4 @@ def search(request):
 
         return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                       'search_score_limit': 0,
-                                                                      'show_topic_score': False,})
-
-
+                                                                      'show_topic_score': False, })

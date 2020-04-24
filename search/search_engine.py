@@ -1,4 +1,5 @@
 from collections import defaultdict
+from django.db.models import Q
 from data.models import Paper
 from typing import List
 from search.search import Search, PaperResult
@@ -25,8 +26,11 @@ class ScoreSortPaginator(Paginator):
 
 
 class SearchResult:
-    def __init__(self, paper_score_table):
+    def __init__(self, paper_score_table, categories, start_date=None, end_date=None):
         self.paper_score_table = paper_score_table
+        self.categories = categories
+        self.start_date = start_date
+        self.end_date = end_date
 
     def paginator_ordered_by(self, criterion, page_count=10):
         if criterion == Paper.SORTED_BY_TITLE:
@@ -44,20 +48,26 @@ class SearchResult:
 
     @property
     def papers(self):
-        return Paper.objects.filter(pk__in=self.paper_score_table.keys())
+        papers = Paper.objects.filter(Q(category__in=self.categories) & Q(pk__in=self.paper_score_table.keys()))
+        if self.start_date:
+            papers = papers.filter(published_at__gte=self.start_date)
+
+        if self.end_date:
+            papers = papers.filter(published_at__lte=self.end_date)
+        return papers
 
 
 class SearchEngine:
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
-    def search(self, query: str):
+    def search(self, query: str, categories: List, start_date=None, end_date=None):
         paper_score_table = defaultdict(int)
         for search_component in self.search_pipeline:
             paper_results = search_component.find(query)
             for result in paper_results:
                 paper_score_table[result.paper_doi] += result.score
-        return SearchResult(paper_score_table)
+        return SearchResult(paper_score_table, categories, start_date, end_date)
 
 
 def get_default_search_engine():
