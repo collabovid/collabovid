@@ -40,21 +40,7 @@ class KeywordSearch(Search):
         sql_query = Q()
         for word in keywords:
             # Each keyword must be contained in title OR in abstract
-            sql_query &= (
-                    Q(title__icontains=word) |
-                    Q(abstract__icontains=word)
-            )
+            sql_query &= (Q(title__icontains=word))
 
-        papers = Paper.objects.filter(sql_query)
-
-        n_keywords = len(keywords)
-        result = []
-        for paper in papers:
-            title_keywords = 0
-            for word in keywords:
-                if word in paper.title:
-                    title_keywords += 1
-            score = KEYWORD_BASE_SCORE + (title_keywords / n_keywords)
-            result.append(PaperResult(paper_doi=paper.doi, score=score))
-
-        return result
+        paper_dois = Paper.objects.filter(sql_query).values_list('doi', flat=True)
+        return [PaperResult(paper_doi=doi, score=KEYWORD_BASE_SCORE) for doi in paper_dois]
