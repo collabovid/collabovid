@@ -7,6 +7,7 @@ import logging
 from django.core.paginator import Paginator
 from search.exact_search import ExactSearch
 from search.keyword_search import KeywordSearch
+from search.semantic_search import SemanticSearch
 
 
 class ScoreSortPaginator(Paginator):
@@ -26,11 +27,12 @@ class ScoreSortPaginator(Paginator):
 
 
 class SearchResult:
-    def __init__(self, paper_score_table, categories, start_date=None, end_date=None):
-        self.paper_score_table = paper_score_table
+    def __init__(self, paper_score_items, categories, start_date=None, end_date=None):
+        self.paper_score_items = paper_score_items
         self.categories = categories
         self.start_date = start_date
         self.end_date = end_date
+        self.paper_dois = [doi for doi, _ in self.paper_score_items]
 
     def paginator_ordered_by(self, criterion, page_count=10):
         if criterion == Paper.SORTED_BY_TITLE:
@@ -38,7 +40,12 @@ class SearchResult:
         elif criterion == Paper.SORTED_BY_NEWEST:
             paginator = Paginator(self.papers.order_by("-published_at"), page_count)
         elif criterion == Paper.SORTED_BY_SCORE:
-            paper_score_items = sorted(list(self.paper_score_table.items()), key=lambda x: x[1], reverse=True)
+            filtered_items = []
+            dois = self.papers.values_list('doi', flat=True)
+            for doi, score in self.paper_score_items:
+                if doi in dois:
+                    filtered_items.append((doi, score))
+            paper_score_items = sorted(filtered_items, key=lambda x: x[1], reverse=True)
             paginator = ScoreSortPaginator(paper_score_items, page_count)
         else:
             paginator = Paginator(self.papers, page_count)
@@ -48,7 +55,7 @@ class SearchResult:
 
     @property
     def papers(self):
-        papers = Paper.objects.filter(Q(category__in=self.categories) & Q(pk__in=self.paper_score_table.keys()))
+        papers = Paper.objects.filter(Q(category__in=self.categories) & Q(pk__in=self.paper_dois))
         if self.start_date:
             papers = papers.filter(published_at__gte=self.start_date)
 
@@ -61,14 +68,19 @@ class SearchEngine:
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
-    def search(self, query: str, categories: List, start_date=None, end_date=None):
+    def search(self, query: str, categories: List, start_date=None, end_date=None, score_min=0.7):
         paper_score_table = defaultdict(int)
         for search_component in self.search_pipeline:
             paper_results = search_component.find(query)
             for result in paper_results:
                 paper_score_table[result.paper_doi] += result.score
-        return SearchResult(paper_score_table, categories, start_date, end_date)
+
+        paper_scores_items = []
+        for doi, score in paper_score_table.items():
+            if score >= score_min:
+                paper_scores_items.append((doi, score))
+        return SearchResult(paper_scores_items, categories, start_date, end_date)
 
 
 def get_default_search_engine():
-    return SearchEngine([ExactSearch(), KeywordSearch()])
+    return SearchEngine([ExactSearch(), KeywordSearch(), SemanticSearch()])

@@ -165,7 +165,7 @@ def search(request):
         end_date = request.POST.get("published_at_end", "")
 
         search_query = request.POST.get("search", "").strip()
-        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
+        sorted_by = Paper.SORTED_BY_SCORE
         search_engine = get_default_search_engine()
         paginator = search_engine.search(search_query, categories=category_names, start_date=start_date,
                                          end_date=end_date).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)

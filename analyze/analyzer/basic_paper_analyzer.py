@@ -11,7 +11,6 @@ from django.conf import settings
 
 
 class BasicPaperAnalyzer(PaperAnalyzer):
-
     TYPE_LDA = 'lda'
     TYPE_SENTENCE_TRANSFORMER = 'sentence-transformer'
     TYPE_CHUNK_SENTENCE_TRANSFORMER = 'chunk-sentence-transformer'
@@ -68,16 +67,7 @@ class BasicPaperAnalyzer(PaperAnalyzer):
 
     def related(self, query: str):
         paper_ids, scores = self.query(query)
-
-        papers = Paper.objects.filter(pk__in=paper_ids)
-        whens = list()
-
-        for pk, score in zip(paper_ids, scores):
-            whens.append(models.When(pk=pk, then=score * 100))
-
-        papers = papers.annotate(search_score=models.Case(*whens, output_field=models.FloatField()))
-
-        return papers
+        return list(zip(paper_ids, scores))
 
     def compute_topic_score(self, topics):
         if self.vectorizer.paper_matrix is None:
