@@ -29,18 +29,22 @@ class SearchResult:
         self.paper_score_table = paper_score_table
 
     def paginator_ordered_by(self, criterion, page_count=10):
-        papers = Paper.objects.filter(pk__in=self.paper_score_table.keys())
         if criterion == Paper.SORTED_BY_TITLE:
-            paginator = Paginator(papers.order_by("title"), page_count)
+            paginator = Paginator(self.papers.order_by("title"), page_count)
         elif criterion == Paper.SORTED_BY_NEWEST:
-            paginator = Paginator(papers.order_by("-published_at"), page_count)
+            paginator = Paginator(self.papers.order_by("-published_at"), page_count)
         elif criterion == Paper.SORTED_BY_SCORE:
-            paginator = ScoreSortPaginator(list(self.paper_score_table.items()), page_count)
+            paper_score_items = sorted(list(self.paper_score_table.items()), key=lambda x: x[1], reverse=True)
+            paginator = ScoreSortPaginator(paper_score_items, page_count)
         else:
-            paginator = Paginator(papers, page_count)
+            paginator = Paginator(self.papers, page_count)
             logger = logging.getLogger(__name__)
             logger.warning("Unknown sorted by" + criterion)
         return paginator
+
+    @property
+    def papers(self):
+        return Paper.objects.filter(pk__in=self.paper_score_table.keys())
 
 
 class SearchEngine:
