@@ -8,7 +8,7 @@ from typing import List
 from data.models import Paper
 
 
-KEYWORD_BASE_SCORE = 1
+KEYWORD_BASE_SCORE = 0.8
 
 
 # Download nltk stopwords, if not exist
