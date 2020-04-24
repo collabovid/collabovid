@@ -1,0 +1,149 @@
+{% load static %}
+<div class="row">
+    <div class="col-12">
+        <label for="chose-category">Choose a category:</label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-9 col-sm-12">
+        <select name="categories"
+                id="chose-category"
+                class="selectpicker"
+                data-live-search="true"
+                multiple="multiple">
+            {% for category in categories %}
+                <option value="{{ category.name }}" selected>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3 col-sm-12">
+        <a href="#" id="toggle-category-select"
+           class="btn btn-secondary delete d-xl-inline-block d-block"
+           data-text-switch="<i class='fas fa-plus'></i>">
+            <i class='fas fa-times'></i>
+        </a>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <label for="start-date">
+            Published After
+        </label>
+    </div>
+</div>
+<div class="row">
+
+    <div class="col-12">
+        <input autocomplete="off" name="published_at_start" id="start-date"/>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        <label for="start-date">
+            Published Before
+        </label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <input autocomplete="off" name="published_at_end" id="end-date"/>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        let indicator = $("#{{ indicator_id }}");
+        let paper_container = $("#{{ result_container_id }}");
+        let form = $("#{{ form_id }}");
+        let pagination_container = $("#pagination-container");
+        let chose_category_select = $("#chose-category");
+
+        update_pagination_container = pagination_container.paginate({
+            searchQuery: search_query,
+        });
+
+        $("#toggle-category-select").click(function (e) {
+            e.preventDefault();
+
+            let new_text = $(this).data("text-switch");
+            let old_text = $(this).html();
+
+
+            if ($(this).hasClass('delete')) {
+                chose_category_select.find('option').attr("selected", false);
+                $(this).removeClass('delete').removeClass('btn-secondary').addClass('add').addClass('btn-success');
+            } else if ($(this).hasClass('add')) {
+                chose_category_select.find('option').attr("selected", "selected");
+                $(this).removeClass('add').removeClass('btn-success').addClass('delete').addClass('btn-secondary');
+            }
+
+            $(this).data("text-switch", old_text);
+            $(this).html(new_text);
+
+            chose_category_select.selectpicker('refresh');
+        });
+
+        function search_query(data, page, scroll = false, on_success) {
+            paper_container.hide();
+            indicator.show();
+
+            data += "&page=" + page;
+
+            $.ajax({
+                url: form.attr("action"),
+                type: 'POST',
+                data: data,
+                success: function (data) {
+                    paper_container.html(data);
+
+                    indicator.hide();
+                    paper_container.fadeIn();
+
+                    update_pagination_container();
+
+                    if (scroll) {
+                        $('html, body').scrollTop(paper_container.offset().top - 50);
+                    }
+
+                    if (on_success) {
+                        on_success();
+                    }
+                },
+                error: function (request, error) {
+                    console.log("Request: " + JSON.stringify(request));
+                    console.log("Error: " + error);
+                }
+            });
+        }
+
+        $('#chose-category').selectpicker();
+
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'yyyy-mm-dd'
+        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'yyyy-mm-dd'
+        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
+
+
+        form.submit(function (e) {
+            e.preventDefault();
+
+            pagination_container.hide();
+
+            search_query(form.serialize(), 1, false, function () {
+                window.Pagination.last_request = form.serialize();
+            });
+
+        });
+
+        {% if load_default %}
+            form.submit();
+        {% endif %}
+    });
+</script>

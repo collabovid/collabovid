@@ -1,0 +1,111 @@
+{% extends "core/search_base.html" %}
+{% load static %}
+{% block content %}
+    <div id="paper-cover" class="paper-cover"></div>
+
+    <form id="paper-search-form" method="post" action="{% url "search" %}">
+        {% csrf_token %}
+        <div class="gradient-header pb-0">
+            <div class="container">
+
+                <div class="row mt-5">
+                    <div class="col-12">
+
+                        <div class="input-group input-group-lg mb-3">
+                            <div class="input-group-prepend border-right-0">
+                                <div class="input-group-text bg-white border-right-0">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+
+                            <input type="text" name="search" class="border-left-0 form-control"
+                                   placeholder="Find papers by their title, content or author">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="submit">Search</button>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="row mt-5">
+                    <div class="col-10">
+                        <ul class="nav nav-search-types nav-justified">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#">Hot</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Newest</a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="#">Statistics</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-2 text-right">
+
+                        <div class="dropdown">
+                            <button class="btn btn-light mt-2"
+                                    aria-haspopup="true"
+                                    aria-expanded="false" id="filterButton">Filters
+                            </button>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12">
+                        <div id="filterContainer"
+                             class="search-dropdown dropdown-menu dropdown-menu-right p-4"
+                             aria-labelledby="filterButton">
+                            {% include "core/partials/_filter_box.html" with load_default=True action=search_url categories=categories best_matching=False form_id="paper-search-form" result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div id="paper-container"></div>
+
+                    <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5"
+                         style="display: none;">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </div>
+
+                    <nav id="pagination-container"></nav>
+                </div>
+
+            </div>
+        </div>
+
+    </form>
+
+{% endblock %}
+
+
+{% block script %}
+    {{ block.super }}
+
+    <script>
+        let filterContainer = $("#filterContainer");
+        let paperCover = $("#paper-cover");
+        $("#filterButton").click(function (e) {
+            e.preventDefault();
+            filterContainer.toggle();
+            paperCover.fadeToggle();
+        });
+
+        paperCover.click(function () {
+            filterContainer.hide();
+            paperCover.fadeOut();
+        });
+    </script>
+{% endblock %}

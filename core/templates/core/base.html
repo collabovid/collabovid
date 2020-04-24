@@ -46,8 +46,11 @@
                 <li class="nav-item {% if request.resolver_match.url_name == "home" %}active{% endif %}">
                     <a class="nav-link" href="{% url "home" %}">Home</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "search" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "search" %}">Search</a>
+                </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "explore" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "explore" %}">Explore</a>
+                    <a class="nav-link" href="{% url "explore" %}">Dataset</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "topic-overview" %}active{% endif %}">
                     <a class="nav-link" href="{% url "topic-overview" %}">Topics</a>
@@ -74,7 +77,8 @@
             <div class="col-4">
                 <img src="{% static "core/img/favicon/favicon-32x32.png" %}" class="img-fluid" width="16px">
                 <small class="d-inline text-muted">
-                    Collabovid &middot; <a href="{% url "imprint" %}">Imprint</a> &middot; <a href="{% url "privacy" %}">Data Protection Declaration</a>
+                    Collabovid &middot; <a href="{% url "imprint" %}">Imprint</a> &middot; <a
+                        href="{% url "privacy" %}">Data Protection Declaration</a>
                 </small>
 
             </div>

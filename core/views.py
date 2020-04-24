@@ -25,23 +25,6 @@ def home(request):
         categories = Category.objects.order_by('name')
 
         return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
-    elif request.method == "POST":
-        search_query = request.POST.get("search", "").strip()
-        print(search_query)
-        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
-        search_engine = get_default_search_engine()
-        paginator = search_engine.search(search_query).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
-        try:
-            page_number = request.POST.get('page')
-            page_obj = paginator.get_page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = None
-
-        return render(request, "core/partials/_custom_topic_search_result.html",
-                      {'papers': page_obj, 'search_score_limit': 0})
-
 
 def explore(request):
     if request.method == "GET":
@@ -168,37 +151,33 @@ def privacy(request):
 
 
 def search(request):
-    if request.method == "POST":
+    if request.method == "GET":
+        categories = Category.objects.order_by('name')
+
+        return render(request, "core/search.html", {'papers': Paper.objects.all(),
+                                                    'categories': categories,
+                                                    'search_url': reverse("explore")})
+    elif request.method == "POST":
         category_names = request.POST.getlist("categories")
-        search_query = request.POST.get("search", "")
 
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
-        # categories = Category.objects.filter(name__in=category_names)
-        categories = Category.objects.all()
-
+        search_query = request.POST.get("search", "").strip()
+        print(search_query)
         sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
-
-        papers = Paper.get_paper_for_query(search_query,
-                                           start_date,
-                                           end_date,
-                                           categories,
-                                           Topic.objects.all(),
-                                           sorted_by)
-
-        if papers.count() > PAPER_PAGE_COUNT:
-            paginator = Paginator(papers, PAPER_PAGE_COUNT)
-            try:
-                page_number = request.POST.get('page')
-                page_obj = paginator.get_page(page_number)
-            except PageNotAnInteger:
-                page_obj = paginator.page(1)
-            except EmptyPage:
-                page_obj = None
-        else:
-            page_obj = papers
+        search_engine = get_default_search_engine()
+        paginator = search_engine.search(search_query).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+        try:
+            page_number = request.POST.get('page')
+            page_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = None
 
         return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                       'search_score_limit': 0,
-                                                                      'show_topic_score': False})
+                                                                      'show_topic_score': False,})
+
+
