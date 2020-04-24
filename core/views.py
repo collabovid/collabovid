@@ -4,11 +4,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
 import os
 import requests
+from search.search_engine import SearchEngine, get_default_search_engine
 
 from django.conf import settings
-
-if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-    import analyze
 
 PAPER_PAGE_COUNT = 10
 
@@ -28,37 +26,21 @@ def home(request):
 
         return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
     elif request.method == "POST":
-
-        search_query = request.POST.get("query", "")
-
-        papers = list()
-        scores = list()
-
-        page_obj = papers
-
-        search_score_limit = 60
-
-        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
-            analyzer = analyze.get_analyzer()
-            papers = analyzer.related(search_query).filter(search_score__gt=search_score_limit)
-
-            sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
-            papers = Paper.sort_papers(papers, sorted_by, score_field="search_score")
-
-            if papers.count() > PAPER_PAGE_COUNT:
-                paginator = Paginator(papers, PAPER_PAGE_COUNT)
-                try:
-                    page_number = request.POST.get('page')
-                    page_obj = paginator.get_page(page_number)
-                except PageNotAnInteger:
-                    page_obj = paginator.page(1)
-                except EmptyPage:
-                    page_obj = None
-            else:
-                page_obj = papers
+        search_query = request.POST.get("search", "").strip()
+        print(search_query)
+        sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
+        search_engine = get_default_search_engine()
+        paginator = search_engine.search(search_query).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+        try:
+            page_number = request.POST.get('page')
+            page_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = None
 
         return render(request, "core/partials/_custom_topic_search_result.html",
-                      {'papers': page_obj, 'search_score_limit': search_score_limit/2})
+                      {'papers': page_obj, 'search_score_limit': 0})
 
 
 def explore(request):
@@ -101,7 +83,8 @@ def explore(request):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': False})
+        return render(request, "core/partials/_search_results.html",
+                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': False})
 
     return HttpResponseNotFound()
 
@@ -157,7 +140,8 @@ def topic(request, id):
         else:
             page_obj = papers
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
+        return render(request, "core/partials/_search_results.html",
+                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
 
     return HttpResponseNotFound()
 
@@ -191,7 +175,7 @@ def search(request):
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
-        #categories = Category.objects.filter(name__in=category_names)
+        # categories = Category.objects.filter(name__in=category_names)
         categories = Category.objects.all()
 
         sorted_by = get_sorted_by_from_string(request.POST.get("sorted_by", ""))
@@ -218,5 +202,3 @@ def search(request):
         return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                       'search_score_limit': 0,
                                                                       'show_topic_score': False})
-
-

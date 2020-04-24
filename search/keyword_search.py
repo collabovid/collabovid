@@ -20,7 +20,7 @@ except LookupError:
         nltk.download('stopwords', download_dir=nltk_data_dir)
     else:
         nltk.download('stopwords')
-stopwords = set(nltk.corpus.stopwords.stopwords.words('english'))
+stopwords = set(nltk.corpus.stopwords.words('english'))
 
 
 class KeywordSearch(Search):
@@ -41,8 +41,8 @@ class KeywordSearch(Search):
         for word in keywords:
             # Each keyword must be contained in title OR in abstract
             sql_query &= (
-                    Q(title__unaccent__icontains=word) |
-                    Q(abstract__unaccent__icontains=word)
+                    Q(title__icontains=word) |
+                    Q(abstract__icontains=word)
             )
 
         papers = Paper.objects.filter(sql_query)

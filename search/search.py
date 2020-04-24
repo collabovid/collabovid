@@ -14,6 +14,3 @@ class Search:
     def find(self, query: str) -> List[PaperResult]:
         raise NotImplementedError()
 
-
-class SearchEngine:
-    pass
