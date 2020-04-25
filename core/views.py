@@ -1,12 +1,12 @@
-from django.shortcuts import render, HttpResponse, get_object_or_404, reverse
+from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Category, Topic
-import os
 import requests
-from search.search_engine import SearchEngine, get_default_search_engine
+from search.search_engine import get_default_search_engine
 
 from django.conf import settings
+from analyze.statistics import Statistics
 
 PAPER_PAGE_COUNT = 10
 
@@ -164,19 +164,32 @@ def search(request):
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
-        search_query = request.POST.get("search", "").strip()
-        sorted_by = Paper.SORTED_BY_SCORE
-        search_engine = get_default_search_engine()
-        paginator = search_engine.search(search_query, categories=category_names, start_date=start_date,
-                                         end_date=end_date).paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
-        try:
-            page_number = request.POST.get('page')
-            page_obj = paginator.get_page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = None
+        tab = request.POST.get("tab", "")
 
-        return render(request, "core/partials/_search_results.html", {'papers': page_obj,
-                                                                      'search_score_limit': 0,
-                                                                      'show_topic_score': False, })
+        search_query = request.POST.get("search", "").strip()
+        search_engine = get_default_search_engine()
+
+        search_result = search_engine.search(search_query, categories=category_names, start_date=start_date,
+                                             end_date=end_date)
+
+        if tab == "statistics":
+            statistics = Statistics(search_result.papers)
+            return render(request, "core/partials/statistics/_statistics.html", {'statistics': statistics})
+        else:
+            if tab == "top":
+                sorted_by = Paper.SORTED_BY_SCORE
+            else:
+                sorted_by = Paper.SORTED_BY_NEWEST
+
+            paginator = search_result.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+            try:
+                page_number = request.POST.get('page')
+                page_obj = paginator.get_page(page_number)
+            except PageNotAnInteger:
+                page_obj = paginator.page(1)
+            except EmptyPage:
+                page_obj = None
+
+            return render(request, "core/partials/_search_results.html", {'papers': page_obj,
+                                                                          'search_score_limit': 0,
+                                                                          'show_topic_score': False, })

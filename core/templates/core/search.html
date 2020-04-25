@@ -5,6 +5,8 @@
 
     <form id="paper-search-form" method="post" action="{% url "search" %}">
         {% csrf_token %}
+
+        <input id="tabInput" type="hidden" name="tab" value="top">
         <div class="gradient-header pb-0">
             <div class="container">
 
@@ -33,15 +35,15 @@
                     <div class="col-10">
                         <ul class="nav nav-search-types nav-justified">
                             <li class="nav-item">
-                                <a class="nav-link active" href="#">Hot</a>
+                                <a class="nav-link active" href="#" data-value="top">Top</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Newest</a>
+                                <a class="nav-link" href="#" data-value="newest">Newest</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Statistics</a>
+                                <a class="nav-link" href="#" data-value="statistics">Statistics</a>
                             </li>
                         </ul>
                     </div>
@@ -90,22 +92,35 @@
 
 {% endblock %}
 
-
 {% block script %}
     {{ block.super }}
 
-    <script>
-        let filterContainer = $("#filterContainer");
-        let paperCover = $("#paper-cover");
-        $("#filterButton").click(function (e) {
-            e.preventDefault();
-            filterContainer.toggle();
-            paperCover.fadeToggle();
-        });
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+            let filterContainer = $("#filterContainer");
+            let paperCover = $("#paper-cover");
+            $("#filterButton").click(function (e) {
+                e.preventDefault();
+                filterContainer.toggle();
+                paperCover.fadeToggle();
+            });
 
-        paperCover.click(function () {
-            filterContainer.hide();
-            paperCover.fadeOut();
+            paperCover.click(function () {
+                filterContainer.hide();
+                paperCover.fadeOut();
+            });
+
+            $(".nav-search-types a.nav-link").click(function (e) {
+                e.preventDefault();
+
+                $(".nav-search-types a.nav-link.active").removeClass("active");
+                $(this).addClass("active");
+
+                let value = $(this).data('value');
+                $("#tabInput").val(value);
+
+                $("#paper-search-form").submit();
+            });
         });
     </script>
 {% endblock %}

@@ -241,6 +241,9 @@ a.invisible-link, a.invisible-link:hover {
     color: white;
     font-weight: bold;
     padding: 15px 15px 15px 15px;
+
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 }
 
 .nav-search-types .nav-item .nav-link:hover:not(.active) {
@@ -251,6 +254,8 @@ a.invisible-link, a.invisible-link:hover {
     color: #4c84d7;
     padding: 15px;
     background: #F5F5F5;
+
+
 }
 
 .nav-search-types .nav-link {
