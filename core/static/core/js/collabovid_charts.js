@@ -51,6 +51,7 @@ window.chartColors = {
                 ]
             },
             options: {
+                maintainAspectRatio: false,
                 scales: {
                     xAxes: [{
                         type: 'time',
@@ -82,7 +83,7 @@ window.chartColors = {
                         type: 'linear',
                         position: 'right',
                         scaleLabel: {
-                            labelString: '#Papers per day',
+                            labelString: 'Number of papers/day',
                             display: true,
                         },
 
@@ -132,6 +133,9 @@ window.chartColors = {
                     data: data,
                     backgroundColor: possible_colors.slice(0, hosts.length)
                 }]
+            },
+            options: {
+                maintainAspectRatio: false
             }
         });
 
@@ -173,6 +177,7 @@ window.chartColors = {
                     }]
                 },
                 options: {
+                    maintainAspectRatio: false,
                     legend: {
                         display: false
                     },
@@ -251,6 +256,7 @@ window.chartColors = {
                     }]
                 },
                 options: {
+                    maintainAspectRatio: false,
                     legend: {
                         display: false
                     },

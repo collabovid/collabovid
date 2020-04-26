@@ -12,7 +12,7 @@
                 data-live-search="true"
                 multiple="multiple">
             {% for category in categories %}
-                <option value="{{ category.name }}" selected>{{ category.name }}</option>
+                <option value="{{ category.name }}" {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
     </div>
@@ -34,9 +34,8 @@
     </div>
 </div>
 <div class="row">
-
     <div class="col-12">
-        <input autocomplete="off" name="published_at_start" id="start-date"/>
+        <input autocomplete="off" name="published_at_start" id="start-date" value="{{ form.start_date }}"/>
     </div>
 </div>
 <div class="row mt-3">
@@ -48,7 +47,7 @@
 </div>
 <div class="row">
     <div class="col-12">
-        <input autocomplete="off" name="published_at_end" id="end-date"/>
+        <input autocomplete="off" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
     </div>
 </div>
 
@@ -138,6 +137,22 @@
 
             search_query(form.serialize(), 1, false, function () {
                 window.Pagination.last_request = form.serialize();
+
+                let all_selected =  $("#chose-category option:not(:selected)").length === 0;
+
+                let categories_serialized = null;
+
+                if(all_selected)
+                {
+                    categories_serialized = $("#chose-category").attr("name") + "=all";
+                }
+                else {
+                    categories_serialized = $("#chose-category").serialize();
+                }
+
+                let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
+                    + form.find('input[name!=csrfmiddlewaretoken]').serialize() + "&" + categories_serialized;
+                window.history.pushState({path: url}, '', url);
             });
 
         });

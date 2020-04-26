@@ -83,4 +83,4 @@ class SearchEngine:
 
 
 def get_default_search_engine():
-    return SearchEngine([ExactSearch(), KeywordSearch(), SemanticSearch()])
+    return SearchEngine([ExactSearch(), KeywordSearch()])
