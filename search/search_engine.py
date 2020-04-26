@@ -68,7 +68,7 @@ class SearchEngine:
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
-    def search(self, query: str, categories: List, start_date=None, end_date=None, score_min=0.7):
+    def search(self, query: str, categories: List, start_date=None, end_date=None, score_min=0.6):
         paper_score_table = defaultdict(int)
         for search_component in self.search_pipeline:
             paper_results = search_component.find(query)

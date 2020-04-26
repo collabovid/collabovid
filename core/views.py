@@ -120,7 +120,7 @@ def search(request):
 
         categories = Category.objects.order_by('name')
 
-        if "all" in category_names:
+        if "all" in category_names or len(category_names) == 0:
             category_names = [category.name for category in categories]
 
         form = {
