@@ -45,17 +45,17 @@
 
                         {% if paper.abstract|length >= 420 %}
                             <div class="abstract-controls text-center">
-                                <a href="#"
-                                   class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
-                                   style="font-size: 10px; {% if extended %} display: none; {% endif %}">
+                                <button
+                                        class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
+                                        style="font-size: 10px; {% if extended %} display: none; {% endif %}">
                                     <i class='fas fa-arrow-circle-down'></i> show full abstract
-                                </a>
+                                </button>
 
-                                <a href="#"
-                                   class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
-                                   style="font-size: 10px; {% if not extended %} display: none; {% endif %}">
+                                <button
+                                        class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
+                                        style="font-size: 10px; {% if not extended %} display: none; {% endif %}">
                                     <i class='fas fa-arrow-circle-up'></i> hide full abstract
-                                </a>
+                                </button>
                             </div>
                         {% endif %}
                     </div>
@@ -77,14 +77,12 @@
                              aria-valuemax="100"></div>
                     </div>
                 {% endif %}
-                <a href="{{ paper.pdf_url }}">
-                    <button class="btn button-pdf mt-2 w-100"><i class="fa fa-file"></i> PDF</button>
+                <a href="{{ paper.pdf_url }}" class="btn button-pdf mt-2 w-100">
+                    <i class="fa fa-file"></i> PDF
                 </a>
-                <a href="{{ paper.url }}">
-                    <button class="btn button-host mt-2 w-100"><i
-                            class="fa fa-external-link-alt"></i>
-                        {{ paper.host.name }}
-                    </button>
+                <a href="{{ paper.url }}" class="btn button-host mt-2 w-100">
+                    <i class="fa fa-external-link-alt"></i>
+                    {{ paper.host.name }}
                 </a>
             </div>
 

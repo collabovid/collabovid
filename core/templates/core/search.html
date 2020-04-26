@@ -20,7 +20,8 @@
                                 </div>
                             </div>
 
-                            <input type="text" value="{{ form.search }}" name="search" class="border-left-0 form-control"
+                            <input type="text" value="{{ form.search }}" name="search"
+                                   class="border-left-0 form-control"
                                    placeholder="Find papers by their title, content or author">
                             <div class="input-group-append">
                                 <button class="btn btn-success" type="submit">Search</button>
@@ -35,15 +36,18 @@
                     <div class="col-10">
                         <ul class="nav nav-search-types nav-justified">
                             <li class="nav-item">
-                                <a class="nav-link {% if form.tab == "top" %}active{% endif %}" href="#" data-value="top">Top</a>
+                                <a class="nav-link {% if form.tab == "top" %}active{% endif %}" href="#"
+                                   data-value="top">Top</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link {% if form.tab == "newest" %}active{% endif %}" href="#" data-value="newest">Newest</a>
+                                <a class="nav-link {% if form.tab == "newest" %}active{% endif %}" href="#"
+                                   data-value="newest">Newest</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link {% if form.tab == "statistics" %}active{% endif %}" href="#" data-value="statistics">Statistics</a>
+                                <a class="nav-link {% if form.tab == "statistics" %}active{% endif %}" href="#"
+                                   data-value="statistics">Statistics</a>
                             </li>
                         </ul>
                     </div>
@@ -71,24 +75,23 @@
                 </div>
             </div>
         </div>
+    </form>
 
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div id="paper-container"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div id="paper-container"></div>
 
-                    <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5"
-                         style="display: none;">
-                        <i class="fas fa-circle-notch fa-spin"></i>
-                    </div>
-
-                    <nav id="pagination-container"></nav>
+                <div id="paper-loading-indicator" class="text-muted text-center fa-5x my-5"
+                     style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
                 </div>
 
+                <nav id="pagination-container"></nav>
             </div>
-        </div>
 
-    </form>
+        </div>
+    </div>
 
 {% endblock %}
 
@@ -109,15 +112,14 @@
                 filterContainer.toggle();
                 paperCover.fadeToggle();
 
-                if(filters_changed)
-                {
+                if (filters_changed) {
                     form.submit();
                     filters_changed = false;
                 }
             });
 
             filterContainer.find("input, select").change(function (e) {
-               filters_changed = true;
+                filters_changed = true;
             });
 
             paperCover.click(function () {
@@ -137,4 +139,5 @@
             });
         });
     </script>
+    {% include 'core/partials/_paper_card.html' with script=True html=False %}
 {% endblock %}
