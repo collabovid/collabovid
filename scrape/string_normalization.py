@@ -18,17 +18,12 @@ def remove_from_list(list: List[str], *patterns: str):
     return [el for el in list if not combined_regex.fullmatch(el)]
 
 
-def _remove(pattern: str, text: str, force_spaces: bool = False):
-    if force_spaces:
-        substituted = re.sub(rf'(^|\n){_HORIZONTAL_SPACE_PATTERN}*{pattern}{_HORIZONTAL_SPACE_PATTERN}*($|\n)', '\n',
-                             text)
-        substituted = re.sub(rf'(^|\n){_HORIZONTAL_SPACE_PATTERN}*{pattern}{_HORIZONTAL_SPACE_PATTERN}+', '\n', substituted)
-        substituted = re.sub(rf'{_HORIZONTAL_SPACE_PATTERN}+{pattern}{_HORIZONTAL_SPACE_PATTERN}*($|\n)', '\n', substituted)
-        substituted = re.sub(rf'{_HORIZONTAL_SPACE_PATTERN}+{pattern}{_HORIZONTAL_SPACE_PATTERN}+', ' ', substituted)
-    else:
-        substituted = re.sub(rf'(^|\n){_HORIZONTAL_SPACE_PATTERN}*{pattern}{_HORIZONTAL_SPACE_PATTERN}*($|\n)', '\n', text)
-        substituted = re.sub(rf'{_HORIZONTAL_SPACE_PATTERN}*{pattern}{_HORIZONTAL_SPACE_PATTERN}*', ' ', substituted)
-    return substituted
+def _remove(pattern: str, text: str):
+    return re.sub(rf'\s*{pattern}\s*', ' ', text)
+
+
+def _remove_space_delimited(pattern:str, text: str):
+    return re.sub(rf'(?:^|\s)\s*{pattern}(?:\s+{pattern}*)*\s*(?:\s|$)', ' ', text)
 
 
 def remove_punctation(text: str):
@@ -52,11 +47,11 @@ def remove_doi(text: str):
 
 
 def remove_separated_numbers(text: str):
-    return _remove(r'([-.,]|\d)+', text, force_spaces=True)
+    return _remove_space_delimited(r'([-.,]|\d)+', text)
 
 
-def remove(text: str, punctation: bool = False, parantheses: bool = False, quotes: bool = False, urls: bool = False,
-           doi: bool = False, numbers: bool = False):
+def remove(text: str, *patterns, punctation: bool = False, parantheses: bool = False, quotes: bool = False,
+           urls: bool = False, doi: bool = False, numbers: bool = False, breaks: bool = False):
     substituted_text = text
     if urls:
         substituted_text = remove_urls(substituted_text)
@@ -70,6 +65,10 @@ def remove(text: str, punctation: bool = False, parantheses: bool = False, quote
         substituted_text = remove_quotes(substituted_text)
     if numbers:
         substituted_text = remove_separated_numbers(substituted_text)
+
+    for pattern in patterns:
+        substituted_text = _remove_space_delimited(pattern, substituted_text)
+
     return substituted_text
 
 
@@ -108,6 +107,13 @@ def remove_biorxiv_header(text: str):
 
 
 def remove_linenumbers(lines: List[str]):
+    """
+    Gets a list of strings and remove line numbers.
+
+    Assumptions and notes:
+    - Assumes that line numbers are located at the end of each line
+    - Only removes line numbers, if line numbers are detected for at least 40% of all lines
+    """
     current_ln = 1
     sanitized_lines = []
 
@@ -119,8 +125,10 @@ def remove_linenumbers(lines: List[str]):
         else:
             sanitized_lines.append(line)
 
-    print(f"Removed {current_ln - 1} line numbers")
-    return sanitized_lines
+    if current_ln - 1 >= 0.4 * len(lines):
+        return sanitized_lines
+    else:
+        return lines
 
 
 def normalize_pdf_content(text: str):
