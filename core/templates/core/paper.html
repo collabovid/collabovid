@@ -24,13 +24,26 @@
             <div class="row d-flex flex-wrap align-items-center">
                 <div class="col-md-12">
                     <div class="card-block">
-                        {{ current_reference.0 }}
-                    </div>
+                        <p>
+                            {{ current_reference.0 }}
+                        </p>
+                        <p>
+                            {{ current_reference.2 }}
+                        </p>
                         {% if current_reference.1 != None %}
-                            <div class="card-block">
-                                <a href="{{ current_reference.1 }}">Link</a>
-                            </div>
+                        <p>
+                            <b>Title:</b> {{ current_reference.1.title }} <br>
+                            <b>Authors:</b> {{ current_reference.1.authors }} <br>
+                            <b>Publication Date:</b> {{ current_reference.1.publication_date }} <br>
+                            <b>Journal:</b> {{ current_reference.1.journal }} <br>
+                            <b>Link:</b> <a href="{{ current_reference.1.url }}">{{ current_reference.1.url }}</a>
+                        </p>
+                        {% else %}
+                        <p>
+                            Found no entry on PubMed
+                        </p>
                         {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
