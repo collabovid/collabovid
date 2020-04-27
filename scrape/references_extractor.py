@@ -1,13 +1,19 @@
-import re
 import random
+import re
 from time import sleep
-from typing import List
 
+import pymed
 import requests
+import scholarly
 from bs4 import BeautifulSoup
 from scholarly import Publication
 from tika import parser
-import scholarly
+from nltk import ngrams
+
+import scrape.string_normalization as stromalization
+
+_PUBMED_URL = 'https://www.ncbi.nlm.nih.gov/pubmed/{0}'
+_PUBMED = pymed.PubMed('corona-tracker', 'testmail')
 
 
 def blubber(soup):
@@ -52,21 +58,64 @@ def get_paper_url(query: str):
         return first_result.bib['url'] if 'url' in first_result.bib else None
 
 
-def remove_linenumbers(lines: List[str]):
-    current_ln = 1
+def get_pubmed_url(word_list: str):
+    if len(word_list) == 0:
+        return None
 
-    sanitized_lines = []
+    response = list(_PUBMED.query(' '.join(word_list)))
+    url = None
+    if len(response) == 1:
+        print("Found result")
+        return _PUBMED_URL.format(response[0].pubmed_id)
+    elif len(response) > 1:
+        print(f"Found {len(response)} results")
+        return None
+    else:
+        tengrams = list(ngrams(word_list, 10))
+        print(f"Test {len(tengrams)} 10-grams")
+        count = 1
+        for tengram in tengrams:
+            print(f"Try {count}. tengram")
+            sleep(3)
+            response = list(_PUBMED.query(' '.join(tengram)))
+            if len(response) == 1:
+                print("Found URL")
+                return _PUBMED_URL.format(response[0].pubmed_id)
+            elif len(response) > 1:
+                print(f"Found {len(response)} results")
+            else:
+                print(f"Found no result")
+            count += 1
+        return None
 
-    for line in lines:
-        if line.endswith(str(current_ln)):
-            number_length = len(str(current_ln))
-            sanitized_lines.append(line[:-number_length].strip())
-            current_ln +=1
-        else:
-            sanitized_lines.append(line)
-
-    print(f"Removed {current_ln - 1} line numbers")
-    return sanitized_lines
+        # max_tries = 50
+        # current_try = 1
+        # i = 10
+        #
+        # while current_try <= max_tries:
+        #     print(f"Try {current_try}")
+        #     parts = ngrams(word_list, i)
+        #     found_several = True
+        #
+        #     for part in parts:
+        #         current_try += 1
+        #         sleep(1)
+        #         response = list(_PUBMED.query(''.join(part)))
+        #         if len(response) == 1:
+        #             print(f"Found result in {current_try}. try")
+        #             return _PUBMED_URL.format(response[0].pubmed_id)
+        #         elif len(response) > 1:
+        #             print(f"Found {len(response)} results in {current_try}. try")
+        #         else:
+        #             found_several = False
+        #             print(f"Found")
+        #         if current_try >= max_tries:
+        #             return None
+        #
+        #     if found_several:
+        #         return None
+        #     i += 1
+        return None
 
 
 def extract_references(path: str):
@@ -77,35 +126,36 @@ def extract_references(path: str):
     else:
         raise
 
-    text = re.sub(
-        ' \. CC-BY(-NC-ND)? 4\.0 International licenseIt is made available under a \n'
-        '(is the )?author/funder, who has granted medRxiv a license to display the preprint in perpetuity\. \n'
-        '\n'
-        '( is the)?\(which was not peer-reviewed\) The copyright holder for this preprint \.\S*: medRxiv preprint \n'
-        '\n'
-        '\S*\n'
-        'http://creativecommons\.org/licenses/by(-nc-nd)?/4\.0/',
-        '',
-        text
-    )
-
-    text = re.sub(
-        'All rights reserved\. No reuse allowed without permission\. \n'
-        'The copyright holder for this preprint \(which was not peer-reviewed\) is the author/funder\.\. \S*: bioRxiv preprint \n'
-        '\n'
-        #'[^\n]\n'
-        'https://\S+',
-        '',
-        text
-    )
+    # text = re.sub(
+    #     ' \. CC-BY(-NC-ND)? 4\.0 International licenseIt is made available under a \n'
+    #     '(is the )?author/funder, who has granted medRxiv a license to display the preprint in perpetuity\. \n'
+    #     '\n'
+    #     '( is the)?\(which was not peer-reviewed\) The copyright holder for this preprint \.\S*: medRxiv preprint \n'
+    #     '\n'
+    #     '\S*\n'
+    #     'http://creativecommons\.org/licenses/by(-nc-nd)?/4\.0/',
+    #     '',
+    #     text
+    # )
+    #
+    # text = re.sub(
+    #     'All rights reserved\. No reuse allowed without permission\. \n'
+    #     'The copyright holder for this preprint \(which was not peer-reviewed\) is the author/funder\.\. \S*: bioRxiv preprint \n'
+    #     '\n'
+    #     #'[^\n]\n'
+    #     'https://\S+',
+    #     '',
+    #     text
+    # )
 
 # All rights reserved. No reuse allowed without permission.
     # The copyright holder for this preprint (which was not peer-reviewed) is the author/funder.. https://doi.org/10.1101/782409doi: bioRxiv preprint
     #
     # https://doi.org/10.1101/782409
 
+    text = stromalization.remove_medrxiv_header(stromalization.remove_biorxiv_header(text))
     lines = [line.strip() for line in text.split('\n') if line.strip() != '']
-    lines = remove_linenumbers(lines)
+    lines = stromalization.remove_linenumbers(lines)
 
     reference_keyword_idx = [idx for idx, line in enumerate(lines) if re.match(r'^references:?( \d+)?$', line.lower())]
 
@@ -159,12 +209,31 @@ def extract_references(path: str):
         except:
             references.append(current)
 
-    # refs_with_url = []
-    # for idx, ref in enumerate(references):
-    #     print(f"{idx}: {ref}")
-    #     refs_with_url.append((ref, get_paper_url(ref)))
+    for idx, ref in enumerate(references):
+        print(f"{idx}: {ref}")
 
-    return [(ref, None) for ref in references]
+    # refs_with_url = []
+    normalized_refs = []
+    for idx, ref in enumerate(references):
+         normalized_ref = stromalization.remove(ref, punctation=True, parantheses=True, quotes=True, urls=True,
+                                                doi=True, numbers=True)
+
+         print(f"{idx}: {normalized_ref}")
+
+         word_list = normalized_ref.split()
+         word_list = stromalization.remove_from_list(
+             word_list,
+             'et al',
+             'vol',
+             'pp',
+             r'\S{1,2}',
+             r'([- .,]|\d)+',
+         )
+
+         #refs_with_url.append((ref, get_paper_url(ref)))
+         normalized_refs.append((' '.join(word_list), get_pubmed_url(word_list)))
+
+    return normalized_refs
 
 
 if __name__ == '__main__':
