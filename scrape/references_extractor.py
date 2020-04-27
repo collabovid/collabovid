@@ -1,5 +1,6 @@
 import random
 import re
+from collections import defaultdict
 from time import sleep
 
 import pymed
@@ -16,57 +17,35 @@ _PUBMED_URL = 'https://www.ncbi.nlm.nih.gov/pubmed/{0}'
 _PUBMED = pymed.PubMed('corona-tracker', 'testmail')
 
 
-def blubber(soup):
-    while True:
-        for row in soup.find_all('div', 'gs_or'):
-            yield Publication(row, 'scholar')
-        else:
-            break
+def _pubmed_query(query: str):
+    sleep(1)
+    return list(_PUBMED.query(query))
 
 
-def get_paper_url(query: str):
-    base_url = 'https://scholar.google.com/scholar?q='
-    url = f'{base_url}{query}'
+def _to_dict(pubmed_obj):
+    data = {}
 
-    sleep(random.randrange(0, 5))
-    response = requests.get(url)
+    data['url'] = _PUBMED_URL.format(pubmed_obj.pubmed_id.split()[0])
+    data['title'] = pubmed_obj.title
+    data['journal'] = pubmed_obj.journal
+    authors = ', '.join([f"{author['firstname']} {author['lastname']}" for author in pubmed_obj.authors])
+    if len(authors) > 200:
+        authors = f"{authors[:197]}..."
+    data['authors'] = authors
+    data['publication_date'] = str(pubmed_obj.publication_date)
 
-    if response.status_code != 200:
-        print(f"Request error: {response.status_code} ({response.reason})")
-        return None
-
-    if 'Bitte zeigen Sie uns, dass Sie kein Roboter sind' in response.text:
-        print("Roboter Fick")
-        return None
-
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    search_result = blubber(soup)
-
-    try:
-        first_result = next(search_result)
-    except StopIteration:
-        print("No search result found on Scholar")
-        return None
-
-    try:
-        next(search_result)
-        print("More than one search result found on Scholar")
-        return None
-    except StopIteration:
-        print("Found paper on Scholar")
-        return first_result.bib['url'] if 'url' in first_result.bib else None
+    return data
 
 
 def get_pubmed_url(word_list: str):
     if len(word_list) == 0:
         return None
 
-    response = list(_PUBMED.query(' '.join(word_list)))
-    url = None
+    response = _pubmed_query(' '.join(word_list))
     if len(response) == 1:
         print("Found result")
-        return _PUBMED_URL.format(response[0].pubmed_id)
+
+        return _to_dict(response[0])
     elif len(response) > 1:
         print(f"Found {len(response)} results")
         return None
@@ -77,44 +56,15 @@ def get_pubmed_url(word_list: str):
         for tengram in tengrams:
             print(f"Try {count}. tengram")
             sleep(3)
-            response = list(_PUBMED.query(' '.join(tengram)))
+            response = _pubmed_query(' '.join(tengram))
             if len(response) == 1:
                 print("Found URL")
-                return _PUBMED_URL.format(response[0].pubmed_id)
+                return _to_dict(response[0])
             elif len(response) > 1:
                 print(f"Found {len(response)} results")
             else:
                 print(f"Found no result")
             count += 1
-        return None
-
-        # max_tries = 50
-        # current_try = 1
-        # i = 10
-        #
-        # while current_try <= max_tries:
-        #     print(f"Try {current_try}")
-        #     parts = ngrams(word_list, i)
-        #     found_several = True
-        #
-        #     for part in parts:
-        #         current_try += 1
-        #         sleep(1)
-        #         response = list(_PUBMED.query(''.join(part)))
-        #         if len(response) == 1:
-        #             print(f"Found result in {current_try}. try")
-        #             return _PUBMED_URL.format(response[0].pubmed_id)
-        #         elif len(response) > 1:
-        #             print(f"Found {len(response)} results in {current_try}. try")
-        #         else:
-        #             found_several = False
-        #             print(f"Found")
-        #         if current_try >= max_tries:
-        #             return None
-        #
-        #     if found_several:
-        #         return None
-        #     i += 1
         return None
 
 
@@ -125,33 +75,6 @@ def extract_references(path: str):
         text = parsed_data['content']
     else:
         raise
-
-    # text = re.sub(
-    #     ' \. CC-BY(-NC-ND)? 4\.0 International licenseIt is made available under a \n'
-    #     '(is the )?author/funder, who has granted medRxiv a license to display the preprint in perpetuity\. \n'
-    #     '\n'
-    #     '( is the)?\(which was not peer-reviewed\) The copyright holder for this preprint \.\S*: medRxiv preprint \n'
-    #     '\n'
-    #     '\S*\n'
-    #     'http://creativecommons\.org/licenses/by(-nc-nd)?/4\.0/',
-    #     '',
-    #     text
-    # )
-    #
-    # text = re.sub(
-    #     'All rights reserved\. No reuse allowed without permission\. \n'
-    #     'The copyright holder for this preprint \(which was not peer-reviewed\) is the author/funder\.\. \S*: bioRxiv preprint \n'
-    #     '\n'
-    #     #'[^\n]\n'
-    #     'https://\S+',
-    #     '',
-    #     text
-    # )
-
-# All rights reserved. No reuse allowed without permission.
-    # The copyright holder for this preprint (which was not peer-reviewed) is the author/funder.. https://doi.org/10.1101/782409doi: bioRxiv preprint
-    #
-    # https://doi.org/10.1101/782409
 
     text = stromalization.remove_medrxiv_header(stromalization.remove_biorxiv_header(text))
     lines = [line.strip() for line in text.split('\n') if line.strip() != '']
@@ -215,8 +138,19 @@ def extract_references(path: str):
     # refs_with_url = []
     normalized_refs = []
     for idx, ref in enumerate(references):
-         normalized_ref = stromalization.remove(ref, punctation=True, parantheses=True, quotes=True, urls=True,
-                                                doi=True, numbers=True)
+         normalized_ref = stromalization.remove(
+             ref,
+             'et al',
+             'vol',
+             'pp',
+             punctation=True,
+             parantheses=True,
+             quotes=True,
+             urls=True,
+             doi=True,
+             numbers=True,
+             breaks=True
+         )
 
          print(f"{idx}: {normalized_ref}")
 
@@ -230,13 +164,7 @@ def extract_references(path: str):
              r'([- .,]|\d)+',
          )
 
-         #refs_with_url.append((ref, get_paper_url(ref)))
-         normalized_refs.append((' '.join(word_list), get_pubmed_url(word_list)))
+         result = get_pubmed_url(word_list)
+         normalized_refs.append((ref, result, normalized_ref))
 
     return normalized_refs
-
-
-if __name__ == '__main__':
-    search_query = scholarly.search_pubs_query("Zou L, Ruan F, Huang M, et al. SARS-CoV-2 Viral Load in Upper Respiratory Specimens of Infected Patients. New England Journal of Medicine 2020;382:1177-9")
-    a = next(search_query)
-    pass

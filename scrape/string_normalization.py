@@ -23,7 +23,7 @@ def _remove(pattern: str, text: str):
 
 
 def _remove_space_delimited(pattern:str, text: str):
-    return re.sub(rf'(?:^|\s)\s*{pattern}(?:\s+{pattern}*)*\s*(?:\s|$)', ' ', text)
+    return re.sub(rf'(?:^|\s)\s*{pattern}(?:\s+{pattern})*\s*(?:\s|$)', ' ', text)
 
 
 def remove_punctation(text: str):
