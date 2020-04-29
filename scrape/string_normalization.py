@@ -2,7 +2,7 @@ import re
 from typing import List
 
 _HORIZONTAL_SPACE_PATTERN = r'[ \t]'
-_PUNCTATION_CHARS_PATTERN = r'[.,;:(){}&/]'
+_PUNCTATION_CHARS_PATTERN = r'[.,;:(){}&/|]'
 _PARANTHESES_PATTERN = r'[\[\](){}]'
 _QUOTES_PATTERN = r'[\'"”“]'
 _DOI_PATTERN = r'(doi:)?10\.\d+/\S+'
@@ -46,10 +46,6 @@ def remove_doi(text: str):
     return _remove(_DOI_PATTERN, text)
 
 
-def remove_separated_numbers(text: str):
-    return _remove_space_delimited(r'([-.,]|\d)+', text)
-
-
 def remove(text: str, *patterns, punctation: bool = False, parantheses: bool = False, quotes: bool = False,
            urls: bool = False, doi: bool = False, numbers: bool = False, breaks: bool = False):
     substituted_text = text
@@ -63,8 +59,6 @@ def remove(text: str, *patterns, punctation: bool = False, parantheses: bool = F
         substituted_text = remove_parantheses(substituted_text)
     if quotes:
         substituted_text = remove_quotes(substituted_text)
-    if numbers:
-        substituted_text = remove_separated_numbers(substituted_text)
 
     for pattern in patterns:
         substituted_text = _remove_space_delimited(pattern, substituted_text)

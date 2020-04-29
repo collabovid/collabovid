@@ -143,6 +143,8 @@ def extract_references(path: str):
              'et al',
              'vol',
              'pp',
+             '\S{1,2}',
+             '([- .,]|\d)+',
              punctation=True,
              parantheses=True,
              quotes=True,
@@ -164,7 +166,10 @@ def extract_references(path: str):
              r'([- .,]|\d)+',
          )
 
-         result = get_pubmed_url(word_list)
+         if any(x in normalized_ref for x in ('arxiv', 'medrxiv', 'biorxiv')):
+             result = None
+         else:
+             result = get_pubmed_url(word_list)
          normalized_refs.append((ref, result, normalized_ref))
 
     return normalized_refs
