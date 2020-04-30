@@ -13,9 +13,11 @@ PAPER_PAGE_COUNT = 10
 
 def home(request):
     if request.method == "GET":
-        categories = Category.objects.order_by('name')
+        statistics = Statistics(Paper.objects.all())
 
-        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
+        most_recent_papers = Paper.objects.order_by('-published_at')[:5]
+        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'statistics': statistics,
+                                                  'most_recent_papers': most_recent_papers})
 
 
 def about(request):

@@ -1,0 +1,65 @@
+
+div.mentions-container .card-image img {
+    max-height: 100%;
+    max-width: 80%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+div.mentions-container .card-image {
+    padding: 5px;
+    height: 150px;
+    position: relative;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    cursor: pointer;
+}
+
+div.mentions-container .card-image.bmbf {
+    background: #fff6dc;
+}
+
+div.mentions-container .card-image.solution-enabler {
+    background: #c78a82;
+}
+
+div.mentions-container .card-image.covid19-global {
+    background: #4e5f7d;
+}
+
+div.mentions-container .card-image.tech-takes-on-covid19 {
+    background: #537d56;
+}
+
+div.mentions-container .card-image.hack-quarantine {
+    background: #7d5578;
+}
+
+div.mentions-container div.card.expandable
+{
+    position: relative;
+}
+div.mentions-container div.card.expandable div.card-body
+{
+    position: absolute;
+    background: white;
+    display: none;
+    top: 150px;
+
+    border-bottom-left-radius: 0.25rem;
+    border-bottom-right-radius: 0.25rem;
+    border-left: 1px solid rgba(0, 0, 0, 0.125);
+    border-right: 1px solid rgba(0, 0, 0, 0.125);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+div.mentions-container div.card-body span.badge {
+    margin-top: -10px;
+    margin-right: -8px;
+}

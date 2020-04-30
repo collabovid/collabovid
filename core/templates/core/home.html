@@ -79,12 +79,194 @@
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
+
+    <div class="container">
+
+        <div class="row mt-5 mb-4">
+            <div class="col-12">
+                <h2 class="display-4 font-weight-light">Our dataset</h2>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 text-muted">
+                The database contains all COVID-19/SARS-CoV-2-related papers from
+                <a href="https://connect.medrxiv.org/relate/content/181">medRxiv</a> and
+                <a href="https://connect.biorxiv.org/relate/content/181">bioRxiv</a>.
+                The dataset is updated several times a day.
+                We are working hard on including new data sources.
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card w-100 shadow rounded bg-white p-4 mt-3">
+                    <div class="card-body p-0">
+                        <div>
+                            <h3>Published Papers over Time</h3>
+                        </div>
+                        <div>
+                            <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+
+            <div class="col-lg-6 col-md-6 col-12">
+                <div class="card w-100 shadow rounded bg-white p-4">
+
+                    <h3>Most recent papers</h3>
+
+                    <div class="card-body">
+                        <ul class="list-group">
+                            {% for paper in most_recent_papers %}
+                                <li class="list-group-item">
+                                    {{ paper.title }}
+                                    <div class="text-muted small mt-2">
+                                        {{ paper.published_at }} &middot; {{ paper.host.name }}
+                                        <a href="{{ paper.pdf_url }}" class="float-right">
+                                            Read more
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-6 col-12">
+
+                <div class="card w-100 shadow rounded bg-white p-4">
+
+                    <h3>Data</h3>
+
+                    <div class="card-body">
+
+                        <table class="table table-striped">
+
+                            <tbody>
+                            <tr>
+                                <td>Papers:</td>
+                                <td class="text-center">{{ statistics.paper_count }}</td>
+                            </tr>
+                            <tr>
+                                <td>Topics:</td>
+                                <td class="text-center">{{ statistics.topic_count }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Dataset Sources:</td>
+                                <td class="text-center">{{ statistics.paper_host_count }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Papers from today:</td>
+                                <td class="text-center">{{ statistics.paper_today_count }}</td>
+                            </tr>
+
+                            <tr>
+                                <td>Papers from last week:</td>
+                                <td class="text-center">{{ statistics.papers_last_week }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="mt-5">
+                            <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5 mb-4">
+            <div class="col-12">
+                <h2 class="display-4 font-weight-light">Partners</h2>
+            </div>
+        </div>
+
+        <div class="mentions-container">
+            <div class="row">
+                <div class="col-12 col-md-4">
+
+                    <div class="card">
+                        <div class="card-image bmbf">
+                            <img class="card-img-top"
+                                 src="{% static "core/img/partners/bmbf-long.png" %}">
+
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title">BMBF</h5>
+                            <p class="card-text">
+                                Collabovid was selected for a funding program of the Federal Ministry of Education and
+                                Research in Germany. The financial aid helps us to improve the platform and
+                                keep the page running.
+                            </p>
+                            <a href="#" class="btn btn-light float-right">
+                                Read more
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+
+                    <div class="card">
+                        <div class="card-image solution-enabler">
+                            <img class="card-img-top"
+                                 src="{% static "core/img/partners/solution-enabler.png" %}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Solution Enabler</h5>
+                            <p class="card-text">
+                                The Solution Enabler is an implementation program for teams with promising
+                                solutions
+                                in times of COVID-19.
+                                The program will initially run over a six-month period. However, the goal is to
+                                implement the solutions as quickly as possible.
+                            </p>
+                            <a href="https://wirvsvirushackathon.org/weiterfuehrung-2/"
+                               class="btn btn-light float-right">
+                                Read more
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
 {% endblock %}
 
 {% block script %}
+    <script src="{% static "core/include/moment.js/moment.js" %}"></script>
+
+    <script src="{% static "core/include/chart.js/Chart.min.js" %}"></script>
+    <script src="{% static "core/include/palette.js/palette.js" %}"></script>
+
+    <script src="{% static "core/js/collabovid_charts.js" %}"></script>
+
+    <script>
+        $(document).ready(function () {
+            let published_at_data = JSON.parse('{{ statistics.published_at_data|escapejs }}');
+            let paper_host_data = JSON.parse('{{ statistics.paper_host_data|escapejs }}');
+
+            $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
+            $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
+        });
+
+    </script>
 
 {% endblock %}
 
 {% block css %}
-
+    <link rel="{% static "core/include/chart.js/Chart.min.css" %}" type="text/css">
 {% endblock %}

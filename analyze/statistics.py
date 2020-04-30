@@ -8,7 +8,7 @@ from collections import defaultdict
 from django.db.models import Count, QuerySet
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from django.utils.timezone import datetime
+from django.utils.timezone import datetime, timedelta
 
 
 class Statistics:
@@ -85,3 +85,13 @@ class Statistics:
     @property
     def author_count(self):
         return self._papers.values('authors').distinct().count()
+
+    @property
+    def paper_today_count(self):
+        date_from = datetime.now() - timedelta(days=1)
+        return self._papers.filter(published_at__gt=date_from).count()
+
+    @property
+    def papers_last_week(self):
+        date_from = datetime.now() - timedelta(days=7)
+        return self._papers.filter(published_at__gt=date_from).count()
