@@ -138,7 +138,6 @@ def _update_detailed_information(db_article: Paper, log_function: Callable[[Tupl
         updated = True
 
     soup = BeautifulSoup(response.text, 'html.parser')
-    authors = _extract_authors_information(soup)
     if not db_article.pdf_url:
         db_article.pdf_url = db_article.host.url + _extract_relative_pdf_url(soup)
         updated = True
@@ -162,7 +161,8 @@ def _update_detailed_information(db_article: Paper, log_function: Callable[[Tupl
 
     db_article.save()  # Has to be saved before adding authors
 
-    if db_article.authors.count() == 0:
+    authors = _extract_authors_information(soup)
+    if len(authors) != 0:
         db_article.authors.clear()
         for author in authors:
             db_author, created = Author.objects.get_or_create(
