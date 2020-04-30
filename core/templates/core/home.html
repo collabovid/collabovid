@@ -173,7 +173,7 @@
                             {% for paper in most_recent_papers %}
 
                                 <img style="max-height: 300px" class="img-fluid"
-                                     src="{% if paper.preview_image.is_exists %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
+                                     src="{% if paper.preview_image %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
 
                             {% endfor %}
                         </div>
