@@ -7,7 +7,7 @@ Paper
 - Title
 - Abstract (maybe empty)
 - InternalSource -> CORD19, xXivScraper
-- Datasource -> PMC, xXiv, Elsevier, WHO
+- Datasource/PaperHost -> PMC, xXiv, Elsevier, WHO
 - Journal (maybe empty, e.g. for preprints)
 - Authors
 - Publish date (shouldn't be empty)
