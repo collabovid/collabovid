@@ -1,7 +1,6 @@
 <select class="form-control w-100" name="sorted_by" id="sorted-by">
     {% if best_matching %}
-        <option value="matching" selected>Relevance</option>
+        <option value="relevance" selected>Relevance</option>
     {% endif %}
     <option value="newest" {% if not best_matching %}selected{% endif %}>Newest</option>
-    <option value="title">Title</option>
 </select>

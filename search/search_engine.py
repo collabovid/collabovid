@@ -27,16 +27,17 @@ class ScoreSortPaginator(Paginator):
 
 
 class SearchResult:
-    def __init__(self, paper_score_items, categories, start_date=None, end_date=None):
+    def __init__(self, paper_score_items, categories, start_date=None, end_date=None, topics=None):
         self.paper_score_items = paper_score_items
         self.categories = categories
         self.start_date = start_date
         self.end_date = end_date
         self.paper_dois = [doi for doi, _ in self.paper_score_items]
+        self.topics = topics
 
     def paginator_ordered_by(self, criterion, page_count=10):
-        if criterion == Paper.SORTED_BY_TITLE:
-            paginator = Paginator(self.papers.order_by("title"), page_count)
+        if criterion == Paper.SORTED_BY_TOPIC_SCORE:
+            paginator = Paginator(self.papers.order_by("-topic_score"), page_count)
         elif criterion == Paper.SORTED_BY_NEWEST:
             paginator = Paginator(self.papers.order_by("-published_at"), page_count)
         elif criterion == Paper.SORTED_BY_SCORE:
@@ -61,6 +62,9 @@ class SearchResult:
 
         if self.end_date:
             papers = papers.filter(published_at__lte=self.end_date)
+
+        if self.topics:
+            papers = papers.filter(topic__in=self.topics)
         return papers
 
 
@@ -68,7 +72,7 @@ class SearchEngine:
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
-    def search(self, query: str, categories: List, start_date=None, end_date=None, score_min=0.6):
+    def search(self, query: str, categories: List, start_date=None, end_date=None, topics=None, score_min=0.6):
         paper_score_table = defaultdict(int)
         for search_component in self.search_pipeline:
             paper_results = search_component.find(query)
@@ -79,7 +83,7 @@ class SearchEngine:
         for doi, score in paper_score_table.items():
             if score >= score_min:
                 paper_scores_items.append((doi, score))
-        return SearchResult(paper_scores_items, categories, start_date, end_date)
+        return SearchResult(paper_scores_items, categories, start_date, end_date, topics)
 
 
 def get_default_search_engine():

@@ -44,7 +44,7 @@ class PaperData(models.Model):
     content = models.TextField(null=True, default=None)
 
 class Paper(models.Model):
-    SORTED_BY_TITLE = 0
+    SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
@@ -83,54 +83,3 @@ class Paper(models.Model):
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
-
-    @staticmethod
-    def sort_papers(papers, sorted_by, score_field="topic_score"):
-
-        if sorted_by == Paper.SORTED_BY_TITLE:
-            papers = papers.order_by("title")
-        elif sorted_by == Paper.SORTED_BY_NEWEST:
-            papers = papers.order_by("-published_at")
-        elif sorted_by == Paper.SORTED_BY_SCORE:
-            papers = papers.order_by("-"+score_field)
-        else:
-            logger = logging.getLogger(__name__)
-            logger.warning("Unknown sorted by" + sorted_by)
-
-        return papers
-
-    @staticmethod
-    def get_paper_for_query(search_text, start_date, end_date, categories, topics, sorted_by=SORTED_BY_TITLE):
-        try:
-            start_date = parse_date(start_date)
-        except ValueError:
-            start_date = None
-
-        try:
-            end_date = parse_date(end_date)
-        except ValueError:
-            end_date = None
-
-        search_query = Q()  # empty Q object
-        words = [word for word in re.split(r"[^A-Za-z1-9']+", search_text) if len(word) > 0]
-
-        if len(words) > 0:
-            for word in words:
-                search_query |= Q(title__icontains=word)
-        else:
-            search_query = Q(title__icontains='')
-
-        papers = Paper.objects.filter(
-            Q(topic__in=topics) & Q(category__in=categories) & (search_query |
-                                                                Q(authors__first_name__icontains=search_text) |
-                                                                Q(authors__last_name__icontains=search_text))
-        ).distinct()
-
-        if start_date:
-            papers = papers.filter(published_at__gte=start_date)
-
-        if end_date:
-            papers = papers.filter(published_at__lte=end_date)
-
-        return Paper.sort_papers(papers, sorted_by)
-
