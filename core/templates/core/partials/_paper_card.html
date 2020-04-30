@@ -67,15 +67,32 @@
                 <div class="clearfix mb-3"></div>
 
                 {% if show_score %}
-                    <div class="progress">
 
-                        <div class="progress-bar"
-                             role="progressbar"
-                             style="width: {{ score|calculate_score:search_score_limit }}%; background: {{ score|calculate_score:search_score_limit|progress_color }};"
-                             aria-valuenow="{{ score|calculate_score:search_score_limit }}"
-                             aria-valuemin="0"
-                             aria-valuemax="100"></div>
+                    <div class="progress-wrapper">
+                        <a href="#" class="help text-muted small"
+                           data-container="body"
+                           data-toggle="popover"
+                           data-placement="left"
+                           data-trigger="focus"
+                           data-title="Score: {{ score }}"
+                           onclick="return false"
+                           data-content="The score ranges from 0 to 100 and indicates how well this publication fits the given topic."
+                        ><i class="fas fa-question-circle"></i>
+                        </a>
+
+                        <div class="progress">
+
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width: {{ score|calculate_score:search_score_limit }}%; background: {{ score|calculate_score:search_score_limit|progress_color }};"
+                                 aria-valuenow="{{ score|calculate_score:search_score_limit }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+
+
+                        </div>
                     </div>
+
                 {% endif %}
                 <a href="{{ paper.pdf_url }}" class="btn button-pdf mt-2 w-100">
                     <i class="fa fa-file"></i> PDF
@@ -88,6 +105,10 @@
 
         </div>
     </div>
+
+    <script>
+        $(".progress-wrapper .help").popover();
+    </script>
 {% elif script %}
     <script type="text/javascript">
         $(document).ready(function () {

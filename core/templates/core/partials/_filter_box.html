@@ -4,7 +4,7 @@
         <label for="chose-category">Choose a category:</label>
     </div>
 </div>
-<div class="row">
+<div class="row align-items-center">
     <div class="col-md-9 col-sm-12">
         <select name="categories"
                 id="chose-category"
@@ -12,16 +12,18 @@
                 data-live-search="true"
                 multiple="multiple">
             {% for category in categories %}
-                <option value="{{ category.name }}" {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
+                <option value="{{ category.name }}"
+                        {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
             {% endfor %}
         </select>
     </div>
 
-    <div class="col-md-3 col-sm-12">
-        <a href="#" id="toggle-category-select"
-           class="btn btn-secondary delete d-xl-inline-block d-block"
-           data-text-switch="<i class='fas fa-plus'></i>">
-            <i class='fas fa-times'></i>
+    <div class="col-md-3 col-sm-12 px-0 py-0">
+        <a href="#"
+           id="toggle-category-select"
+           class="small delete"
+           data-text-switch="Select all">
+            Deselect all
         </a>
     </div>
 </div>
@@ -53,6 +55,8 @@
 
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
+        window.formAjaxAllowed = true;
+
         let indicator = $("#{{ indicator_id }}");
         let paper_container = $("#{{ result_container_id }}");
         let form = $("#{{ form_id }}");
@@ -72,10 +76,10 @@
 
             if ($(this).hasClass('delete')) {
                 chose_category_select.find('option').attr("selected", false);
-                $(this).removeClass('delete').removeClass('btn-secondary').addClass('add').addClass('btn-success');
+                $(this).removeClass('delete').addClass('add');
             } else if ($(this).hasClass('add')) {
                 chose_category_select.find('option').attr("selected", "selected");
-                $(this).removeClass('add').removeClass('btn-success').addClass('delete').addClass('btn-secondary');
+                $(this).removeClass('add').addClass('delete');
             }
 
             $(this).data("text-switch", old_text);
@@ -133,28 +137,36 @@
         form.submit(function (e) {
             e.preventDefault();
 
+            if (!window.formAjaxAllowed) {
+                return;
+            }
+
+            window.formAjaxAllowed = false;
+            $('.nav-search-types a.nav-link').addClass('disabled');
+
             pagination_container.hide();
 
             search_query(form.serialize(), 1, false, function () {
                 window.Pagination.last_request = form.serialize();
 
-                let all_selected =  $("#chose-category option:not(:selected)").length === 0;
+                let all_selected = $("#chose-category option:not(:selected)").length === 0;
 
                 let categories_serialized = null;
 
-                if(all_selected)
-                {
+                if (all_selected) {
                     categories_serialized = $("#chose-category").attr("name") + "=all";
-                }
-                else {
+                } else {
                     categories_serialized = $("#chose-category").serialize();
                 }
 
                 let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
                     + form.find('input[name!=csrfmiddlewaretoken]').serialize() + "&" + categories_serialized;
                 window.history.pushState({path: url}, '', url);
-            });
 
+                window.formAjaxAllowed = true;
+
+                $('.nav-search-types a.nav-link').removeClass('disabled');
+            });
         });
 
         {% if load_default %}

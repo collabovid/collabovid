@@ -129,6 +129,11 @@
             $(".nav-search-types a.nav-link").click(function (e) {
                 e.preventDefault();
 
+                if($(this).hasClass('disabled'))
+                {
+                    return;
+                }
+
                 $(".nav-search-types a.nav-link.active").removeClass("active");
                 $(this).addClass("active");
 
@@ -137,6 +142,7 @@
 
                 form.submit();
             });
+
         });
     </script>
     {% include 'core/partials/_paper_card.html' with script=True html=False %}
