@@ -1,8 +1,3 @@
-import django
-
-django.setup()
-# import json
-
 import re
 import arxiv
 
