@@ -159,18 +159,20 @@ window.chartColors = {
 
         let topics = [];
         let data = [];
+        let labels_nulls = [];
 
         let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue, chartColors.orange, chartColors.purple, chartColors.yellow, chartColors.grey, chartColors.limegreen, chartColors.pink];
 
         Object.keys(plugin.settings.plot_data).forEach(function (key) {
             topics.push(key);
             data.push(plugin.settings.plot_data[key]);
+            labels_nulls.push(0);
         });
 
         return new Chart(plugin, {
-                type: "doughnut",
+                type: "bar",
                 data: {
-                    labels: topics,
+                    labels: labels_nulls,
                     datasets: [{
                         data: data,
                         backgroundColor: possible_colors.slice(0, topics.length)
@@ -180,6 +182,20 @@ window.chartColors = {
                     maintainAspectRatio: false,
                     legend: {
                         display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: false
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            },
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Number of papers'
+                            }
+                        }]
                     },
                     tooltips: {
                         mode: 'single',
@@ -211,7 +227,11 @@ window.chartColors = {
                                 }
 
                                 return output;
+                            },
+
+                            title: function () {
                             }
+
                         }
                     }
                 }

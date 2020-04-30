@@ -84,8 +84,8 @@
 
                             <div class="progress-bar"
                                  role="progressbar"
-                                 style="width: {{ score|calculate_score:search_score_limit }}%; background: {{ score|calculate_score:search_score_limit|progress_color }};"
-                                 aria-valuenow="{{ score|calculate_score:search_score_limit }}"
+                                 style="width: {{ score }}%; background: {{ score|progress_color }};"
+                                 aria-valuenow="{{ score }}"
                                  aria-valuemin="0"
                                  aria-valuemax="100"></div>
 

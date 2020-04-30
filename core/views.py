@@ -23,13 +23,10 @@ def about(request):
 
 
 def topic(request, id):
-    # TODO: Adapt search
     topic = get_object_or_404(Topic, pk=id)
 
     if request.method == "GET":
-        categories = set()
-        for paper in topic.papers.all():
-            categories.add(paper.category)
+        categories = Category.objects.filter(papers__topic=topic).distinct()
 
         return render(request, "core/topic.html",
                       {'topic': topic,
@@ -74,7 +71,7 @@ def topic(request, id):
             page_obj = None
 
         return render(request, "core/partials/_search_results.html",
-                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
+                      {'papers': page_obj, 'show_score': True})
 
     return HttpResponseNotFound()
 
@@ -142,7 +139,7 @@ def search(request):
         search_engine = get_default_search_engine()
 
         search_result = search_engine.search(search_query, categories=category_names, start_date=start_date,
-                                             end_date=end_date)
+                                             end_date=end_date, score_min=0.65)
 
         if tab == "statistics":
             statistics = Statistics(search_result.papers)
@@ -163,5 +160,4 @@ def search(request):
                 page_obj = None
 
             return render(request, "core/partials/_search_results.html", {'papers': page_obj,
-                                                                          'search_score_limit': 0,
-                                                                          'show_topic_score': False, })
+                                                                          'show_score': False, })
