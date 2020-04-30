@@ -18,6 +18,14 @@ class PaperHost(models.Model):
     url = models.URLField()
 
 
+class DataSource(models.Model):
+    name = models.CharField(max_length=120)
+
+
+class ScrapeMethod(models.Model):
+    name = models.CharField(max_length=120)
+
+
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -54,8 +62,12 @@ class Paper(models.Model):
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
-    category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
+    datasource = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
+                                   default=None, )
+    scrape_method = models.ForeignKey(ScrapeMethod, related_name="papers", on_delete=models.CASCADE, null=True,
+                                      default=None)
     version = models.IntegerField(default=1, null=False)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
@@ -65,6 +77,7 @@ class Paper(models.Model):
                               null=True,
                               default=None,
                               on_delete=models.SET_DEFAULT)
+    covid_related = models.BooleanField(null=True, default=None)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
