@@ -1,0 +1,25 @@
+Paper
+------
+- id
+    - artificial PK?
+    - "natural" id -> DOI, arXiv id, etc. (WHO articles have no id -> maybe null)
+    - Sometimes PMC id and Microsoft Academic id
+- Title
+- Abstract (maybe empty)
+- InternalSource -> CORD19, xXivScraper
+- Datasource -> PMC, xXiv, Elsevier, WHO
+- Journal (maybe empty, e.g. for preprints)
+- Authors
+- Publish date (shouldn't be empty)
+- URL
+- Version -> default 1
+- Category -> null for CORD19 dataset
+- Covid_related -> True, iff COVID-19, etc. is in title or abstract (or content)
+- PDF_SHA
+
+
+Author
+------
+- id (artificial)
+- lastname
+- firstname
