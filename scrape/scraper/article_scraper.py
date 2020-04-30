@@ -38,7 +38,7 @@ class ArticleScraper(object):
         db_article, _ = Paper.objects.get_or_create(doi=doi)
         db_article.title = title
         db_article.abstract = abstract
-        db_article.scrape_method = self._get_scrape_method()
+        db_article.data_source = self._get_scrape_method()
         db_article.save()
         db_article.authors = self._get_or_create_authors(authors)
 

@@ -6,7 +6,7 @@ from typing import Callable, List, Dict, Tuple, Any, Optional
 from django.utils.dateparse import parse_datetime
 
 from django.utils import timezone
-from data.models import Author, Paper, PaperHost, ScrapeMethod
+from data.models import Author, Paper, PaperHost, DataSource
 
 
 class _AuthorsNotExtractableException(Exception):
@@ -76,7 +76,8 @@ def _update_detailed_information(db_article: Paper, article: Dict,
                                                          url='https://www.arxiv.org')
     db_article.url = article['id']
     db_article.pdf_url = article['pdf_url']
-    db_article.scrape_method, _ = ScrapeMethod.objects.get_or_create(name='arxiv-scraper')
+    arxiv_data_source, _ = DataSource.objects.get_or_create(name='arxiv-scraper')
+    db_article.data_source = arxiv_data_source
     authors = _extract_authors(article)
     if len(authors) == 0:
         raise _AuthorsNotExtractableException
@@ -88,6 +89,8 @@ def _update_detailed_information(db_article: Paper, article: Dict,
         db_author, created = Author.objects.get_or_create(
             first_name=author[0],
             last_name=author[1],
+            data_source=arxiv_data_source,
+            split_name=True
         )
         db_author.save()
         db_article.authors.add(db_author)
@@ -116,8 +119,10 @@ def _get_or_create_article(
         if update_properties:
             article_version = _extract_article_version(article)
             last_changed = parse_datetime(article['updated'])
-            if last_changed > db_article.last_scrape or article_version > db_article.version:
-                updated = _update_detailed_information(db_article, log_function)
+            if not db_article.last_scrape or \
+                    last_changed > db_article.last_scrape or \
+                    article_version > db_article.version:
+                updated = _update_detailed_information(db_article, article, log_function)
             else:
                 updated = False
         return False, updated

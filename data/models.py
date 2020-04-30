@@ -18,7 +18,7 @@ class PaperHost(models.Model):
     url = models.URLField()
 
 
-class ScrapeMethod(models.Model):
+class DataSource(models.Model):
     name = models.CharField(max_length=120)
 
 
@@ -28,7 +28,9 @@ class Author(models.Model):
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
     scholar_url = models.URLField(null=True, default=None)
-
+    split_name = models.BooleanField(default=False)  # True iff the name was split by us at the time of creation.
+    data_source = models.ForeignKey(DataSource, related_name="authors", on_delete=models.CASCADE, null=True,
+                                    default=None)
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
 
@@ -60,7 +62,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    scrape_method = models.ForeignKey(ScrapeMethod, related_name="papers", on_delete=models.CASCADE, null=True,
+    data_source = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
                                       default=None)
     version = models.IntegerField(default=1, null=False)
 
