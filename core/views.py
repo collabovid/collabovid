@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -13,13 +14,17 @@ PAPER_PAGE_COUNT = 10
 
 def home(request):
     if request.method == "GET":
-        categories = Category.objects.order_by('name')
+        statistics = Statistics(Paper.objects.all())
 
-        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
+        most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
+        paper_count = Paper.objects.count()
+        return render(request, "core/home.html", {'statistics': statistics,
+                                                  'most_recent_papers': most_recent_papers})
 
 
 def about(request):
-    return render(request, "core/about.html", {'papers': Paper.objects.all()})
+    paper_count = Paper.objects.count()
+    return render(request, "core/about.html", {'paper_count': paper_count})
 
 
 def topic(request, id):
@@ -125,7 +130,6 @@ def search(request):
         }
 
         return render(request, "core/search.html", {'form': form,
-                                                    'papers': Paper.objects.all(),
                                                     'categories': categories})
     elif request.method == "POST":
         category_names = request.POST.getlist("categories")
