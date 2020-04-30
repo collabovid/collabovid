@@ -7,14 +7,18 @@ import re
 import arxiv
 
 from nameparser import HumanName
-from typing import Callable, List, Dict, Tuple, Any
+from typing import Callable, List, Dict, Tuple, Any, Optional
 from django.utils.dateparse import parse_datetime
 
 from django.utils import timezone
-from data.models import Author, Category, Paper, PaperHost
+from data.models import Author, Paper, PaperHost, ScrapeMethod
 
 
-def _extract_unique_id(article: dict) -> str:
+class _AuthorsNotExtractableException(Exception):
+    pass
+
+
+def _extract_unique_id(article: Dict) -> str:
     '''
     Extracts the unique id from an arxiv article.
     :param article: The arXiv article, as dict.
@@ -28,7 +32,7 @@ def _extract_unique_id(article: dict) -> str:
     return splits[1]
 
 
-def _extract_article_version(article: dict) -> str:
+def _extract_article_version(article: Dict) -> Optional[int]:
     '''
     Extracts the version number from the arxiv article.
     :param article: The arXiv article, as dict.
@@ -36,13 +40,12 @@ def _extract_article_version(article: dict) -> str:
     '''
     version_match = re.match('^\S+v(\d+)$', article['id'])
     if version_match:
-        return version_match.group(1)
+        return int(version_match.group(1))
     else:
-        # log_function(f'{db_article.doi}: Could not extract version')
         return None
 
 
-def _extract_authors(article: dict) -> List[Tuple[str, str]]:
+def _extract_authors(article: Dict) -> List[Tuple[str, str]]:
     '''
     Extracts the authors from an arXiv article.
     :param article: The arXiv article, as dict.
@@ -58,7 +61,7 @@ def _extract_authors(article: dict) -> List[Tuple[str, str]]:
 
 
 def _update_detailed_information(db_article: Paper, article: Dict,
-                                 log_function: Callable[[Tuple[Any, ...]], Any]) -> bool:
+                                 log_function: Callable[[Any], Any]) -> bool:
     '''
     Given a article object from the DB, we check the mutable information and refresh them.
     :param db_article: DB article object.
@@ -67,18 +70,25 @@ def _update_detailed_information(db_article: Paper, article: Dict,
     '''
     updated = False
 
-    # TODO: Can we access db_article.version before the article is saved (so for a new article)?
-    new_verion = _extract_article_version(article)
-    if new_verion != db_article.version:
+    new_version = _extract_article_version(article)
+    if not new_version:
+        log_function(f'{db_article.doi}: Could not extract version.')
+    elif new_version != db_article.version:
+        db_article.version = new_version
         updated = True
-    db_article.host = PaperHost.objects.get_or_create(name='arXiv')
-    db_article.url = article['id']
 
+    db_article.host, _ = PaperHost.objects.get_or_create(name='arXiv',
+                                                         url='https://www.arxiv.org')
+    db_article.url = article['id']
+    db_article.pdf_url = article['pdf_url']
+    db_article.scrape_method, _ = ScrapeMethod.objects.get_or_create(name='arxiv-scraper')
     authors = _extract_authors(article)
     if len(authors) == 0:
-        raise
-    db_article.save()
+        raise _AuthorsNotExtractableException
+    else:
+        db_article.save()
 
+    db_article.authors.clear()
     for author in authors:
         db_author, created = Author.objects.get_or_create(
             first_name=author[0],
@@ -90,51 +100,80 @@ def _update_detailed_information(db_article: Paper, article: Dict,
     db_article.last_scrape = timezone.now()
     db_article.save()
 
+    return updated
+
 
 def _get_or_create_article(
-        article: Dict[str, str], update_properties: bool, log_function: Callable[[Tuple[Any, ...]], Any]
+        article: Dict[str, str], update_properties: bool, log_function: Callable[[Any], Any]
 ) -> Tuple[bool, bool]:
     '''
-   Creates or updates a DB article object depending on whether it exists and depending on update_properties
+    Creates or updates a DB article object depending on whether it exists and depending on update_properties
     :param article:
     :param log_function:
     :return: First bool is True, iff article object was created, second one is True, if already existing article object
     was updated.
     '''
     article_id = _extract_unique_id(article)
+    updated = False
 
     try:
         db_article = Paper.objects.get(doi=article_id)
         if update_properties:
             article_version = _extract_article_version(article)
-            last_changed = parse_datetime(article['published_at']).date()
+            last_changed = parse_datetime(article['updated'])
             if last_changed > db_article.last_scrape or article_version > db_article.version:
                 updated = _update_detailed_information(db_article, log_function)
             else:
                 updated = False
-            return False, updated
+        return False, updated
+
     except Paper.DoesNotExist:
-        db_article = Paper(doi=article_id)  # TODO: dont use doi but arxiv id here
+        db_article = Paper(doi=article_id)  # TODO: Save to extra arXiv ID field?
         db_article.title = article['title'].replace('\n', ' ')
         db_article.abstract = article['summary'].replace('\n', ' ')
-        db_article.internal_source = 'arXiv'
-        db_article.published_at = parse_datetime(article['published_at']).date()
+        db_article.published_at = parse_datetime(article['published']).date()
 
         _update_detailed_information(db_article, article, log_function)
+        return True, False
 
 
-def scrape_articles(log_function: Callable[[Tuple[Any, ...]], Any] = print) -> None:
-    result = arxiv.query("all:%22COVID 19%22", max_results=1000, iterative=False, sort_by='submittedDate',
-                         sort_order='descending')
+def scrape_articles(max_new_created: int = None, update_existing_articles: bool = True,
+                    log_function: Callable[[Any], Any] = print):
+    '''
+    Scrape new articles.
+    :param max_new_created: Maximum number of new articles to create. We stop after this amount.
+    :param update_existing_articles: Set, if already existing articles should be updated.
+    :param log_function: Function used for logging.
+    '''
+    created, updated, errors = 0, 0, 0
+    article_created, article_updated = False, False
+    query_result = arxiv.query("all:%22COVID 19%22", max_results=1000, iterative=False, sort_by='submittedDate',
+                               sort_order='descending')
 
-    for i, article in enumerate(result):
-        modify_status = _get_or_create_article(article, False, log_function)
+    for i, article in enumerate(query_result):
+        if max_new_created and created >= max_new_created:
+            log_function(f'Stopping after given number of {max_new_created} created articles.')
+            break
+        try:
+            article_created, article_updated = _get_or_create_article(article, update_existing_articles, log_function)
+        except _AuthorsNotExtractableException:
+            log_function(f"Authors not extractable for {article['id']}. Did not save to DB.")
+            errors += 1
+        except KeyError as e:
+            log_function(f"Skipping {article['id']} due to a Key Error. {str(e)}")
+            errors += 1
 
+        if article_created:
+            log_function(f"Created DB record for {article['id']}")
+            created += 1
+        elif article_updated:
+            log_function(f"Updated DB record for {article['id']}")
+            updated += 1
+        else:
+            log_function(f"Skipped article {article['id']}")
 
-def update_articles(count=200):
-    result = arxiv.query("all:%22COVID 19%22", max_results=1000, iterative=False, sort_by='submittedDate',
-                         sort_order='ascending')
+    log_function(f"Created/Updated: {created}/{updated}")
 
-
-if __name__ == '__main__':
-    scrape_articles()
+    if errors > 0:
+        log_function(f"Finished with {errors} errors")
+        raise Exception()
