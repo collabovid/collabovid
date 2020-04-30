@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -15,9 +16,9 @@ def home(request):
     if request.method == "GET":
         statistics = Statistics(Paper.objects.all())
 
-        most_recent_papers = Paper.objects.order_by('-published_at')[:5]
+        most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
         paper_count = Paper.objects.count()
-        return render(request, "core/home.html", {'paper_count': paper_count, 'statistics': statistics,
+        return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
 
 
@@ -27,7 +28,6 @@ def about(request):
 
 
 def topic(request, id):
-    # TODO: Adapt search
     topic = get_object_or_404(Topic, pk=id)
 
     if request.method == "GET":

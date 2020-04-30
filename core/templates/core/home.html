@@ -62,9 +62,9 @@
                                     d-none d-sm-none d-md-block d-lg-block d-xl-block" type="submit">
                                         <span class="">Search</span>
                                     </button>
-                                    <button class="btn btn-lg btn-info
-                                    d-block d-sm-block d-md-none d-lg-none d-xl-none rounded-circle" type="submit">
-                                        <i class="fas fa-search text-body"></i>
+                                    <button class="btn btn-info
+                                    d-block d-sm-block d-md-none d-lg-none d-xl-none rounded-circle text-white" type="submit">
+                                        <i class="fas fa-search"></i>
                                     </button>
 
                                 </div>
@@ -84,30 +84,30 @@
         <div class="container py-5">
 
             <div class="row align-items-center">
-                <div class="col-lg-5 order-2 order-lg-1">
+                <div class="col-lg-5 order-2 order-lg-1 col-12">
                     <h2 class="font-weight-light">A lot of data</h2>
-                    <p class="font-italic text-muted mb-4">Since 13th January 2020, <b>{{ paper_count }}</b> articles
+                    <p class="font-italic text-muted">Since 13th January 2020, <b>{{ statistics.paper_count }}</b>
+                        articles
                         concerning the
-                        COVID-19
-                        virus are published on preprint servers. Alone today, there appeared
-                        <b>{{ statistics.paper_today_count }}</b> new publications
-                        and in the last week <b>{{ statistics.papers_last_week }}</b> papers have been published. For
-                        researchers, it is impossible to inspect every single one manually.
+                        coronavirus were published on so-called preprint servers. Of these publications,
+                        <b>{{ statistics.paper_today_count }}</b>  appeared today and
+                        <b>{{ statistics.papers_last_week }}</b> have been released in the past week. For
+                        researchers, it is impossible to review every single one manually.
                         Therefore, NLP techniques are needed to filter out the most relevant information and
                         allow researchers to make faster progress in fighting the crisis.
 
                 </div>
-                <div class="col-lg-7 mx-auto order-1 order-lg-2">
+                <div class="col-lg-7 mx-auto order-1 order-lg-2 col-12">
                     <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
                 </div>
             </div>
 
 
-            <div class="row align-items-center py-5">
-                <div class="col-lg-5 mx-auto">
+            <div class="row align-items-center">
+                <div class="col-lg-5 mx-auto mt-4">
                     <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6 mt-4">
                     <h2 class="font-weight-light">Our Datasources</h2>
                     <p class="font-italic text-muted">
                         Collabovid currently indexes all COVID-19/SARS-CoV-2-related papers
@@ -121,18 +121,17 @@
             </div>
 
             <div class="row align-items-center">
-                <div class="col-lg-6">
+                <div class="col-lg-6 order-2 order-lg-1 col-12">
                     <h2 class="font-weight-light">Are you an expert?</h2>
                     <p class="font-italic text-muted mb-4">
-                        We are looking for medical researchers or other people that are currently working with COVID-19
+                        We are looking for medical researchers or other people that are currently working on COVID-19
                         publications to
-                        improve Collabovid and gain insights into your workflow. If you want to help us, please drop us
-                        a <a href="mailto:info@collabovid.org">message</a>.
+                        improve Collabovid and gain insights into your workflow. If you want to help us, please leave us
+                        a <a href="mailto:info@collabovid.org">message</a> or fill out our survey.
                     </p>
                 </div>
-                <div class="col-lg-5 mx-auto">
-                    <img src="{% static 'core/img/virus-icons/039-doctor.png' %}" class="img-fluid p-5"
-                         style="height: 400px">
+                <div class="col-lg-4 mx-auto order-1 order-lg-2 col-md-6 col-8">
+                    <img src="{% static 'core/img/collaborate.png' %}" class="img-fluid">
                 </div>
             </div>
 
@@ -146,8 +145,10 @@
                     <h2 class="display-5 font-weight-light">Recent Papers</h2>
                 </div>
             </div>
+
             <div class="row mt-3 align-items-center">
-                <div class="col-md-7">
+
+                <div class="col-lg-7 col-md-12">
                     <div class="card w-100 shadow rounded bg-white">
                         <ul class="list-group">
                             {% for paper in most_recent_papers %}
@@ -164,14 +165,21 @@
                         </ul>
                     </div>
                 </div>
-                <div class="col-md-5">
-                    <figure class="stack stack-fanout">
-                        {% for paper in most_recent_papers %}
-                            <img style="max-height: 300px" class=""
-                                 src="https://covid-publications.s3.amazonaws.com/media/pdf_images/1011012020040220051466.jpg">
-                        {% endfor %}
-                    </figure>
+
+
+                <div class="col-lg-5 d-lg-block d-none">
+                    <div class="row">
+                        <div class="col-md-5 col-lg-5 col-sm-2 mx-auto stack stack-fanout">
+                            {% for paper in most_recent_papers %}
+
+                                <img style="max-height: 300px" class="img-fluid"
+                                     src="{% if paper.preview_image.is_exists %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
+
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </div>
     </div>
