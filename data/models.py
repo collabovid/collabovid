@@ -18,10 +18,6 @@ class PaperHost(models.Model):
     url = models.URLField()
 
 
-class DataSource(models.Model):
-    name = models.CharField(max_length=120)
-
-
 class ScrapeMethod(models.Model):
     name = models.CharField(max_length=120)
 
@@ -64,8 +60,6 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    datasource = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
-                                   default=None, )
     scrape_method = models.ForeignKey(ScrapeMethod, related_name="papers", on_delete=models.CASCADE, null=True,
                                       default=None)
     version = models.IntegerField(default=1, null=False)
