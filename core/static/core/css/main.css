@@ -13,6 +13,8 @@ body {
 .feedback-bar {
     background-color: #5b73aa;
     color: #fff;
+    position: relative;
+    z-index: 1;
 }
 
 .feedback-bar a {
