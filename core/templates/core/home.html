@@ -8,17 +8,17 @@
                 <div class="col-lg-8">
                     <h1 class="display-4">Explore COVID-19 Preprints</h1>
                     <p class="muted-white lead mb-0">
-                        Since 13th January 2020, {{ papers|length }} articles concerning the COVID-19 virus are
-                        published on preprint
-                        servers and collected by <strong>Collabovid</strong>. Most of
-                        these papers are not reviewed in a professional reviewing process at the time of publication on
-                        the preprint server. You can search for any topic you want below.
+                        A lot of articles concerning SARS-CoV-2/COVID-19 are
+                        published on preprint servers every day. Most of
+                        these papers are not reviewed in a professional reviewing process at the time of publication.
+                        Collabovid helps researchers to identify the most relevant information by using
+                        Natural Language Processing.
+                        You can search for any topic you want below.
                         Visit <a class="muted-white" href="{% url "search" %}">search</a> to review all articles or
                         browse a list of
                         predefined <a class="muted-white" href="{% url "topic-overview" %}">topics</a>. For additional
                         help visit the
                         <a class="muted-white" href="{% url "about" %}">frequently asked questions</a>.
-
                     </p>
                 </div>
                 <div class="col-lg-4">
@@ -77,50 +77,78 @@
                 <!--end of col-->
             </div>
         </div>
-        {% include 'core/partials/_rounded_bottom.html' %}
+        {% include 'core/partials/_rounded_bottom.html' with color='white' %}
     </div>
 
-    <div class="container">
+    <div class="bg-white">
+        <div class="container py-5">
 
-        <div class="row mt-5 mb-4">
-            <div class="col-12">
-                <h2 class="display-4 font-weight-light">Our dataset</h2>
-            </div>
-        </div>
+            <div class="row align-items-center">
+                <div class="col-lg-5 order-2 order-lg-1">
+                    <h2 class="font-weight-light">A lot of data</h2>
+                    <p class="font-italic text-muted mb-4">Since 13th January 2020, <b>{{ paper_count }}</b> articles
+                        concerning the
+                        COVID-19
+                        virus are published on preprint servers. Alone today, there appeared
+                        <b>{{ statistics.paper_today_count }}</b> new publications
+                        and in the last week <b>{{ statistics.papers_last_week }}</b> papers have been published. For
+                        researchers, it is impossible to inspect every single one manually.
+                        Therefore, NLP techniques are needed to filter out the most relevant information and
+                        allow researchers to make faster progress in fighting the crisis.
 
-        <div class="row">
-            <div class="col-12 text-muted">
-                The database contains all COVID-19/SARS-CoV-2-related papers from
-                <a href="https://connect.medrxiv.org/relate/content/181">medRxiv</a> and
-                <a href="https://connect.biorxiv.org/relate/content/181">bioRxiv</a>.
-                The dataset is updated several times a day.
-                We are working hard on including new data sources.
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="card w-100 shadow rounded bg-white p-4 mt-3">
-                    <div class="card-body p-0">
-                        <div>
-                            <h3>Published Papers over Time</h3>
-                        </div>
-                        <div>
-                            <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
-                        </div>
-                    </div>
+                </div>
+                <div class="col-lg-7 mx-auto order-1 order-lg-2">
+                    <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
                 </div>
             </div>
+
+
+            <div class="row align-items-center py-5">
+                <div class="col-lg-5 mx-auto">
+                    <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
+                </div>
+                <div class="col-lg-6">
+                    <h2 class="font-weight-light">Our Datasources</h2>
+                    <p class="font-italic text-muted">
+                        Collabovid currently indexes all COVID-19/SARS-CoV-2-related papers
+                        from
+                        <a href="https://connect.medrxiv.org/relate/content/181">medRxiv</a> and
+                        <a href="https://connect.biorxiv.org/relate/content/181">bioRxiv</a>. The dataset is updated
+                        automatically
+                        several times a day. We are working hard
+                        on including new data sources.</p>
+                </div>
+            </div>
+
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="font-weight-light">Are you an expert?</h2>
+                    <p class="font-italic text-muted mb-4">
+                        We are looking for medical researchers or other people that are currently working with COVID-19
+                        publications to
+                        improve Collabovid and gain insights into your workflow. If you want to help us, please drop us
+                        a <a href="mailto:info@collabovid.org">message</a>.
+                    </p>
+                </div>
+                <div class="col-lg-5 mx-auto">
+                    <img src="{% static 'core/img/virus-icons/039-doctor.png' %}" class="img-fluid p-5"
+                         style="height: 400px">
+                </div>
+            </div>
+
         </div>
+    </div>
 
-        <div class="row mt-4">
-
-            <div class="col-lg-6 col-md-6 col-12">
-                <div class="card w-100 shadow rounded bg-white p-4">
-
-                    <h3>Most recent papers</h3>
-
-                    <div class="card-body">
+    <div class="bg-light">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="display-5 font-weight-light">Recent Papers</h2>
+                </div>
+            </div>
+            <div class="row mt-3 align-items-center">
+                <div class="col-md-7">
+                    <div class="card w-100 shadow rounded bg-white">
                         <ul class="list-group">
                             {% for paper in most_recent_papers %}
                                 <li class="list-group-item">
@@ -136,113 +164,78 @@
                         </ul>
                     </div>
                 </div>
+                <div class="col-md-5">
+                    <figure class="stack stack-fanout">
+                        {% for paper in most_recent_papers %}
+                            <img style="max-height: 300px" class=""
+                                 src="https://covid-publications.s3.amazonaws.com/media/pdf_images/1011012020040220051466.jpg">
+                        {% endfor %}
+                    </figure>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="">
+        <div class="container py-3">
+            <div class="row mt-5 mb-4">
+                <div class="col-12">
+                    <h2 class="display-5 font-weight-light">Partners</h2>
+                </div>
             </div>
 
-            <div class="col-lg-6 col-md-6 col-12">
+            <div class="mentions-container">
+                <div class="row">
+                    <div class="col-12 col-md-4">
 
-                <div class="card w-100 shadow rounded bg-white p-4">
+                        <div class="card h-100">
+                            <div class="card-image bmbf">
+                                <img class="card-img-top"
+                                     src="{% static "core/img/partners/bmbf-long.png" %}">
 
-                    <h3>Data</h3>
+                            </div>
 
-                    <div class="card-body">
+                            <div class="card-body">
+                                <h5 class="card-title">BMBF</h5>
+                                <p class="card-text">
+                                    Collabovid was selected for a funding program of the Federal Ministry of Education
+                                    and
+                                    Research in Germany. The financial aid helps us to improve the platform and
+                                    keep the page running.
+                                </p>
+                                <a href="#" class="btn btn-light float-right">
+                                    Read more
+                                </a>
+                            </div>
+                        </div>
+                    </div>
 
-                        <table class="table table-striped">
+                    <div class="col-12 col-md-4">
 
-                            <tbody>
-                            <tr>
-                                <td>Papers:</td>
-                                <td class="text-center">{{ statistics.paper_count }}</td>
-                            </tr>
-                            <tr>
-                                <td>Topics:</td>
-                                <td class="text-center">{{ statistics.topic_count }}</td>
-                            </tr>
-
-                            <tr>
-                                <td>Dataset Sources:</td>
-                                <td class="text-center">{{ statistics.paper_host_count }}</td>
-                            </tr>
-
-                            <tr>
-                                <td>Papers from today:</td>
-                                <td class="text-center">{{ statistics.paper_today_count }}</td>
-                            </tr>
-
-                            <tr>
-                                <td>Papers from last week:</td>
-                                <td class="text-center">{{ statistics.papers_last_week }}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <div class="mt-5">
-                            <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
+                        <div class="card">
+                            <div class="card-image solution-enabler">
+                                <img class="card-img-top"
+                                     src="{% static "core/img/partners/solution-enabler.png" %}">
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">Solution Enabler</h5>
+                                <p class="card-text">
+                                    The Solution Enabler is an implementation program for teams with promising
+                                    solutions
+                                    in times of COVID-19.
+                                    The program will initially run over a six-month period. However, the goal is to
+                                    implement the solutions as quickly as possible.
+                                </p>
+                                <a href="https://wirvsvirushackathon.org/weiterfuehrung-2/"
+                                   class="btn btn-light float-right">
+                                    Read more
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="row mt-5 mb-4">
-            <div class="col-12">
-                <h2 class="display-4 font-weight-light">Partners</h2>
-            </div>
-        </div>
-
-        <div class="mentions-container">
-            <div class="row">
-                <div class="col-12 col-md-4">
-
-                    <div class="card">
-                        <div class="card-image bmbf">
-                            <img class="card-img-top"
-                                 src="{% static "core/img/partners/bmbf-long.png" %}">
-
-                        </div>
-
-                        <div class="card-body">
-                            <h5 class="card-title">BMBF</h5>
-                            <p class="card-text">
-                                Collabovid was selected for a funding program of the Federal Ministry of Education and
-                                Research in Germany. The financial aid helps us to improve the platform and
-                                keep the page running.
-                            </p>
-                            <a href="#" class="btn btn-light float-right">
-                                Read more
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-
-                    <div class="card">
-                        <div class="card-image solution-enabler">
-                            <img class="card-img-top"
-                                 src="{% static "core/img/partners/solution-enabler.png" %}">
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">Solution Enabler</h5>
-                            <p class="card-text">
-                                The Solution Enabler is an implementation program for teams with promising
-                                solutions
-                                in times of COVID-19.
-                                The program will initially run over a six-month period. However, the goal is to
-                                implement the solutions as quickly as possible.
-                            </p>
-                            <a href="https://wirvsvirushackathon.org/weiterfuehrung-2/"
-                               class="btn btn-light float-right">
-                                Read more
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-
     </div>
 {% endblock %}
 
@@ -261,6 +254,44 @@
 
             $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
             $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
+
+
+            function elementInViewport(el) {
+                var top = el.offsetTop;
+                var left = el.offsetLeft;
+                var width = el.offsetWidth;
+                var height = el.offsetHeight;
+
+                console.log(top)
+
+                while (el.offsetParent) {
+                    el = el.offsetParent;
+                    top += el.offsetTop;
+                    left += el.offsetLeft;
+                }
+                return (
+                    top >= window.pageYOffset &&
+                    left >= window.pageXOffset &&
+                    (top + height) <= (window.pageYOffset + window.innerHeight) &&
+                    (left + width) <= (window.pageXOffset + window.innerWidth)
+                );
+            }
+
+            function checkAnimation() {
+                var $elem = $('.stack');
+
+                // If the animation has already been started
+                if ($elem.hasClass('active')) return;
+
+                if (elementInViewport($elem.get()[0])) {
+                    // Start the animation
+                    $elem.addClass('active');
+                }
+            }
+
+            $(window).scroll(function () {
+                checkAnimation();
+            });
         });
 
     </script>

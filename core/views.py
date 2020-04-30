@@ -16,12 +16,14 @@ def home(request):
         statistics = Statistics(Paper.objects.all())
 
         most_recent_papers = Paper.objects.order_by('-published_at')[:5]
-        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'statistics': statistics,
+        paper_count = Paper.objects.count()
+        return render(request, "core/home.html", {'paper_count': paper_count, 'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
 
 
 def about(request):
-    return render(request, "core/about.html", {'papers': Paper.objects.all()})
+    paper_count = Paper.objects.count()
+    return render(request, "core/about.html", {'paper_count': paper_count})
 
 
 def topic(request, id):
@@ -134,7 +136,6 @@ def search(request):
         }
 
         return render(request, "core/search.html", {'form': form,
-                                                    'papers': Paper.objects.all(),
                                                     'categories': categories})
     elif request.method == "POST":
         category_names = request.POST.getlist("categories")
