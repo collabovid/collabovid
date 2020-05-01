@@ -22,6 +22,10 @@ class DataSource(models.Model):
     name = models.CharField(max_length=120)
 
 
+class Journal(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+
+
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -46,8 +50,8 @@ class PaperData(models.Model):
     """
     Model to store large data which should not be loaded on each select on a regular Paper
     """
-
     content = models.TextField(null=True, default=None)
+
 
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
@@ -82,6 +86,7 @@ class Paper(models.Model):
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField()
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
     latent_topic_score = models.BinaryField(null=True)
 

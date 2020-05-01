@@ -1,3 +1,4 @@
+from scrape.scraper.cord19_downloader import update_cord19_data
 from scrape.scraper.medrxiv_scraper import scrape_articles, delete_revoked_articles, update_articles
 from tasks import register_task, Runnable
 
@@ -14,6 +15,20 @@ class ArticleScraper(Runnable):
 
     def run(self):
         scrape_articles(self._update_unknown_category, self.log)
+
+
+@register_task
+class Cord19Downloader(Runnable):
+    @staticmethod
+    def task_name():
+        return "download-cord19"
+
+    def __init__(self, *args, **kwargs):
+        super(Cord19Downloader, self).__init__(*args, **kwargs)
+
+    def run(self):
+        update_cord19_data()
+
 
 
 @register_task
