@@ -58,6 +58,10 @@ class ArticleDataPoint(object):
         raise NotImplementedError
 
     @property
+    def paperhost_url(self):
+        raise NotImplementedError
+
+    @property
     def journal(self):
         return None
 
@@ -117,7 +121,8 @@ class ArticleDataPoint(object):
         db_article.title = title
         db_article.abstract = self.abstract
         db_article.data_source, _ = DataSource.objects.get_or_create(name=self.data_source_name)
-        db_article.host, _ = PaperHost.objects.get_or_create(name=self.paperhost_name)
+        db_article.host, _ = PaperHost.objects.get_or_create(name=self.paperhost_name,
+                                                             url=self.paperhost_url)
         if self.journal:
             db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
         db_article.published_at = self.published_at

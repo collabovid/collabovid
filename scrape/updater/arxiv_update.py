@@ -11,6 +11,8 @@ class ArxivDataPoint(ArticleDataPoint):
     _ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
     _ARXIV_DATA_PRIORITY = 10
     _ARXIV_PAPERHOST_NAME = 'arXiv'
+    _ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
+
     _ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
 
     def __init__(self, raw_article_dict):
@@ -58,6 +60,10 @@ class ArxivDataPoint(ArticleDataPoint):
     @property
     def paperhost_name(self):
         return self._ARXIV_PAPERHOST_NAME
+
+    @property
+    def paperhost_url(self):
+        return self._ARXIV_PAPERHOST_URL
 
     @property
     def published_at(self):
