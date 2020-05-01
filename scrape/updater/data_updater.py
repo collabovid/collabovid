@@ -1,9 +1,9 @@
 import re
 
 from django.utils import timezone
-from datetime import datetime, timedelta
+from datetime import date, timedelta
 
-from data.models import Paper, PaperHost, DataSource, Journal
+from data.models import Author, Paper, PaperHost, DataSource, Journal
 from timeit import default_timer as timer
 
 
@@ -46,7 +46,7 @@ class ArticleDataPoint(object):
         return None
 
     @property
-    def data_source(self):
+    def data_source_name(self):
         raise NotImplementedError
 
     @property
@@ -54,12 +54,12 @@ class ArticleDataPoint(object):
         raise NotImplementedError
 
     @property
-    def paperhost(self):
+    def paperhost_name(self):
         raise NotImplementedError
 
     @property
     def journal(self):
-        raise NotImplementedError
+        return None
 
     @property
     def published_at(self):
@@ -77,9 +77,13 @@ class ArticleDataPoint(object):
     def version(self):
         return 1
 
+    @property
+    def is_preprint(self):
+        return True
+
     @staticmethod
     def _covid_related(db_article):
-        if db_article.published_at and db_article.published_at >= datetime(year=2019, month=12, day=1):
+        if db_article.published_at and db_article.published_at >= date(year=2019, month=12, day=1):
             _COVID19_KEYWORDS = r'(corona([ -]?virus)?|covid[ -]?19|sars[ -]?cov[ -]?2)'
         else:
             _COVID19_KEYWORDS = r'(covid[ -]?19|sars[ -]?cov[ -]?2)'
@@ -91,13 +95,13 @@ class ArticleDataPoint(object):
     def update_db(self, update_existing=True):
         doi = self.doi
         title = self.title
-        paperhost = self.paperhost
+        paperhost_name = self.paperhost_name
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
         if not title:
             raise MissingDataError("Couldn't extrat title")
-        if not paperhost:
+        if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
 
         try:
@@ -112,19 +116,28 @@ class ArticleDataPoint(object):
 
         db_article.title = title
         db_article.abstract = self.abstract
-        db_article.data_source, _ = DataSource.objects.get_or_create(name=self.data_source)
-        db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost)
+        db_article.data_source, _ = DataSource.objects.get_or_create(name=self.data_source_name)
+        db_article.host, _ = PaperHost.objects.get_or_create(name=self.paperhost_name)
         if self.journal:
             db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
         db_article.published_at = self.published_at
         db_article.version = self.version
         db_article.url = self.url
         db_article.pdf_url = self.pdf_url
+        db_article.is_preprint = self.is_preprint
 
         db_article.save()
-        if db_article.authors.count() > 0:
+        if len(self.authors) > 0:
             db_article.authors.clear()
-        db_article.authors.add(*self.authors)
+            for author in self.authors:
+                db_author, created = Author.objects.get_or_create(
+                    first_name=author[1],
+                    last_name=author[0],
+                    data_source=db_article.data_source,
+                )
+                db_author.save()
+                db_article.authors.add(db_author)
+        # db_article.authors.add(*self.authors) TODO: This did not work
 
         db_article.content = self.content
         db_article.covid_related = self._covid_related(db_article=db_article)
@@ -141,6 +154,12 @@ class DataUpdater(object):
         self.n_success = 0
 
     @property
+    def _data_source_name(self):
+        # TODO: We need the data source when filtering the articles in update(), but this is now duplicate with the
+        #  ArticleDataPoint Class.
+        raise NotImplementedError
+
+    @property
     def _data_points(self):
         raise NotImplementedError
 
@@ -150,7 +169,7 @@ class DataUpdater(object):
     def _update_data(self, data_point, update_existing=True, log=print):
         try:
             data_point.update_db(update_existing=update_existing)
-            log(f"Updated {data_point.doi}")
+            log(f"Updated/Created {data_point.doi}")
             self.n_success += 1
         except MissingDataError as ex:
             id = data_point.doi if data_point.doi else data_point.title
@@ -178,7 +197,8 @@ class DataUpdater(object):
 
         total = self.n_success + self.n_errors
         if max_count and total < max_count:
-            update_articles = Paper.objects.all().order_by('last_scrape')[:max_count - total]  # TODO: test
+            filtered_articles = Paper.objects.all().filter(data_source__name=self._data_source_name)
+            update_articles = filtered_articles.order_by('last_scrape')[:max_count - total]
             for article in update_articles:
                 data_point = self._get_data_point(doi=article.doi)
                 if data_point:
