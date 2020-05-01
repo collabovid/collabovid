@@ -201,9 +201,7 @@ def _get_or_create_article(
 
         return False, updated
     except Paper.DoesNotExist:
-        db_article = Paper(
-            doi=article['rel_doi']
-        )
+        db_article = Paper(doi=article['rel_doi'])
 
         db_article.title = article['rel_title']
         db_article.url = article['rel_link']

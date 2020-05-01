@@ -15,7 +15,7 @@ class Topic(models.Model):
 
 class PaperHost(models.Model):
     name = models.CharField(max_length=60)
-    url = models.URLField()
+    url = models.URLField(null=True, default=None)
 
 
 class DataSource(models.Model):
@@ -81,11 +81,11 @@ class Paper(models.Model):
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
-    url = models.URLField()
-    pdf_url = models.URLField()
+    url = models.URLField(null=True, default=None)
+    pdf_url = models.URLField(null=True, default=None)
     is_preprint = models.BooleanField(default=True)
 
-    published_at = models.DateField()
+    published_at = models.DateField(null=True, default=None)
     journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
     latent_topic_score = models.BinaryField(null=True)

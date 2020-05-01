@@ -1,5 +1,5 @@
 from scrape.scrape import Scrape
-from scrape.medrxiv_scraping_task import ArticleUpdater
+from scrape.task_medrxiv_update import ArticleUpdater
 from datetime import datetime
 from tasks.task_runner import TaskRunner
 from analyze.setup_vectorizer import SetupVectorizer

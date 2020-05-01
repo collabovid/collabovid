@@ -2,7 +2,7 @@ import os
 
 from scrape.citation_refresher import CitationRefresher
 from tasks.task_runner import TaskRunner
-from scrape.medrxiv_scraping_task import ArticleScraper
+from scrape.task_medrxiv_update import ArticleScraper
 from scrape.pdf_scraper import PdfScraper
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
