@@ -14,12 +14,13 @@ class Topic(models.Model):
 
 
 class PaperHost(models.Model):
-    name = models.CharField(max_length=60)
+    name = models.CharField(max_length=60, unique=True)
     url = models.URLField(null=True, default=None)
 
 
 class DataSource(models.Model):
-    name = models.CharField(max_length=120)
+    name = models.CharField(max_length=120, unique=True)
+    priority = models.IntegerField(default=0)
 
 
 class Journal(models.Model):

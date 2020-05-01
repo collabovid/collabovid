@@ -1,6 +1,4 @@
 import os
-
-from scrape.citation_refresher import CitationRefresher
 from tasks.task_runner import TaskRunner
 from scrape.task_medrxiv_update import ArticleScraper
 from scrape.pdf_scraper import PdfScraper

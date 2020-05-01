@@ -1,4 +1,4 @@
-from scrape.scraper.cord19_downloader import update_cord19_data
+from scrape.updater.cord19_update import update_cord19_data
 from tasks import register_task, Runnable
 
 

@@ -15,8 +15,10 @@ from data.models import Paper, DataSource, Author, PaperData, Journal, PaperHost
 
 # TODO:
 #   - Identify removed articles
+from scrape.updater.data_updater import DataUpdater, ArticleDataPoint, UpdateException
 
 _CORD19_DATA_SOURCE = 'cord19-dataset'
+_CORD19_DATA_PRIORITY = 10
 
 _CORD19_BASE_URL = 'https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/latest/{0}{1}'
 _CORD19_METADATA = 'metadata'
@@ -209,3 +211,53 @@ def update_cord19_data(log_function=print):
     log_function(f"Skipped, because already tracked: {n_already_tracked}")
 
     # shutil.rmtree(_CORD19_DOWNLOAD_PATH)
+
+
+# class Cord19ArticleDataPoint(ArticleDataPoint):
+#
+#     def __init__(self, raw_data, log=print):
+#         self.raw_data = raw_data
+#         self.log = log
+#
+#
+#     @property
+#     def doi(self):
+#         if not (self.raw_data['doi'] and is_doi(self.raw_data['doi'])):
+#             self.log(f"Article \"{self.raw_data['title']}\" from {self.raw_data['source_x']} has no valid doi: "
+#                          f"{self.raw_data['doi']}")
+#             raise UpdateException(f"Article \"{self.raw_data['title']}\" from {self.raw_data['source_x']} has no valid doi: "
+#                          f"{self.raw_data['doi']}")
+#
+#         return self.raw_data['doi']
+#
+#     @property
+#     def title(self):
+#         return self.raw_data['title']
+#
+#     @property
+#     def abstract(self):
+#         super().abstract()
+#
+#     @property
+#     def authors(self):
+#         super().authors()
+#
+#     @property
+#     def content(self):
+#         super().content()
+#
+#     @property
+#     def datasource(self):
+#         pass
+#
+#     @property
+#     def url(self):
+#         super().url()
+#
+#     @property
+#     def pdf_url(self):
+#         super().pdf_url()
+#
+#
+# class Cord19Updater(DataUpdater):
+#     pass

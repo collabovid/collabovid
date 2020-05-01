@@ -1,4 +1,4 @@
-from scrape.scraper.arxiv_scraper import scrape_articles
+from scrape.updater.arxiv_update import update_arxiv_data
 from tasks import register_task, Runnable
 
 
@@ -12,4 +12,4 @@ class Cord19Downloader(Runnable):
         super(Cord19Downloader, self).__init__(*args, **kwargs)
 
     def run(self):
-        scrape_articles()
+        update_arxiv_data()

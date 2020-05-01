@@ -82,7 +82,7 @@ def _update_detailed_information(db_article: Paper, article: Dict,
                                                          url='https://www.arxiv.org')
     db_article.url = article['id']
     db_article.pdf_url = article['pdf_url']
-    arxiv_data_source, _ = DataSource.objects.get_or_create(name='arxiv-scraper')
+    arxiv_data_source, _ = DataSource.objects.get_or_create(name='arxiv-updater')
     db_article.data_source = arxiv_data_source
     authors = _extract_authors(article)
     if len(authors) == 0:
@@ -145,7 +145,7 @@ def _get_or_create_article(
         return True, False
 
 
-def scrape_articles(max_new_created: int = None, log_function: Callable[[Any], Any] = print):
+def update_arxiv_data(max_new_created: int = None, log_function: Callable[[Any], Any] = print):
     """
     Scrape new articles.
     :param max_new_created: Maximum number of new articles to create. We stop after this amount.
