@@ -2,184 +2,110 @@ import re
 import arxiv
 
 from nameparser import HumanName
-from typing import Callable, List, Dict, Tuple, Any, Optional
 from django.utils.dateparse import parse_datetime
 
-from django.utils import timezone
-from data.models import Author, Paper, PaperHost, DataSource
+from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
 
-_ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
+class ArxivDataPoint(ArticleDataPoint):
+    _ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
+    _ARXIV_DATA_PRIORITY = 10
+    _ARXIV_PAPERHOST_NAME = 'arXiv'
+    _ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
 
+    def __init__(self, raw_article_dict):
+        self.raw_article = raw_article_dict
 
-class _AuthorsNotExtractableException(Exception):
-    pass
+    @property
+    def doi(self):
+        reduced_url = re.sub(r'v(\d+)$', '', self.raw_article['id'])
+        splits = reduced_url.split('/abs/')
+        if len(splits) < 2:
+            return None
+        else:
+            return splits[1]
 
+    @property
+    def title(self):
+        return self.raw_article['title'].replace('\n', ' ')
 
-def _extract_unique_id(article: Dict) -> str:
-    """
-    Extracts the unique id from an arxiv article.
-    :param article: The arXiv article, as dict.
-                    'id' is the url, e.g. 'http://arxiv.org/abs/2004.11626v1'
-    :return: The unique id, so '2004.11626' in this example.
-    """
-    reduced_url = re.sub(r'v(\d+)$', '', article['id'])
-    splits = reduced_url.split('/abs/')
-    if len(splits) < 2:
-        raise Exception
-    return splits[1]
+    @property
+    def abstract(self):
+        return self.raw_article['summary'].replace('\n', ' ')
 
+    @property
+    def authors(self):
+        authors = []
+        for author in self.raw_article['authors']:
+            human_name = HumanName(author)
+            first_name = f'{human_name.first} {human_name.middle}'.strip()
+            last_name = human_name.last
+            authors.append((last_name, first_name))
+        return authors
 
-def _extract_article_version(article: Dict) -> Optional[int]:
-    """
-    Extracts the version number from the arxiv article.
-    :param article: The arXiv article, as dict.
-    :return: Version number, defaults to 1.
-    """
-    version_match = re.match('^\S+v(\d+)$', article['id'])
-    if version_match:
-        return int(version_match.group(1))
-    else:
+    @property
+    def content(self):
         return None
 
+    @property
+    def data_source_name(self):
+        return self._ARXIV_DATA_SOURCE_NAME
 
-def _extract_authors(article: Dict) -> List[Tuple[str, str]]:
-    """
-    Extracts the authors from an arXiv article.
-    :param article: The arXiv article, as dict.
-    :return: List of authors in format (firstname, listname).
-    """
-    authors = []
-    for author in article['authors']:
-        human_name = HumanName(author)
-        first_name = f'{human_name.first} {human_name.middle}'.strip()
-        last_name = human_name.last
-        authors.append((first_name, last_name))
-    return authors
+    @property
+    def data_source_priority(self):
+        return self._ARXIV_DATA_PRIORITY
 
+    @property
+    def paperhost_name(self):
+        return self._ARXIV_PAPERHOST_NAME
 
-def _update_detailed_information(db_article: Paper, article: Dict,
-                                 log_function: Callable[[Any], Any]) -> bool:
-    """
-    Given a article object from the DB, we check the mutable information and refresh them.
-    :param db_article: DB article object.
-    :param log_function: Used for logging output.
-    :return: True iff the updating finished successfully.
-    """
-    if _ARXIV_WITHDRAWN_NOTICE in article['title']:
-        log_function(f'Article {article["id"]} was withdrawn. We mark it as withdrawn.')
-        # db_article.withdrawn = True
-        # db_article.save()
-        # TODO: Mark as withdrawn after Yannic's migrations.
+    @property
+    def published_at(self):
+        return parse_datetime(self.raw_article['published']).date()
 
-    new_version = _extract_article_version(article)
-    if not new_version:
-        log_function(f'{db_article.doi}: Could not extract version.')
-    elif new_version != db_article.version:
-        db_article.version = new_version
+    @property
+    def url(self):
+        return self.raw_article['id']
 
-    db_article.host, _ = PaperHost.objects.get_or_create(name='arXiv',
-                                                         url='https://www.arxiv.org')
-    db_article.url = article['id']
-    db_article.pdf_url = article['pdf_url']
-    arxiv_data_source, _ = DataSource.objects.get_or_create(name='arxiv-updater')
-    db_article.data_source = arxiv_data_source
-    authors = _extract_authors(article)
-    if len(authors) == 0:
-        raise _AuthorsNotExtractableException
-    else:
-        db_article.save()
+    @property
+    def pdf_url(self):
+        return self.raw_article['pdf_url']
 
-    db_article.authors.clear()
-    for author in authors:
-        db_author, created = Author.objects.get_or_create(
-            first_name=author[0],
-            last_name=author[1],
-            data_source=arxiv_data_source,
-            split_name=True
-        )
-        db_author.save()
-        db_article.authors.add(db_author)
-
-    db_article.last_scrape = timezone.now()
-    db_article.save()
-    return True
-
-
-def _get_or_create_article(
-        article: Dict[str, str], log_function: Callable[[Any], Any]
-) -> Tuple[bool, bool]:
-    """
-    Creates or updates a DB article object depending on whether it exists.
-    :param article: The Dict of the article (dict from arXiv API)
-    :param log_function:
-    :return: First bool is True, iff article object was created, second one is True, if already existing article object
-    was updated.
-    """
-    article_id = _extract_unique_id(article)
-    updated = False
-
-    try:
-        db_article = Paper.objects.get(doi=article_id)
-        article_version = _extract_article_version(article)
-        last_changed = parse_datetime(article['updated'])
-        if not db_article.last_scrape or \
-                last_changed > db_article.last_scrape or \
-                article_version > db_article.version:
-            updated = _update_detailed_information(db_article, article, log_function)
+    @property
+    def version(self):
+        version_match = re.match('^\S+v(\d+)$', self.raw_article['id'])
+        if version_match:
+            return int(version_match.group(1))
         else:
-            updated = False
-        return False, updated
+            return 1
 
-    except Paper.DoesNotExist:
-        if _ARXIV_WITHDRAWN_NOTICE in article['title']:
-            log_function(f'Article {article["id"]} was withdrawn. We do not add it.')
-            return False, False
-
-        db_article = Paper(doi=article_id)  # TODO: Save to extra arXiv ID field?
-        db_article.title = article['title'].replace('\n', ' ')
-        db_article.abstract = article['summary'].replace('\n', ' ')
-        db_article.published_at = parse_datetime(article['published']).date()
-
-        _update_detailed_information(db_article, article, log_function)
-        return True, False
+    @property
+    def is_preprint(self):
+        return True
 
 
-def update_arxiv_data(max_new_created: int = None, log_function: Callable[[Any], Any] = print):
-    """
-    Scrape new articles.
-    :param max_new_created: Maximum number of new articles to create. We stop after this amount.
-    :param log_function: Function used for logging.
-    """
-    created, updated, errors = 0, 0, 0
-    article_created, article_updated = False, False
-    query_result = arxiv.query("all:%22COVID 19%22", max_results=1000, iterative=False, sort_by='submittedDate',
-                               sort_order='descending')
-    # TODO: Split the query into smaller chunks?
-    for i, article in enumerate(query_result):
-        if max_new_created and created >= max_new_created:
-            log_function(f'Stopping after given number of {max_new_created} created articles.')
-            break
-        try:
-            article_created, article_updated = _get_or_create_article(article, log_function)
-        except _AuthorsNotExtractableException:
-            log_function(f"Authors not extractable for {article['id']}. Did not save to DB.")
-            errors += 1
-        except KeyError as e:
-            log_function(f"Skipping {article['id']} due to a Key Error. {str(e)}")
-            errors += 1
+class ArxivUpdater(DataUpdater):
+    _ARXIV_SEARCH_QUERY = 'all:%22COVID 19%22'
+    _ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
 
-        if article_created:
-            log_function(f"Created DB record for {article['id']}")
-            created += 1
-        elif article_updated:
-            log_function(f"Updated DB record for {article['id']}")
-            updated += 1
-        else:
-            log_function(f"Skipped article {article['id']}")
+    @property
+    def _data_source_name(self):
+        return self._ARXIV_DATA_SOURCE_NAME
 
-    log_function(f"Created/Updated: {created}/{updated}")
+    def __init__(self):
+        super().__init__()
+        self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
+                                         sort_by='submittedDate',
+                                         sort_order='descending')
+        # TODO: Split the query into smaller chunks?? Take a deeper look in arxiv package.
 
-    if errors > 0:
-        log_function(f"Finished with {errors} errors")
-        raise Exception()
+    @property
+    def _data_points(self):
+        for article in self._query_result:
+            yield ArxivDataPoint(raw_article_dict=article)
+
+    def _get_data_point(self, doi):
+        for article in self._query_result:
+            if article['doi'] == doi:
+                return ArxivDataPoint(raw_article_dict=article)
+        return None
