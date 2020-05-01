@@ -150,3 +150,5 @@ TASK_LOGGING_PATH = os.path.join(BASE_DIR, "log/tasks/")
 
 IMPRINT_URL = os.getenv("IMPRINT_URL", "")
 DATA_PROTECTION_URL = os.getenv("DATA_PROTECTION_URL", "")
+
+USING_ANALYTICS = False

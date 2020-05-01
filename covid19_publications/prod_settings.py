@@ -91,3 +91,5 @@ if int(os.getenv('ALLOW_IMAGE_SCRAPING', 0)) > 0:
     ALLOW_IMAGE_SCRAPING = True
 else:
     ALLOW_IMAGE_SCRAPING = False
+
+USING_ANALYTICS = True
