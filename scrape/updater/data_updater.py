@@ -3,7 +3,7 @@ import re
 from django.utils import timezone
 from datetime import date, timedelta
 
-from data.models import Author, Paper, PaperHost, DataSource, Journal
+from data.models import Author, Category, Paper, PaperHost, DataSource, Journal
 from timeit import default_timer as timer
 
 
@@ -85,6 +85,10 @@ class ArticleDataPoint(object):
     def is_preprint(self):
         return True
 
+    @property
+    def category_name(self):
+        return None
+
     @staticmethod
     def _covid_related(db_article):
         if db_article.published_at and db_article.published_at >= date(year=2019, month=12, day=1):
@@ -143,6 +147,9 @@ class ArticleDataPoint(object):
                 db_author.save()
                 db_article.authors.add(db_author)
         # db_article.authors.add(*self.authors) TODO: This did not work
+
+        if self.category_name:
+            db_article.category = Category.objects.get_or_create(name=self.category_name)
 
         db_article.content = self.content
         db_article.covid_related = self._covid_related(db_article=db_article)
