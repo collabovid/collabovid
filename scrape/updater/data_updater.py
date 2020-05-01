@@ -149,7 +149,7 @@ class ArticleDataPoint(object):
         # db_article.authors.add(*self.authors) TODO: This did not work
 
         if self.category_name:
-            db_article.category = Category.objects.get_or_create(name=self.category_name)
+            db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
         db_article.content = self.content
         db_article.covid_related = self._covid_related(db_article=db_article)

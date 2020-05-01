@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from data.models import Paper
+from datetime import datetime
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
 
@@ -20,11 +21,12 @@ class MedrxivDataPoint(ArticleDataPoint):
 
     def __init__(self, raw_article_json):
         self.raw_article = raw_article_json
+        self._article_soup = None
 
     def _setup_article_soup(self):
-        if not self.article_soup:
+        if not self._article_soup:
             response = requests.get(self.url)
-            self.article_soup = BeautifulSoup(response.text, 'html.parser')
+            self._article_soup = BeautifulSoup(response.text, 'html.parser')
             self.redirected_url = response.url
 
     @property
@@ -43,7 +45,7 @@ class MedrxivDataPoint(ArticleDataPoint):
     def authors(self):
         self._setup_article_soup()
 
-        author_webelements = self.article_soup.find(
+        author_webelements = self._article_soup.find(
             'span', attrs={'class': 'highwire-citation-authors'}
         ).find_all('span', recursive=False)
 
@@ -81,8 +83,15 @@ class MedrxivDataPoint(ArticleDataPoint):
             return None
 
     @property
+    def paperhost_url(self):
+        if self.paperhost_name == self._MEDRXIV_PAPERHOST_NAME:
+            return self._MEDRXIV_PAPERHOST_URL
+        else:
+            return self._BIORXIV_PAPERHOST_URL
+
+    @property
     def published_at(self):
-        return self.raw_article['rel_date']
+        return datetime.strptime(self.raw_article['rel_date'], "%Y-%m-%d").date()
 
     @property
     def url(self):
@@ -92,13 +101,10 @@ class MedrxivDataPoint(ArticleDataPoint):
     def pdf_url(self):
         self._setup_article_soup()
 
-        dl_element = self.article_soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
+        dl_element = self._article_soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
         if dl_element and dl_element.has_attr('href'):
             relative_url = dl_element['href']
-            if self.paperhost_name == self._MEDRXIV_PAPERHOST_NAME:
-                return self._MEDRXIV_PAPERHOST_URL + relative_url
-            else:
-                return self._BIORXIV_PAPERHOST_URL + relative_url
+            return self.paperhost_url + relative_url
         else:
             return None
 
@@ -119,7 +125,7 @@ class MedrxivDataPoint(ArticleDataPoint):
     @property
     def category_name(self):
         self._setup_article_soup()
-        categories = self.article_soup.find_all('span', {'class': 'highwire-article-collection-term'})
+        categories = self._article_soup.find_all('span', {'class': 'highwire-article-collection-term'})
         if len(categories) == 0:
             return "Unknown"
         else:
@@ -157,6 +163,8 @@ class MedrxivUpdater(DataUpdater):
         return None
 
 
+# TODO:
+#  - integrate revoked articles into above process?
 def delete_revoked_articles(log_function: Callable[[Tuple[Any, ...]], Any] = print) -> List[str]:
     """
     Remove all revoked articles (no longer in JSON file) from DB.
