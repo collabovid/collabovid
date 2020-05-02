@@ -51,12 +51,18 @@ class ArticleDataPoint(object):
         return []
 
     def extract_content(self):
-        self._setup_pdf_extractor()
-        return self._pdf_extractor.extract_content()
+        if self.pdf_url:
+            self._setup_pdf_extractor()
+            return self._pdf_extractor.extract_content()
+        else:
+            return None
 
     def extract_image(self):
-        self._setup_pdf_extractor()
-        return self._pdf_extractor.extract_image()
+        if self.pdf_url:
+            self._setup_pdf_extractor()
+            return self._pdf_extractor.extract_image()
+        else:
+            return None
 
     @property
     def data_source_name(self):
