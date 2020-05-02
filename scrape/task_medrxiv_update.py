@@ -13,7 +13,7 @@ class MedrxivUpdateTask(Runnable):
         self._update_unknown_category = update_unknown_category
 
     def run(self):
-        updater = MedrxivUpdater()
+        updater = MedrxivUpdater(log=self.log)
         updater.update()
         #scrape_articles(self._update_unknown_category, self.log) # TODO: unknown_categories
 

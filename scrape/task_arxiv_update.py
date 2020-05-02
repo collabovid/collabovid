@@ -12,5 +12,5 @@ class ArxivUpdateTask(Runnable):
         super(ArxivUpdateTask, self).__init__(*args, **kwargs)
 
     def run(self):
-        updater = ArxivUpdater()
+        updater = ArxivUpdater(log=self.log)
         updater.update()

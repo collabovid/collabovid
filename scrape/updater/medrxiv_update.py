@@ -13,7 +13,7 @@ _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
 _BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
-_MEDRXIV_DATA_PRIORITY = 1
+_MEDBIORXIV_DATA_PRIORITY = 1
 
 
 class MedrxivDataPoint(ArticleDataPoint):
@@ -68,7 +68,7 @@ class MedrxivDataPoint(ArticleDataPoint):
 
     @property
     def data_source_priority(self):
-        return _MEDRXIV_DATA_PRIORITY
+        return _MEDBIORXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
