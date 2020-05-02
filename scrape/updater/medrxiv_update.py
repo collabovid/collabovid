@@ -152,10 +152,10 @@ class MedrxivUpdater(DataUpdater):
     @property
     def _data_points(self):
         for article in self._article_json:
-            yield MedrxivDataPoint(raw_article_json=article)
+            yield MedrxivDataPoint(article)
 
     def _get_data_point(self, doi):
         try:
-            return MedrxivDataPoint(raw_article_json=next(x for x in self._article_json if x['rel_doi'] == doi))
+            return MedrxivDataPoint(next(x for x in self._article_json if x['rel_doi'] == doi))
         except StopIteration:
             return None

@@ -1,9 +1,7 @@
 from django.db import models
-from django.db.models import Q, Max
-from django.utils.dateparse import parse_date
 from django.db.models import F
-import logging
-import re
+
+
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
     description = models.TextField()

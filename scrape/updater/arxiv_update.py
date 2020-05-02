@@ -101,18 +101,23 @@ class ArxivUpdater(DataUpdater):
 
     def __init__(self, log=print):
         super().__init__(log)
-        self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
-                                         sort_by='submittedDate',
-                                         sort_order='descending')
-        # TODO: Split the query into smaller chunks?? Take a deeper look in arxiv package.
+
+    def _load_query_result(self):
+        if not self._query_result:
+            # TODO: Split the query into smaller chunks?? Take a deeper look in arxiv package.
+            self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
+                                             sort_by='submittedDate',
+                                             sort_order='descending')
 
     @property
     def _data_points(self):
+        self._load_query_result()
         for article in self._query_result:
             yield ArxivDataPoint(raw_article_dict=article)
 
     def _get_data_point(self, doi):
-        for article in self._query_result:
-            if article['doi'] == doi:
-                return ArxivDataPoint(raw_article_dict=article)
-        return None
+        self._load_query_result()
+        try:
+            return ArxivUpdater(next(x for x in self._query_result if x['doi'] == doi))
+        except StopIteration:
+            return None
