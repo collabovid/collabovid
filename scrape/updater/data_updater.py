@@ -96,7 +96,7 @@ class ArticleDataPoint(object):
         if db_article.published_at < date(year=2019, month=12, day=1):
             return False
 
-        _COVID19_KEYWORDS = r'(corona.?virus)?|covid.?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
+        _COVID19_KEYWORDS = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
 
         return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
             or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
