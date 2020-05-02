@@ -85,8 +85,6 @@ SECURE_REDIRECT_EXEMPT = [r'^system-health/$']
 
 ALLOW_IMAGE_SCRAPING = True
 
-TASK_LOGGING_PATH = "/var/log/app-logs/tasks/"
-
 if int(os.getenv('ALLOW_IMAGE_SCRAPING', 0)) > 0:
     ALLOW_IMAGE_SCRAPING = True
 else:

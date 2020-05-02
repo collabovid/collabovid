@@ -1,4 +1,4 @@
-from tasks import Runnable, register_task
+from tasks.definitions import Runnable, register_task
 from . import get_topic_assignment_analyzer, get_analyzer
 from analyze.analyzer import PaperAnalyzer
 

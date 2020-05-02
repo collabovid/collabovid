@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from django.utils import timezone
 
 from data.models import Author
-from tasks import Runnable, register_task
+from tasks.definitions import Runnable, register_task
 
 
 @register_task

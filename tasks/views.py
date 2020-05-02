@@ -18,9 +18,7 @@ def tasks(request):
 @staff_member_required
 def task_detail(request, id):
     task = Task.objects.get(pk=id)
-    with open(task.log_file, 'r') as f:
-        log = f.read()
-    return render(request, 'tasks/task_detail.html', {'task': task, 'log': log})
+    return render(request, 'tasks/task_detail.html', {'task': task})
 
 
 @staff_member_required

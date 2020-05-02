@@ -1,5 +1,5 @@
 from scrape.medrxiv_scraper import scrape_articles, delete_revoked_articles, update_articles
-from tasks import register_task, Runnable
+from tasks.definitions import register_task, Runnable
 
 
 @register_task

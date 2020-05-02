@@ -12,7 +12,7 @@ class TaskRunner:
                     status=Task.STATUS_PENDING,
                     started_by=kwargs['started_by'])
         task.save()
-        runnable = cls(*args, **dict(kwargs, log_file=task.log_file))
+        runnable = cls(*args, **dict(kwargs, task=task))
 
         try:
             runnable.run()
@@ -29,6 +29,7 @@ class TaskRunner:
             task.status = Task.STATUS_FINISHED
 
         task.ended_at = timezone.now()
+        runnable.flush()
         task.save()
 
     @staticmethod

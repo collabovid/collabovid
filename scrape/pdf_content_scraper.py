@@ -3,7 +3,7 @@ import requests
 from data.models import Paper, PaperData
 import re
 
-from tasks import Runnable, register_task
+from tasks.definitions import register_task, Runnable
 
 
 @register_task
