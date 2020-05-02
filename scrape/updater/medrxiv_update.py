@@ -7,18 +7,12 @@ from bs4 import BeautifulSoup
 
 from data.models import Paper
 from datetime import datetime
+from scrape.data_helper import BIORXIV_PAPERHOST_NAME, BIORXIV_PAPERHOST_URL, MEDRXIV_PAPERHOST_NAME, \
+    MEDRXIV_PAPERHOST_URL, MEDRXIV_DATA_PRIORITY, MEDRXIV_DATA_SOURCE_NAME
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
 
 class MedrxivDataPoint(ArticleDataPoint):
-    _MEDRXIV_DATA_SOURCE_NAME = 'medrxiv-updater'
-    _MEDRXIV_DATA_PRIORITY = 5
-
-    _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
-    _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
-    _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
-    _BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
-
     def __init__(self, raw_article_json):
         self.raw_article = raw_article_json
         self._article_soup = None
@@ -66,28 +60,28 @@ class MedrxivDataPoint(ArticleDataPoint):
 
     @property
     def data_source_name(self):
-        return self._MEDRXIV_DATA_SOURCE_NAME
+        return MEDRXIV_DATA_SOURCE_NAME
 
     @property
     def data_source_priority(self):
-        return self._MEDRXIV_DATA_PRIORITY
+        return MEDRXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
         site = self.raw_article['rel_site']
         if site == "medrxiv":
-            return self._MEDRXIV_PAPERHOST_NAME
+            return MEDRXIV_PAPERHOST_NAME
         elif site == "biorxiv":
-            return self._BIORXIV_PAPERHOST_NAME
+            return BIORXIV_PAPERHOST_NAME
         else:
             return None
 
     @property
     def paperhost_url(self):
-        if self.paperhost_name == self._MEDRXIV_PAPERHOST_NAME:
-            return self._MEDRXIV_PAPERHOST_URL
+        if self.paperhost_name == MEDRXIV_PAPERHOST_NAME:
+            return MEDRXIV_PAPERHOST_URL
         else:
-            return self._BIORXIV_PAPERHOST_URL
+            return BIORXIV_PAPERHOST_URL
 
     @property
     def published_at(self):
@@ -133,12 +127,11 @@ class MedrxivDataPoint(ArticleDataPoint):
 
 
 class MedrxivUpdater(DataUpdater):
-    _MEDRXIV_DATA_SOURCE_NAME = 'medrxiv-updater'
     _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'
 
     @property
     def _data_source_name(self):
-        return self._MEDRXIV_DATA_SOURCE_NAME
+        return MEDRXIV_DATA_SOURCE_NAME
 
     def __init__(self):
         super().__init__()

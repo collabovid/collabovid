@@ -4,15 +4,11 @@ import arxiv
 from nameparser import HumanName
 from django.utils.dateparse import parse_datetime
 
+from scrape.data_helper import ARXIV_PAPERHOST_NAME, ARXIV_PAPERHOST_URL, ARXIV_DATA_SOURCE_NAME, ARXIV_DATA_PRIORITY
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
 
 class ArxivDataPoint(ArticleDataPoint):
-    _ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
-    _ARXIV_DATA_PRIORITY = 10
-    _ARXIV_PAPERHOST_NAME = 'arXiv'
-    _ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
-
     _ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
 
     def __init__(self, raw_article_dict):
@@ -51,19 +47,19 @@ class ArxivDataPoint(ArticleDataPoint):
 
     @property
     def data_source_name(self):
-        return self._ARXIV_DATA_SOURCE_NAME
+        return ARXIV_DATA_SOURCE_NAME
 
     @property
     def data_source_priority(self):
-        return self._ARXIV_DATA_PRIORITY
+        return ARXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
-        return self._ARXIV_PAPERHOST_NAME
+        return ARXIV_PAPERHOST_NAME
 
     @property
     def paperhost_url(self):
-        return self._ARXIV_PAPERHOST_URL
+        return ARXIV_PAPERHOST_URL
 
     @property
     def published_at(self):
@@ -92,11 +88,10 @@ class ArxivDataPoint(ArticleDataPoint):
 
 class ArxivUpdater(DataUpdater):
     _ARXIV_SEARCH_QUERY = 'all:%22COVID 19%22'
-    _ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
 
     @property
     def _data_source_name(self):
-        return self._ARXIV_DATA_SOURCE_NAME
+        return ARXIV_DATA_SOURCE_NAME
 
     def __init__(self):
         super().__init__()

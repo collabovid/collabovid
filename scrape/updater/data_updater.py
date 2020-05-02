@@ -167,8 +167,6 @@ class DataUpdater(object):
 
     @property
     def _data_source_name(self):
-        # TODO: We need the data source when filtering the articles in update(), but this is now duplicate with the
-        #  ArticleDataPoint Class.
         raise NotImplementedError
 
     @property

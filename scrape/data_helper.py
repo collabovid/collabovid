@@ -1,0 +1,15 @@
+MEDRXIV_DATA_SOURCE_NAME = 'medrxiv-updater'
+MEDRXIV_DATA_PRIORITY = 5
+
+ARXIV_DATA_SOURCE_NAME = 'arxiv-updater'
+ARXIV_DATA_PRIORITY = 10
+
+
+MEDRXIV_PAPERHOST_NAME = 'medRxiv'
+MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
+
+BIORXIV_PAPERHOST_NAME = 'bioRxiv'
+BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
+
+ARXIV_PAPERHOST_NAME = 'arXiv'
+ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
