@@ -59,7 +59,6 @@ class MedrxivDataPoint(ArticleDataPoint):
                 continue
         return authors
 
-    @property
     def extract_content(self):
         return None
 
@@ -140,21 +139,24 @@ class MedrxivUpdater(DataUpdater):
 
     def __init__(self, log=print):
         super().__init__(log)
-        self._article_json = self._get_article_json()
+        self._article_json = None
 
     def _get_article_json(self):
-        try:
-            response = requests.get(self._COVID_JSON_URL)
-            return json.loads(response.text)['rels']
-        except requests.exceptions.ConnectionError:
-            raise Exception("Unable to download medRxiv COVID-19 article list JSON")
+        if not self._article_json:
+            try:
+                response = requests.get(self._COVID_JSON_URL)
+                self._article_json = json.loads(response.text)['rels']
+            except requests.exceptions.ConnectionError:
+                raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
     @property
     def _data_points(self):
+        self._get_article_json()
         for article in self._article_json:
             yield MedrxivDataPoint(article)
 
     def _get_data_point(self, doi):
+        self._get_article_json()
         try:
             return MedrxivDataPoint(next(x for x in self._article_json if x['rel_doi'] == doi))
         except StopIteration:
