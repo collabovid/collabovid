@@ -19,6 +19,10 @@ class PaperHost(models.Model):
 
 
 class DataSource(models.Model):
+    MEDBIORXIV_DATASOURCE_NAME = 'medbiorxiv-updater'
+    ARXIV_DATASOURCE_NAME = 'arxiv-updater'
+    CORD19_DATASOURCE_NAME = 'cord19-dataset'
+
     name = models.CharField(max_length=120, unique=True)
     priority = models.IntegerField(default=0)
 
