@@ -47,7 +47,6 @@ class ArxivDataPoint(ArticleDataPoint):
             authors.append((last_name, first_name))
         return authors
 
-    @property
     def extract_content(self):
         return None
 
@@ -101,6 +100,7 @@ class ArxivUpdater(DataUpdater):
 
     def __init__(self, log=print):
         super().__init__(log)
+        self._query_result = None
 
     def _load_query_result(self):
         if not self._query_result:
