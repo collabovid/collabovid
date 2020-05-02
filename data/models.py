@@ -22,7 +22,15 @@ class DataSource(models.Model):
     CORD19_DATASOURCE_NAME = 'cord19-dataset'
 
     name = models.CharField(max_length=120, unique=True)
-    priority = models.IntegerField(default=0)
+
+    @property
+    def priority(datasource):
+        if datasource.name == DataSource.MEDBIORXIV_DATASOURCE_NAME:
+            return 1
+        elif datasource.name == DataSource.ARXIV_DATASOURCE_NAME:
+            return 2
+        elif datasource.name == DataSource.CORD19_DATASOURCE_NAME:
+            return 3
 
 
 class Journal(models.Model):

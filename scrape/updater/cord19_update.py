@@ -123,7 +123,7 @@ class Cord19DataPoint(ArticleDataPoint):
             #  Currently we take just the last one of them.
             return sha.split(';')[-1].strip()
         else:
-            return '1'
+            return None
 
     @property
     def is_preprint(self):
@@ -191,7 +191,7 @@ class Cord19Updater(DataUpdater):
         self._download_data()
         #random.seed(0)
         random.shuffle(self.metadata)
-        for raw_data in self.metadata:
+        for raw_data in self.metadata[:1000]:
             yield Cord19DataPoint(raw_data=raw_data)
 
     def _get_data_point(self, doi):

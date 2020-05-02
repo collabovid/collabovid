@@ -93,14 +93,14 @@ class ArticleDataPoint(object):
 
     @staticmethod
     def _covid_related(db_article):
-        if db_article.published_at and db_article.published_at >= date(year=2019, month=12, day=1):
-            _COVID19_KEYWORDS = r'(corona([ -]?virus)?|covid[ -]?19|sars[ -]?cov[ -]?2)'
-        else:
-            _COVID19_KEYWORDS = r'(covid[ -]?19|sars[ -]?cov[ -]?2)'
+        if db_article.published_at < date(year=2019, month=12, day=1):
+            return False
+
+        _COVID19_KEYWORDS = r'(corona.?virus)?|covid.?19|sars.?cov.?2|2019.?ncov)'
 
         return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
-            or bool(re.search(_COVID19_KEYWORDS, db_article.abstract)) \
-            or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content)))
+            or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
+            or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
 
     def update_db(self, update_existing=True):
         doi = self.doi
@@ -121,13 +121,13 @@ class ArticleDataPoint(object):
         except Paper.DoesNotExist:
             db_article = Paper(doi=doi)
 
-        if db_article.data_source and db_article.data_source.priority < self.data_source_priority:
+        datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
+        if db_article.data_source and db_article.data_source.priority < datasource.priority:
             raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
 
         db_article.title = title
         db_article.abstract = self.abstract
-        db_article.data_source, _ = DataSource.objects.get_or_create(name=self.data_source_name,
-                                                                     priority=self.data_source_priority)
+        db_article.data_source = datasource
         db_article.host, _ = PaperHost.objects.get_or_create(name=self.paperhost_name,
                                                              url=self.paperhost_url)
         if self.journal:
