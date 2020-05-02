@@ -8,7 +8,6 @@ from data.models import DataSource
 from datetime import datetime
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
-
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
@@ -59,8 +58,6 @@ class MedrxivDataPoint(ArticleDataPoint):
                 continue
         return authors
 
-    def extract_content(self):
-        return None
 
     @property
     def data_source_name(self):

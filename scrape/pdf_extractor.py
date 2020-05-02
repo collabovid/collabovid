@@ -1,58 +1,35 @@
-from tika import parser
 import requests
-from data.models import Paper, PaperData
 import re
 
-from tasks import Runnable, register_task
+from django.core.files.base import ContentFile
+from io import BytesIO
+from PIL import Image
+from pdf2image import convert_from_bytes
+from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
+from tika import parser
 
 
-@register_task
-class PdfContentScraper(Runnable):
+class PdfExtractor:
+    def __init__(self, pdf_url):
+        self._pdf_response = None
+        self._pdf_url = pdf_url
 
-    @staticmethod
-    def task_name():
-        return "scrape-pdf-content"
+    def _load_pdf_response(self):
+        if not self._pdf_response:
+            self._pdf_response = requests.get(self._pdf_url)
 
-    def __init__(self, papers = None, *args, **kwargs):
-        super(PdfContentScraper, self).__init__(*args, **kwargs)
-
-        if papers:
-            self.papers = papers
-        else:
-            self.papers = Paper.objects.all()
-
-    def run(self):
-        skipped_papers = 0
-        for i, paper in enumerate(self.papers):
-            if not paper.data or not paper.data.content:
-                self.log("Scraping content of", paper.doi)
-                res = requests.get(paper.pdf_url)
-                PdfContentScraper.parse_response(self, paper, res)
-                self.log("Got content of", paper.doi, "with length", len(paper.data.content))
-            else:
-                skipped_papers += 1
-
-        self.log("Skipped", skipped_papers)
-
-    @staticmethod
-    def parse_response(runnable: Runnable, paper, response):
+    def extract_content(self):
         """
-        Todo: this methods does some unnecessary conversion.
-        :param paper:
-        :param response:
-        :return:
+        Extracts the content of the PDF file.
+        :return: The content of the PDF file as string, or None if impossible.
         """
+        self._load_pdf_response()
 
-        if paper.data and paper.data.content:
-            return
-
-        # Extract text from document
-        content = parser.from_buffer(response.content)
+        content = parser.from_buffer(self._pdf_response.content)
         if 'content' in content:
             text = content['content']
         else:
-            runnable.log("No Content found for", paper.doi)
-            return
+            return None
 
         # Convert to string
         text = str(text)
@@ -88,10 +65,28 @@ class PdfContentScraper(Runnable):
         safe_text = re.sub(r"\s+", ' ', safe_text)
         safe_text = re.sub(r"\[\d+\]", '', safe_text)  # Delete all references like [12])
 
-        if not paper.data:
-            paper.data = PaperData(content=safe_text)
-        else:
-            paper.data.content = safe_text
+        return safe_text
 
-        paper.data.save()
-        paper.save()
+    def extract_image(self, page=1):
+        """
+        Extracts the preview image from the PDF.
+        :param page: Sets, which PDF page should appear on the preview. Interesting for Kaggle dataset,
+                     where the first page often/always (?) is a disclaimer.
+        :return: The preview image as ContentFile or None, if an error occurs.
+        """
+        self._load_pdf_response()
+
+        try:
+            pages = convert_from_bytes(self._pdf_response.content, first_page=page, last_page=page)
+        except (PDFPageCountError, PDFSyntaxError):
+            return None
+
+        if len(pages) != 1:
+            return None
+
+        buffer = BytesIO()
+        pages[0].thumbnail((400, 400), Image.ANTIALIAS)
+        pages[0].save(fp=buffer, format='JPEG')
+
+        pillow_image = ContentFile(buffer.getvalue())
+        return pillow_image

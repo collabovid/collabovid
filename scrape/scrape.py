@@ -3,14 +3,14 @@ from tasks.task_runner import TaskRunner
 from scrape.task_medrxiv_update import MedrxivUpdateTask
 from scrape.task_cord19_update import Cord19UpdateTask
 from scrape.task_arxiv_update import ArxivUpdateTask
-from scrape.pdf_scraper import PdfScraper
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
 from tasks import Runnable
 from data.models import Paper
 
 from django.conf import settings
-
+# TODO:
+#  - delete or restructure this task?
 class Scrape(Runnable):
     @staticmethod
     def task_name():

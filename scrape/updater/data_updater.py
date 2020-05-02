@@ -4,6 +4,8 @@ from django.utils import timezone
 from datetime import timedelta, date
 
 from data.models import Author, Category, Paper, PaperHost, DataSource, Journal, PaperData
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from scrape.pdf_extractor import PdfExtractor
 from timeit import default_timer as timer
 
 
@@ -26,7 +28,11 @@ class SkipArticle(UpdateException):
 
 class ArticleDataPoint(object):
     def __init__(self):
-        self._new_pdf_version = True
+        self._pdf_extractor = None
+
+    def _setup_pdf_extractor(self):
+        if not self._pdf_extractor:
+            self._pdf_extractor = PdfExtractor(self.pdf_url)
 
     @property
     def doi(self):
@@ -45,7 +51,12 @@ class ArticleDataPoint(object):
         return []
 
     def extract_content(self):
-        return None
+        self._setup_pdf_extractor()
+        return self._pdf_extractor.extract_content()
+
+    def extract_image(self):
+        self._setup_pdf_extractor()
+        return self._pdf_extractor.extract_image()
 
     @property
     def data_source_name(self):
@@ -102,6 +113,10 @@ class ArticleDataPoint(object):
             or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
             or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
 
+    @staticmethod
+    def _sanitize_doi(doi):
+        return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
+
     def update_db(self, update_existing=True):
         doi = self.doi
         title = self.title
@@ -142,12 +157,12 @@ class ArticleDataPoint(object):
         if len(self.extract_authors) > 0:
             db_article.authors.clear()
         for author in authors:
-                db_author, _ = Author.objects.get_or_create(
-                    first_name=author[1],
-                    last_name=author[0],
-                    data_source=db_article.data_source,
-                )
-                db_article.authors.add(db_author)
+            db_author, _ = Author.objects.get_or_create(
+                first_name=author[1],
+                last_name=author[0],
+                data_source=db_article.data_source,
+            )
+            db_article.authors.add(db_author)
 
         if self.category_name:
             db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
@@ -160,6 +175,17 @@ class ArticleDataPoint(object):
                 else:
                     db_content = PaperData.objects.create(content=content)
                     db_article.data = db_content
+
+            preview_image = self.extract_image()
+            if preview_image:
+                img_name = self._sanitize_doi(self.doi) + ".jpg"
+                db_article.preview_image.save(img_name, InMemoryUploadedFile(
+                    preview_image,  # file
+                    None,  # field_name
+                    img_name,  # file name
+                    'image/jpeg',  # content_type
+                    preview_image.tell,  # size
+                    None))
 
         db_article.version = self.version
         db_article.covid_related = self._covid_related(db_article=db_article)
