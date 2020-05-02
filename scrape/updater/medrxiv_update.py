@@ -1,19 +1,24 @@
 import json
 import re
-from typing import Callable, List, Tuple, Any
 
 import requests
 from bs4 import BeautifulSoup
 
-from data.models import Paper
+from data.models import DataSource
 from datetime import datetime
-from scrape.data_helper import BIORXIV_PAPERHOST_NAME, BIORXIV_PAPERHOST_URL, MEDRXIV_PAPERHOST_NAME, \
-    MEDRXIV_PAPERHOST_URL, MEDRXIV_DATA_PRIORITY, MEDRXIV_DATA_SOURCE_NAME
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
+
+
+_MEDRXIV_PAPERHOST_NAME = 'medRxiv'
+_BIORXIV_PAPERHOST_NAME = 'bioRxiv'
+_MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
+_BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
+_MEDRXIV_DATA_PRIORITY = 1
 
 
 class MedrxivDataPoint(ArticleDataPoint):
     def __init__(self, raw_article_json):
+        super().__init__()
         self.raw_article = raw_article_json
         self._article_soup = None
 
@@ -36,7 +41,7 @@ class MedrxivDataPoint(ArticleDataPoint):
         return self.raw_article['rel_abs']
 
     @property
-    def authors(self):
+    def extract_authors(self):
         self._setup_article_soup()
 
         author_webelements = self._article_soup.find(
@@ -47,41 +52,41 @@ class MedrxivDataPoint(ArticleDataPoint):
         for author_webelement in author_webelements:
             try:
                 firstname = author_webelement.find('span', attrs={'class': 'nlm-given-names'}).text
-                name = author_webelement.find('span', attrs={'class': 'nlm-surname'}).text
-                authors.append((name, firstname))
+                lastname = author_webelement.find('span', attrs={'class': 'nlm-surname'}).text
+                authors.append((lastname, firstname))
             except AttributeError:
                 # Ignore collaboration groups, listed in authors list
                 continue
         return authors
 
     @property
-    def content(self):
+    def extract_content(self):
         return None
 
     @property
     def data_source_name(self):
-        return MEDRXIV_DATA_SOURCE_NAME
+        return DataSource.MEDBIORXIV_DATASOURCE_NAME
 
     @property
     def data_source_priority(self):
-        return MEDRXIV_DATA_PRIORITY
+        return _MEDRXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
         site = self.raw_article['rel_site']
         if site == "medrxiv":
-            return MEDRXIV_PAPERHOST_NAME
+            return _MEDRXIV_PAPERHOST_NAME
         elif site == "biorxiv":
-            return BIORXIV_PAPERHOST_NAME
+            return _BIORXIV_PAPERHOST_NAME
         else:
             return None
 
     @property
     def paperhost_url(self):
-        if self.paperhost_name == MEDRXIV_PAPERHOST_NAME:
-            return MEDRXIV_PAPERHOST_URL
+        if self.paperhost_name == _MEDRXIV_PAPERHOST_NAME:
+            return _MEDRXIV_PAPERHOST_URL
         else:
-            return BIORXIV_PAPERHOST_URL
+            return _BIORXIV_PAPERHOST_URL
 
     @property
     def published_at(self):
@@ -106,11 +111,11 @@ class MedrxivDataPoint(ArticleDataPoint):
     def version(self):
         self._setup_article_soup()
 
-        version_match = re.match('^\S+v(\d+)$', self.redirected_url)
+        version_match = re.match(r'^\S+v(\d+)$', self.redirected_url)
         if version_match:
-            return int(version_match.group(1))
+            return version_match.group(1)
         else:
-            return 1
+            return '1'
 
     @property
     def is_preprint(self):
@@ -131,17 +136,17 @@ class MedrxivUpdater(DataUpdater):
 
     @property
     def _data_source_name(self):
-        return MEDRXIV_DATA_SOURCE_NAME
+        return DataSource.MEDBIORXIV_DATASOURCE_NAME
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, log=print):
+        super().__init__(log)
         self._article_json = self._get_article_json()
 
     def _get_article_json(self):
         try:
             response = requests.get(self._COVID_JSON_URL)
             return json.loads(response.text)['rels']
-        except requests.exceptions.ConnectionError as ex:
+        except requests.exceptions.ConnectionError:
             raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
     @property
@@ -150,29 +155,7 @@ class MedrxivUpdater(DataUpdater):
             yield MedrxivDataPoint(raw_article_json=article)
 
     def _get_data_point(self, doi):
-        for article in self._article_json:
-            if article['rel_doi'] == doi:
-                return MedrxivDataPoint(raw_article_json=article)
-        return None
-
-
-# TODO:
-#  - integrate revoked articles into above process?
-def delete_revoked_articles(log_function: Callable[[Tuple[Any, ...]], Any] = print) -> List[str]:
-    """
-    Remove all revoked articles (no longer in JSON file) from DB.
-
-    :return: List of dois of removed articles.
-    """
-    json_dois = [article['rel_doi'] for article in _get_article_json()]
-
-    revoked_articles = []
-    for db_article in Paper.objects.all():
-        if db_article.doi not in json_dois:
-            revoked_articles.append(db_article.doi)
-            log_function(f"Deleting article {db_article.doi}")
-
-    Paper.objects.filter(doi__in=revoked_articles).delete()
-
-    log_function(f"Deleted {len(revoked_articles)} articles")
-    return revoked_articles
+        try:
+            return MedrxivDataPoint(raw_article_json=next(x for x in self._article_json if x['rel_doi'] == doi))
+        except StopIteration:
+            return None

@@ -1,9 +1,9 @@
 import re
 
 from django.utils import timezone
-from datetime import date, timedelta
+from datetime import timedelta, date
 
-from data.models import Author, Category, Paper, PaperHost, DataSource, Journal
+from data.models import Author, Category, Paper, PaperHost, DataSource, Journal, PaperData
 from timeit import default_timer as timer
 
 
@@ -25,6 +25,9 @@ class SkipArticle(UpdateException):
 
 
 class ArticleDataPoint(object):
+    def __init__(self):
+        self._new_pdf_version = True
+
     @property
     def doi(self):
         raise NotImplementedError
@@ -38,11 +41,10 @@ class ArticleDataPoint(object):
         return ''
 
     @property
-    def authors(self):
+    def extract_authors(self):
         return []
 
-    @property
-    def content(self):
+    def extract_content(self):
         return None
 
     @property
@@ -79,11 +81,11 @@ class ArticleDataPoint(object):
 
     @property
     def version(self):
-        return 1
+        raise NotImplementedError
 
     @property
     def is_preprint(self):
-        return True
+        raise NotImplementedError
 
     @property
     def category_name(self):
@@ -130,28 +132,35 @@ class ArticleDataPoint(object):
         if self.journal:
             db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
         db_article.published_at = self.published_at
-        db_article.version = self.version
         db_article.url = self.url
         db_article.pdf_url = self.pdf_url
         db_article.is_preprint = self.is_preprint
 
         db_article.save()
-        if len(self.authors) > 0:
+        authors = self.extract_authors
+        if len(self.extract_authors) > 0:
             db_article.authors.clear()
-            for author in self.authors:
-                db_author, created = Author.objects.get_or_create(
+        for author in authors:
+                db_author, _ = Author.objects.get_or_create(
                     first_name=author[1],
                     last_name=author[0],
                     data_source=db_article.data_source,
                 )
-                db_author.save()
                 db_article.authors.add(db_author)
-        # db_article.authors.add(*self.authors) TODO: This did not work
 
         if self.category_name:
             db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
-        db_article.content = self.content
+        if self.version != db_article.version:
+            content = self.extract_content()
+            if content:
+                if db_article.data:
+                    db_article.data.content = content
+                else:
+                    db_content = PaperData.objects.create(content=content)
+                    db_article.data = db_content
+
+        db_article.version = self.version
         db_article.covid_related = self._covid_related(db_article=db_article)
         db_article.last_scrape = timezone.now()
         db_article.save()
@@ -159,7 +168,9 @@ class ArticleDataPoint(object):
 
 
 class DataUpdater(object):
-    def __init__(self):
+    def __init__(self, log=print):
+        self.log = log
+
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -176,24 +187,24 @@ class DataUpdater(object):
     def _get_data_point(self, doi):
         raise NotImplementedError
 
-    def _update_data(self, data_point, update_existing=True, log=print):
+    def _update_data(self, data_point, update_existing=True):
         try:
             data_point.update_db(update_existing=update_existing)
-            log(f"Updated/Created {data_point.doi}")
+            self.log(f"Updated/Created {data_point.doi}")
             self.n_success += 1
         except MissingDataError as ex:
-            id = data_point.doi if data_point.doi else data_point.title
-            log(f"{id}: {ex.msg}")
+            id = data_point.doi if data_point.doi else f"\"{data_point.title}\""
+            self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            log(f"{data_point.doi}: {ex.msg}")
+            self.log(f"Sip: {data_point.doi}: {ex.msg}")
             self.n_skipped += 1
             pass
         except DifferentDataSourceError as ex:
-            log(f"{data_point.doi}: {ex.msg}")
+            self.log(f"{data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
 
-    def update(self, max_count=None, log=print):
+    def update(self, max_count=None):
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -203,7 +214,7 @@ class DataUpdater(object):
 
         start = timer()
         for data_point in self._data_points:
-            self._update_data(data_point, update_existing=update_existing, log=log)
+            self._update_data(data_point, update_existing=update_existing)
 
         total = self.n_success + self.n_errors
         if max_count and total < max_count:
@@ -215,6 +226,8 @@ class DataUpdater(object):
                     self._update_data(data_point, update_existing=True)
 
         end = timer()
-        log(f"Finished: {timedelta(seconds=end-start)}")
-        log(f"Errors: {self.n_errors}")
-        log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Finished: {timedelta(seconds=end-start)}")
+        self.log(f"Created: {self.n_success}")
+        self.log(f"Skipped: {self.n_skipped}")
+        self.log(f"Errors: {self.n_errors}")
+        self.log(f"Tracked by other source: {self.n_already_tracked}")

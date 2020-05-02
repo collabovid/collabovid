@@ -19,6 +19,13 @@ class PaperHost(models.Model):
 
 
 class DataSource(models.Model):
+    MEDBIORXIV_DATASOURCE_NAME = 'medbiorxiv-updater'
+    MEDBIORXIV_DATASOURCE_PRIORITY = 1
+    ARXIV_DATASOURCE_NAME = 'arxiv-updater'
+    MEDBIORXIV_DATASOURCE_PRIORITY = 2
+    CORD19_DATASOURCE_NAME = 'cord19-dataset'
+    MEDBIORXIV_DATASOURCE_PRIORITY = 3
+
     name = models.CharField(max_length=120, unique=True)
     priority = models.IntegerField(default=0)
 
@@ -69,7 +76,7 @@ class Paper(models.Model):
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
                                       default=None)
-    version = models.IntegerField(default=1, null=False)
+    version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 

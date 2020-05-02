@@ -4,14 +4,20 @@ import arxiv
 from nameparser import HumanName
 from django.utils.dateparse import parse_datetime
 
-from scrape.data_helper import ARXIV_PAPERHOST_NAME, ARXIV_PAPERHOST_URL, ARXIV_DATA_SOURCE_NAME, ARXIV_DATA_PRIORITY
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
+from data.models import DataSource
+
+
+_ARXIV_DATA_PRIORITY = 2
+_ARXIV_PAPERHOST_NAME = 'arXiv'
+_ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
 
 
 class ArxivDataPoint(ArticleDataPoint):
     _ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
 
     def __init__(self, raw_article_dict):
+        super().__init__()
         self.raw_article = raw_article_dict
 
     @property
@@ -32,7 +38,7 @@ class ArxivDataPoint(ArticleDataPoint):
         return self.raw_article['summary'].replace('\n', ' ')
 
     @property
-    def authors(self):
+    def extract_authors(self):
         authors = []
         for author in self.raw_article['authors']:
             human_name = HumanName(author)
@@ -42,24 +48,24 @@ class ArxivDataPoint(ArticleDataPoint):
         return authors
 
     @property
-    def content(self):
+    def extract_content(self):
         return None
 
     @property
     def data_source_name(self):
-        return ARXIV_DATA_SOURCE_NAME
+        return DataSource.ARXIV_DATASOURCE_NAME
 
     @property
     def data_source_priority(self):
-        return ARXIV_DATA_PRIORITY
+        return _ARXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
-        return ARXIV_PAPERHOST_NAME
+        return _ARXIV_PAPERHOST_NAME
 
     @property
     def paperhost_url(self):
-        return ARXIV_PAPERHOST_URL
+        return _ARXIV_PAPERHOST_URL
 
     @property
     def published_at(self):
@@ -77,9 +83,9 @@ class ArxivDataPoint(ArticleDataPoint):
     def version(self):
         version_match = re.match('^\S+v(\d+)$', self.raw_article['id'])
         if version_match:
-            return int(version_match.group(1))
+            return version_match.group(1)
         else:
-            return 1
+            return '1'
 
     @property
     def is_preprint(self):
@@ -91,10 +97,10 @@ class ArxivUpdater(DataUpdater):
 
     @property
     def _data_source_name(self):
-        return ARXIV_DATA_SOURCE_NAME
+        return DataSource.ARXIV_DATASOURCE_NAME
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, log=print):
+        super().__init__(log)
         self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
                                          sort_by='submittedDate',
                                          sort_order='descending')

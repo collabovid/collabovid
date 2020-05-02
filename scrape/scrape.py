@@ -1,6 +1,8 @@
 import os
 from tasks.task_runner import TaskRunner
-from scrape.task_medrxiv_update import ArticleScraper
+from scrape.task_medrxiv_update import MedrxivUpdateTask
+from scrape.task_cord19_update import Cord19UpdateTask
+from scrape.task_arxiv_update import ArxivUpdateTask
 from scrape.pdf_scraper import PdfScraper
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
@@ -31,7 +33,7 @@ class Scrape(Runnable):
 
     def run(self):
         self.log("Scraping articles...")
-        TaskRunner.run_task(ArticleScraper, update_unknown_category=self._update_unknown_category,
+        TaskRunner.run_task(MedrxivUpdateTask, update_unknown_category=self._update_unknown_category,
                             started_by=self._started_by)
         self.log("Finished scraping articles...")
         self.log("Scraping pdf images and content...")

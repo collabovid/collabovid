@@ -1,15 +1,16 @@
-from scrape.updater.cord19_update import update_cord19_data
+from scrape.updater.cord19_update import Cord19Updater
 from tasks import register_task, Runnable
 
 
 @register_task
-class Cord19Downloader(Runnable):
+class Cord19UpdateTask(Runnable):
     @staticmethod
     def task_name():
-        return "download-cord19"
+        return "update-cord19"
 
     def __init__(self, *args, **kwargs):
-        super(Cord19Downloader, self).__init__(*args, **kwargs)
+        super(Cord19UpdateTask, self).__init__(*args, **kwargs)
 
     def run(self):
-        update_cord19_data()
+        updater = Cord19Updater(log=self.log)
+        updater.update()
