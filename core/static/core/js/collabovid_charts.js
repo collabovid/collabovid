@@ -25,9 +25,12 @@ window.chartColors = {
         plugin.init();
 
         let published_dates = [];
-
+        let today = new Date()
         plugin.settings.plot_data['x'].forEach(function (item) {
-            published_dates.push(new Date(item));
+            let article_date = new Date(item)
+            if (article_date <= today) {
+                published_dates.push(article_date);
+            }
         });
 
         return new Chart(plugin, {
