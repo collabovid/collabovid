@@ -6,7 +6,7 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.files.base import ContentFile
-from tasks import register_task, Runnable
+from tasks.definitions import register_task, Runnable
 
 from data.models import Paper
 

@@ -13,6 +13,8 @@ body {
 .feedback-bar {
     background-color: #5b73aa;
     color: #fff;
+    position: relative;
+    z-index: 1;
 }
 
 .feedback-bar a {
@@ -246,7 +248,7 @@ a.invisible-link, a.invisible-link:hover {
     border-top-right-radius: 10px;
 }
 
-.nav-search-types .nav-item .nav-link:hover:not(.active) {
+.nav-search-types .nav-item .nav-link:hover:not(.active):not(.disabled) {
     background: #5475a1;
 }
 
@@ -254,11 +256,14 @@ a.invisible-link, a.invisible-link:hover {
     color: #4c84d7;
     padding: 15px;
     background: #F5F5F5;
-
-
 }
 
-.nav-search-types .nav-link {
+.nav-search-types .nav-item .nav-link.disabled:not(.active) {
+    color: #d6d9d9 !important;
+}
+
+.nav-search-types .nav-item .nav-link.active.disabled {
+    color: #6c757d!important;
 }
 
 .search-dropdown {
@@ -280,4 +285,81 @@ div.paper-cover {
     height: 100%;
     background: rgba(.3, .3, .3, .3);
     display: none;
+}
+
+div.progress-wrapper
+{
+    position: relative;
+}
+div.progress-wrapper a.help
+{
+    position: absolute;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    cursor: pointer;
+    margin-top: -1px;
+}
+
+div.progress-wrapper div.progress
+{
+    margin-right: 20px;
+}
+
+div.stack-col
+{
+    overflow: hidden;
+}
+
+.stack {
+    padding: 0;
+    position: relative;
+    max-width: 100%;
+}
+
+.stack img {
+    max-width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: all 1s;
+
+    -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
+}
+
+.stack img:last-child {
+    position: relative;
+}
+
+.stack-fanout img:first-child,
+.stack-fanout img:nth-child(2) {
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+}
+
+.stack-fanout.active img:nth-child(3) {
+    -webkit-transform: rotate(-10deg) translateX(-35%) scale(0.8);
+    transform: rotate(-10deg) translateX(-35%) scale(0.8);
+}
+
+.stack-fanout.active img:nth-child(4) {
+    -webkit-transform: rotate(10deg) translateX(35%) scale(0.8);
+    transform: rotate(10deg) translateX(35%) scale(0.8);
+}
+
+.stack-fanout.active img:nth-child(5) {
+    -webkit-transform: scale(0.9);
+    transform: scale(0.9);
+}
+
+.stack-fanout.active img:first-child {
+    -webkit-transform: rotate(-20deg) translateX(-60%) scale(0.8);
+    transform: rotate(-20deg) translateX(-60%) scale(0.8);
+}
+
+.stack-fanout.active img:nth-child(2) {
+    -webkit-transform: rotate(20deg) translateX(60%) scale(0.8);
+    transform: rotate(20deg) translateX(60%) scale(0.8);
 }

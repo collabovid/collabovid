@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="row mt-5">
-                    <div class="col-10">
+                    <div class="col-9">
                         <ul class="nav nav-search-types nav-justified">
                             <li class="nav-item">
                                 <a class="nav-link {% if form.tab == "top" %}active{% endif %}" href="#"
@@ -52,7 +52,7 @@
                         </ul>
                     </div>
 
-                    <div class="col-2 text-right">
+                    <div class="col-3 text-right">
 
                         <div class="dropdown">
                             <button class="btn btn-light mt-2"
@@ -129,6 +129,11 @@
             $(".nav-search-types a.nav-link").click(function (e) {
                 e.preventDefault();
 
+                if($(this).hasClass('disabled'))
+                {
+                    return;
+                }
+
                 $(".nav-search-types a.nav-link.active").removeClass("active");
                 $(this).addClass("active");
 
@@ -137,6 +142,7 @@
 
                 form.submit();
             });
+
         });
     </script>
     {% include 'core/partials/_paper_card.html' with script=True html=False %}

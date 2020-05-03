@@ -1,4 +1,5 @@
 {% load static %}
+{% load settings_helper %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -24,6 +25,13 @@
 
     <link rel="stylesheet" href="{% static "core/css/main.css" %}"/>
     <link rel="stylesheet" href="{% static "core/css/cookie.css" %}"/>
+
+    <link rel="stylesheet" href="{% static "core/css/info-cards.css" %}"/>
+
+    {% settings_value "USING_ANALYTICS" as using_analytics %}
+    {% if using_analytics %}
+        <script async defer data-domain="collabovid.org" src="https://plausible.io/js/plausible.js"></script>
+    {% endif %}
 
     {% block css %}
     {% endblock %}

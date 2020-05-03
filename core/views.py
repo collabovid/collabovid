@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -13,23 +14,24 @@ PAPER_PAGE_COUNT = 10
 
 def home(request):
     if request.method == "GET":
-        categories = Category.objects.order_by('name')
+        statistics = Statistics(Paper.objects.all())
 
-        return render(request, "core/home.html", {'papers': Paper.objects.all(), 'categories': categories})
+        most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
+        paper_count = Paper.objects.count()
+        return render(request, "core/home.html", {'statistics': statistics,
+                                                  'most_recent_papers': most_recent_papers})
 
 
 def about(request):
-    return render(request, "core/about.html", {'papers': Paper.objects.all()})
+    paper_count = Paper.objects.count()
+    return render(request, "core/about.html", {'paper_count': paper_count})
 
 
 def topic(request, id):
-    # TODO: Adapt search
     topic = get_object_or_404(Topic, pk=id)
 
     if request.method == "GET":
-        categories = set()
-        for paper in topic.papers.all():
-            categories.add(paper.category)
+        categories = Category.objects.filter(papers__topic=topic).distinct()
 
         return render(request, "core/topic.html",
                       {'topic': topic,
@@ -74,7 +76,7 @@ def topic(request, id):
             page_obj = None
 
         return render(request, "core/partials/_search_results.html",
-                      {'papers': page_obj, 'search_score_limit': 0, 'show_topic_score': True})
+                      {'papers': page_obj, 'show_score': True})
 
     return HttpResponseNotFound()
 
@@ -128,7 +130,6 @@ def search(request):
         }
 
         return render(request, "core/search.html", {'form': form,
-                                                    'papers': Paper.objects.all(),
                                                     'categories': categories})
     elif request.method == "POST":
         category_names = request.POST.getlist("categories")
@@ -142,7 +143,7 @@ def search(request):
         search_engine = get_default_search_engine()
 
         search_result = search_engine.search(search_query, categories=category_names, start_date=start_date,
-                                             end_date=end_date)
+                                             end_date=end_date, score_min=0.65)
 
         if tab == "statistics":
             statistics = Statistics(search_result.papers)
@@ -163,5 +164,4 @@ def search(request):
                 page_obj = None
 
             return render(request, "core/partials/_search_results.html", {'papers': page_obj,
-                                                                          'search_score_limit': 0,
-                                                                          'show_topic_score': False, })
+                                                                          'show_score': False, })

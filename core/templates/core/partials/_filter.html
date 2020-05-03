@@ -29,7 +29,7 @@
                             <label for="chose-category">Choose a category:</label>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row align-items-center">
                         <div class="col-xl-9 col-lg-10 col-md-10 col-sm-12">
                             <select name="categories"
                                     id="chose-category"
@@ -42,12 +42,13 @@
                             </select>
                         </div>
 
-                        <div class="col-xl-3 col-lg-2 col-md-2 col-sm-12">
-                            <div class="mt-3 d-xl-none d-lg-none d-md-none d-sm-block d-block"></div>
-                            <a href="#" id="toggle-category-select"
-                               class="btn btn-secondary delete d-xl-inline-block d-block"
-                               data-text-switch="<i class='fas fa-plus'></i>">
-                                <i class='fas fa-times'></i>
+
+                        <div class="col-md-3 col-sm-12 px-0 py-0">
+                            <a href="#"
+                               id="toggle-category-select"
+                               class="small delete"
+                               data-text-switch="Select all">
+                                Deselect all
                             </a>
                         </div>
                     </div>
@@ -97,7 +98,7 @@
                     <button class="btn btn-pink d-block d-sm-block
                         d-md-inline-block
                         d-lg-inline-block
-                        d-xl-inline-block w-100">
+                        d-xl-inline-block w-100" id="findPapersSubmit">
                         <i class="fas fa-search mr-2"></i> Find Papers
                     </button>
                 </div>
@@ -122,6 +123,9 @@
             let form = $("#paper-search-form");
             let pagination_container = $("#pagination-container");
             let chose_category_select = $("#chose-category");
+            let find_papers_submit = $("#findPapersSubmit");
+
+            window.formAjaxAllowed = true;
 
             update_pagination_container = pagination_container.paginate({
                 searchQuery: search_query,
@@ -136,10 +140,10 @@
 
                 if ($(this).hasClass('delete')) {
                     chose_category_select.find('option').attr("selected", false);
-                    $(this).removeClass('delete').removeClass('btn-secondary').addClass('add').addClass('btn-success');
+                    $(this).removeClass('delete').addClass('add');
                 } else if ($(this).hasClass('add')) {
                     chose_category_select.find('option').attr("selected", "selected");
-                    $(this).removeClass('add').removeClass('btn-success').addClass('delete').addClass('btn-secondary');
+                    $(this).removeClass('add').addClass('delete');
                 }
 
                 $(this).data("text-switch", old_text);
@@ -148,7 +152,7 @@
                 chose_category_select.selectpicker('refresh');
             });
 
-            function search_query(data, page, scroll=false, on_success) {
+            function search_query(data, page, scroll = false, on_success) {
                 paper_container.hide();
                 indicator.show();
 
@@ -166,8 +170,7 @@
 
                         update_pagination_container();
 
-                        if(scroll)
-                        {
+                        if (scroll) {
                             $('html, body').scrollTop(paper_container.offset().top - 50);
                         }
 
@@ -198,15 +201,22 @@
             form.submit(function (e) {
                 e.preventDefault();
 
+                if (!window.formAjaxAllowed) {
+                    return;
+                }
+
+                window.formAjaxAllowed = false;
+                find_papers_submit.prop('disabled', true);
+
                 pagination_container.hide();
 
                 search_query(form.serialize(), 1, false, function () {
                     window.Pagination.last_request = form.serialize();
+                    window.formAjaxAllowed = true;
+                    find_papers_submit.prop('disabled', false);
                 });
 
             });
-
-
 
             {% if load_default %}
                 form.submit();
@@ -216,7 +226,7 @@
 
 {% elif css %}
     <link href="{% static "core/include/gijgo-1.9.13/css/gijgo.css" %}" rel="stylesheet" type="text/css"/>
-     <link rel="stylesheet"
+    <link rel="stylesheet"
           href="{% static "core/include/bootstrap-select-1.13.1/css/bootstrap-select.css" %}"/>
 
 {% endif %}

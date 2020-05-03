@@ -5,7 +5,7 @@ from scrape.task_cord19_update import Cord19UpdateTask
 from scrape.task_arxiv_update import ArxivUpdateTask
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
-from tasks import Runnable
+from tasks.definitions import Runnable
 from data.models import Paper
 
 from django.conf import settings

@@ -146,7 +146,10 @@ if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CON
 
 # For certain test cases we might not allow image scraping.
 ALLOW_IMAGE_SCRAPING = False
-TASK_LOGGING_PATH = os.path.join(BASE_DIR, "log/tasks/")
 
 IMPRINT_URL = os.getenv("IMPRINT_URL", "")
 DATA_PROTECTION_URL = os.getenv("DATA_PROTECTION_URL", "")
+
+USING_ANALYTICS = False
+
+TASK_LOGGING_DB_FLUSH_MINUTES = int(os.getenv("TASK_LOGGING_DB_FLUSH_MINUTES", "1"))
