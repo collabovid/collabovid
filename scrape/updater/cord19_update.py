@@ -47,7 +47,6 @@ class Cord19DataPoint(ArticleDataPoint):
     def abstract(self):
         return self.raw_data['abstract']
 
-    @property
     def extract_authors(self):
         return [f"{name},".split(',') for name in self.raw_data['authors'].split(';') if name]
 
@@ -84,7 +83,10 @@ class Cord19DataPoint(ArticleDataPoint):
 
     @property
     def paperhost_name(self):
-        return self.raw_data['source_x']
+        paperhost = self.raw_data['source_x']
+        if paperhost == 'medrxiv': return 'medRxiv'
+        if paperhost == 'biorxiv': return 'bioRxiv'
+        return paperhost
 
     @property
     def paperhost_url(self):
@@ -111,7 +113,11 @@ class Cord19DataPoint(ArticleDataPoint):
     @property
     def published_at(self):
         try:
-            return datetime.strptime(self.raw_data['publish_time'], '%Y-%m-%d').date()
+            date = datetime.strptime(self.raw_data['publish_time'], '%Y-%m-%d').date()
+            # if date >= datetime.now() + timedelta(days=7):
+            #     # Return None, if publishing date is more than one wekk in the future
+            #     return None
+            # return date
         except ValueError:
             return None
 

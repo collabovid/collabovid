@@ -37,7 +37,6 @@ class ArxivDataPoint(ArticleDataPoint):
     def abstract(self):
         return self.raw_article['summary'].replace('\n', ' ')
 
-    @property
     def extract_authors(self):
         authors = []
         for author in self.raw_article['authors']:

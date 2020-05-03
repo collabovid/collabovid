@@ -1,5 +1,6 @@
 import re
 
+from django.db import transaction
 from django.utils import timezone
 from datetime import timedelta, date
 
@@ -46,7 +47,6 @@ class ArticleDataPoint(object):
     def abstract(self):
         return ''
 
-    @property
     def extract_authors(self):
         return []
 
@@ -137,72 +137,78 @@ class ArticleDataPoint(object):
         if not doi:
             raise MissingDataError("Couldn't extract doi")
         if not title:
-            raise MissingDataError("Couldn't extrat title")
+            raise MissingDataError("Couldn't extract title")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
 
-        try:
-            db_article = Paper.objects.get(doi=doi)
-            if not update_existing:
-                raise SkipArticle("Article already in database")
-        except Paper.DoesNotExist:
-            db_article = Paper(doi=doi)
+        with transaction.atomic():
+            datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
 
-        datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
-        if db_article.data_source and db_article.data_source.priority < datasource.priority:
-            raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
+            try:
+                db_article = Paper.objects.get(doi=doi)
+                if db_article.data_source.priority < datasource.priority:
+                    raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
+                elif not update_existing and db_article.data_source.priority == datasource.priority:
+                    raise SkipArticle("Article already in database")
+            except Paper.DoesNotExist:
+                db_article = Paper(doi=doi)
 
-        db_article.title = title
-        db_article.abstract = self.abstract
-        db_article.data_source = datasource
-        db_article.host, _ = PaperHost.objects.get_or_create(name=self.paperhost_name,
-                                                             url=self.paperhost_url)
-        if self.journal:
-            db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
-        db_article.published_at = self.published_at
-        db_article.url = self.url
-        db_article.pdf_url = self.pdf_url
-        db_article.is_preprint = self.is_preprint
+            db_article.title = title
+            db_article.abstract = self.abstract
+            db_article.data_source = datasource
+            db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name,
+                                                                 url=self.paperhost_url)
+            if self.journal:
+                db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
+            db_article.published_at = self.published_at
+            db_article.url = self.url
+            db_article.pdf_url = self.pdf_url
+            db_article.is_preprint = self.is_preprint
 
-        db_article.save()
-        authors = self.extract_authors
-        if len(self.extract_authors) > 0:
-            db_article.authors.clear()
-        for author in authors:
-            db_author, _ = Author.objects.get_or_create(
-                first_name=author[1],
-                last_name=author[0],
-                data_source=db_article.data_source,
-            )
-            db_article.authors.add(db_author)
+            db_article.save()
 
-        if self.category_name:
-            db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
+            try:
+                authors = self.extract_authors()
+            except AttributeError:
+                raise MissingDataError("Couldn't extract authors, error in HTML soup")
 
-        if self.version != db_article.version:
-            content = self.extract_content()
-            if content:
-                if db_article.data:
-                    db_article.data.content = content
-                else:
-                    db_content = PaperData.objects.create(content=content)
-                    db_article.data = db_content
+            if len(authors) > 0:
+                db_article.authors.clear()
+            for author in authors:
+                db_author, _ = Author.objects.get_or_create(
+                    first_name=author[1],
+                    last_name=author[0],
+                    data_source=db_article.data_source,
+                )
+                db_article.authors.add(db_author)
 
-            preview_image = self.extract_image()
-            if preview_image:
-                img_name = self._sanitize_doi(self.doi) + ".jpg"
-                db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                    preview_image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    preview_image.tell,  # size
-                    None))
+            if self.category_name:
+                db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
-        db_article.version = self.version
-        db_article.covid_related = self._covid_related(db_article=db_article)
-        db_article.last_scrape = timezone.now()
-        db_article.save()
+            if self.version != db_article.version:
+                content = self.extract_content()
+                if content:
+                    if db_article.data:
+                        db_article.data.content = content
+                    else:
+                        db_content = PaperData.objects.create(content=content)
+                        db_article.data = db_content
+
+                preview_image = self.extract_image()
+                if preview_image:
+                    img_name = self._sanitize_doi(self.doi) + ".jpg"
+                    db_article.preview_image.save(img_name, InMemoryUploadedFile(
+                        preview_image,  # file
+                        None,  # field_name
+                        img_name,  # file name
+                        'image/jpeg',  # content_type
+                        preview_image.tell,  # size
+                        None))
+
+            db_article.version = self.version
+            db_article.covid_related = self._covid_related(db_article=db_article)
+            db_article.last_scrape = timezone.now()
+            db_article.save()
         return True
 
 
@@ -236,11 +242,11 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            self.log(f"Sip: {data_point.doi}: {ex.msg}")
+            self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_skipped += 1
             pass
         except DifferentDataSourceError as ex:
-            self.log(f"{data_point.doi}: {ex.msg}")
+            self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
 
     def update(self, max_count=None):
@@ -249,7 +255,7 @@ class DataUpdater(object):
         self.n_already_tracked = 0
         self.n_success = 0
 
-        update_existing = not max_count
+        update_existing = max_count is None
 
         start = timer()
         for data_point in self._data_points:
