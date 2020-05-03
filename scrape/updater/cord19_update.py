@@ -117,7 +117,7 @@ class Cord19DataPoint(ArticleDataPoint):
             # if date >= datetime.now() + timedelta(days=7):
             #     # Return None, if publishing date is more than one wekk in the future
             #     return None
-            # return date
+            return date
         except ValueError:
             return None
 
