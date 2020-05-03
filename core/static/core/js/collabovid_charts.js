@@ -41,14 +41,14 @@ window.chartColors = {
                     label: 'Total published',
                     borderColor: window.chartColors.blue,
                     fill: false,
-                    data: plugin.settings.plot_data['total'],
+                    data: plugin.settings.plot_data['total'].slice(0, published_dates.length),
                     yAxisID: 'total'
                 },
                     {
                         label: 'Published at date',
                         backgroundColor: window.chartColors.red,
                         type: 'bar',
-                        data: plugin.settings.plot_data['added'],
+                        data: plugin.settings.plot_data['added'].slice(0, published_dates.length),
                         yAxisID: 'per-day',
                     }
                 ]
