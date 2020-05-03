@@ -1,5 +1,5 @@
 from scrape.updater.cord19_update import Cord19Updater
-from tasks import register_task, Runnable
+from tasks.definitions import register_task, Runnable
 
 
 @register_task

@@ -1,5 +1,5 @@
 from scrape.updater.medrxiv_update import MedrxivUpdater
-from tasks import register_task, Runnable
+from tasks.definitions import register_task, Runnable
 
 
 @register_task
