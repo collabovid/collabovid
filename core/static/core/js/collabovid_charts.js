@@ -120,13 +120,21 @@ window.chartColors = {
 
         let hosts = [];
         let data = [];
-
-        let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue, chartColors.orange, chartColors.purple, chartColors.yellow, chartColors.limegreen, chartColors.pink];
+        let host_values = {};
+        let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue, chartColors.purple, chartColors.yellow, chartColors.limegreen, chartColors.pink];
 
         Object.keys(plugin.settings.plot_data).forEach(function (key) {
+            host_values[key] = plugin.settings.plot_data[key];
             hosts.push(key);
-            data.push(plugin.settings.plot_data[key]);
         });
+        hosts.sort(function (a, b) {
+                return a.toLowerCase().localeCompare(b.toLowerCase());
+                // Sort case-insensitive
+        });
+        hosts.forEach(function (item, index) {
+            data.push(host_values[item]);
+        });
+
 
         return new Chart(plugin, {
             type: "doughnut",
