@@ -9,6 +9,12 @@ from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
 from tika import parser
 
 
+class PdfDownloadError(Exception):
+    @property
+    def msg(self):
+        return "Could not download PDF"
+
+
 class PdfExtractor:
     def __init__(self, pdf_url):
         self._pdf_response = None
@@ -16,7 +22,11 @@ class PdfExtractor:
 
     def _load_pdf_response(self):
         if not self._pdf_response:
-            self._pdf_response = requests.get(self._pdf_url)
+            try:
+                self._pdf_response = requests.get(self._pdf_url)
+            except requests.exceptions.ConnectionError:
+                raise PdfDownloadError()
+
 
     def extract_content(self):
         """

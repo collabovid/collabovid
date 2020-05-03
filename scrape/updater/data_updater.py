@@ -5,7 +5,7 @@ from datetime import timedelta, date
 
 from data.models import Author, Category, Paper, PaperHost, DataSource, Journal, PaperData
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor
+from scrape.pdf_extractor import PdfExtractor, PdfDownloadError
 from timeit import default_timer as timer
 
 
@@ -53,14 +53,20 @@ class ArticleDataPoint(object):
     def extract_content(self):
         if self.pdf_url:
             self._setup_pdf_extractor()
-            return self._pdf_extractor.extract_content()
+            try:
+                return self._pdf_extractor.extract_content()
+            except PdfDownloadError:
+                return None
         else:
             return None
 
     def extract_image(self):
         if self.pdf_url:
-            self._setup_pdf_extractor()
-            return self._pdf_extractor.extract_image()
+            try:
+                self._setup_pdf_extractor()
+                return self._pdf_extractor.extract_image()
+            except PdfDownloadError:
+                return None
         else:
             return None
 
