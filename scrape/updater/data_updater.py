@@ -156,8 +156,11 @@ class ArticleDataPoint(object):
             db_article.title = title
             db_article.abstract = self.abstract
             db_article.data_source = datasource
-            db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name,
-                                                                 url=self.paperhost_url)
+
+            db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
+            if self.paperhost_url:
+                db_article.host.url = self.paperhost_url
+
             if self.journal:
                 db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
             db_article.published_at = self.published_at

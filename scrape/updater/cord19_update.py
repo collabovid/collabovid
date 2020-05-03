@@ -195,9 +195,7 @@ class Cord19Updater(DataUpdater):
     @property
     def _data_points(self):
         self._download_data()
-        #random.seed(0)
-        random.shuffle(self.metadata)
-        for raw_data in self.metadata[:1000]:
+        for raw_data in self.metadata:
             yield Cord19DataPoint(raw_data=raw_data)
 
     def _get_data_point(self, doi):

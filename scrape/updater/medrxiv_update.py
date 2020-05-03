@@ -39,7 +39,6 @@ class MedrxivDataPoint(ArticleDataPoint):
     def abstract(self):
         return self.raw_article['rel_abs']
 
-    @property
     def extract_authors(self):
         self._setup_article_soup()
 
