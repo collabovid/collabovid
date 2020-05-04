@@ -145,8 +145,11 @@ class MedrxivUpdater(DataUpdater):
             except requests.exceptions.ConnectionError:
                 raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
-    @property
-    def _data_points(self):
+    def _count(self):
+        self._get_article_json()
+        return len(self._article_json)
+
+    def _get_data_points(self):
         self._get_article_json()
         for article in self._article_json:
             yield MedrxivDataPoint(article)

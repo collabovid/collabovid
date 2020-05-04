@@ -184,7 +184,7 @@ class Cord19Updater(DataUpdater):
             end = timer()
             self.log(f"Finished downloading meta data: {timedelta(seconds=end - start)}")
             start = timer()
-            #self._download_full_text_data()
+            self._download_full_text_data()
             end = timer()
             self.log(f"Finished downloading full text data: {timedelta(seconds=end - start)}")
 

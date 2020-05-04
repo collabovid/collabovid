@@ -283,7 +283,7 @@ class DataUpdater(object):
 
         end = timer()
         self.log(f"Finished: {timedelta(seconds=end-start)}")
-        self.log(f"Created: {self.n_success}")
+        self.log(f"Updated/Created: {self.n_success}")
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
