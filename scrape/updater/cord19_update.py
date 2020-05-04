@@ -13,8 +13,7 @@ import requests
 # TODO:
 #   - Identify removed articles
 from data.models import DataSource
-from scrape.updater.data_updater import DataUpdater, ArticleDataPoint
-
+from scrape.updater.data_updater import DataUpdater, ArticleDataPoint, UpdateException
 
 _CORD19_DATA_PRIORITY = 10
 _CORD19_BASE_URL = 'https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/latest/{0}{1}'
@@ -51,7 +50,15 @@ class Cord19DataPoint(ArticleDataPoint):
         return [f"{name},".split(',') for name in self.raw_data['authors'].split(';') if name]
 
     def _get_json_path(self):
-        path = Path(_CORD19_DOWNLOAD_PATH) / self.raw_data['full_text_file']
+        subdirectory = self.raw_data['full_text_file']
+
+        if not subdirectory:
+            return None
+
+        if subdirectory not in _CORD19_SUBSETS:
+            raise UpdateException
+
+        path = Path(_CORD19_DOWNLOAD_PATH) / subdirectory
 
         if self.raw_data['has_pdf_parse']:
             path /= 'pdf_json'
@@ -102,9 +109,7 @@ class Cord19DataPoint(ArticleDataPoint):
 
     @property
     def pdf_url(self):
-        if self.raw_data['url'].endswith('.pdf'):
-            return self.raw_data['url']
-        return None
+        return self.raw_data['url']
 
     @property
     def journal(self):
@@ -113,11 +118,7 @@ class Cord19DataPoint(ArticleDataPoint):
     @property
     def published_at(self):
         try:
-            date = datetime.strptime(self.raw_data['publish_time'], '%Y-%m-%d').date()
-            # if date >= datetime.now() + timedelta(days=7):
-            #     # Return None, if publishing date is more than one wekk in the future
-            #     return None
-            return date
+            return datetime.strptime(self.raw_data['publish_time'], '%Y-%m-%d').date()
         except ValueError:
             return None
 
@@ -134,6 +135,18 @@ class Cord19DataPoint(ArticleDataPoint):
     @property
     def is_preprint(self):
         return self.raw_data['source_x'] == 'medrxiv' or self.raw_data['source_x'] == 'biorxiv'
+
+    @property
+    def pubmed_id(self):
+        if self.raw_data['pubmed_id']:
+            return self.raw_data['pubmed_id']
+        return None
+
+    @property
+    def pmcid(self):
+        if self.raw_data['pmcid']:
+            return self.raw_data['pmcid']
+        return None
 
 
 class Cord19Updater(DataUpdater):
@@ -184,7 +197,7 @@ class Cord19Updater(DataUpdater):
             end = timer()
             self.log(f"Finished downloading meta data: {timedelta(seconds=end - start)}")
             start = timer()
-            self._download_full_text_data()
+            #self._download_full_text_data()
             end = timer()
             self.log(f"Finished downloading full text data: {timedelta(seconds=end - start)}")
 
@@ -198,7 +211,13 @@ class Cord19Updater(DataUpdater):
 
     def _get_data_points(self):
         self._download_data()
-        for raw_data in self.metadata:
+        random.seed(0)
+        random.shuffle(self.metadata)
+        for raw_data in self.metadata[:200]:
+            # Ignore articles from medrxiv, biorxiv, arxiv
+            #if raw_data['source_x'] in ('medrxiv', 'biorxiv', 'arxiv'):
+            if raw_data['source_x'] == 'arxiv':
+                continue
             yield Cord19DataPoint(raw_data=raw_data)
 
     def _get_data_point(self, doi):

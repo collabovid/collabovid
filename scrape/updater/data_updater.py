@@ -1,3 +1,4 @@
+import functools
 import re
 
 from django.db import transaction
@@ -8,6 +9,8 @@ from data.models import Author, Category, Paper, PaperHost, DataSource, Journal,
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from scrape.pdf_extractor import PdfExtractor, PdfDownloadError
 from timeit import default_timer as timer
+
+from multiprocessing import Pool as ThreadPool
 
 
 class UpdateException(Exception):
@@ -49,26 +52,6 @@ class ArticleDataPoint(object):
 
     def extract_authors(self):
         return []
-
-    def extract_content(self):
-        if self.pdf_url:
-            self._setup_pdf_extractor()
-            try:
-                return self._pdf_extractor.extract_content()
-            except PdfDownloadError:
-                return None
-        else:
-            return None
-
-    def extract_image(self):
-        if self.pdf_url:
-            try:
-                self._setup_pdf_extractor()
-                return self._pdf_extractor.extract_image()
-            except PdfDownloadError:
-                return None
-        else:
-            return None
 
     @property
     def data_source_name(self):
@@ -114,6 +97,14 @@ class ArticleDataPoint(object):
     def category_name(self):
         return None
 
+    @property
+    def pubmed_id(self):
+        return None
+
+    @property
+    def pmcid(self):
+        return None
+
     @staticmethod
     def _covid_related(db_article):
         if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
@@ -124,10 +115,6 @@ class ArticleDataPoint(object):
         return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
             or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
             or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
-
-    @staticmethod
-    def _sanitize_doi(doi):
-        return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
 
     def update_db(self, update_existing=True):
         doi = self.doi
@@ -167,6 +154,8 @@ class ArticleDataPoint(object):
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint
+            db_article.pmcid = self.pmcid
+            db_article.pubmed_id = self.pubmed_id
 
             db_article.save()
 
@@ -188,31 +177,11 @@ class ArticleDataPoint(object):
             if self.category_name:
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
-            if self.version != db_article.version:
-                content = self.extract_content()
-                if content:
-                    if db_article.data:
-                        db_article.data.content = content
-                    else:
-                        db_content = PaperData.objects.create(content=content)
-                        db_article.data = db_content
-
-                preview_image = self.extract_image()
-                if preview_image:
-                    img_name = self._sanitize_doi(self.doi) + ".jpg"
-                    db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                        preview_image,  # file
-                        None,  # field_name
-                        img_name,  # file name
-                        'image/jpeg',  # content_type
-                        preview_image.tell,  # size
-                        None))
-
             db_article.version = self.version
             db_article.covid_related = self._covid_related(db_article=db_article)
             db_article.last_scrape = timezone.now()
             db_article.save()
-        return True
+        return db_article
 
 
 class DataUpdater(object):
@@ -237,11 +206,39 @@ class DataUpdater(object):
     def _count(self):
         raise NotImplementedError
 
+    @staticmethod
+    def _sanitize_doi(doi):
+        return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
+
+    def _extract_pdf_data(self, db_articles):
+        pdf_extractor = PdfExtractor([x.pdf_url for x in db_articles if x.pdf_url])
+        images = pdf_extractor.extract_images()
+        contents = pdf_extractor.extract_contents()
+
+        for article, image, content in zip([x for x in db_articles if x.pdf_url], images, contents):
+            if image:
+                img_name = self._sanitize_doi(article.doi) + ".jpg"
+                article.preview_image.save(img_name, InMemoryUploadedFile(
+                    image,  # file
+                    None,  # field_name
+                    img_name,  # file name
+                    'image/jpeg',  # content_type
+                    image.tell,  # size
+                    None))
+
+            if content:
+                if article.data:
+                    article.data.content = content
+                else:
+                    db_content = PaperData.objects.create(content=content)
+                    article.data = db_content
+
     def _update_data(self, data_point, update_existing=True):
         try:
-            data_point.update_db(update_existing=update_existing)
+            db_article = data_point.update_db(update_existing=update_existing)
             self.log(f"Updated/Created {data_point.doi}")
             self.n_success += 1
+            return db_article
         except MissingDataError as ex:
             id = data_point.doi if data_point.doi else f"\"{data_point.title}\""
             self.log(f"Error: {id}: {ex.msg}")
@@ -249,10 +246,10 @@ class DataUpdater(object):
         except SkipArticle as ex:
             #self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_skipped += 1
-            pass
         except DifferentDataSourceError as ex:
             #self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
+        return None
 
     def update(self, max_count=None):
         self.n_errors = 0
@@ -266,10 +263,21 @@ class DataUpdater(object):
         update_existing = max_count is None
 
         start = timer()
+
+        chunk_size = 4
+        article_buffer = []
         for i, data_point in enumerate(self._get_data_points()):
             if i % 100 == 0:
                 self.log(f"Progress: {i}/{total}")
-            self._update_data(data_point, update_existing=update_existing)
+            db_article = self._update_data(data_point, update_existing=update_existing)
+            if db_article:
+                article_buffer.append(db_article)
+            if len(article_buffer) == chunk_size:
+                self._extract_pdf_data(article_buffer)
+                article_buffer.clear()
+        if len(article_buffer) > 0:
+            self._extract_pdf_data(article_buffer)
+            article_buffer.clear()
 
         total_handled = self.n_success + self.n_errors
         if max_count and total_handled < max_count:
@@ -282,7 +290,10 @@ class DataUpdater(object):
                     self._update_data(data_point, update_existing=True)
 
         end = timer()
-        self.log(f"Finished: {timedelta(seconds=end-start)}")
+        elapsed_time = timedelta(seconds=end-start)
+        self.log(f"Time (total): {elapsed_time}")
+        if total_handled > 0:
+            self.log(f"Time (per Record): {elapsed_time / total_handled}")
         self.log(f"Updated/Created: {self.n_success}")
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")

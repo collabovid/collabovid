@@ -8,6 +8,8 @@ from data.models import DataSource
 from datetime import datetime
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
+from multiprocessing import Pool as ThreadPool
+
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
@@ -16,16 +18,17 @@ _MEDBIORXIV_DATA_PRIORITY = 1
 
 
 class MedrxivDataPoint(ArticleDataPoint):
-    def __init__(self, raw_article_json):
+    def __init__(self, raw_article_json, response):
         super().__init__()
         self.raw_article = raw_article_json
         self._article_soup = None
+        self.response=response
 
     def _setup_article_soup(self):
         if not self._article_soup:
-            response = requests.get(self.url)
-            self._article_soup = BeautifulSoup(response.text, 'html.parser')
-            self.redirected_url = response.url
+            #response = requests.get(self.url)
+            self._article_soup = BeautifulSoup(self.response.text, 'html.parser')
+            self.redirected_url = self.response.url
 
     @property
     def doi(self):
@@ -141,7 +144,7 @@ class MedrxivUpdater(DataUpdater):
         if not self._article_json:
             try:
                 response = requests.get(self._COVID_JSON_URL)
-                self._article_json = json.loads(response.text)['rels']
+                self._article_json = json.loads(response.text)['rels'][:50]
             except requests.exceptions.ConnectionError:
                 raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
@@ -151,8 +154,17 @@ class MedrxivUpdater(DataUpdater):
 
     def _get_data_points(self):
         self._get_article_json()
-        for article in self._article_json:
-            yield MedrxivDataPoint(article)
+
+        chunk_size = 100
+        for i in range(0, len(self._article_json), chunk_size):
+            urls = [x['rel_link'] for x in self._article_json[i:i + chunk_size]]
+            pool = ThreadPool(16)
+            responses = pool.map(requests.get, urls)
+            pool.close()
+            pool.join()
+
+            for article in zip(self._article_json[i:i + chunk_size], responses):
+                yield MedrxivDataPoint(*article)
 
     def _get_data_point(self, doi):
         self._get_article_json()

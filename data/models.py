@@ -72,6 +72,8 @@ class Paper(models.Model):
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
     doi = models.CharField(max_length=100, primary_key=True)
+    pmcid = models.CharField(max_length=10, unique=True, null=True, default=None)
+    pubmed_id = models.IntegerField(unique=True, null=True, default=None)
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")

@@ -1,5 +1,6 @@
 import requests
 import re
+import gc
 
 from django.core.files.base import ContentFile
 from io import BytesIO
@@ -8,6 +9,8 @@ from pdf2image import convert_from_bytes
 from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
 from tika import parser
 
+from multiprocessing import Pool as ThreadPool
+
 
 class PdfDownloadError(Exception):
     @property
@@ -15,88 +18,102 @@ class PdfDownloadError(Exception):
         return "Could not download PDF"
 
 
+def get_and_except(url):
+    try:
+        return requests.get(url)
+    except requests.exceptions.RequestException:
+        return None
+
+
 class PdfExtractor:
-    def __init__(self, pdf_url):
-        self._pdf_response = None
-        self._pdf_url = pdf_url
+    def __init__(self, pdf_urls):
+        gc.collect()
+        self._pdf_responses = None
+        self._pdf_urls = pdf_urls
 
-    def _load_pdf_response(self):
-        if not self._pdf_response:
-            try:
-                self._pdf_response = requests.get(self._pdf_url)
-            except requests.exceptions.RequestException:
-                raise PdfDownloadError()
+    def _load_pdf_responses(self):
+        if not self._pdf_responses:
+            pool = ThreadPool(4)
+            self._pdf_responses = pool.map(get_and_except, self._pdf_urls)
+            pool.close()
+            pool.join()
 
-
-    def extract_content(self):
+    def extract_contents(self):
         """
         Extracts the content of the PDF file.
         :return: The content of the PDF file as string, or None if impossible.
         """
-        self._load_pdf_response()
+        self._load_pdf_responses()
 
-        content = parser.from_buffer(self._pdf_response.content)
-        if 'content' in content:
-            text = content['content']
-        else:
-            return None
+        contents = []
+        for response in self._pdf_responses:
+            content = parser.from_buffer(response.content)
+            if 'content' in content:
+                text = content['content']
+            else:
+                return None
 
-        # Convert to string
-        text = str(text)
-        # Ensure text is utf-8 formatted
-        safe_text = text.encode('utf-8', errors='ignore')
-        # Escape any \ issues
-        safe_text = str(safe_text).replace('\\', '\\\\').replace('"', '\\"')
+            # Convert to string
+            text = str(text)
+            # Ensure text is utf-8 formatted
+            safe_text = text.encode('utf-8', errors='ignore')
+            # Escape any \ issues
+            safe_text = str(safe_text).replace('\\', '\\\\').replace('"', '\\"')
 
-        safe_text = safe_text[2:-1]
+            safe_text = safe_text[2:-1]
 
-        safe_text = safe_text.replace('author/funder. All rights reserved. No reuse allowed without permission.',
-                                      '')
-        safe_text = safe_text.replace('(which was not peer-reviewed) is the', '')
-        safe_text = safe_text.replace('bioRxiv preprint', '')
+            safe_text = safe_text.replace('author/funder. All rights reserved. No reuse allowed without permission.',
+                                          '')
+            safe_text = safe_text.replace('(which was not peer-reviewed) is the', '')
+            safe_text = safe_text.replace('bioRxiv preprint', '')
 
-        safe_text = safe_text.replace('. CC-BY-NC-ND 4.0 International license', '')
-        safe_text = safe_text.replace('It is made available under a', '')
-        safe_text = safe_text.replace(
-            'is the author/funder, who has granted medRxiv a license to display the preprint in perpetuity.', '')
-        safe_text = safe_text.replace('(which was not peer-reviewed)', '')
-        safe_text = safe_text.replace('The copyright holder for this preprint', '')
-        safe_text = safe_text.replace('medRxiv preprint', '')
+            safe_text = safe_text.replace('. CC-BY-NC-ND 4.0 International license', '')
+            safe_text = safe_text.replace('It is made available under a', '')
+            safe_text = safe_text.replace(
+                'is the author/funder, who has granted medRxiv a license to display the preprint in perpetuity.', '')
+            safe_text = safe_text.replace('(which was not peer-reviewed)', '')
+            safe_text = safe_text.replace('The copyright holder for this preprint', '')
+            safe_text = safe_text.replace('medRxiv preprint', '')
 
-        #  if enabled, try to remove everything after "References" line
-        # match = re.match(r"(.*)\\\\n\s*(R|r)eferences:?\s*\\\\n")
-        # if match:
-        #     safe_text = match.group(1)
+            #  if enabled, try to remove everything after "References" line
+            # match = re.match(r"(.*)\\\\n\s*(R|r)eferences:?\s*\\\\n")
+            # if match:
+            #     safe_text = match.group(1)
 
-        safe_text = re.sub(r"\\\\t|\\\\n|\\\\x\S\S", ' ', safe_text)
-        safe_text = re.sub(r"http[^\s\\]*", '', safe_text)
-        safe_text = re.sub(r"[\w\.-]+@[\w\.-]+(\.[\w]+)+", '', safe_text)  # remove e-mail adresses
-        safe_text = re.sub(r"\.", '. ', safe_text)
-        safe_text = re.sub(r"\s+", ' ', safe_text)
-        safe_text = re.sub(r"\[\d+\]", '', safe_text)  # Delete all references like [12])
+            safe_text = re.sub(r"\\\\t|\\\\n|\\\\x\S\S", ' ', safe_text)
+            safe_text = re.sub(r"http[^\s\\]*", '', safe_text)
+            safe_text = re.sub(r"[\w\.-]+@[\w\.-]+(\.[\w]+)+", '', safe_text)  # remove e-mail adresses
+            safe_text = re.sub(r"\.", '. ', safe_text)
+            safe_text = re.sub(r"\s+", ' ', safe_text)
+            safe_text = re.sub(r"\[\d+\]", '', safe_text)  # Delete all references like [12])
+            contents.append(safe_text)
 
-        return safe_text
+        return contents
 
-    def extract_image(self, page=1):
+    def extract_images(self, page=1):
         """
         Extracts the preview image from the PDF.
         :param page: Sets, which PDF page should appear on the preview. Interesting for Kaggle dataset,
                      where the first page often/always (?) is a disclaimer.
         :return: The preview image as ContentFile or None, if an error occurs.
         """
-        self._load_pdf_response()
+        self._load_pdf_responses()
 
-        try:
-            pages = convert_from_bytes(self._pdf_response.content, first_page=page, last_page=page)
-        except (PDFPageCountError, PDFSyntaxError):
-            return None
+        images = []
+        for response in self._pdf_responses:
+            try:
+                pages = convert_from_bytes(response.content, first_page=page, last_page=page)
+            except (PDFPageCountError, PDFSyntaxError):
+                return None
 
-        if len(pages) != 1:
-            return None
+            if len(pages) != 1:
+                return None
 
-        buffer = BytesIO()
-        pages[0].thumbnail((400, 400), Image.ANTIALIAS)
-        pages[0].save(fp=buffer, format='JPEG')
+            buffer = BytesIO()
+            pages[0].thumbnail((400, 400), Image.ANTIALIAS)
+            pages[0].save(fp=buffer, format='JPEG')
 
-        pillow_image = ContentFile(buffer.getvalue())
-        return pillow_image
+            pillow_image = ContentFile(buffer.getvalue())
+            images.append(pillow_image)
+
+        return images
