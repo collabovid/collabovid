@@ -1,4 +1,6 @@
 import re
+from time import sleep
+
 import arxiv
 
 from nameparser import HumanName
@@ -6,7 +8,6 @@ from django.utils.dateparse import parse_datetime
 
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 from data.models import DataSource
-
 
 _ARXIV_DATA_PRIORITY = 2
 _ARXIV_PAPERHOST_NAME = 'arXiv'
@@ -103,11 +104,24 @@ class ArxivUpdater(DataUpdater):
 
     def _load_query_result(self):
         if not self._query_result:
-            # TODO: What happens, if arXiv hosts more than 1000 covid-related paper?
             # TODO: Filter for keywords Sars-CoV-2 and Coronavirus
-            self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
-                                             sort_by='submittedDate',
-                                             sort_order='descending')
+            chunk_size = 500
+            start = 0
+            query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, start=start, max_results=chunk_size, iterative=False,
+                                       sort_by='submittedDate',
+                                       sort_order='descending')
+            self._query_result = query_result
+
+            while len(query_result) == chunk_size:
+                # Fetch the remaining papers.
+                # Make sure to follow arxiv API guidelines of at least 3 seconds between 2 queries.
+                sleep(3)
+                start += chunk_size
+                query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, start=start, max_results=chunk_size,
+                                           iterative=False,
+                                           sort_by='submittedDate',
+                                           sort_order='descending')
+                self._query_result += query_result
 
     def _count(self):
         self._load_query_result()
