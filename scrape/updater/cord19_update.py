@@ -188,12 +188,15 @@ class Cord19Updater(DataUpdater):
             end = timer()
             self.log(f"Finished downloading full text data: {timedelta(seconds=end - start)}")
 
+    def _count(self):
+        self._download_data()
+        return len(self.metadata)
+
     @property
     def _data_source_name(self):
         return DataSource.CORD19_DATASOURCE_NAME
 
-    @property
-    def _data_points(self):
+    def _get_data_points(self):
         self._download_data()
         for raw_data in self.metadata:
             yield Cord19DataPoint(raw_data=raw_data)

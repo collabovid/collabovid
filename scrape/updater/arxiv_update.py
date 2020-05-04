@@ -103,13 +103,17 @@ class ArxivUpdater(DataUpdater):
 
     def _load_query_result(self):
         if not self._query_result:
-            # TODO: Split the query into smaller chunks?? Take a deeper look in arxiv package.
+            # TODO: What happens, if arXiv hosts more than 1000 covid-related paper?
+            # TODO: Filter for keywords Sars-CoV-2 and Coronavirus
             self._query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, max_results=1000, iterative=False,
                                              sort_by='submittedDate',
                                              sort_order='descending')
 
-    @property
-    def _data_points(self):
+    def _count(self):
+        self._load_query_result()
+        return len(self._query_result)
+
+    def _get_data_points(self):
         self._load_query_result()
         for article in self._query_result:
             yield ArxivDataPoint(raw_article_dict=article)

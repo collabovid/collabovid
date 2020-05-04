@@ -24,7 +24,7 @@ class PdfExtractor:
         if not self._pdf_response:
             try:
                 self._pdf_response = requests.get(self._pdf_url)
-            except requests.exceptions.ConnectionError:
+            except requests.exceptions.RequestException:
                 raise PdfDownloadError()
 
 

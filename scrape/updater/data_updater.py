@@ -228,11 +228,13 @@ class DataUpdater(object):
     def _data_source_name(self):
         raise NotImplementedError
 
-    @property
-    def _data_points(self):
+    def _get_data_points(self):
         raise NotImplementedError
 
     def _get_data_point(self, doi):
+        raise NotImplementedError
+
+    def _count(self):
         raise NotImplementedError
 
     def _update_data(self, data_point, update_existing=True):
@@ -245,11 +247,11 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            self.log(f"Skip: {data_point.doi}: {ex.msg}")
+            #self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_skipped += 1
             pass
         except DifferentDataSourceError as ex:
-            self.log(f"Skip: {data_point.doi}: {ex.msg}")
+            #self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
 
     def update(self, max_count=None):
@@ -258,16 +260,22 @@ class DataUpdater(object):
         self.n_already_tracked = 0
         self.n_success = 0
 
+        total = self._count()
+        self.log(f"Check {total} publications")
+
         update_existing = max_count is None
 
         start = timer()
-        for data_point in self._data_points:
+        for i, data_point in enumerate(self._get_data_points()):
+            if i % 100 == 0:
+                self.log(f"Progress: {i}/{total}")
             self._update_data(data_point, update_existing=update_existing)
 
-        total = self.n_success + self.n_errors
-        if max_count and total < max_count:
+        total_handled = self.n_success + self.n_errors
+        if max_count and total_handled < max_count:
+            self.log("Update existing articles")
             filtered_articles = Paper.objects.all().filter(data_source__name=self._data_source_name)
-            update_articles = filtered_articles.order_by('last_scrape')[:max_count - total]
+            update_articles = filtered_articles.order_by('last_scrape')[:max_count - total_handled]
             for article in update_articles:
                 data_point = self._get_data_point(doi=article.doi)
                 if data_point:
