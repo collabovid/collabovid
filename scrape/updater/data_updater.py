@@ -274,9 +274,13 @@ class DataUpdater(object):
                 article_buffer.append(db_article)
             if len(article_buffer) == chunk_size:
                 self._extract_pdf_data(article_buffer)
+                for art in article_buffer:
+                    art.save()
                 article_buffer.clear()
         if len(article_buffer) > 0:
             self._extract_pdf_data(article_buffer)
+            for art in article_buffer:
+                art.save()
             article_buffer.clear()
 
         total_handled = self.n_success + self.n_errors
