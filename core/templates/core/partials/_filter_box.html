@@ -63,6 +63,9 @@
         let pagination_container = $("#pagination-container");
         let chose_category_select = $("#chose-category");
 
+        let categorySelectPicker = $('#chose-category').selectpicker();
+
+
         update_pagination_container = pagination_container.paginate({
             searchQuery: search_query,
         });
@@ -75,10 +78,10 @@
 
 
             if ($(this).hasClass('delete')) {
-                chose_category_select.find('option').attr("selected", false);
+                categorySelectPicker.selectpicker('deselectAll');
                 $(this).removeClass('delete').addClass('add');
             } else if ($(this).hasClass('add')) {
-                chose_category_select.find('option').attr("selected", "selected");
+                categorySelectPicker.selectpicker('selectAll');
                 $(this).removeClass('add').addClass('delete');
             }
 
@@ -121,7 +124,6 @@
             });
         }
 
-        $('#chose-category').selectpicker();
 
         $('#start-date').datepicker({
             uiLibrary: 'bootstrap4',
