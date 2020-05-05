@@ -104,10 +104,12 @@ class PdfExtractor:
             try:
                 pages = convert_from_bytes(response.content, first_page=page, last_page=page)
             except (PDFPageCountError, PDFSyntaxError):
-                return None
+                images.append(None)
+                continue
 
             if len(pages) != 1:
-                return None
+                images.append(None)
+                continue
 
             buffer = BytesIO()
             pages[0].thumbnail((400, 400), Image.ANTIALIAS)
