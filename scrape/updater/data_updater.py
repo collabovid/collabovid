@@ -1,16 +1,14 @@
-import functools
 import re
 
 from django.db import transaction
+from django.db.utils import IntegrityError
 from django.utils import timezone
 from datetime import timedelta, date
 
 from data.models import Author, Category, Paper, PaperHost, DataSource, Journal, PaperData
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor, PdfDownloadError
+from scrape.pdf_extractor import PdfExtractor
 from timeit import default_timer as timer
-
-from multiprocessing import Pool as ThreadPool
 
 
 class UpdateException(Exception):
@@ -29,8 +27,25 @@ class MissingDataError(UpdateException):
 class SkipArticle(UpdateException):
     pass
 
+
 def sanitize_doi(doi):
     return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
+
+
+def _covid_related(db_article):
+    if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
+        return False
+
+    _COVID19_KEYWORDS = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
+
+    return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
+           or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
+           or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
+
+
+def _relevant_record(db_article):
+    expression = db_article.data_source in ('arxiv', 'medrxiv', 'biorxiv')
+
 
 class ArticleDataPoint(object):
     def __init__(self):
@@ -107,17 +122,6 @@ class ArticleDataPoint(object):
     def pmcid(self):
         return None
 
-    @staticmethod
-    def _covid_related(db_article):
-        if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
-            return False
-
-        _COVID19_KEYWORDS = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
-
-        return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
-            or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
-            or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
-
     def update_db(self, update_existing=True):
         doi = self.doi
         title = self.title
@@ -180,7 +184,7 @@ class ArticleDataPoint(object):
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
             db_article.version = self.version
-            db_article.covid_related = self._covid_related(db_article=db_article)
+            db_article.covid_related = _covid_related(db_article=db_article)
             db_article.last_scrape = timezone.now()
             db_article.save()
         return db_article
@@ -236,7 +240,7 @@ class DataUpdater(object):
     def _update_data(self, data_point, update_existing=True):
         try:
             db_article = data_point.update_db(update_existing=update_existing)
-            self.log(f"Updated/Created {data_point.doi}")
+            #self.log(f"Updated/Created {data_point.doi}")
             self.n_success += 1
             return db_article
         except MissingDataError as ex:
@@ -249,9 +253,11 @@ class DataUpdater(object):
         except DifferentDataSourceError as ex:
             #self.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
+        except IntegrityError as ex:
+            self.log(f"Error: {data_point.doi}: {ex}")
         return None
 
-    def update(self, max_count=None):
+    def update(self, max_count=None, pdf_content=False):
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -270,14 +276,15 @@ class DataUpdater(object):
             if i % 100 == 0:
                 self.log(f"Progress: {i}/{total}")
             db_article = self._update_data(data_point, update_existing=update_existing)
-            if db_article:
-                article_buffer.append(db_article)
-            if len(article_buffer) == chunk_size:
-                self.extract_pdf_data(article_buffer)
-                for art in article_buffer:
-                    art.save()
-                article_buffer.clear()
-        if len(article_buffer) > 0:
+            if pdf_content:
+                if db_article:
+                    article_buffer.append(db_article)
+                if len(article_buffer) == chunk_size:
+                    self.extract_pdf_data(article_buffer)
+                    for art in article_buffer:
+                        art.save()
+                    article_buffer.clear()
+        if pdf_content and len(article_buffer) > 0:
             self.extract_pdf_data(article_buffer)
             for art in article_buffer:
                 art.save()

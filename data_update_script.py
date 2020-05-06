@@ -1,6 +1,3 @@
-import sys
-
-sys.settrace
 import os
 
 import django
@@ -13,6 +10,6 @@ from scrape.updater.medrxiv_update import MedrxivUpdater
 from scrape.updater.cord19_update import Cord19Updater
 
 if __name__ == '__main__':
-    #updater = Cord19Updater(log=print)
-    updater = MedrxivUpdater(log=print)
-    updater.update(max_count=0)
+    updater = Cord19Updater(log=print)
+    #updater = MedrxivUpdater(log=print)
+    updater.update(max_count=0, pdf_content=False)
