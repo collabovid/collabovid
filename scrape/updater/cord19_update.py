@@ -154,6 +154,20 @@ class Cord19Updater(DataUpdater):
         super().__init__(log)
         self.metadata = None
 
+    @staticmethod
+    def check_version():
+        CHANGELOG_URL = 'https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/latest/changelog'
+        response = requests.get(CHANGELOG_URL)
+
+        if not response or response.status_code != 200:
+            raise UpdateException("Couldn't retrieve changelog file")
+
+        first_line = response.text.split('\n', 1)[0].strip()
+        try:
+            return datetime.strptime(first_line, '%Y-%m-%d').date()
+        except ValueError:
+            raise UpdateException(f"Couldn't extract date from first line of changelog: {first_line}")
+
     def _download_metadata(self):
         """Downloads the metadata CSV file."""
         self.log("Download latest CORD19 meta data. This may take a few minutes.")
