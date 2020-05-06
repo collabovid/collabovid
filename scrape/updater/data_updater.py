@@ -29,6 +29,8 @@ class MissingDataError(UpdateException):
 class SkipArticle(UpdateException):
     pass
 
+def sanitize_doi(doi):
+    return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
 
 class ArticleDataPoint(object):
     def __init__(self):
@@ -207,17 +209,15 @@ class DataUpdater(object):
         raise NotImplementedError
 
     @staticmethod
-    def _sanitize_doi(doi):
-        return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
-
-    def _extract_pdf_data(self, db_articles):
-        pdf_extractor = PdfExtractor([x.pdf_url for x in db_articles if x.pdf_url])
-        images = pdf_extractor.extract_images()
-        contents = pdf_extractor.extract_contents()
+    def extract_pdf_data(db_articles, extract_images=True, exctract_contents=True):
+        feasible_articles = [x for x in db_articles if x.pdf_url]
+        pdf_extractor = PdfExtractor([x.pdf_url for x in feasible_articles])
+        images = pdf_extractor.extract_images() if extract_images else [None] * len(feasible_articles)
+        contents = pdf_extractor.extract_contents() if exctract_contents else [None] * len(feasible_articles)
 
         for article, image, content in zip([x for x in db_articles if x.pdf_url], images, contents):
             if image:
-                img_name = self._sanitize_doi(article.doi) + ".jpg"
+                img_name = sanitize_doi(article.doi) + ".jpg"
                 article.preview_image.save(img_name, InMemoryUploadedFile(
                     image,  # file
                     None,  # field_name
@@ -264,7 +264,7 @@ class DataUpdater(object):
 
         start = timer()
 
-        chunk_size = 4
+        chunk_size = 16
         article_buffer = []
         for i, data_point in enumerate(self._get_data_points()):
             if i % 100 == 0:
@@ -273,12 +273,12 @@ class DataUpdater(object):
             if db_article:
                 article_buffer.append(db_article)
             if len(article_buffer) == chunk_size:
-                self._extract_pdf_data(article_buffer)
+                self.extract_pdf_data(article_buffer)
                 for art in article_buffer:
                     art.save()
                 article_buffer.clear()
         if len(article_buffer) > 0:
-            self._extract_pdf_data(article_buffer)
+            self.extract_pdf_data(article_buffer)
             for art in article_buffer:
                 art.save()
             article_buffer.clear()

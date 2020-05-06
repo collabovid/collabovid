@@ -9,7 +9,9 @@ from pdf2image import convert_from_bytes
 from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
 from tika import parser
 
-from multiprocessing import Pool as ThreadPool
+from multiprocessing.pool import ThreadPool
+
+_POOL_SIZE = 16
 
 
 class PdfDownloadError(Exception):
@@ -21,7 +23,8 @@ class PdfDownloadError(Exception):
 def get_and_except(url):
     try:
         return requests.get(url)
-    except requests.exceptions.RequestException:
+    except requests.exceptions.RequestException as ex:
+        print(ex)
         return None
 
 
@@ -33,7 +36,7 @@ class PdfExtractor:
 
     def _load_pdf_responses(self):
         if not self._pdf_responses:
-            pool = ThreadPool(4)
+            pool = ThreadPool(_POOL_SIZE)
             self._pdf_responses = pool.map(get_and_except, self._pdf_urls)
             pool.close()
             pool.join()
@@ -46,12 +49,18 @@ class PdfExtractor:
         self._load_pdf_responses()
 
         contents = []
-        for response in self._pdf_responses:
+        for i, response in enumerate(self._pdf_responses):
+            if not response or response.status_code != 200:
+                print(f'No response for pdf url: {self._pdf_urls[i]}')
+                contents.append(None)
+                continue
+
             content = parser.from_buffer(response.content)
             if 'content' in content:
                 text = content['content']
             else:
-                return None
+                contents.append(None)
+                continue
 
             # Convert to string
             text = str(text)
@@ -100,7 +109,11 @@ class PdfExtractor:
         self._load_pdf_responses()
 
         images = []
-        for response in self._pdf_responses:
+        for i, response in enumerate(self._pdf_responses):
+            if not response or response.status_code != 200:
+                print(f'Problem with response in extracting image from {self._pdf_urls[i]}')
+                images.append(None)
+                continue
             try:
                 pages = convert_from_bytes(response.content, first_page=page, last_page=page)
             except (PDFPageCountError, PDFSyntaxError):

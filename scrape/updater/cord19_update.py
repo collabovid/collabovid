@@ -215,8 +215,7 @@ class Cord19Updater(DataUpdater):
         random.shuffle(self.metadata)
         for raw_data in self.metadata[:200]:
             # Ignore articles from medrxiv, biorxiv, arxiv
-            #if raw_data['source_x'] in ('medrxiv', 'biorxiv', 'arxiv'):
-            if raw_data['source_x'] == 'arxiv':
+            if raw_data['source_x'] in ('medrxiv', 'biorxiv', 'arxiv'):
                 continue
             yield Cord19DataPoint(raw_data=raw_data)
 

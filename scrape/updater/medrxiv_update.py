@@ -8,7 +8,7 @@ from data.models import DataSource
 from datetime import datetime
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
-from multiprocessing import Pool as ThreadPool
+from multiprocessing.pool import ThreadPool
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
@@ -144,7 +144,7 @@ class MedrxivUpdater(DataUpdater):
         if not self._article_json:
             try:
                 response = requests.get(self._COVID_JSON_URL)
-                self._article_json = json.loads(response.text)['rels'][:50]
+                self._article_json = json.loads(response.text)['rels']
             except requests.exceptions.ConnectionError:
                 raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
