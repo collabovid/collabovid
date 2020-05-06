@@ -1,0 +1,38 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load markdown_extras %}
+
+{% block content %}
+    <div class="gradient-header">
+        <div class="container py-3 text-white">
+            <div class="row h-100 align-items-center py-5">
+                <div class="col-lg-12">
+                    <h1 class="display-4">Imprint</h1>
+                    <p class="muted-white lead mb-0">
+                        Collabovid is an Open Source project provides an overview over recent preprint versions
+                        concerning SARS-CoV-2 and COVID19. Further information can be found
+                        <a class="muted-white" href="{% url "about" %}">here</a>. The data protection declaration can
+                        be found <a class="muted-white" href="{% url "privacy" %}">here</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {% include 'core/partials/_rounded_bottom.html' %}
+
+    </div>
+
+    <div class="container text-justify">
+        <div class="col-sm-12">
+            {{ content|markdown|safe }}
+        </div>
+
+    </div>
+
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+{% block css %}
+{% endblock %}

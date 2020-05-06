@@ -1,0 +1,130 @@
+{% load static %}
+{% load progress_helper %}
+{% if html %}
+    <div class="card p-4 rounded shadow">
+        <div class="row d-flex flex-wrap align-items-center">
+            <div class="col-md-2 d-none d-lg-block">
+                {% if paper.preview_image %}
+                    <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                         class="img-fluid mx-auto d-block">
+                {% else %}
+                    <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
+                         class="img-fluid mx-auto d-block">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card-block">
+
+                    <h5 class="card-title" style="font-size: 1.2em">{{ paper.title }}</h5>
+
+
+                    <h6 class="card-subtitle mb-2 text-muted" style="font-size: 0.8em">
+                        <i class="fas fa-layer-group"></i> {{ paper.category.name }}&nbsp;&nbsp;&middot;&nbsp;&nbsp;
+                        {% for author in paper.authors.all|slice:":5" %}
+                            {% if not forloop.first %}&nbsp;{% endif %}
+                            <span class="text-nowrap text-muted">
+                                <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
+                            </span>
+                        {% endfor %}
+
+
+                    </h6>
+
+                    <div class="abstract-container card-text">
+                        <span style="font-size: 0.8em">
+                            {% if paper.abstract|length >= 420 %}
+                                <span class="short">{{ paper.abstract|slice:":400" }}</span><span
+                                    class="dots">...</span><span
+                                    class="long"
+                                    style="{% if not extended %}display: none; {% endif %}">{{ paper.abstract|slice:"400:" }}</span>
+                            {% else %}
+                                <span class="short">{{ paper.abstract }}</span>
+                            {% endif %}
+                        </span>
+
+                        {% if paper.abstract|length >= 420 %}
+                            <div class="abstract-controls text-center">
+                                <button
+                                        class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description show"
+                                        style="font-size: 10px; {% if extended %} display: none; {% endif %}">
+                                    <i class='fas fa-arrow-circle-down'></i> show full abstract
+                                </button>
+
+                                <button
+                                        class="btn w-25 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-description hide"
+                                        style="font-size: 10px; {% if not extended %} display: none; {% endif %}">
+                                    <i class='fas fa-arrow-circle-up'></i> hide full abstract
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 text-center align-self-start">
+                <span class="text-muted small float-right">{{ paper.published_at }}</span>
+
+                <div class="clearfix mb-3"></div>
+
+                {% if show_score %}
+
+                    <div class="progress-wrapper">
+                        <a href="#" class="help text-muted small"
+                           data-container="body"
+                           data-toggle="popover"
+                           data-placement="left"
+                           data-trigger="focus"
+                           data-title="Score: {{ score }}"
+                           onclick="return false"
+                           data-content="The score ranges from 0 to 100 and indicates how well this publication fits the given topic."
+                        ><i class="fas fa-question-circle"></i>
+                        </a>
+
+                        <div class="progress">
+
+                            <div class="progress-bar"
+                                 role="progressbar"
+                                 style="width: {{ score }}%; background: {{ score|progress_color }};"
+                                 aria-valuenow="{{ score }}"
+                                 aria-valuemin="0"
+                                 aria-valuemax="100"></div>
+
+
+                        </div>
+                    </div>
+
+                {% endif %}
+                <a href="{{ paper.pdf_url }}" class="btn button-pdf mt-2 w-100">
+                    <i class="fa fa-file"></i> PDF
+                </a>
+                <a href="{{ paper.url }}" class="btn button-host mt-2 w-100">
+                    <i class="fa fa-external-link-alt"></i>
+                    {{ paper.host.name }}
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        $(".progress-wrapper .help").popover();
+    </script>
+{% elif script %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $(document).on('click', '.toggle-description', function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('hide')) {
+                    $(this).closest('.abstract-container').find('.long').hide();
+                    $(this).closest('.abstract-container').find('.dots').show();
+                    $(this).parent().find('.toggle-description.show').show();
+                    $(this).hide();
+                } else {
+                    $(this).closest('.abstract-container').find('.dots').hide();
+                    $(this).closest('.abstract-container').find('.long').fadeIn();
+                    $(this).parent().find('.toggle-description.hide').show();
+                    $(this).hide();
+                }
+            });
+        })
+    </script>
+{% endif %}

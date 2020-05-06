@@ -1,0 +1,36 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Start Task</h1>
+    </div>
+
+    <div class="container">
+        <form method="post" action="{% url 'task_create' %}">
+            {% csrf_token %}
+            <div class="row">
+                {% for task in tasks %}
+                    <div class="form-check col-md-6 mt-2">
+                        <input class="form-check-input" type="radio" name="task" value="{{ task.name }}">
+                        <label class="form-check-label">
+                            <h6>{{ task.name }}</h6>{{ task.description }}
+                        </label>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="w-100 text-center mt-5">
+                <input type="submit" class="btn btn-outline-success" value="Start Task"></input>
+            </div>
+        </form>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+
+    </script>
+
+{% endblock %}

@@ -1,0 +1,176 @@
+{% load static %}
+<div class="row">
+    <div class="col-12">
+        <label for="chose-category">Choose a category:</label>
+    </div>
+</div>
+<div class="row align-items-center">
+    <div class="col-md-9 col-sm-12">
+        <select name="categories"
+                id="chose-category"
+                class="selectpicker"
+                data-live-search="true"
+                multiple="multiple">
+            {% for category in categories %}
+                <option value="{{ category.name }}"
+                        {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-3 col-sm-12 px-0 py-0">
+        <a href="#"
+           id="toggle-category-select"
+           class="small delete"
+           data-text-switch="Select all">
+            Deselect all
+        </a>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-12">
+        <label for="start-date">
+            Published After
+        </label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <input autocomplete="off" name="published_at_start" id="start-date" value="{{ form.start_date }}"/>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-12">
+        <label for="start-date">
+            Published Before
+        </label>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <input autocomplete="off" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
+    </div>
+</div>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        window.formAjaxAllowed = true;
+
+        let indicator = $("#{{ indicator_id }}");
+        let paper_container = $("#{{ result_container_id }}");
+        let form = $("#{{ form_id }}");
+        let pagination_container = $("#pagination-container");
+        let chose_category_select = $("#chose-category");
+
+        update_pagination_container = pagination_container.paginate({
+            searchQuery: search_query,
+        });
+
+        $("#toggle-category-select").click(function (e) {
+            e.preventDefault();
+
+            let new_text = $(this).data("text-switch");
+            let old_text = $(this).html();
+
+
+            if ($(this).hasClass('delete')) {
+                chose_category_select.find('option').attr("selected", false);
+                $(this).removeClass('delete').addClass('add');
+            } else if ($(this).hasClass('add')) {
+                chose_category_select.find('option').attr("selected", "selected");
+                $(this).removeClass('add').addClass('delete');
+            }
+
+            $(this).data("text-switch", old_text);
+            $(this).html(new_text);
+
+            chose_category_select.selectpicker('refresh');
+        });
+
+        function search_query(data, page, scroll = false, on_success) {
+            paper_container.hide();
+            indicator.show();
+
+            data += "&page=" + page;
+
+            $.ajax({
+                url: form.attr("action"),
+                type: 'POST',
+                data: data,
+                success: function (data) {
+                    paper_container.html(data);
+
+                    indicator.hide();
+                    paper_container.fadeIn();
+
+                    update_pagination_container();
+
+                    if (scroll) {
+                        $('html, body').scrollTop(paper_container.offset().top - 50);
+                    }
+
+                    if (on_success) {
+                        on_success();
+                    }
+                },
+                error: function (request, error) {
+                    console.log("Request: " + JSON.stringify(request));
+                    console.log("Error: " + error);
+                }
+            });
+        }
+
+        $('#chose-category').selectpicker();
+
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'yyyy-mm-dd'
+        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            format: 'yyyy-mm-dd'
+        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
+
+
+        form.submit(function (e) {
+            e.preventDefault();
+
+            if (!window.formAjaxAllowed) {
+                return;
+            }
+
+            window.formAjaxAllowed = false;
+            $('.nav-search-types a.nav-link').addClass('disabled');
+
+            pagination_container.hide();
+
+            search_query(form.serialize(), 1, false, function () {
+                window.Pagination.last_request = form.serialize();
+
+                let all_selected = $("#chose-category option:not(:selected)").length === 0;
+
+                let categories_serialized = null;
+
+                if (all_selected) {
+                    categories_serialized = $("#chose-category").attr("name") + "=all";
+                } else {
+                    categories_serialized = $("#chose-category").serialize();
+                }
+
+                let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
+                    + form.find('input[name!=csrfmiddlewaretoken]').serialize() + "&" + categories_serialized;
+                window.history.pushState({path: url}, '', url);
+
+                window.formAjaxAllowed = true;
+
+                $('.nav-search-types a.nav-link').removeClass('disabled');
+            });
+        });
+
+        {% if load_default %}
+            form.submit();
+        {% endif %}
+    });
+</script>
