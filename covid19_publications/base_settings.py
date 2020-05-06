@@ -30,14 +30,14 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'data.apps.DataConfig',
     'scrape.apps.ScrapeConfig',
-    'visualization.apps.VisualizationConfig',
     'django_crontab',
     'health_check',
     'health_check.db',
     'health_check.cache',
     'health_check.storage',
     'classification.apps.ClassificationConfig',
-    'tasks.apps.TasksConfig'
+    'tasks.apps.TasksConfig',
+    'dashboard.apps.DashboardConfig'
 ]
 
 MIDDLEWARE = [
