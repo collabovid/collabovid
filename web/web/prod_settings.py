@@ -1,4 +1,6 @@
 from .base_settings import *
+from collabovid_settings.postgres_settings import *
+from collabovid_settings.service_settings import *
 
 INSTALLED_APPS.append('storages')
 
@@ -9,10 +11,10 @@ EXTRA_HOST = os.getenv('ALLOWED_TEST_HOST', '')
 if len(EXTRA_HOST) > 0:
     ALLOWED_HOSTS.append(EXTRA_HOST)
 
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.getenv('SECRET_KEY', 'test')
 
 
-LOGGING = {
+'''LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
@@ -29,10 +31,7 @@ LOGGING = {
             'propagate': True,
         },
     },
-}
-
-CRONTAB_DJANGO_SETTINGS_MODULE = 'covid19_publications.prod_settings'
-CRONTAB_COMMAND_PREFIX = "source /opt/python/run/venv/bin/activate && source /opt/python/current/env && cd /opt/python/current/app/ && "
+}'''
 
 CORS_REPLACE_HTTPS_REFERER = True
 HOST_SCHEME = "https://"

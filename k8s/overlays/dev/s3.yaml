@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: s3
+  labels:
+    app: s3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: s3
+  template:
+    metadata:
+      labels:
+        app: s3
+    spec:
+      volumes:
+        - name: vol
+          hostPath:
+            path: /home/jonas/kubedata/s3
+      containers:
+        - name: s3
+          image: scireum/s3-ninja:6.4
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: vol
+              mountPath: /home/sirius/data
+          securityContext:
+            runAsUser: 0
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3
+spec:
+  type: NodePort
+  ports:
+    - port: 80
+      targetPort: 9000
+      nodePort: 30002
+      protocol: TCP
+  selector:
+    app: s3
+

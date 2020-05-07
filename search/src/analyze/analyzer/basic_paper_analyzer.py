@@ -18,7 +18,6 @@ class BasicPaperAnalyzer(PaperAnalyzer):
     def __init__(self, type=TYPE_LDA, *args, **kwargs):
 
         super(BasicPaperAnalyzer, self).__init__(*args, **kwargs)
-        dir_path = os.path.join(settings.BASE_DIR, "analyze/res")
 
         self.type = type
 

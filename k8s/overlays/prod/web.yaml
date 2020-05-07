@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  type: LoadBalancer
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          image: 932829830564.dkr.ecr.us-east-1.amazonaws.com/kubeweb:0.0.0

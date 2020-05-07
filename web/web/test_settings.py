@@ -1,6 +1,6 @@
 from .prod_settings import *
 
-ALLOWED_HOSTS = [os.environ['ALLOWED_TEST_HOST']]
+DEBUG=True
 
 ALLOW_IMAGE_SCRAPING = False
 

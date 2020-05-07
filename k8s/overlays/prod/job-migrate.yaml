@@ -1,0 +1,10 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          image: 932829830564.dkr.ecr.us-east-1.amazonaws.com/kubeweb:0.0.0

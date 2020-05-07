@@ -13,7 +13,7 @@ class TitleSentenceVectorizer(TextVectorizer):
     Utilizing the model from sentence-transformer (https://github.com/UKPLab/sentence-transformers)
     to vectorize sentences, i.e. titles of papers and topics.
     """
-    TITLE_SENTENCE_VECTORIZER_BASE_DIR = os.path.join(settings.BASE_DIR, "res/title_sentence_vectorizer/")
+    TITLE_SENTENCE_VECTORIZER_BASE_DIR = os.path.join(settings.MODELS_BASE_DIR, "title_sentence_vectorizer/")
 
     def __init__(self,
                  model_name='roberta-large-nli-stsb-mean-tokens',
@@ -22,7 +22,7 @@ class TitleSentenceVectorizer(TextVectorizer):
         super(TitleSentenceVectorizer, self).__init__(matrix_file_name=matrix_file_name, *args, **kwargs)
 
         self.similarity_computer = CosineDistance()
-        self.model = SentenceTransformer(model_name, device='cpu')
+        self.model = SentenceTransformer(os.path.join(settings.MODELS_BASE_DIR, 'sentence_transformer_model'), device='cpu')
 
     def vectorize(self, texts):
         return self.model.encode(texts)

@@ -1,0 +1,2 @@
+SHELL=/bin/bash
+* * * * * root (cd /app && . envs && /usr/local/bin/python sync.py) > /proc/1/fd/1 2>/proc/1/fd/2

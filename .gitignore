@@ -1,5 +1,6 @@
 .idea/
 generated
+models
 
 set_secret_envs.sh
 set_db_envs.sh

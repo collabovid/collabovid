@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sync-daemon
+spec:
+  selector:
+    matchLabels:
+      app: sync-daemon
+  template:
+    metadata:
+      labels:
+        app: sync-daemon
+    spec:
+      tolerations:
+        # this toleration is to have the daemonset runnable on master nodes
+        # remove it if your masters can't run pods
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: daemon-set
+          image: localhost:32000/sync-deamon:0.0.0
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: models
+              mountPath: /models
+          envFrom:
+            - secretRef:
+                name: daemon
+      terminationGracePeriodSeconds: 5
+      volumes:
+        - name: models
+          hostPath:
+            path: /home/jonas/kubedata/models

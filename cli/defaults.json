@@ -1,0 +1,26 @@
+{
+  "repositories": {
+    "web": {
+      "version": "0.0.0"
+    },
+    "search": {
+      "version": "0.0.0"
+    },
+    "scrape": {
+      "version": "0.0.0"
+    },
+    "sync-deamon": {
+      "version": "0.0.0"
+    }
+  },
+  "env-defaults": {
+    "kubectl": "kubectl",
+    "registry": "localhost:32000"
+  },
+  "envs": {
+    "dev": {
+    },
+    "prod": {
+    }
+  }
+}

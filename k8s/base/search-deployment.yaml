@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+  labels:
+    app: search
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search
+  template:
+    metadata:
+      labels:
+        app: search
+    spec:
+      containers:
+        - name: search
+          image: localhost:32000/search:0.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: shared
+            - secretRef:
+                name: search
+          volumeMounts:
+            - name: vol
+              mountPath: /models
+      volumes:
+        - name: vol
+          hostPath:
+            path: /home/jonas/kubedata/models

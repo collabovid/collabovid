@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+    version: v1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: localhost:32000/web:0.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          envFrom:
+            - secretRef:
+                name: shared
+            - secretRef:
+                name: web
