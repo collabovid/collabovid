@@ -30,4 +30,4 @@ spec:
       volumes:
         - name: models
           hostPath:
-            path: /home/jonas/kubedata/models
+            path: /usr/local/kubedata/models

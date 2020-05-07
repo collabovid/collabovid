@@ -9,7 +9,7 @@ RUN pip install --no-cache --no-warn-script-location -r /requirements.txt -f htt
 COPY ${PROJECT_DIR} /app
 WORKDIR /app
 ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings_prod
-#RUN chown -R www-data:www-data /models
+RUN mkdir /models && mkdir /models/nltk && chown -R www-data:www-data /models && chown -R www-data:www-data /models/nltk
 RUN python manage.py collectstatic
 
 EXPOSE 80

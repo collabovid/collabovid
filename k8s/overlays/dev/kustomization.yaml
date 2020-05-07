@@ -6,6 +6,9 @@ resources:
   - postgres.yaml
   - s3.yaml
 
+patchesStrategicMerge:
+  - search-service.yaml
+
 secretGenerator:
   - name: web
     envs:

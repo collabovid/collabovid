@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: search
-          image: localhost:32000/search:0.0.0
+          image: search
           imagePullPolicy: Always
           ports:
             - containerPort: 80
@@ -32,4 +32,4 @@ spec:
       volumes:
         - name: vol
           hostPath:
-            path: /home/jonas/kubedata/models
+            path: /usr/local/kubedata/models

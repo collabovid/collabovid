@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: localhost:32000/web:0.0.0
+          image: web
           imagePullPolicy: Always
           ports:
             - containerPort: 80

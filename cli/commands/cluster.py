@@ -16,7 +16,15 @@ class ClusterCommand(Command):
             print('No resource type supplied. Use -r <resource>. Exiting.')
             return
         kubectl = self.current_env_config()['kubectl']
-        self.run_shell_command('k8s/build.sh')
+        self.run_shell_command(
+            'mkdir -p ./k8s/tmp/tmp && cp -r ./k8s/overlays/{} ./k8s/tmp'.format(self.config["env"]))
+        for repo, config in self.config['repositories'].items():
+            tag = config['version']
+            registry = self.current_env_config()['registry']
+            if len(registry) > 0:
+                registry += '/'
+            self.run_shell_command('(cd k8s/tmp/{} && kustomize edit set image {}={}{}:{})'.format(self.config["env"], repo, registry, repo, tag))
+        self.run_shell_command('k8s/build.sh ./k8s/tmp/{} {}'.format(self.config["env"], self.config["env"]))
         path = ''
         base_path = join('k8s', 'dist')
         env_path = join(base_path, self.config["env"])

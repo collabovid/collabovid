@@ -12,9 +12,6 @@ metadata:
 spec:
   template:
     spec:
-      containers:
-        - name: search
-          image: 932829830564.dkr.ecr.us-east-1.amazonaws.com/search:0.0.0
       volumes:
         - name: vol
           hostPath:

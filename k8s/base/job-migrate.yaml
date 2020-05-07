@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: localhost:32000/kubeweb:0.0.0
+          image: localhost:32000/web:0.0.0
           imagePullPolicy: Always
           command: ["bash","-c"]
           args: ["echo Running on: $RDS_HOSTNAME && python manage.py migrate"]
