@@ -1,7 +1,7 @@
 from .vectorizer import PretrainedLDA
 from .similarity import JensonShannonSimilarity, CosineDistance
 import os
-from analyze.analyzer import CombinedPaperAnalyzer, BasicPaperAnalyzer
+from src.analyze.analyzer import CombinedPaperAnalyzer, BasicPaperAnalyzer
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 

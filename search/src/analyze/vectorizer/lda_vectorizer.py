@@ -1,14 +1,14 @@
 import joblib
 import en_core_sci_md
 import sys
-from analyze.similarity import JensonShannonSimilarity
+from src.analyze.similarity import JensonShannonSimilarity
 from . import TextVectorizer
 import os
 from django.conf import settings
 
 
 class PretrainedLDA(TextVectorizer):
-    LDA_BASE_DIR = os.path.join(settings.BASE_DIR, "analyze/res/lda/")
+    LDA_BASE_DIR = os.path.join(settings.BASE_DIR, "res/lda/")
 
     def __init__(self, lda_file=os.path.join(LDA_BASE_DIR, 'lda.pkl'),
                  vectorizer_file=os.path.join(LDA_BASE_DIR, 'vectorizer.pkl'),

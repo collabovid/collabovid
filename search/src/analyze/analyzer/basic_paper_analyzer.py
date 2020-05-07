@@ -1,4 +1,4 @@
-from analyze.vectorizer import PretrainedLDA
+from src.analyze.vectorizer import PretrainedLDA
 import os
 
 import numpy as np
@@ -26,11 +26,11 @@ class BasicPaperAnalyzer(PaperAnalyzer):
             self.vectorizer = PretrainedLDA()
             print("Loaded lda vectorizer")
         elif type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
-            from analyze.vectorizer import TitleSentenceVectorizer
+            from src.analyze.vectorizer import TitleSentenceVectorizer
             self.vectorizer = TitleSentenceVectorizer()
             print("Loaded paper matrix title sentence transformer")
         elif type == BasicPaperAnalyzer.TYPE_CHUNK_SENTENCE_TRANSFORMER:
-            from analyze.vectorizer import SentenceChunkVectorizer
+            from src.analyze.vectorizer import SentenceChunkVectorizer
             self.vectorizer = SentenceChunkVectorizer()
             print("Loaded paper matrix chunk sentence transformer")
         else:

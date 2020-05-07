@@ -1,4 +1,5 @@
 from typing import List
+from django.db.models import QuerySet
 
 
 class PaperResult:
@@ -11,6 +12,6 @@ class Search:
     def __init__(self, *args, **kwargs):
         pass
 
-    def find(self, query: str) -> List[PaperResult]:
+    def find(self, query: str, papers: QuerySet) -> List[PaperResult]:
         raise NotImplementedError()
 

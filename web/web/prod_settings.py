@@ -2,7 +2,6 @@ from .base_settings import *
 
 INSTALLED_APPS.append('storages')
 
-
 ALLOWED_HOSTS = ['www.collabovid.org', 'collabovid.org']
 
 EXTRA_HOST = os.getenv('ALLOWED_TEST_HOST', '')

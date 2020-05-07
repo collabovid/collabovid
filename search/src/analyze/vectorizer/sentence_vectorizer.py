@@ -2,9 +2,9 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 import os
 
-from analyze.similarity import CosineDistance
+from src.analyze.similarity import CosineDistance
 from . import TextVectorizer
-from analyze.vectorizer.utils.splitter import TextToChunksSplitter
+from src.analyze.vectorizer.utils.splitter import TextToChunksSplitter
 from django.conf import settings
 
 
@@ -13,7 +13,7 @@ class TitleSentenceVectorizer(TextVectorizer):
     Utilizing the model from sentence-transformer (https://github.com/UKPLab/sentence-transformers)
     to vectorize sentences, i.e. titles of papers and topics.
     """
-    TITLE_SENTENCE_VECTORIZER_BASE_DIR = os.path.join(settings.BASE_DIR, "analyze/res/title_sentence_vectorizer/")
+    TITLE_SENTENCE_VECTORIZER_BASE_DIR = os.path.join(settings.BASE_DIR, "res/title_sentence_vectorizer/")
 
     def __init__(self,
                  model_name='roberta-large-nli-stsb-mean-tokens',

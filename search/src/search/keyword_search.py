@@ -1,9 +1,9 @@
 import os
 
 import nltk
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 
-from search.search import Search, PaperResult
+from .search import Search, PaperResult
 from typing import List
 from data.models import Paper
 
@@ -24,7 +24,7 @@ stopwords = set(nltk.corpus.stopwords.words('english'))
 
 
 class KeywordSearch(Search):
-    def find(self, query: str) -> List[PaperResult]:
+    def find(self, query: str, papers: QuerySet) -> List[PaperResult]:
         """
         Search for records, containing all keywords of query. Stopwords are excluded before. If all words in query are
         stopwords, use stopwords instead.
@@ -42,5 +42,5 @@ class KeywordSearch(Search):
             # Each keyword must be contained in title OR in abstract
             sql_query &= (Q(title__icontains=word))
 
-        paper_dois = Paper.objects.filter(sql_query).values_list('doi', flat=True)
+        paper_dois = papers.filter(sql_query).values_list('doi', flat=True)
         return [PaperResult(paper_doi=doi, score=KEYWORD_BASE_SCORE) for doi in paper_dois]

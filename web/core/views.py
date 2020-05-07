@@ -8,6 +8,8 @@ from data.statistics import Statistics
 import requests
 
 from django.conf import settings
+from search.request_helper import SearchRequestHelper
+
 
 PAPER_PAGE_COUNT = 10
 
@@ -140,15 +142,10 @@ def search(request):
         tab = request.POST.get("tab", "")
 
         search_query = request.POST.get("search", "").strip()
-        #search_engine = get_default_search_engine()
-
-        #search_result = search_engine.search(search_query, categories=category_names, start_date=start_date,
-        #                                     end_date=end_date, score_min=0.65)
-
-        search_result = None
+        search_request = SearchRequestHelper(category_names, start_date, end_date, search_query)
 
         if tab == "statistics":
-            statistics = Statistics(search_result.papers)
+            statistics = Statistics(search_request.papers)
             return render(request, "core/partials/statistics/_statistics.html", {'statistics': statistics})
         else:
             if tab == "top":
@@ -156,7 +153,7 @@ def search(request):
             else:
                 sorted_by = Paper.SORTED_BY_NEWEST
 
-            paginator = search_result.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+            paginator = search_request.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
             try:
                 page_number = request.POST.get('page')
                 page_obj = paginator.get_page(page_number)
