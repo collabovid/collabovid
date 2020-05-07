@@ -38,8 +38,8 @@ class Journal(models.Model):
 
 
 class Author(models.Model):
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(db_index=True, max_length=50)
+    last_name = models.CharField(db_index=True, max_length=50)
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
     scholar_url = models.URLField(null=True, default=None)
@@ -62,6 +62,10 @@ class PaperData(models.Model):
     Model to store large data which should not be loaded on each select on a regular Paper
     """
     content = models.TextField(null=True, default=None)
+
+
+class CrossrefType(models.Model):
+    name = models.CharField(max_length=50, unique=True, null=False)
 
 
 class Paper(models.Model):
@@ -91,6 +95,8 @@ class Paper(models.Model):
                               default=None,
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
+    crossref_type = models.ForeignKey(CrossrefType, related_name="papers", on_delete=models.CASCADE, null=True,
+                                      default=None)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
