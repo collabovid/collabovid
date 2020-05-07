@@ -263,18 +263,18 @@ a.invisible-link, a.invisible-link:hover {
 }
 
 .nav-search-types .nav-item .nav-link.active.disabled {
-    color: #6c757d!important;
+    color: #6c757d !important;
 }
 
 .search-dropdown {
     margin-top: 10px;
-    margin-right: 12px;
     width: 100%;
 }
 
 @media (min-width: 576px) {
     .search-dropdown {
         width: 400px;
+        margin-right: 12px;
     }
 }
 
@@ -287,27 +287,15 @@ div.paper-cover {
     display: none;
 }
 
-div.progress-wrapper
-{
-    position: relative;
-}
-div.progress-wrapper a.help
-{
+div.score-helper {
     position: absolute;
-    right: 0;
-    width: 20px;
-    height: 100%;
-    cursor: pointer;
-    margin-top: -1px;
+    top: 0;
+    left: 4px;
 }
 
-div.progress-wrapper div.progress
-{
-    margin-right: 20px;
-}
 
-div.stack-col
-{
+
+div.stack-col {
     overflow: hidden;
 }
 
@@ -362,4 +350,11 @@ div.stack-col
 .stack-fanout.active img:nth-child(2) {
     -webkit-transform: rotate(20deg) translateX(60%) scale(0.8);
     transform: rotate(20deg) translateX(60%) scale(0.8);
+}
+
+div.paper-card-badge {
+    float: right;
+    margin-top: -15px;
+    margin-right: -15px;
+    padding-left: 10px;
 }

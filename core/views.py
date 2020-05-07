@@ -14,7 +14,7 @@ PAPER_PAGE_COUNT = 10
 
 def home(request):
     if request.method == "GET":
-        statistics = Statistics(Paper.objects.all())
+        statistics = Statistics(Paper.objects.filter(covid_related=True))
 
         most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
         paper_count = Paper.objects.count()

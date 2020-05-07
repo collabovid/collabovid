@@ -1,9 +1,7 @@
 from django.db import models
-from django.db.models import Q, Max
-from django.utils.dateparse import parse_date
 from django.db.models import F
-import logging
-import re
+
+
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
     description = models.TextField()
@@ -14,8 +12,22 @@ class Topic(models.Model):
 
 
 class PaperHost(models.Model):
-    name = models.CharField(max_length=60)
-    url = models.URLField()
+    name = models.CharField(max_length=60, unique=True)
+    url = models.URLField(null=True, default=None)
+
+
+class DataSource(models.Model):
+    MEDBIORXIV_DATASOURCE_NAME = 'medbiorxiv-updater'
+    ARXIV_DATASOURCE_NAME = 'arxiv-updater'
+
+    name = models.CharField(max_length=120, unique=True)
+
+    @property
+    def priority(datasource):
+        if datasource.name == DataSource.MEDBIORXIV_DATASOURCE_NAME:
+            return 1
+        elif datasource.name == DataSource.ARXIV_DATASOURCE_NAME:
+            return 2
 
 
 class Author(models.Model):
@@ -24,7 +36,9 @@ class Author(models.Model):
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
     scholar_url = models.URLField(null=True, default=None)
-
+    split_name = models.BooleanField(default=False)  # True iff the name was split by us at the time of creation.
+    data_source = models.ForeignKey(DataSource, related_name="authors", on_delete=models.CASCADE, null=True,
+                                    default=None)
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
 
@@ -40,8 +54,8 @@ class PaperData(models.Model):
     """
     Model to store large data which should not be loaded on each select on a regular Paper
     """
-
     content = models.TextField(null=True, default=None)
+
 
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
@@ -54,9 +68,11 @@ class Paper(models.Model):
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
-    category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    version = models.IntegerField(default=1, null=False)
+    data_source = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
+                                      default=None)
+    version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
@@ -65,14 +81,15 @@ class Paper(models.Model):
                               null=True,
                               default=None,
                               on_delete=models.SET_DEFAULT)
+    covid_related = models.BooleanField(null=True, default=None)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
-    url = models.URLField()
-    pdf_url = models.URLField()
+    url = models.URLField(null=True, default=None)
+    pdf_url = models.URLField(null=True, default=None)
     is_preprint = models.BooleanField(default=True)
 
-    published_at = models.DateField()
+    published_at = models.DateField(null=True, default=None)
 
     latent_topic_score = models.BinaryField(null=True)
 

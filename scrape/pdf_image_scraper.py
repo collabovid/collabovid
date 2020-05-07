@@ -10,9 +10,11 @@ from tasks.definitions import register_task, Runnable
 
 from data.models import Paper
 
+
 @register_task
 class PdfImageScraper(Runnable):
-
+    # TODO:
+    #  - delete this separate task?
     @staticmethod
     def task_name():
         return "scrape-pdf-image"
@@ -48,7 +50,7 @@ class PdfImageScraper(Runnable):
             return
 
         buffer = BytesIO()
-        pages[0].thumbnail((400,400), Image.ANTIALIAS)
+        pages[0].thumbnail((400, 400), Image.ANTIALIAS)
         pages[0].save(fp=buffer, format='JPEG')
 
         pillow_image = ContentFile(buffer.getvalue())

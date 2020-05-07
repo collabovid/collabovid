@@ -1,16 +1,15 @@
 import os
-
-from scrape.citation_refresher import CitationRefresher
 from tasks.task_runner import TaskRunner
-from scrape.medrxiv_scraping_task import ArticleScraper
-from scrape.pdf_scraper import PdfScraper
+from scrape.task_medrxiv_update import MedrxivUpdateTask
+from scrape.task_arxiv_update import ArxivUpdateTask
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from analyze.setup_vectorizer import SetupVectorizer
 from tasks.definitions import Runnable
 from data.models import Paper
 
 from django.conf import settings
-
+# TODO:
+#  - delete or restructure this task?
 class Scrape(Runnable):
     @staticmethod
     def task_name():
@@ -33,7 +32,7 @@ class Scrape(Runnable):
 
     def run(self):
         self.log("Scraping articles...")
-        TaskRunner.run_task(ArticleScraper, update_unknown_category=self._update_unknown_category,
+        TaskRunner.run_task(MedrxivUpdateTask, update_unknown_category=self._update_unknown_category,
                             started_by=self._started_by)
         self.log("Finished scraping articles...")
         self.log("Scraping pdf images and content...")
