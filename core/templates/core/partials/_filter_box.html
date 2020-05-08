@@ -1,32 +1,4 @@
 {% load static %}
-<div class="row">
-    <div class="col-12">
-        <label for="chose-category">Choose a category:</label>
-    </div>
-</div>
-<div class="row align-items-center">
-    <div class="col-md-9 col-sm-12">
-        <select name="categories"
-                id="chose-category"
-                class="selectpicker"
-                data-live-search="true"
-                multiple="multiple">
-            {% for category in categories %}
-                <option value="{{ category.name }}"
-                        {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="col-md-3 col-sm-12 px-0 py-0">
-        <a href="#"
-           id="toggle-category-select"
-           class="small delete"
-           data-text-switch="Select all">
-            Deselect all
-        </a>
-    </div>
-</div>
 
 <div class="row mt-3">
     <div class="col-12">
