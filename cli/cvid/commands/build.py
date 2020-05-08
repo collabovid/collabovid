@@ -13,7 +13,7 @@ class BuildCommand(CommandWithRepositories):
                                                                                            repository))
 
     def help(self):
-        return "Specify which repository to use."
+        return "Build a repository and tag it with the current version."
 
     def name(self):
         return "build"

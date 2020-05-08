@@ -15,7 +15,7 @@
   },
   "env-defaults": {
     "kubectl": "kubectl",
-    "registry": "localhost:32000"
+    "registry": ""
   },
   "envs": {
     "dev": {
