@@ -42,26 +42,6 @@
             searchQuery: search_query,
         });
 
-        $("#toggle-category-select").click(function (e) {
-            e.preventDefault();
-
-            let new_text = $(this).data("text-switch");
-            let old_text = $(this).html();
-
-
-            if ($(this).hasClass('delete')) {
-                categorySelectPicker.selectpicker('deselectAll');
-                $(this).removeClass('delete').addClass('add');
-            } else if ($(this).hasClass('add')) {
-                categorySelectPicker.selectpicker('selectAll');
-                $(this).removeClass('add').addClass('delete');
-            }
-
-            $(this).data("text-switch", old_text);
-            $(this).html(new_text);
-
-            chose_category_select.selectpicker('refresh');
-        });
 
         function search_query(data, page, scroll = false, on_success) {
             paper_container.hide();
@@ -125,16 +105,8 @@
 
                 let all_selected = $("#chose-category option:not(:selected)").length === 0;
 
-                let categories_serialized = null;
-
-                if (all_selected) {
-                    categories_serialized = $("#chose-category").attr("name") + "=all";
-                } else {
-                    categories_serialized = $("#chose-category").serialize();
-                }
-
                 let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
-                    + form.find('input[name!=csrfmiddlewaretoken]').serialize() + "&" + categories_serialized;
+                    + form.find('input[name!=csrfmiddlewaretoken]').serialize();
                 window.history.pushState({path: url}, '', url);
 
                 window.formAjaxAllowed = true;
