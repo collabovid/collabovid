@@ -1,12 +1,12 @@
 from django.http import HttpResponseNotFound
 from django.shortcuts import render, redirect
 from tasks.models import Task
-from tasks.definitions import AVAILABLE_TASKS
-from tasks.task_runner import TaskRunner
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from datetime import timedelta
 from django.utils import timezone
+from dashboard.tasks.tasks import get_available_tasks
+from dashboard.tasks.task_launcher import KubeTaskLauncher
 
 
 @staff_member_required
@@ -23,21 +23,21 @@ def task_detail(request, id):
 
 @staff_member_required
 def create_task(request):
+    available_tasks = get_available_tasks()
     if request.method == 'GET':
         tasks = []
-        for task in AVAILABLE_TASKS.values():
-            name = task.task_name()
-            description = task.description()
+        for name, config in available_tasks.items():
             tasks.append({
                 'name': name,
-                'description': description
+                'description': ''
             })
         return render(request, 'dashboard/tasks/task_create.html', {'tasks': tasks})
     elif request.method == 'POST':
         task_name = request.POST.get('task')
-        if task_name in AVAILABLE_TASKS:
-            cls = AVAILABLE_TASKS[task_name]
-            TaskRunner.run_task_async(cls, started_by=request.user.username)
+        if task_name in available_tasks.keys():
+            task_launcher = KubeTaskLauncher()
+            task_config = available_tasks[task_name]
+            task_launcher.launch_task(name=task_name, config=task_config)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
         else:

@@ -1,15 +1,16 @@
 import os
 
-from scrape.citation_refresher import CitationRefresher
+from src.citation_refresher import CitationRefresher
 from tasks.task_runner import TaskRunner
-from scrape.medrxiv_scraping_task import ArticleScraper
-from scrape.pdf_scraper import PdfScraper
-from analyze.update_topic_assignment import UpdateTopicAssignment
-from analyze.setup_vectorizer import SetupVectorizer
+from src.medrxiv_scraping_task import ArticleScraper
+from src.pdf_scraper import PdfScraper
+# from analyze.update_topic_assignment import UpdateTopicAssignment
+# from analyze.setup_vectorizer import SetupVectorizer
 from tasks.definitions import Runnable
 from data.models import Paper
 
 from django.conf import settings
+
 
 class Scrape(Runnable):
     @staticmethod
@@ -47,13 +48,12 @@ class Scrape(Runnable):
                             scrape_images=scrape_images, started_by=self._started_by)
         self.log("Finished scraping pdf images and content...")
 
-        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+        '''if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             self.log("Updating Topic assigment...")
             TaskRunner.run_task(SetupVectorizer, started_by=self._started_by)
             TaskRunner.run_task(UpdateTopicAssignment, started_by=self._started_by)
             self.log("Finished updating topic assigment")
         else:
-            self.log("Paper matrix update and topic assignment skipped.")
+            self.log("Paper matrix update and topic assignment skipped.")'''
 
         self.log("Citation update skipped..")
-

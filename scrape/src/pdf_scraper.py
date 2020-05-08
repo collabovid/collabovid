@@ -1,8 +1,8 @@
 import requests
 
 from tasks.definitions import register_task, Runnable
-from scrape.pdf_content_scraper import PdfContentScraper
-from scrape.pdf_image_scraper import PdfImageScraper
+from src.pdf_content_scraper import PdfContentScraper
+from src.pdf_image_scraper import PdfImageScraper
 from data.models import Paper
 
 @register_task

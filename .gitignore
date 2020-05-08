@@ -1,6 +1,7 @@
 .idea/
 generated
 models
+cvid-config.json
 
 set_secret_envs.sh
 set_db_envs.sh

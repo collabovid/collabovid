@@ -9,9 +9,9 @@ spec:
         - name: scrape
           image: localhost:32000/scrape:0.0.0
           command: ["bash","-c"]
-          args: ["echo Hello World"]
+          args: ["echo Test"]
           envFrom:
             - secretRef:
-                name: web
+                name: scrape
       restartPolicy: Never
   backoffLimit: 0

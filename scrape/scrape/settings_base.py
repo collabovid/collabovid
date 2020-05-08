@@ -1,11 +1,8 @@
 import os
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'test'
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -17,3 +14,5 @@ INSTALLED_APPS = [
     'data',
     'tasks'
 ]
+
+TASK_LOGGING_DB_FLUSH_MINUTES = 1

@@ -22,5 +22,8 @@ secretGenerator:
   - name: shared
     envs:
       - shared.env
+  - name: scrape
+    envs:
+      - scrape.env
 generatorOptions:
   disableNameSuffixHash: true
