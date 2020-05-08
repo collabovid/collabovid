@@ -1,14 +1,13 @@
-BASEDIR=$(dirname "$0")
-OUTPUT_DIR="dist"
+output_dir=$(dirname "$0")/dist
+path=$1
+env=$2
 
-rm -rf ${BASEDIR}/${OUTPUT_DIR}
-
-generate_config() {
-  kustomize build $1 | kubesplit -o ${BASEDIR}/${OUTPUT_DIR}/$2 -p
-  mkdir --parents ${BASEDIR}/${OUTPUT_DIR}/jobs/$2
-  mkdir --parents ${BASEDIR}/${OUTPUT_DIR}/cronjobs/$2
-  mv ${BASEDIR}/${OUTPUT_DIR}/$2/job* ${BASEDIR}/${OUTPUT_DIR}/jobs/$2/
-  mv ${BASEDIR}/${OUTPUT_DIR}/$2/cronjob* ${BASEDIR}/${OUTPUT_DIR}/cronjobs/$2/
-}
-
-generate_config $1 $2
+kustomize build $path | kubesplit -o $output_dir/$env -p
+rm -rf $output_dir/jobs/$env && mkdir -p $output_dir/jobs/$env
+rm -rf $output_dir/cronobs/$env && mkdir -p $output_dir/cronjobs/$env
+if [ "`echo $output_dir/$env/job*`" != "$output_dir/$env/job*" ]; then
+    mv $output_dir/$env/job* $output_dir/jobs/$env/
+fi
+if [ "`echo $output_dir/$env/cronjob*`" != "$output_dir/$env/cronjob*" ]; then
+    mv $output_dir/$env/cronjob* $output_dir/cronjobs/$env/
+fi

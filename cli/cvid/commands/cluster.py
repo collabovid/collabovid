@@ -15,19 +15,9 @@ class ClusterCommand(Command):
         if args.name and not args.resource:
             print('No resource type supplied. Use -r <resource>. Exiting.')
             return
-        kubectl = self.current_env_config()['kubectl']
-        self.run_shell_command(
-            'mkdir -p ./k8s/tmp/tmp && cp -r ./k8s/overlays/{} ./k8s/tmp'.format(self.config["env"]))
-        for repo, config in self.config['repositories'].items():
-            tag = config['version']
-            registry = self.current_env_config()['registry']
-            if len(registry) > 0:
-                registry += '/'
-            self.run_shell_command('(cd k8s/tmp/{} && kustomize edit set image {}={}{}:{})'.format(self.config["env"], repo, registry, repo, tag))
-        self.run_shell_command('k8s/build.sh ./k8s/tmp/{} {}'.format(self.config["env"], self.config["env"]))
+        self.build_kubernetes_config()
         path = ''
-        base_path = join('k8s', 'dist')
-        env_path = join(base_path, self.config["env"])
+        env_path = join('k8s', 'dist', self.current_env())
         if not args.resource and args.all:
             path = '-f ' + env_path
         elif args.resource:
@@ -37,7 +27,7 @@ class ClusterCommand(Command):
                         path += " -f {}".format(join(env_path, file))
             elif args.name:
                 path = '-f ' + join(env_path, '{}--{}.yml').format(args.resource, args.name)
-        self.run_shell_command("{} {} {}".format(kubectl, commands[args.command], path))
+        self.run_shell_command("{} {} {}".format(self.current_env_config()['kubectl'], commands[args.command], path))
 
     def add_arguments(self, parser):
         parser.add_argument('command', choices=commands.keys())
