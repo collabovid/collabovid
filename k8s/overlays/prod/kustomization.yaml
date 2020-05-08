@@ -8,7 +8,6 @@ resources:
 patchesStrategicMerge:
   - search.yaml
   - web.yaml
-  - job-migrate.yaml
 
 secretGenerator:
   - name: web

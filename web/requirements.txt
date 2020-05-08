@@ -8,3 +8,4 @@ django-health-check==3.12.1
 colour==0.1.1
 markdown==3.2.1
 Pillow==7.0.0
+kubernetes==11.0.0

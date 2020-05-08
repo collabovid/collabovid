@@ -43,7 +43,17 @@ class Command:
                 registry += '/'
             self.run_shell_command(
                 '(cd {} && kustomize edit set image {}={}{}:{})'.format(join(temp_dir, env), repo, registry, repo, tag))
+
+        options_dir = join(kubernetes_dir, 'options')
+        for option in self.current_env_config()['optionFiles']:
+            option_file_path = join(options_dir, option)
+            if not exists(option_file_path):
+                print("Unknown optionFiles item specified in config: {}".format(option))
+                exit(2)
+            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option)))
+            self.run_shell_command("(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option)))
         self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env))
+        self.run_shell_command('rm -rf {}'.format(temp_dir))
 
     def help(self):
         return ""

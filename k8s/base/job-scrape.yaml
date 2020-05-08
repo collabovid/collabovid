@@ -8,7 +8,6 @@ spec:
       containers:
         - name: scrape
           image: localhost:32000/scrape:0.0.0
-          imagePullPolicy: Always
           command: ["bash","-c"]
           args: ["echo Hello World"]
           envFrom:

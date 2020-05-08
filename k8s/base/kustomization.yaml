@@ -9,3 +9,5 @@ resources:
   - search-service.yaml
   - job-scrape.yaml
   - job-dbinit.yaml
+  - job-superuser.yaml
+  - job-test.yaml

@@ -7,7 +7,7 @@ resources:
   - s3.yaml
 
 patchesStrategicMerge:
-  - search-service.yaml
+  - search.yaml
 
 secretGenerator:
   - name: web

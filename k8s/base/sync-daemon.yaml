@@ -18,8 +18,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: daemon-set
-          image: localhost:32000/sync-deamon:0.0.0
-          imagePullPolicy: Always
+          image: sync-deamon
           volumeMounts:
             - name: models
               mountPath: /models

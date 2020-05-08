@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+spec:
+  template:
+    spec:
+      containers:
+        - name: search
+          imagePullPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Always
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: superuser
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Always
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Always
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: scrape
+spec:
+  template:
+    spec:
+      containers:
+        - name: scrape
+          imagePullPolicy: Always
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Always

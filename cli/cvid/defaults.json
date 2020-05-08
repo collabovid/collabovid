@@ -15,7 +15,8 @@
   },
   "env-defaults": {
     "kubectl": "kubectl",
-    "registry": ""
+    "registry": "",
+    "optionFiles": []
   },
   "envs": {
     "dev": {

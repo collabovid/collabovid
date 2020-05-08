@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: migrate
+  name: test
 spec:
   template:
     spec:
@@ -9,7 +9,7 @@ spec:
         - name: web
           image: web
           command: ["bash","-c"]
-          args: ["echo Running on: $RDS_HOSTNAME && python manage.py migrate"]
+          args: ["export PYTHONPATH=/app:$PYTHONPATH && python scripts/task_launcher.py"]
           envFrom:
             - secretRef:
                 name: web
