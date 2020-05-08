@@ -17,15 +17,18 @@ spec:
       volumes:
         - name: vol
           hostPath:
-            path: /home/jonas/kubedata/s3
+            path: /usr/local/kubedata/s3storage
       containers:
         - name: s3
-          image: scireum/s3-ninja:6.4
+          image: adobe/s3mock
           ports:
-            - containerPort: 9000
+            - containerPort: 9090
+          env:
+            - name: root
+              value: /s3
           volumeMounts:
             - name: vol
-              mountPath: /home/sirius/data
+              mountPath: /s3
           securityContext:
             runAsUser: 0
 
@@ -40,7 +43,7 @@ spec:
   type: NodePort
   ports:
     - port: 80
-      targetPort: 9000
+      targetPort: 9090
       nodePort: 30002
       protocol: TCP
   selector:
