@@ -92,7 +92,7 @@ class ArxivDataPoint(ArticleDataPoint):
 
 
 class ArxivUpdater(DataUpdater):
-    _ARXIV_SEARCH_QUERY = 'all:%22COVID 19%22'
+    _ARXIV_SEARCH_QUERY = 'all:"COVID 19" OR all:"SARS-CoV-2"'
 
     @property
     def _data_source_name(self):
