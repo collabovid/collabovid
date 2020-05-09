@@ -1,6 +1,6 @@
 from tasks.definitions import Runnable, register_task
 from . import get_topic_assignment_analyzer, get_analyzer
-from analyze.analyzer import PaperAnalyzer
+from src.analyze.analyzer import PaperAnalyzer
 
 
 @register_task
@@ -10,7 +10,7 @@ class SetupVectorizer(Runnable):
     def task_name():
         return "setup-vectorizer"
 
-    def __init__(self, analyzer: PaperAnalyzer = None, force_recompute = False, *args, **kwargs):
+    def __init__(self, analyzer: PaperAnalyzer = None, force_recompute: bool = False, *args, **kwargs):
         super(SetupVectorizer, self).__init__(*args, **kwargs)
         self.analyzer = analyzer
         self._force_recompute = force_recompute

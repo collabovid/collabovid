@@ -11,18 +11,17 @@ from tasks.definitions import Runnable, register_task
 
 @register_task
 class CitationRefresher(Runnable):
-    
     SUCCESS = 0
     NO_AUTHOR_FOUND = 1
     MULTIPLE_AUTHORS_FOUND = 2
     HTTP_ERROR = 3
     UNKNOWN = 4
-    
+
     @staticmethod
     def task_name():
         return "refresh-citations"
 
-    def __init__(self, only_new=False, count=None, *args, **kwargs):
+    def __init__(self, only_new: bool = False, count: int = None, *args, **kwargs):
         super(CitationRefresher, self).__init__(*args, **kwargs)
 
         self._only_new = only_new
@@ -109,4 +108,3 @@ class CitationRefresher(Runnable):
             if len(name) > 2 or (len(name) == 2 and name[1] != '.'):
                 final_name += " " + name
         return final_name.strip()
-

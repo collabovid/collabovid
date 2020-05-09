@@ -10,7 +10,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import KernelPCA
 from sklearn.metrics import pairwise_distances
 
-from analyze import get_analyzer
+from src.analyze import get_analyzer
 
 
 def get_vector_for_doi(analyzer, doi):

@@ -9,6 +9,7 @@ from dashboard.tasks.tasks import get_available_tasks
 from dashboard.tasks.task_launcher import KubeTaskLauncher, LocalTaskLauncher
 from django.conf import settings
 
+from tasks.load import AVAILABLE_TASKS
 
 @staff_member_required
 def tasks(request):
@@ -24,15 +25,9 @@ def task_detail(request, id):
 
 @staff_member_required
 def create_task(request):
-    available_tasks = get_available_tasks()
+    available_tasks = AVAILABLE_TASKS
     if request.method == 'GET':
-        tasks = []
-        for name, config in available_tasks.items():
-            tasks.append({
-                'name': name,
-                'description': ''
-            })
-        return render(request, 'dashboard/tasks/task_create.html', {'tasks': tasks})
+        return render(request, 'dashboard/tasks/task_create.html', {'services_with_tasks': available_tasks})
     elif request.method == 'POST':
         task_name = request.POST.get('task')
         if task_name in available_tasks.keys():

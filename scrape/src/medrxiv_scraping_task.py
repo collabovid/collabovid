@@ -8,7 +8,7 @@ class ArticleScraper(Runnable):
     def task_name():
         return "scrape-articles"
 
-    def __init__(self, update_unknown_category=True, *args, **kwargs):
+    def __init__(self, update_unknown_category: bool = True, *args, **kwargs):
         super(ArticleScraper, self).__init__(*args, **kwargs)
         self._update_unknown_category = update_unknown_category
 
@@ -22,7 +22,7 @@ class ArticleUpdater(Runnable):
     def task_name():
         return "update-articles"
 
-    def __init__(self, count=200, *args, **kwargs):
+    def __init__(self, count: int = 200, *args, **kwargs):
         super(ArticleUpdater, self).__init__(*args, **kwargs)
         self._count = count
 
@@ -35,6 +35,9 @@ class DeleteRevokedArticlesTask(Runnable):
     @staticmethod
     def task_name():
         return "delete-revoked-articles"
+
+    def __init__(self, *args, **kwargs):
+        super(DeleteRevokedArticlesTask, self).__init__(*args, **kwargs)
 
     def run(self):
         delete_revoked_articles(self.log)
