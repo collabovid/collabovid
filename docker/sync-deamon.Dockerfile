@@ -7,7 +7,7 @@ RUN pip install --no-cache -r /requirements.txt
 
 COPY sync-deamon/src /app
 
-#Copy hello-cron file to the cron.d directory
+# Copy executable file to the cron.d directory
 RUN mv /app/cronjob /etc/cron.d/cronjob \
 # Give execution rights on the cron job
 && chmod 0644 /etc/cron.d/cronjob \

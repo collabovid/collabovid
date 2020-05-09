@@ -6,7 +6,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from datetime import timedelta
 from django.utils import timezone
 from dashboard.tasks.tasks import get_available_tasks
-from dashboard.tasks.task_launcher import KubeTaskLauncher
+from dashboard.tasks.task_launcher import KubeTaskLauncher, LocalTaskLauncher
+from django.conf import settings
 
 
 @staff_member_required
@@ -35,7 +36,12 @@ def create_task(request):
     elif request.method == 'POST':
         task_name = request.POST.get('task')
         if task_name in available_tasks.keys():
-            task_launcher = KubeTaskLauncher()
+
+            if settings.TASK_LAUNCHER_LOCAL:
+                task_launcher = LocalTaskLauncher()
+            else:
+                task_launcher = KubeTaskLauncher()
+
             task_config = available_tasks[task_name]
             task_launcher.launch_task(name=task_name, config=task_config)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
