@@ -1,0 +1,26 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Start Task</h1>
+    </div>
+
+    <div class="container">
+        {% for service, tasks in services_with_tasks.items %}
+            <div class="row mt-3">
+                <div class="col-12">
+                    <h3>{{ service.title }}</h3>
+                </div>
+            </div>
+            <div class="row">
+                {% for task_id, task in tasks.items %}
+                    <div class="form-check col-md-6 mt-2">
+                        <a class="btn btn-info" href="{% url "task_create" task_id %}">> {{ task.name }}</a><br>
+                        <span class="text-muted">{{ task.description }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

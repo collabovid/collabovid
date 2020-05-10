@@ -9,7 +9,8 @@ from dashboard.tasks.tasks import get_available_tasks
 from dashboard.tasks.task_launcher import KubeTaskLauncher, LocalTaskLauncher
 from django.conf import settings
 
-from tasks.load import AVAILABLE_TASKS
+from tasks.load import AVAILABLE_TASKS, get_task_by_id
+
 
 @staff_member_required
 def tasks(request):
@@ -24,20 +25,33 @@ def task_detail(request, id):
 
 
 @staff_member_required
-def create_task(request):
-    available_tasks = AVAILABLE_TASKS
+def select_task(request):
     if request.method == 'GET':
-        return render(request, 'dashboard/tasks/task_create.html', {'services_with_tasks': available_tasks})
+        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS})
+
+    return HttpResponseNotFound()
+
+
+@staff_member_required
+def create_task(request, task_id):
+
+    task_definition = get_task_by_id(task_id)
+
+    if not task_definition:
+        return HttpResponseNotFound()
+
+    if request.method == 'GET':
+        return render(request, 'dashboard/tasks/task_create.html', {'definition': task_definition})
     elif request.method == 'POST':
         task_name = request.POST.get('task')
-        if task_name in available_tasks.keys():
+        if task_name in AVAILABLE_TASKS.keys():
 
             if settings.TASK_LAUNCHER_LOCAL:
                 task_launcher = LocalTaskLauncher()
             else:
                 task_launcher = KubeTaskLauncher()
 
-            task_config = available_tasks[task_name]
+            task_config = AVAILABLE_TASKS[task_name]
             task_launcher.launch_task(name=task_name, config=task_config)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
