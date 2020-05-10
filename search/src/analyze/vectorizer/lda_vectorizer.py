@@ -9,10 +9,11 @@ from django.conf import settings
 
 class PretrainedLDA(TextVectorizer):
     LDA_BASE_DIR = os.path.join(settings.MODELS_BASE_DIR, "lda/")
+    PAPER_MATRIX_BASE_DIR = os.path.join(settings.MODELS_BASE_DIR, "paper_matrix")
 
     def __init__(self, lda_file=os.path.join(LDA_BASE_DIR, 'lda.pkl'),
                  vectorizer_file=os.path.join(LDA_BASE_DIR, 'vectorizer.pkl'),
-                 matrix_file_name=os.path.join(LDA_BASE_DIR, 'paper_matrix.pkl'),
+                 matrix_file_name=os.path.join(PAPER_MATRIX_BASE_DIR, 'lda.pkl'),
                  *args, **kwargs):
 
         super(PretrainedLDA, self).__init__(matrix_file_name=matrix_file_name, *args, **kwargs)

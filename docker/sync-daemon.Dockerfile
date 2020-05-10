@@ -2,10 +2,10 @@ FROM python:3.7-slim-buster
 
 RUN apt-get update && apt-get -y --no-install-recommends install cron && rm -rf /var/lib/apt/lists/*
 
-COPY ./sync-deamon/requirements.txt /requirements.txt
+COPY ./sync-daemon/requirements.txt /requirements.txt
 RUN pip install --no-cache -r /requirements.txt
 
-COPY sync-deamon/src /app
+COPY sync-daemon/src /app
 
 # Copy executable file to the cron.d directory
 RUN mv /app/cronjob /etc/cron.d/cronjob \

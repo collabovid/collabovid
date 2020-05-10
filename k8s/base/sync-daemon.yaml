@@ -18,7 +18,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: daemon-set
-          image: sync-deamon
+          image: sync-daemon
           volumeMounts:
             - name: models
               mountPath: /models

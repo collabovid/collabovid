@@ -7,3 +7,4 @@ recursive-include tasks/static *
 recursive-include tasks/fixtures *
 recursive-include tasks/templates *
 recursive-include docs *
+recursive-include tasks/resources *

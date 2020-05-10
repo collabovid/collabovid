@@ -11,3 +11,4 @@ resources:
   - job-dbinit.yaml
   - job-superuser.yaml
   - job-test.yaml
+  - sync-daemon.yaml
