@@ -17,7 +17,7 @@ class ArxivUpdateTask(Runnable):
             pdf_image = False
             self.log("Scraping images disabled in settings")
         else:
-            pdf_image=True
+            pdf_image = True
 
         updater = ArxivUpdater(log=self.log)
         updater.update_existing_data(count=10, pdf_image=pdf_image)
@@ -37,7 +37,7 @@ class ArxivNewArticlesTask(Runnable):
             pdf_image = False
             self.log("Scraping images disabled in settings")
         else:
-            pdf_image=True
+            pdf_image = True
 
         updater = ArxivUpdater(log=self.log)
         updater.get_new_data(pdf_content=True, pdf_image=pdf_image)
