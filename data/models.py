@@ -28,6 +28,8 @@ class DataSource(models.Model):
             return 1
         elif datasource.name == DataSource.ARXIV_DATASOURCE_NAME:
             return 2
+        else:
+            return 100
 
 
 class Author(models.Model):
