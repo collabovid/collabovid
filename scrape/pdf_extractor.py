@@ -9,26 +9,27 @@ from pdf2image.exceptions import PDFPageCountError, PDFSyntaxError
 from tika import parser
 
 
-
-
-class PdfDownloadError(Exception):
-    @property
-    def msg(self):
-        return "Could not download PDF"
+class PdfExtractError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
 
 
 class PdfExtractor:
-    def __init__(self, pdf_urls):
+    def __init__(self, pdf_url):
         self._pdf_response = None
-        self._pdf_url = pdf_urls
+        self._pdf_url = pdf_url
 
     def _load_pdf_response(self):
         if not self._pdf_response:
             try:
                 self._pdf_response = requests.get(self._pdf_url)
             except requests.exceptions.RequestException as ex:
-                print(ex)
-                self._pdf_response = None
+                raise PdfExtractError(f"Coud not download PDF file: {ex}")
+            if self._pdf_response.status_code != 200:
+                raise PdfExtractError(f"Invalid HTTP status code: {self._pdf_response.status_code}")
+            if self._pdf_response.headers['Content-Type'] != 'application/pdf':
+                raise PdfExtractError(f"HTTP content type is {self._pdf_response.headers['Content-Type']}. Expect "
+                                      f"application/pdf")
 
     def extract_contents(self):
         """

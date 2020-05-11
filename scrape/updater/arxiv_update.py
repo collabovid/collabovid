@@ -2,17 +2,24 @@ import re
 from time import sleep
 
 import arxiv
-
-from nameparser import HumanName
 from django.utils.dateparse import parse_datetime
+from nameparser import HumanName
 
-from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 from data.models import DataSource
+from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
 
 _ARXIV_DATA_PRIORITY = 2
 _ARXIV_PAPERHOST_NAME = 'arXiv'
 _ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
 
+
+def _get_arxiv_id_from_url(url):
+    reduced_url = re.sub(r'v(\d+)$', '', url)
+    splits = reduced_url.split('/abs/')
+    if len(splits) < 2:
+        return None
+    else:
+        return 'arXiv:' + splits[1]
 
 class ArxivDataPoint(ArticleDataPoint):
     _ARXIV_WITHDRAWN_NOTICE = 'This paper has been withdrawn by the author(s)'
@@ -23,12 +30,7 @@ class ArxivDataPoint(ArticleDataPoint):
 
     @property
     def doi(self):
-        reduced_url = re.sub(r'v(\d+)$', '', self.raw_article['id'])
-        splits = reduced_url.split('/abs/')
-        if len(splits) < 2:
-            return None
-        else:
-            return splits[1]
+        return _get_arxiv_id_from_url(self.raw_article['id'])
 
     @property
     def title(self):
@@ -94,17 +96,16 @@ class ArxivDataPoint(ArticleDataPoint):
 class ArxivUpdater(DataUpdater):
     _ARXIV_SEARCH_QUERY = 'all:"COVID 19" OR all:"SARS-CoV-2"'
 
-    @property
-    def _data_source_name(self):
-        return DataSource.ARXIV_DATASOURCE_NAME
-
     def __init__(self, log=print):
         super().__init__(log)
         self._query_result = None
 
+    @property
+    def data_source_name(self):
+        return DataSource.ARXIV_DATASOURCE_NAME
+
     def _load_query_result(self):
         if not self._query_result:
-            # TODO: Filter for keywords Sars-CoV-2 and Coronavirus
             chunk_size = 500
             start = 0
             query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, start=start, max_results=chunk_size, iterative=False,
@@ -135,6 +136,6 @@ class ArxivUpdater(DataUpdater):
     def _get_data_point(self, doi):
         self._load_query_result()
         try:
-            return ArxivUpdater(next(x for x in self._query_result if x['doi'] == doi))
+            return ArxivDataPoint(next(x for x in self._query_result if _get_arxiv_id_from_url(x['id']) == doi))
         except StopIteration:
             return None

@@ -132,7 +132,7 @@ class MedrxivUpdater(DataUpdater):
     _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'
 
     @property
-    def _data_source_name(self):
+    def data_source_name(self):
         return DataSource.MEDBIORXIV_DATASOURCE_NAME
 
     def __init__(self, log=print):

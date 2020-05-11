@@ -1,4 +1,5 @@
 import re
+from time import sleep
 
 from django.db import transaction
 from django.db.utils import IntegrityError
@@ -7,7 +8,7 @@ from datetime import timedelta, date
 
 from data.models import Author, Category, Paper, PaperHost, DataSource, PaperData
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor
+from scrape.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
 
@@ -106,7 +107,38 @@ class ArticleDataPoint(object):
     def category_name(self):
         return None
 
-    def update_db(self, update_existing=True):
+    @staticmethod
+    def _update_pdf_data(db_article, extract_image=True, extract_content=True):
+        if not extract_image and not extract_content:
+            return
+        if not db_article.pdf_url:
+            return
+
+        sleep(3)
+        pdf_extractor = PdfExtractor(db_article.pdf_url)
+
+        if extract_image:
+            image = pdf_extractor.extract_image()
+            if image:
+                img_name = sanitize_doi(db_article.doi) + ".jpg"
+                db_article.preview_image.save(img_name, InMemoryUploadedFile(
+                    image,  # file
+                    None,  # field_name
+                    img_name,  # file name
+                    'image/jpeg',  # content_type
+                    image.tell,  # size
+                    None))
+
+        if extract_content:
+            content = pdf_extractor.extract_contents()
+            if content:
+                if db_article.data:
+                    db_article.data.content = content
+                else:
+                    db_content = PaperData.objects.create(content=content)
+                    db_article.data = db_content
+
+    def update_db(self, update_existing, pdf_content, pdf_image):
         doi = self.doi
         title = self.title
         paperhost_name = self.paperhost_name
@@ -127,8 +159,10 @@ class ArticleDataPoint(object):
                     raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
                 elif not update_existing and db_article.data_source.priority == datasource.priority:
                     raise SkipArticle("Article already in database")
+                created = False
             except Paper.DoesNotExist:
                 db_article = Paper(doi=doi)
+                created = True
 
             db_article.title = title
             db_article.abstract = self.abstract
@@ -163,11 +197,13 @@ class ArticleDataPoint(object):
             if self.category_name:
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
+            if pdf_content or pdf_image:
+                self._update_pdf_data(db_article, pdf_content, pdf_image)
             db_article.version = self.version
             db_article.covid_related = _covid_related(db_article=db_article)
             db_article.last_scrape = timezone.now()
             db_article.save()
-        return db_article
+        return db_article, created
 
 
 class DataUpdater(object):
@@ -180,7 +216,7 @@ class DataUpdater(object):
         self.n_success = 0
 
     @property
-    def _data_source_name(self):
+    def data_source_name(self):
         raise NotImplementedError
 
     def _get_data_points(self):
@@ -192,55 +228,32 @@ class DataUpdater(object):
     def _count(self):
         raise NotImplementedError
 
-    @staticmethod
-    def extract_pdf_data(db_article, extract_image=True, extract_content=True):
-        if not db_article.pdf_url:
-            return None
-        pdf_extractor = PdfExtractor(db_article.pdf_url)
-
-        if extract_image:
-            image = pdf_extractor.extract_image()
-            if image:
-                img_name = sanitize_doi(db_article.doi) + ".jpg"
-                db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                    image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    image.tell,  # size
-                    None))
-
-        if extract_content:
-            content = pdf_extractor.extract_contents()
-            if content:
-                if db_article.data:
-                    db_article.data.content = content
-                else:
-                    db_content = PaperData.objects.create(content=content)
-                    db_article.data = db_content
-        db_article.save()
-
-    def _update_data(self, data_point, update_existing=True):
+    def get_or_create_db_article(self, datapoint, pdf_content, pdf_image, update_existing):
         try:
-            db_article = data_point.update_db(update_existing=update_existing)
-            #self.log(f"Updated/Created {data_point.doi}")
+            db_article, created = datapoint.update_db(update_existing=update_existing, pdf_content=pdf_content,
+                                                      pdf_image=pdf_image)
+            self.log(f"Updated/Created {datapoint.doi}")
             self.n_success += 1
-            return db_article
+            return db_article, created
         except MissingDataError as ex:
-            id = data_point.doi if data_point.doi else f"\"{data_point.title}\""
+            id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            #self.log(f"Skip: {data_point.doi}: {ex.msg}")
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
-            #self.log(f"Skip: {data_point.doi}: {ex.msg}")
+            #elf.log(f"Skip: {data_point.doi}: {ex.msg}")
             self.n_already_tracked += 1
         except IntegrityError as ex:
-            self.log(f"Error: {data_point.doi}: {ex}")
-        return None
+            self.log(f"Error: {datapoint.doi}: {ex}")
+            self.n_errors += 1
+        except PdfExtractError as ex:
+            self.log(f"Error: {datapoint.doi}: {ex}")
+            self.n_errors += 1
+        return None, None
 
-    def update(self, max_count=None, pdf_content=False):
+    def get_new_data(self, pdf_content=True, pdf_image=True):
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -249,34 +262,53 @@ class DataUpdater(object):
         total = self._count()
         self.log(f"Check {total} publications")
 
-        update_existing = max_count is None
-
         start = timer()
-
 
         for i, data_point in enumerate(self._get_data_points()):
             if i % 100 == 0:
                 self.log(f"Progress: {i}/{total}")
-            db_article = self._update_data(data_point, update_existing=update_existing)
-            if pdf_content:
-                self.extract_pdf_data(db_article)
-
-        total_handled = self.n_success + self.n_errors
-        if max_count and total_handled < max_count:
-            self.log("Update existing articles")
-            filtered_articles = Paper.objects.all().filter(data_source__name=self._data_source_name)
-            update_articles = filtered_articles.order_by('last_scrape')[:max_count - total_handled]
-            for article in update_articles:
-                data_point = self._get_data_point(doi=article.doi)
-                if data_point:
-                    self._update_data(data_point, update_existing=True)
+            self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image, update_existing=False)
 
         end = timer()
-        elapsed_time = timedelta(seconds=end-start)
+        elapsed_time = timedelta(seconds=end - start)
         self.log(f"Time (total): {elapsed_time}")
+        total_handled = self.n_success + self.n_errors
         if total_handled > 0:
             self.log(f"Time (per Record): {elapsed_time / total_handled}")
-        self.log(f"Updated/Created: {self.n_success}")
+        self.log(f"Created: {self.n_success}")
+        self.log(f"Skipped: {self.n_skipped}")
+        self.log(f"Errors: {self.n_errors}")
+        self.log(f"Tracked by other source: {self.n_already_tracked}")
+
+    def update_existing_data(self, count=None, pdf_content=True, pdf_image=True):
+        self.n_errors = 0
+        self.n_skipped = 0
+        self.n_already_tracked = 0
+        self.n_success = 0
+
+        total = self._count()
+
+        if count is None:
+            count = total
+
+        self.log(f"Update {count} existing articles")
+
+        start = timer()
+
+        filtered_articles = Paper.objects.all().filter(data_source__name=self.data_source_name).order_by(
+            'last_scrape')[:count]
+        for article in filtered_articles:
+            data_point = self._get_data_point(doi=article.doi)
+            if data_point:
+                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content, pdf_image=pdf_image)
+
+        end = timer()
+        elapsed_time = timedelta(seconds=end - start)
+        self.log(f"Time (total): {elapsed_time}")
+        total_handled = self.n_success + self.n_errors
+        if total_handled > 0:
+            self.log(f"Time (per Record): {elapsed_time / total_handled}")
+        self.log(f"Updated: {self.n_success}")
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
