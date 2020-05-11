@@ -6,6 +6,7 @@ import boto3
 import datetime
 import botocore
 import json
+from boto3.s3.transfer import TransferConfig
 
 paper_matrices = [
     'lda',
@@ -28,7 +29,9 @@ class S3Store():
         self.bucket = bucket
 
     def upload(self, local_file, remote_key):
-        self.s3.meta.client.upload_file(local_file, self.bucket, remote_key)
+        config = TransferConfig(multipart_threshold=(1024 ** 3) * 2)
+        self.s3.meta.client.upload_file(local_file, self.bucket, remote_key,
+                                        Config=config)
 
     def download_file(self, key, local_filename):
         self.s3.Bucket(self.bucket).download_file(key, local_filename)

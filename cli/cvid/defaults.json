@@ -1,16 +1,12 @@
 {
-  "repositories": {
+  "services": {
     "web": {
-      "version": "0.0.0"
     },
     "search": {
-      "version": "0.0.0"
     },
     "scrape": {
-      "version": "0.0.0"
     },
     "sync-daemon": {
-      "version": "0.0.0"
     }
   },
   "env-defaults": {

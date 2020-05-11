@@ -1,16 +1,17 @@
-from .command import Command, CommandWithRepositories
+from .command import Command, CommandWithServices
 
 
-class BuildCommand(CommandWithRepositories):
+class BuildCommand(CommandWithServices):
     def run(self, args):
         super().run(args)
-        for repository, config in args.repositories:
-            self.print_info("Building repository: {}".format(repository))
-            self.run_shell_command("DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
+        for service, config in args.services:
+            self.print_info("Building service: {}".format(service))
             self.run_shell_command(
-                "DOCKER_BUILDKIT=1 docker build -t {}:{} -f docker/{}.Dockerfile .".format(repository,
-                                                                                           config['version'],
-                                                                                           repository))
+                "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
+
+            tag = self.generate_tag()
+            self.run_shell_command(
+                "DOCKER_BUILDKIT=1 docker build -t {}:{} -f docker/{}.Dockerfile .".format(service, tag, service))
 
     def help(self):
         return "Build a repository and tag it with the current version."
