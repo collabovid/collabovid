@@ -15,9 +15,7 @@ PAPER_PAGE_COUNT = 10
 def home(request):
     if request.method == "GET":
         statistics = Statistics(Paper.objects.all())
-
         most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
-        paper_count = Paper.objects.count()
         return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
 
