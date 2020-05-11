@@ -2,6 +2,8 @@ from data.models import Paper
 from scrape.static_functions import covid_related
 from tasks.definitions import register_task, Runnable
 
+from scrape.task_pdf_image_download import PdfImageDownloader
+
 
 @register_task
 class CheckCovidRelatedTask(Runnable):
