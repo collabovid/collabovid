@@ -155,7 +155,7 @@ class ArticleDataPoint(object):
 
             try:
                 db_article = Paper.objects.get(doi=doi)
-                if db_article.data_source.priority < datasource.priority:
+                if db_article.data_source and db_article.data_source.priority < datasource.priority:
                     raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
                 elif not update_existing and db_article.data_source.priority == datasource.priority:
                     raise SkipArticle("Article already in database")
