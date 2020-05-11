@@ -198,7 +198,7 @@ class ArticleDataPoint(object):
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
             if pdf_content or pdf_image:
-                self._update_pdf_data(db_article, pdf_content, pdf_image)
+                self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
             db_article.covid_related = _covid_related(db_article=db_article)
             db_article.last_scrape = timezone.now()
