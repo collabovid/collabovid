@@ -2,6 +2,8 @@ import re
 from time import sleep
 
 import arxiv
+import datetime
+
 from django.utils.dateparse import parse_datetime
 from nameparser import HumanName
 
@@ -94,7 +96,8 @@ class ArxivDataPoint(ArticleDataPoint):
 
 
 class ArxivUpdater(DataUpdater):
-    _ARXIV_SEARCH_QUERY = 'all:"COVID 19" OR all:"SARS-CoV-2"'
+    _ARXIV_SEARCH_QUERY = 'title:"COVID 19" OR title:"SARS-CoV-2" OR title:"coronavirus" ' \
+                          'OR abs:"COVID 19" OR abs:"SARS-CoV-2" OR abs:"coronavirus"'
 
     def __init__(self, log=print):
         super().__init__(log)
@@ -111,7 +114,8 @@ class ArxivUpdater(DataUpdater):
             query_result = arxiv.query(self._ARXIV_SEARCH_QUERY, start=start, max_results=chunk_size, iterative=False,
                                        sort_by='submittedDate',
                                        sort_order='descending')
-            self._query_result = query_result
+            self._query_result = [x for x in query_result
+                                  if parse_datetime(x['updated']).date() >= datetime.date(2019, 12, 1)]
 
             while len(query_result) == chunk_size:
                 # Fetch the remaining papers.
@@ -122,7 +126,8 @@ class ArxivUpdater(DataUpdater):
                                            iterative=False,
                                            sort_by='submittedDate',
                                            sort_order='descending')
-                self._query_result += query_result
+                self._query_result += [x for x in query_result
+                                       if parse_datetime(x['updated']).date() >= datetime.date(2019, 12, 1)]
 
     def _count(self):
         self._load_query_result()
