@@ -1,124 +1,135 @@
 {
-  "scrape": {
-    "refresh-citations": {
-      "name": "Refresh Citations",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "only_new",
-          "required": false,
-          "annotation": "bool",
-          "default": false
+    "scrape": {
+        "refresh-citations": {
+            "name": "Refresh Citations",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "only_new",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                },
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": null,
+                    "is_primitive": true
+                }
+            ]
         },
-        {
-          "name": "count",
-          "required": false,
-          "annotation": "int",
-          "default": null
-        }
-      ]
-    },
-    "scrape-articles": {
-      "name": "Scrape Articles",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "update_unknown_category",
-          "required": false,
-          "annotation": "bool",
-          "default": true
-        }
-      ]
-    },
-    "update-articles": {
-      "name": "Update Articles",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "count",
-          "required": false,
-          "annotation": "int",
-          "default": 200
-        }
-      ]
-    },
-    "delete-revoked-articles": {
-      "name": "Delete Revoked Articles",
-      "description": "No description provided.",
-      "parameters": []
-    },
-    "scrape-pdf-content": {
-      "name": "Scrape Pdf Content",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "papers",
-          "required": false,
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "scrape-pdf-image": {
-      "name": "Scrape Pdf Image",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "papers",
-          "required": false,
-          "annotation": null,
-          "default": null
-        }
-      ]
-    },
-    "scrape-pdf": {
-      "name": "Scrape Pdf",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "papers",
-          "required": false,
-          "annotation": null,
-          "default": null
+        "scrape-articles": {
+            "name": "Scrape Articles",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "update_unknown_category",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
         },
-        {
-          "name": "scrape_content",
-          "required": false,
-          "annotation": "bool",
-          "default": true
+        "update-articles": {
+            "name": "Update Articles",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 200,
+                    "is_primitive": true
+                }
+            ]
         },
-        {
-          "name": "scrape_images",
-          "required": false,
-          "annotation": "bool",
-          "default": true
+        "delete-revoked-articles": {
+            "name": "Delete Revoked Articles",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "scrape-pdf-content": {
+            "name": "Scrape Pdf Content",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "papers",
+                    "required": false,
+                    "type": "_empty",
+                    "default": null,
+                    "is_primitive": false
+                }
+            ]
+        },
+        "scrape-pdf-image": {
+            "name": "Scrape Pdf Image",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "papers",
+                    "required": false,
+                    "type": "_empty",
+                    "default": null,
+                    "is_primitive": false
+                }
+            ]
+        },
+        "scrape-pdf": {
+            "name": "Scrape Pdf",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "papers",
+                    "required": false,
+                    "type": "_empty",
+                    "default": null,
+                    "is_primitive": false
+                },
+                {
+                    "name": "scrape_content",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                },
+                {
+                    "name": "scrape_images",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
         }
-      ]
+    },
+    "search": {
+        "setup-vectorizer": {
+            "name": "Setup Vectorizer",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "analyzer",
+                    "required": false,
+                    "type": "PaperAnalyzer",
+                    "default": null,
+                    "is_primitive": false
+                },
+                {
+                    "name": "force_recompute",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "update-topic-assignment": {
+            "name": "Update Topic Assignment",
+            "description": "No description provided.",
+            "parameters": []
+        }
     }
-  },
-  "search": {
-    "setup-vectorizer": {
-      "name": "Setup Vectorizer",
-      "description": "No description provided.",
-      "parameters": [
-        {
-          "name": "analyzer",
-          "required": false,
-          "annotation": null,
-          "default": null
-        },
-        {
-          "name": "force_recompute",
-          "required": false,
-          "annotation": "bool",
-          "default": false
-        }
-      ]
-    },
-    "update-topic-assignment": {
-      "name": "Update Topic Assignment",
-      "description": "No description provided.",
-      "parameters": []
-    }
-  }
 }

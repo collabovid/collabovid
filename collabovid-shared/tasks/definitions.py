@@ -27,6 +27,13 @@ class PrimitivesHelper:
     def to_string(data_type):
         return PrimitivesHelper.PRIMITIVES_STRINGS[PrimitivesHelper.PRIMITIVES.index(data_type)]
 
+    @staticmethod
+    def from_string(data_type):
+        return PrimitivesHelper.PRIMITIVES[PrimitivesHelper.PRIMITIVES_STRINGS.index(data_type)]
+
+    @staticmethod
+    def convert(data_type, data: str):
+        return PrimitivesHelper.PRIMITIVES[PrimitivesHelper.PRIMITIVES_STRINGS.index(data_type)](data)
 
 # noinspection PyPep8Naming
 def register_task(cls):
@@ -48,9 +55,12 @@ def register_task(cls):
             SERVICE_TASK_DEFINITIONS[cls.task_name()]['parameters'].append({
                 'name': param.name,
                 'required': param.default == inspect.Parameter.empty,
-                'annotation': None if param.annotation == inspect.Parameter.empty or not PrimitivesHelper.is_primitive(
-                    param.annotation) else PrimitivesHelper.to_string(param.annotation),
-                'default': None if param.default == inspect.Parameter.empty else param.default
+                'type':
+                    str(param.annotation.__name__) if not PrimitivesHelper.is_primitive(param.annotation) else  # class name
+                    None if param.annotation == inspect.Parameter.empty else  # No annotation
+                    PrimitivesHelper.to_string(param.annotation),  # Annotation is a primitive
+                'default': None if param.default == inspect.Parameter.empty else param.default,
+                'is_primitive': True if PrimitivesHelper.is_primitive(param.annotation) else False
             })
     return cls
 
@@ -62,6 +72,7 @@ class Runnable:
     Furthermore this class implements some logging helper function that should be used by any task of the Collabovid
     project.
     """
+
     def __init__(self, task: Task, *args, **kwargs):
         self._task = task
 

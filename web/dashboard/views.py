@@ -34,30 +34,37 @@ def select_task(request):
 
 @staff_member_required
 def create_task(request, task_id):
+    service, task_definition = get_task_by_id(task_id)
 
-    task_definition = get_task_by_id(task_id)
-
-    if not task_definition:
-        return HttpResponseNotFound()
-
-    if request.method == 'GET':
-        return render(request, 'dashboard/tasks/task_create.html', {'definition': task_definition})
-    elif request.method == 'POST':
-        task_name = request.POST.get('task')
-        if task_name in AVAILABLE_TASKS.keys():
-
+    if service and task_definition:
+        if request.method == 'GET':
+            return render(request, 'dashboard/tasks/task_create.html',
+                          {'task_id': task_id, 'definition': task_definition})
+        elif request.method == 'POST':
             if settings.TASK_LAUNCHER_LOCAL:
                 task_launcher = LocalTaskLauncher()
             else:
                 task_launcher = KubeTaskLauncher()
 
-            task_config = AVAILABLE_TASKS[task_name]
-            task_launcher.launch_task(name=task_name, config=task_config)
+            task_config = {
+                'service': service,
+                'parameters': []
+            }
+
+            for parameter in task_definition['parameters']:
+                if parameter['is_primitive']:
+                    task_config['parameters'].append(
+                        (
+                            parameter['name'],
+                            parameter['type'],
+                            request.POST.get(parameter['name'], parameter['default'])
+                        )
+                    )
+
+            task_launcher.launch_task(name=task_id, config=task_config)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
-        else:
-            messages.add_message(request, messages.ERROR, 'Unknown Task name')
-            return redirect('task_create')
+
     return HttpResponseNotFound()
 
 

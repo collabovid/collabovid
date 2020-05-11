@@ -12,14 +12,9 @@ with open(TASKS_FILE_NAME, 'r') as f:
 
 
 def get_task_by_id(requested_id):
-    task_definition = None
-
-    for tasks_for_service in AVAILABLE_TASKS.values():
+    for service, tasks_for_service in AVAILABLE_TASKS.items():
         for task_id, definition in tasks_for_service.items():
             if task_id == requested_id:
-                task_definition = definition
-                break
-        if task_definition:
-            break
+                return service, definition
 
-    return task_definition
+    return None, None

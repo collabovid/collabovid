@@ -36,7 +36,7 @@ class CollectTasksCommand(Command):
 
         tasks_output_path = os.path.join(os.getcwd(), "collabovid-shared/tasks/resources/tasks.json")
         with open(tasks_output_path, 'w') as f:
-            json.dump(all_tasks, f)
+            json.dump(all_tasks, f, indent=4)
 
         print("Successfully dumped all tasks to", tasks_output_path)
 

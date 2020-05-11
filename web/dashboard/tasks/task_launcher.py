@@ -34,7 +34,22 @@ class KubeTaskLauncher(TaskLauncher):
 
 class LocalTaskLauncher(TaskLauncher):
     def launch_task(self, name, config):
-        repository = config['repository']
-        script_path = join(settings.BASE_DIR, '..', repository, 'run_task.py')
-        cmd = "python {} {} -u {}".format(script_path, name, 'web')
-        subprocess.run(cmd, shell=True)
+        service = config['service']
+        script_path = join(settings.BASE_DIR, '..', service, 'run_task.py')
+
+        parameter_values = []
+
+        launch_env = os.environ.copy()
+        launch_env.pop("DJANGO_SETTINGS_MODULE")
+
+        for param, param_type, value in config['parameters']:
+
+            if param_type == 'bool':
+                if value == '1':
+                    parameter_values.append("--{}".format(param))
+            else:
+                parameter_values.append("--{} {}".format(param, value))
+
+        cmd = "python {} -u {} {} {}".format(script_path, 'web', name, " ".join(parameter_values))
+        print(cmd)
+        subprocess.Popen(cmd, shell=True, env=launch_env)
