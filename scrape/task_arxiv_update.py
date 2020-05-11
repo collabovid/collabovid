@@ -1,4 +1,4 @@
-from covid19_publications import settings
+from django.conf import settings
 from scrape.updater.arxiv_update import ArxivUpdater
 from tasks.definitions import register_task, Runnable
 

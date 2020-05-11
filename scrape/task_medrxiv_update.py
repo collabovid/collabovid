@@ -1,4 +1,4 @@
-from covid19_publications import settings
+from django.conf import settings
 from scrape.updater.medrxiv_update import MedrxivUpdater
 from tasks.definitions import register_task, Runnable
 
