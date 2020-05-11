@@ -11,6 +11,8 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from scrape.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
+from scrape.static_functions import sanitize_doi, covid_related
+
 
 class UpdateException(Exception):
     def __init__(self, msg):
@@ -27,21 +29,6 @@ class MissingDataError(UpdateException):
 
 class SkipArticle(UpdateException):
     pass
-
-
-def sanitize_doi(doi):
-    return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
-
-
-def _covid_related(db_article):
-    if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
-        return False
-
-    _COVID19_KEYWORDS = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
-
-    return bool(re.search(_COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
-           or bool(re.search(_COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
-           or bool((db_article.data and re.search(_COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))
 
 
 class ArticleDataPoint(object):
@@ -200,7 +187,7 @@ class ArticleDataPoint(object):
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
-            db_article.covid_related = _covid_related(db_article=db_article)
+            db_article.covid_related = covid_related(db_article=db_article)
             db_article.last_scrape = timezone.now()
             db_article.save()
         return db_article, created
