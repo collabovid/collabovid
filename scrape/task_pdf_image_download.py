@@ -1,3 +1,5 @@
+from time import sleep
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from scrape.pdf_extractor import PdfExtractor, PdfExtractError
@@ -29,6 +31,7 @@ class PdfImageDownloader(Runnable):
             if not paper.preview_image and paper.pdf_url:
                 self.log(f"Download PDF preview image for {paper.doi}")
                 try:
+                    sleep(3)
                     pdf_extractor = PdfExtractor(paper.pdf_url)
                     image = pdf_extractor.extract_image()
 
