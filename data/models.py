@@ -23,10 +23,10 @@ class DataSource(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
     @property
-    def priority(datasource):
-        if datasource.name == DataSource.MEDBIORXIV_DATASOURCE_NAME:
+    def priority(self):
+        if self.name == DataSource.MEDBIORXIV_DATASOURCE_NAME:
             return 1
-        elif datasource.name == DataSource.ARXIV_DATASOURCE_NAME:
+        elif self.name == DataSource.ARXIV_DATASOURCE_NAME:
             return 2
         else:
             return 100
