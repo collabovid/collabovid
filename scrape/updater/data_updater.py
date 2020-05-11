@@ -2,7 +2,7 @@ import re
 from time import sleep
 
 from django.db import transaction
-from django.db.utils import IntegrityError
+from django.db.utils import IntegrityError, DataError as DjangoDataError
 from django.utils import timezone
 from datetime import timedelta, date
 
@@ -18,6 +18,12 @@ class UpdateException(Exception):
     def __init__(self, msg):
         self.msg = msg
 
+    def __str__(self):
+        return self.msg
+
+    def __repr__(self):
+        return self.msg
+
 
 class DifferentDataSourceError(UpdateException):
     pass
@@ -28,6 +34,10 @@ class MissingDataError(UpdateException):
 
 
 class SkipArticle(UpdateException):
+    pass
+
+
+class DataError(UpdateException):
     pass
 
 
@@ -174,12 +184,15 @@ class ArticleDataPoint(object):
             if len(authors) > 0:
                 db_article.authors.clear()
             for author in authors:
-                db_author, _ = Author.objects.get_or_create(
-                    first_name=author[1],
-                    last_name=author[0],
-                    data_source=db_article.data_source,
-                )
-                db_article.authors.add(db_author)
+                try:
+                    db_author, _ = Author.objects.get_or_create(
+                        first_name=author[1],
+                        last_name=author[0],
+                        data_source=db_article.data_source,
+                    )
+                    db_article.authors.add(db_author)
+                except DjangoDataError as ex:
+                    raise DataError(f"Author {author[1]} {author[0]}: {ex}")
 
             if self.category_name:
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
@@ -230,12 +243,9 @@ class DataUpdater(object):
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
-            #elf.log(f"Skip: {data_point.doi}: {ex.msg}")
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_already_tracked += 1
-        except IntegrityError as ex:
-            self.log(f"Error: {datapoint.doi}: {ex}")
-            self.n_errors += 1
-        except PdfExtractError as ex:
+        except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
             self.log(f"Error: {datapoint.doi}: {ex}")
             self.n_errors += 1
         return None, None
