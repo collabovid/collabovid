@@ -5,7 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.utils import timezone
 
-from data.models import Author
+from data.models import Author, Paper
 from tasks.definitions import Runnable, register_task
 
 

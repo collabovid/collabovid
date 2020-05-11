@@ -9,6 +9,26 @@ class TaskLauncher():
     def launch_task(self, name, config):
         raise NotImplementedError
 
+    def _generate_command(self, name, config, username, full_path=True):
+
+        service = config['service']
+
+        if full_path:
+            script_path = join(settings.BASE_DIR, '..', service, 'run_task.py')
+        else:
+            script_path = 'run_task.py'
+
+        parameter_values = []
+
+        for param, param_type, value in config['parameters']:
+
+            if param_type == 'bool':
+                if value == '1':
+                    parameter_values.append("--{}".format(param))
+            else:
+                parameter_values.append("--{} {}".format(param, value))
+
+        return "python {} -u {} {} {}".format(script_path, username, name, " ".join(parameter_values))
 
 secret_map = {
     'scrape': ['scrape', 'shared'],
@@ -25,31 +45,23 @@ class KubeTaskLauncher(TaskLauncher):
             registry += '/'
         version = '0.0.0'
         image = registry + repository + ':' + version
+        cmd = self._generate_command(name, config, 'web', full_path=False)
+
         job_object = create_job_object(name=name + '-' + id_generator(size=10), container_image=image,
                                        command=["bash", "-c"],
-                                       args=["export PYTHONPATH=/app:$PYTHONPATH && python run_task.py " + name],
+                                       args=["export PYTHONPATH=/app:$PYTHONPATH && " + cmd],
                                        secret_names=secret_map[repository])
         run_job(job_object)
 
 
 class LocalTaskLauncher(TaskLauncher):
     def launch_task(self, name, config):
-        service = config['service']
-        script_path = join(settings.BASE_DIR, '..', service, 'run_task.py')
-
-        parameter_values = []
 
         launch_env = os.environ.copy()
         launch_env.pop("DJANGO_SETTINGS_MODULE")
 
-        for param, param_type, value in config['parameters']:
+        cmd = self._generate_command(name, config, 'web')
 
-            if param_type == 'bool':
-                if value == '1':
-                    parameter_values.append("--{}".format(param))
-            else:
-                parameter_values.append("--{} {}".format(param, value))
-
-        cmd = "python {} -u {} {} {}".format(script_path, 'web', name, " ".join(parameter_values))
         print(cmd)
+
         subprocess.Popen(cmd, shell=True, env=launch_env)

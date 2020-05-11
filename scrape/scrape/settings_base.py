@@ -15,4 +15,10 @@ INSTALLED_APPS = [
     'tasks'
 ]
 
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
+
 TASK_LOGGING_DB_FLUSH_MINUTES = 1

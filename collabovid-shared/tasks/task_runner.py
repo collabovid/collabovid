@@ -32,6 +32,7 @@ class TaskRunner:
         task.ended_at = timezone.now()
         runnable.flush()
         task.save()
+        print("saved", task)
 
     @staticmethod
     def run_task_async(cls, *args, **kwargs):
