@@ -33,19 +33,16 @@
         let paper_container = $("#{{ result_container_id }}");
         let form = $("#{{ form_id }}");
         let pagination_container = $("#pagination-container");
-        let chose_category_select = $("#chose-category");
-
-        let categorySelectPicker = $('#chose-category').selectpicker();
-
 
         update_pagination_container = pagination_container.paginate({
             searchQuery: search_query,
         });
 
-
         function search_query(data, page, scroll = false, on_success) {
             paper_container.hide();
             indicator.show();
+
+            console.log(data);
 
             data += "&page=" + page;
 
@@ -100,10 +97,10 @@
 
             pagination_container.hide();
 
-            search_query(form.serialize(), 1, false, function () {
-                window.Pagination.last_request = form.serialize();
+            let submission_data = form.serialize();
 
-                let all_selected = $("#chose-category option:not(:selected)").length === 0;
+            search_query(submission_data, 1, false, function () {
+                window.Pagination.last_request = submission_data;
 
                 let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
                     + form.find('input[name!=csrfmiddlewaretoken]').serialize();

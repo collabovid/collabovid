@@ -15,16 +15,16 @@
 
                         <!-- For desktop search -->
 
-                        <div class="input-group input-group-lg mb-3 d-none d-md-flex">
+                        <div class="input-group input-group-lg mb-3">
                             <div class="input-group-prepend border-right-0">
-                                <div class="input-group-text bg-white border-right-0">
+                                <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
                                     <i class="fas fa-search"></i>
                                 </div>
                             </div>
 
                             <input type="text" value="{{ form.search }}" name="search"
                                    class="border-left-0 form-control"
-                                   placeholder="Find papers by their title, content or author">
+                                   placeholder="Find papers by their title or content">
                             <div class="input-group-append">
                                 <button class="btn btn-success" type="submit">Search</button>
                             </div>
@@ -32,16 +32,6 @@
 
                         <!-- End desktop search -->
 
-                        <!-- For mobile search -->
-                        <div class="input-group mb-3 d-flex d-md-none">
-                            <input type="text" value="{{ form.search }}" name="search"
-                                   class="border-left-0 form-control"
-                                   placeholder="Find papers by their title, content or author">
-                            <div class="input-group-append">
-                                <button class="btn btn-success" type="submit">Search</button>
-                            </div>
-                        </div>
-                        <!-- End mobile search -->
 
                     </div>
 

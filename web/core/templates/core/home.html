@@ -171,11 +171,11 @@
                 <div class="col-lg-5 d-lg-block d-none">
                     <div class="row">
                         <div class="col-md-5 col-lg-5 col-sm-2 mx-auto stack stack-fanout">
-                            {% for paper in most_recent_papers %}
-
-                                <img style="max-height: 300px" class="img-fluid"
-                                     src="{% if paper.preview_image %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
-
+                            {% for paper in most_recent_papers reversed %}
+                                <div style="height: 240px; background: white">
+                                    <img style="max-height: 200px" class="img-fluid"
+                                         src="{% if paper.preview_image %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
+                                </div>
                             {% endfor %}
                         </div>
                     </div>
