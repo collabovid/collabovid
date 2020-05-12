@@ -126,6 +126,9 @@ def search(request):
         search_query = request.POST.get("search", "").strip()
         search_request = SearchRequestHelper(start_date, end_date, search_query)
 
+        if search_request.error:
+            return render(request, "core/partials/_search_result_error.html")
+
         if tab == "statistics":
             statistics = Statistics(search_request.papers)
             return render(request, "core/partials/statistics/_statistics.html", {'statistics': statistics})

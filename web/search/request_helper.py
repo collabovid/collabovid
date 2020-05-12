@@ -12,6 +12,7 @@ class SearchRequestHelper:
         logger = logging.getLogger(__name__)
 
         self._response = None
+        self._error = False
 
         try:
             response = requests.get(settings.SEARCH_SERVICE_URL, params={
@@ -26,18 +27,26 @@ class SearchRequestHelper:
 
         except requests.exceptions.Timeout:
             logger.error("Search Request Connection Timeout")
+            self._error = True
         except requests.exceptions.RequestException as e:
             logger.error("Some unknown request exception occured", e)
-            raise
+            self._error = True
 
-        self._papers = Paper.objects.filter(pk__in=self._response.keys())
+
+        if self._response is None:
+            self._error = True
+        else:
+            self._papers = Paper.objects.filter(pk__in=self._response.keys())
+
+    @property
+    def error(self):
+        return self._error
 
     @property
     def papers(self):
         return self._papers
 
     def paginator_ordered_by(self, criterion, page_count=10):
-
 
         if criterion == Paper.SORTED_BY_TOPIC_SCORE:
             paginator = Paginator(self.papers.order_by("-topic_score"), page_count)

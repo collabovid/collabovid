@@ -12,6 +12,6 @@ def search(request):
         search_engine = get_default_search_engine()
 
         search_result = search_engine.search(search_query, start_date=start_date,
-                                             end_date=end_date, score_min=score_threshold)
+                                             end_date=end_date, score_min=score_min)
 
         return JsonResponse(search_result)
