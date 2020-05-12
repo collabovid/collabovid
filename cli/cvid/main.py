@@ -8,6 +8,7 @@ from cvid.commands.aws_registry_login import AWSRegistryLoginCommand
 from cvid.commands.cronjobs import CronJobsCommand
 from cvid.commands.collect_tasks import CollectTasksCommand
 from cvid.commands.upload_models import UploadModelsCommand
+from cvid.commands.release import ReleaseCommand
 import json
 from os.path import join, dirname, realpath
 import os
@@ -33,7 +34,7 @@ def main():
     args = {'config': config, 'user_config': user_config}
     commands = [UseCommand(**args), BuildCommand(**args), PushCommand(**args),
                 ClusterCommand(**args), JobsCommand(**args), AWSRegistryLoginCommand(**args),
-                CronJobsCommand(**args), CollectTasksCommand(**args), UploadModelsCommand(**args)]
+                CronJobsCommand(**args), CollectTasksCommand(**args), UploadModelsCommand(**args), ReleaseCommand(**args)]
 
     parser = argparse.ArgumentParser(prog='cvid')
     subparsers = parser.add_subparsers()

@@ -10,8 +10,15 @@ class BuildCommand(CommandWithServices):
                 "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
 
             tag = self.generate_tag()
-            self.run_shell_command(
-                "DOCKER_BUILDKIT=1 docker build -t {}:{} -f docker/{}.Dockerfile .".format(service, tag, service))
+            image = f"{service}:{tag}"
+            self.run_shell_command(f"DOCKER_BUILDKIT=1 docker build -t {image} -f docker/{service}.Dockerfile .")
+            if args.delete_old:
+                self.run_shell_command(
+                    f"docker rmi $(docker image ls --filter reference=\"*/{service}\" --filter reference=\"{service}\" --format '{{{{.Repository}}}}:{{{{.Tag}}}}' | grep -v '...:{tag}')")
+
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument('--delete-old', action='store_true')
 
     def help(self):
         return "Build a repository and tag it with the current version."

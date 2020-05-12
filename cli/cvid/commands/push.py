@@ -6,11 +6,13 @@ class PushCommand(CommandWithServices):
         super().run(args)
         for service, config in args.services:
             tag = self.generate_tag()
-            self.print_info("Tagging Image: {}:{}".format(service, tag))
             registry = self.current_env_config()['registry']
-            self.run_shell_command("docker tag {}:{} {}/{}:{}".format(service, tag, registry, service, tag))
-            self.print_info("Pushing image: {}:{}".format(service, tag))
-            self.run_shell_command("docker push {}/{}:{}".format(registry, service, tag))
+            local_image = f"{service}:{tag}"
+            registry_image = f"{registry}/{local_image}"
+            self.run_shell_command(f"docker tag {local_image} {registry_image}")
+            self.print_info(f"Pushing image: {local_image}")
+            self.run_shell_command(f"docker push {registry_image}")
+            self.run_shell_command(f"docker rmi {registry_image}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

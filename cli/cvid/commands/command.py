@@ -16,9 +16,12 @@ class Command:
     def add_arguments(self, parser):
         pass
 
-    def run_shell_command(self, cmd, cwd=None):
+    def run_shell_command(self, cmd, cwd=None, collect_output=False):
         self.print_info("Running: {}".format(cmd))
-        return subprocess.run(cmd, shell=True, cwd=cwd, )
+        if collect_output:
+            return subprocess.run(cmd, shell=True, cwd=cwd, stdout=PIPE)
+        else:
+            subprocess.run(cmd, shell=True, cwd=cwd)
 
     def print_info(self, info):
         ansi_cyan = "\033[1;36m"
