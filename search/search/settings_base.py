@@ -112,5 +112,3 @@ STATIC_URL = '/static/'
 STATIC_ROOT= 'static'
 
 MODELS_BASE_DIR = '/models'
-
-TASK_LOGGING_DB_FLUSH_MINUTES = 5

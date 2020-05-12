@@ -9,7 +9,7 @@ if __name__ == "__main__":
     django.setup()
 
     # noinspection PyUnresolvedReferences
-    from scrape.src.tasks import *
+    from src.tasks import *
 
     from tasks.task_runner import CommandLineTaskRunner
     CommandLineTaskRunner.run_task()

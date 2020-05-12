@@ -95,7 +95,7 @@ class Runnable:
             print(message)
 
         if flush or (
-                datetime.now() - self.__log_updated_at).total_seconds() / 60 > settings.TASK_LOGGING_DB_FLUSH_MINUTES:
+                datetime.now() - self.__log_updated_at).total_seconds() > settings.TASK_LOGGING_DB_FLUSH_SECONDS:
             self.flush()
 
     def run(self):
@@ -106,6 +106,7 @@ class Runnable:
             self._task.log += "\n".join(self.__message_buffer) + "\n"
             self._task.save()
             self.__log_updated_at = datetime.now()
+            self.__message_buffer.clear()
 
     @staticmethod
     def task_name():

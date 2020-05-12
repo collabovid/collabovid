@@ -1,84 +1,45 @@
 {
     "scrape": {
-        "refresh-citations": {
-            "name": "Refresh Citations",
-            "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "only_new",
-                    "required": false,
-                    "type": "bool",
-                    "default": false,
-                    "is_primitive": true
-                },
-                {
-                    "name": "count",
-                    "required": false,
-                    "type": "int",
-                    "default": null,
-                    "is_primitive": true
-                }
-            ]
-        },
-        "scrape-articles": {
-            "name": "Scrape Articles",
-            "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "update_unknown_category",
-                    "required": false,
-                    "type": "bool",
-                    "default": true,
-                    "is_primitive": true
-                }
-            ]
-        },
-        "update-articles": {
-            "name": "Update Articles",
-            "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "count",
-                    "required": false,
-                    "type": "int",
-                    "default": 200,
-                    "is_primitive": true
-                }
-            ]
-        },
-        "delete-revoked-articles": {
-            "name": "Delete Revoked Articles",
+        "update-medbiorxiv": {
+            "name": "Update Medbiorxiv",
             "description": "No description provided.",
             "parameters": []
         },
-        "scrape-pdf-content": {
-            "name": "Scrape Pdf Content",
+        "get-new-medbiorxiv": {
+            "name": "Get New Medbiorxiv",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "update-arxiv": {
+            "name": "Update Arxiv",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "get-new-arxiv": {
+            "name": "Get New Arxiv",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "scrape": {
+            "name": "Scrape",
             "description": "No description provided.",
             "parameters": [
                 {
-                    "name": "papers",
+                    "name": "started_by",
                     "required": false,
                     "type": "_empty",
-                    "default": null,
+                    "default": "",
                     "is_primitive": false
                 }
             ]
         },
-        "scrape-pdf-image": {
-            "name": "Scrape Pdf Image",
+        "check-covid-related": {
+            "name": "Check Covid Related",
             "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "papers",
-                    "required": false,
-                    "type": "_empty",
-                    "default": null,
-                    "is_primitive": false
-                }
-            ]
+            "parameters": []
         },
-        "scrape-pdf": {
-            "name": "Scrape Pdf",
+        "download-pdf-images": {
+            "name": "Download Pdf Images",
             "description": "No description provided.",
             "parameters": [
                 {
@@ -87,20 +48,6 @@
                     "type": "_empty",
                     "default": null,
                     "is_primitive": false
-                },
-                {
-                    "name": "scrape_content",
-                    "required": false,
-                    "type": "bool",
-                    "default": true,
-                    "is_primitive": true
-                },
-                {
-                    "name": "scrape_images",
-                    "required": false,
-                    "type": "bool",
-                    "default": true,
-                    "is_primitive": true
                 }
             ]
         }

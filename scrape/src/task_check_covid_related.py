@@ -1,5 +1,5 @@
 from data.models import Paper
-from scrape.src.static_functions import covid_related
+from src.static_functions import covid_related
 from tasks.definitions import register_task, Runnable
 
 @register_task

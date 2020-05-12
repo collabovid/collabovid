@@ -1,7 +1,7 @@
 import os
 from tasks.task_runner import TaskRunner
-from scrape.src.task_medrxiv_update import MedBiorxivNewArticlesTask
-from scrape.src.task_arxiv_update import ArxivNewArticlesTask
+from src.task_medrxiv_update import MedBiorxivNewArticlesTask
+from src.task_arxiv_update import ArxivNewArticlesTask
 
 #from analyze.update_topic_assignment import UpdateTopicAssignment
 #from analyze.setup_vectorizer import SetupVectorizer

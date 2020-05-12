@@ -1,17 +1,16 @@
-import re
 from time import sleep
 
 from django.db import transaction
 from django.db.utils import IntegrityError, DataError as DjangoDataError
 from django.utils import timezone
-from datetime import timedelta, date
+from datetime import timedelta
 
 from data.models import Author, Category, Paper, PaperHost, DataSource, PaperData
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor, PdfExtractError
+from src.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
-from scrape.static_functions import sanitize_doi, covid_related
+from src.static_functions import sanitize_doi, covid_related
 
 
 class UpdateException(Exception):

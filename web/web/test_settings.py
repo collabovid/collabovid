@@ -1,4 +1,5 @@
 from .prod_settings import *
+from collabovid_settings.tasks_settings import *
 
 DEBUG=True
 

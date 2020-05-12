@@ -2,8 +2,8 @@ from time import sleep
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
-from scrape.src.pdf_extractor import PdfExtractor, PdfExtractError
-from scrape.src.static_functions import sanitize_doi
+from src.pdf_extractor import PdfExtractor, PdfExtractError
+from src.static_functions import sanitize_doi
 from tasks.definitions import register_task, Runnable
 
 from data.models import Paper

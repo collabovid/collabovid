@@ -5,9 +5,7 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from datetime import timedelta
 from django.utils import timezone
-from dashboard.tasks.tasks import get_available_tasks
-from dashboard.tasks.task_launcher import KubeTaskLauncher, LocalTaskLauncher
-from django.conf import settings
+from tasks.launcher.task_launcher import get_task_launcher
 
 from tasks.load import AVAILABLE_TASKS, get_task_by_id
 
@@ -41,10 +39,8 @@ def create_task(request, task_id):
             return render(request, 'dashboard/tasks/task_create.html',
                           {'task_id': task_id, 'definition': task_definition})
         elif request.method == 'POST':
-            if settings.TASK_LAUNCHER_LOCAL:
-                task_launcher = LocalTaskLauncher()
-            else:
-                task_launcher = KubeTaskLauncher()
+
+            task_launcher = get_task_launcher()
 
             task_config = {
                 'service': service,
@@ -54,11 +50,11 @@ def create_task(request, task_id):
             for parameter in task_definition['parameters']:
                 if parameter['is_primitive']:
                     task_config['parameters'].append(
-                        (
-                            parameter['name'],
-                            parameter['type'],
-                            request.POST.get(parameter['name'], parameter['default'])
-                        )
+                        {
+                            'name': parameter['name'],
+                            'type': parameter['type'],
+                            'value': request.POST.get(parameter['name'], parameter['default'])
+                        }
                     )
 
             task_launcher.launch_task(name=task_id, config=task_config)

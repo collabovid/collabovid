@@ -8,7 +8,7 @@ from django.utils.dateparse import parse_datetime
 from nameparser import HumanName
 
 from data.models import DataSource
-from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
+from src.updater.data_updater import ArticleDataPoint, DataUpdater
 
 _ARXIV_DATA_PRIORITY = 2
 _ARXIV_PAPERHOST_NAME = 'arXiv'

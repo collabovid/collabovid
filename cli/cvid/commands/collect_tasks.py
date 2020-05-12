@@ -22,7 +22,7 @@ class CollectTasksCommand(Command):
 
             service_path = os.path.join(os.getcwd(), service)
 
-            print(self.run_shell_command("python run_task.py --list", service_path))
+            print(self.run_shell_command("python run_task.py --list", service_path, collect_output=True))
 
             tasks_json_path = os.path.join(service_path, 'tasks.json')
 

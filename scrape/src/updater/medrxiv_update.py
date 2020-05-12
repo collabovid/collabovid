@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from data.models import DataSource
 from datetime import datetime
-from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
+from src.updater.data_updater import ArticleDataPoint, DataUpdater
 
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'

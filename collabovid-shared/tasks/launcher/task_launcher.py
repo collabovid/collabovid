@@ -1,15 +1,24 @@
-from dashboard.tasks.kube_job_utils import create_job_object, run_job, id_generator
+from tasks.launcher.kube_job_utils import create_job_object, run_job, id_generator
 import os
 from os.path import join
-from django.conf import settings
 import subprocess
+from django.conf import settings
 
 
-class TaskLauncher():
+class TaskLauncher:
     def launch_task(self, name, config):
         raise NotImplementedError
 
-    def _generate_command(self, name, config, username, full_path=True):
+    @staticmethod
+    def _generate_command(name, config, username, full_path=True):
+        """
+        Generates the python command for a given configuration.
+        :param name:
+        :param config:
+        :param username:
+        :param full_path:
+        :return:
+        """
 
         service = config['service']
 
@@ -20,15 +29,16 @@ class TaskLauncher():
 
         parameter_values = []
 
-        for param, param_type, value in config['parameters']:
+        for parameter in config['parameters']:
 
-            if param_type == 'bool':
-                if value == '1':
-                    parameter_values.append("--{}".format(param))
+            if parameter['type'] == 'bool':
+                if parameter['value'] == '1':
+                    parameter_values.append("--{}".format(parameter['name']))
             else:
-                parameter_values.append("--{} {}".format(param, value))
+                parameter_values.append("--{} {}".format(parameter['name'], parameter['value']))
 
         return "python {} -u {} {} {}".format(script_path, username, name, " ".join(parameter_values))
+
 
 secret_map = {
     'scrape': ['scrape', 'shared'],
@@ -45,7 +55,7 @@ class KubeTaskLauncher(TaskLauncher):
             registry += '/'
         version = '0.0.0'
         image = registry + repository + ':' + version
-        cmd = self._generate_command(name, config, 'web', full_path=False)
+        cmd = TaskLauncher._generate_command(name, config, 'web', full_path=False)
 
         job_object = create_job_object(name=name + '-' + id_generator(size=10), container_image=image,
                                        command=["bash", "-c"],
@@ -56,12 +66,19 @@ class KubeTaskLauncher(TaskLauncher):
 
 class LocalTaskLauncher(TaskLauncher):
     def launch_task(self, name, config):
-
         launch_env = os.environ.copy()
         launch_env.pop("DJANGO_SETTINGS_MODULE")
 
-        cmd = self._generate_command(name, config, 'web')
-
-        print(cmd)
-
+        cmd = TaskLauncher._generate_command(name, config, 'web')
         subprocess.Popen(cmd, shell=True, env=launch_env)
+
+
+def get_task_launcher():
+    """
+    Returns the correct task launcher for the given environment.
+    :return:
+    """
+    if settings.TASK_LAUNCHER_LOCAL:
+        return LocalTaskLauncher()
+    else:
+        return KubeTaskLauncher()

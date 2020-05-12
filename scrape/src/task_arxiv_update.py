@@ -1,5 +1,5 @@
 from django.conf import settings
-from scrape.updater.arxiv_update import ArxivUpdater
+from src.updater.arxiv_update import ArxivUpdater
 from tasks.definitions import register_task, Runnable
 
 
