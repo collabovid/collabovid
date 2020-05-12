@@ -15,7 +15,6 @@ class PretrainedLDA(TextVectorizer):
                  vectorizer_file=os.path.join(LDA_BASE_DIR, 'vectorizer.pkl'),
                  matrix_file_name=os.path.join(PAPER_MATRIX_BASE_DIR, 'lda.pkl'),
                  *args, **kwargs):
-
         super(PretrainedLDA, self).__init__(matrix_file_name=matrix_file_name, *args, **kwargs)
 
         self.nlp = en_core_sci_md.load(disable=["tagger", "parser", "ner"])

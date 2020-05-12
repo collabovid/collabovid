@@ -13,8 +13,8 @@ class SearchEngine:
         self.search_pipeline = search_pipeline
 
     @staticmethod
-    def filter_papers(categories, start_date=None, end_date=None, topics=None):
-        papers = Paper.objects.filter(Q(category__in=categories))
+    def filter_papers(start_date=None, end_date=None, topics=None):
+        papers = Paper.objects.all()
 
         if start_date:
             papers = papers.filter(published_at__gte=start_date)
@@ -26,10 +26,10 @@ class SearchEngine:
             papers = papers.filter(topic__in=topics)
         return papers
 
-    def search(self, query: str, categories: List, start_date=None, end_date=None, topics=None, score_min=0.6):
+    def search(self, query: str, start_date=None, end_date=None, topics=None, score_min=0.6):
         paper_score_table = defaultdict(int)
 
-        papers = SearchEngine.filter_papers(categories, start_date, end_date, topics)
+        papers = SearchEngine.filter_papers(start_date, end_date, topics)
 
         for search_component in self.search_pipeline:
             paper_results = search_component.find(query, papers)

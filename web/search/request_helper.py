@@ -8,17 +8,17 @@ from search.paginator import ScoreSortPaginator
 
 class SearchRequestHelper:
 
-    def __init__(self, categories, start_date, end_date, search_query):
+    def __init__(self, start_date, end_date, search_query, score_min=0.6):
         logger = logging.getLogger(__name__)
 
         self._response = None
 
         try:
             response = requests.get(settings.SEARCH_SERVICE_URL, params={
-                'categories': categories,
                 'start_date': start_date,
                 'end_date': end_date,
-                'search': search_query
+                'search': search_query,
+                'score_min': score_min
             })
             response.raise_for_status()
 

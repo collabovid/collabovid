@@ -1,32 +1,4 @@
 {% load static %}
-<div class="row">
-    <div class="col-12">
-        <label for="chose-category">Choose a category:</label>
-    </div>
-</div>
-<div class="row align-items-center">
-    <div class="col-md-9 col-sm-12">
-        <select name="categories"
-                id="chose-category"
-                class="selectpicker"
-                data-live-search="true"
-                multiple="multiple">
-            {% for category in categories %}
-                <option value="{{ category.name }}"
-                        {% if category.name in form.categories %}selected{% endif %}>{{ category.name }}</option>
-            {% endfor %}
-        </select>
-    </div>
-
-    <div class="col-md-3 col-sm-12 px-0 py-0">
-        <a href="#"
-           id="toggle-category-select"
-           class="small delete"
-           data-text-switch="Select all">
-            Deselect all
-        </a>
-    </div>
-</div>
 
 <div class="row mt-3">
     <div class="col-12">
@@ -63,30 +35,13 @@
         let pagination_container = $("#pagination-container");
         let chose_category_select = $("#chose-category");
 
+        let categorySelectPicker = $('#chose-category').selectpicker();
+
+
         update_pagination_container = pagination_container.paginate({
             searchQuery: search_query,
         });
 
-        $("#toggle-category-select").click(function (e) {
-            e.preventDefault();
-
-            let new_text = $(this).data("text-switch");
-            let old_text = $(this).html();
-
-
-            if ($(this).hasClass('delete')) {
-                chose_category_select.find('option').attr("selected", false);
-                $(this).removeClass('delete').addClass('add');
-            } else if ($(this).hasClass('add')) {
-                chose_category_select.find('option').attr("selected", "selected");
-                $(this).removeClass('add').addClass('delete');
-            }
-
-            $(this).data("text-switch", old_text);
-            $(this).html(new_text);
-
-            chose_category_select.selectpicker('refresh');
-        });
 
         function search_query(data, page, scroll = false, on_success) {
             paper_container.hide();
@@ -121,7 +76,6 @@
             });
         }
 
-        $('#chose-category').selectpicker();
 
         $('#start-date').datepicker({
             uiLibrary: 'bootstrap4',
@@ -151,16 +105,8 @@
 
                 let all_selected = $("#chose-category option:not(:selected)").length === 0;
 
-                let categories_serialized = null;
-
-                if (all_selected) {
-                    categories_serialized = $("#chose-category").attr("name") + "=all";
-                } else {
-                    categories_serialized = $("#chose-category").serialize();
-                }
-
                 let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
-                    + form.find('input[name!=csrfmiddlewaretoken]').serialize() + "&" + categories_serialized;
+                    + form.find('input[name!=csrfmiddlewaretoken]').serialize();
                 window.history.pushState({path: url}, '', url);
 
                 window.formAjaxAllowed = true;
