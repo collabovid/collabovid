@@ -2,9 +2,11 @@ from collections import defaultdict
 from django.db.models import Q
 from data.models import Paper
 from typing import List
-from search.search import Search, PaperResult
+from search.search import Search
 import logging
 from django.core.paginator import Paginator
+from search.author_search import AuthorSearch
+from search.doi_search import DoiSearch
 from search.exact_search import ExactSearch
 from search.keyword_search import KeywordSearch
 from search.semantic_search import SemanticSearch
@@ -86,4 +88,4 @@ class SearchEngine:
 
 
 def get_default_search_engine():
-    return SearchEngine([ExactSearch(), KeywordSearch(), SemanticSearch()])
+    return SearchEngine([DoiSearch(), ExactSearch(), KeywordSearch(), SemanticSearch()])
