@@ -5,7 +5,6 @@ from typing import List
 from search.search import Search
 import logging
 from django.core.paginator import Paginator
-from search.author_search import AuthorSearch
 from search.doi_search import DoiSearch
 from search.exact_search import ExactSearch
 from search.keyword_search import KeywordSearch
