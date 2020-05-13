@@ -17,7 +17,7 @@ spec:
       volumes:
         - name: vol
           hostPath:
-            path: /home/jonas/kubedata/postgres/
+            path: /usr/local/kubedata/postgres
       containers:
         - name: postgres
           image: postgres:12
