@@ -65,9 +65,9 @@ class ReleaseCommand(Command):
         release_dict['new_version'] = self.generate_tag()
 
         # Applying to cluster
-        self.call_command('cluster apply --all')
+        self.call_command('cluster apply --all --no-config-build')
         if args.restart:
-            self.call_command('cluster restart --all')
+            self.call_command('cluster restart --all --no-config-build')
 
         self.save_release_file(release_dict)
 

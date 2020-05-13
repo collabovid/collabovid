@@ -1,4 +1,4 @@
-from tasks.launcher.kube_job_utils import create_job_object, run_job, id_generator
+from tasks.launcher.kube_job_utils import create_job_object, run_job, id_generator, get_deployment_version
 import os
 from os.path import join
 import subprocess
@@ -46,21 +46,32 @@ secret_map = {
     'search': ['search', 'shared']
 }
 
+volume_map = {
+    'scrape': [],
+    'web': [],
+    'search': [{
+        # Todo make configurable
+        'host_path': '/usr/local/kubedata/models',
+        'mount_path': '/models'
+    }]
+}
+
 
 class KubeTaskLauncher(TaskLauncher):
     def launch_task(self, name, config, block=False):
-        repository = config['repository']
+        service = config['service']
         registry = os.getenv('REGISTRY', 'localhost:32000')
         if len(registry) > 0:
             registry += '/'
-        version = '0.0.0'
-        image = registry + repository + ':' + version
+        # we assume that the web deployment holds te newest version
+        version = get_deployment_version('web')
+        image = registry + service + ':' + version
         cmd = TaskLauncher._generate_command(name, config, full_path=False)
 
         job_object = create_job_object(name=name + '-' + id_generator(size=10), container_image=image,
                                        command=["bash", "-c"],
                                        args=["export PYTHONPATH=/app:$PYTHONPATH && " + cmd],
-                                       secret_names=secret_map[repository])
+                                       secret_names=secret_map[service], volume_mappings=volume_map[service])
         run_job(job_object, block=block)
 
 
