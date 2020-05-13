@@ -4,11 +4,10 @@ from .command import Command, CommandWithServices
 class BuildCommand(CommandWithServices):
     def run(self, args):
         super().run(args)
+        self.run_shell_command(
+            "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
         for service, config in args.services:
             self.print_info("Building service: {}".format(service))
-            self.run_shell_command(
-                "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
-
             tag = self.generate_tag()
             image = f"{service}:{tag}"
             self.run_shell_command(f"DOCKER_BUILDKIT=1 docker build -t {image} -f docker/{service}.Dockerfile .")

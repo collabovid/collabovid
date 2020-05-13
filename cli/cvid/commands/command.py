@@ -16,8 +16,13 @@ class Command:
     def add_arguments(self, parser):
         pass
 
-    def run_shell_command(self, cmd, cwd=None, collect_output=False):
-        self.print_info("Running: {}".format(cmd))
+    @property
+    def kubectl(self):
+        return self.current_env_config()['kubectl']
+
+    def run_shell_command(self, cmd, cwd=None, collect_output=False, print_command=True):
+        if print_command:
+            self.print_info("Running: {}".format(cmd))
         if collect_output:
             return subprocess.run(cmd, shell=True, cwd=cwd, stdout=PIPE)
         else:
@@ -31,7 +36,28 @@ class Command:
     def current_env(self):
         return self.config['env']
 
-    def build_kubernetes_config(self):
+    def help(self):
+        return ""
+
+    def current_env_config(self):
+        return self.config['envs'][self.current_env()]
+
+    @property
+    def services(self):
+        return self.config['services']
+
+    def name(self):
+        return ""
+
+    def call_command(self, cmd, *args, **kwargs):
+        return self.run_shell_command(f'cvid {cmd}', *args, **kwargs)
+
+    def generate_tag(self):
+        result = subprocess.run("echo $(date +%Y%m%d).$(git log -1 --pretty=%h)", shell=True, stdout=PIPE)
+        tag = result.stdout.decode('utf-8').strip()
+        return tag
+
+    def build_kubernetes_config(self, image_tag=None, customize_callback=None):
         env = self.current_env()
         kubernetes_dir = join(os.getcwd(), 'k8s')
         if not exists(kubernetes_dir):
@@ -41,12 +67,14 @@ class Command:
         kubernetes_env_dir = join(kubernetes_dir, 'overlays', env)
         self.run_shell_command('mkdir -p {} && cp -r {} {}'.format(temp_dir, kubernetes_env_dir, temp_dir))
         for repo, config in self.config['services'].items():
-            tag = self.generate_tag()
+            if image_tag is None:
+                image_tag = self.generate_tag()
             registry = self.current_env_config()['registry']
             if len(registry) > 0:
                 registry += '/'
             self.run_shell_command(
-                '(cd {} && kustomize edit set image {}={}{}:{})'.format(join(temp_dir, env), repo, registry, repo, tag))
+                '(cd {} && kustomize edit set image {}={}{}:{})'.format(join(temp_dir, env), repo, registry, repo,
+                                                                        image_tag))
 
         options_dir = join(kubernetes_dir, 'options')
         for option in self.current_env_config()['optionFiles']:
@@ -57,22 +85,13 @@ class Command:
             self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option)))
             self.run_shell_command(
                 "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option)))
+
+        # allow caller to add further customization
+        if customize_callback is not None:
+            customize_callback(join(temp_dir, env))
+
         self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env))
         self.run_shell_command('rm -rf {}'.format(temp_dir))
-
-    def help(self):
-        return ""
-
-    def current_env_config(self):
-        return self.config['envs'][self.current_env()]
-
-    def name(self):
-        return ""
-
-    def generate_tag(self):
-        result = subprocess.run("echo $(date +%Y%m%d).$(git log -1 --pretty=%h)", shell=True, stdout=PIPE)
-        tag = result.stdout.decode('utf-8').strip()
-        return tag
 
 
 class CommandWithServices(Command):
@@ -88,3 +107,47 @@ class CommandWithServices(Command):
         group.add_argument('--all', action='store_true')
         group.add_argument('-s', '--services', nargs='*', choices=self.config['services'].keys(),
                            help="Specify multiple values of {} or use all".format(self.config['services'].keys()))
+
+
+class KubectlCommand(Command):
+    def run(self, args):
+        if not args.no_config_build:
+            self.build_kubernetes_config(image_tag=args.tag)
+
+    def add_arguments(self, parser):
+        parser.add_argument('-t', '--tag', default=None,
+                            help="Specifies the image tag that should be used when building the cluster config")
+        parser.add_argument('--no-config-build', action='store_true')
+
+    @property
+    def k8s_dist_path(self):
+        return join('k8s', 'dist')
+
+    @property
+    def k8s_dist_env_path(self):
+        return join(self.k8s_dist_path, self.current_env())
+
+
+class AbstractJobsCommand(KubectlCommand):
+    def run(self, args):
+        super().run(args)
+        job_identifier = self.get_job_identifier()
+        job_file = join(self.k8s_dist_path, f"{job_identifier}s", self.current_env(),
+                        f'{job_identifier}--{args.name}.yml')
+        if args.command == 'run':
+            self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
+            self.run_shell_command(f"{self.kubectl} apply -f {job_file}")
+        elif args.command == 'logs':
+            self.run_shell_command(f"{self.kubectl} logs  --tail=-1 --selector={job_identifier}-name={args.name}")
+        elif args.command == 'status':
+            self.run_shell_command(f"{self.kubectl} get pods --selector={job_identifier}-name={args.name}")
+        elif args.command == 'delete':
+            self.run_shell_command(f"{self.kubectl} delete job {args.name}")
+
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument('command', choices=['run', 'logs', 'status', 'delete'])
+        parser.add_argument('name')
+
+    def get_job_identifier(self):
+        return ''

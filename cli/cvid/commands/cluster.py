@@ -1,4 +1,4 @@
-from .command import Command
+from .command import Command, KubectlCommand
 import os
 from os.path import join
 
@@ -10,26 +10,26 @@ commands = {
 }
 
 
-class ClusterCommand(Command):
+class ClusterCommand(KubectlCommand):
     def run(self, args):
+        super().run(args)
         if args.name and not args.resource:
             print('No resource type supplied. Use -r <resource>. Exiting.')
             return
-        self.build_kubernetes_config()
         path = ''
-        env_path = join('k8s', 'dist', self.current_env())
         if not args.resource and args.all:
-            path = '-f ' + env_path
+            path = '-f ' + self.k8s_dist_env_path
         elif args.resource:
             if args.all:
-                for file in os.listdir(env_path):
+                for file in os.listdir(self.k8s_dist_env_path):
                     if file.startswith(args.resource):
-                        path += " -f {}".format(join(env_path, file))
+                        path += f" -f {join(self.k8s_dist_env_path, file)}"
             elif args.name:
-                path = '-f ' + join(env_path, '{}--{}.yml').format(args.resource, args.name)
-        self.run_shell_command("{} {} {}".format(self.current_env_config()['kubectl'], commands[args.command], path))
+                path = '-f ' + join(self.k8s_dist_env_path, f"{args.resource}--{args.name}.yml")
+        self.run_shell_command(f"{self.kubectl} {commands[args.command]} {path}")
 
     def add_arguments(self, parser):
+        super().add_arguments(parser)
         parser.add_argument('command', choices=commands.keys())
         parser.add_argument('-r', '--resource', choices=['service', 'deployment', 'secret', 'cronjob', 'daemonset'])
         group = parser.add_mutually_exclusive_group(required=True)
