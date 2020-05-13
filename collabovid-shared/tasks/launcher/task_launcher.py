@@ -6,11 +6,11 @@ from django.conf import settings
 
 
 class TaskLauncher:
-    def launch_task(self, name, config):
+    def launch_task(self, name, config, block=False):
         raise NotImplementedError
 
     @staticmethod
-    def _generate_command(name, config, username, full_path=True):
+    def _generate_command(name, config, full_path=True):
         """
         Generates the python command for a given configuration.
         :param name:
@@ -37,7 +37,7 @@ class TaskLauncher:
             else:
                 parameter_values.append("--{} {}".format(parameter['name'], parameter['value']))
 
-        return "python {} -u {} {} {}".format(script_path, username, name, " ".join(parameter_values))
+        return "python {} -u {} {} {}".format(script_path, config['started_by'], name, " ".join(parameter_values))
 
 
 secret_map = {
@@ -48,29 +48,33 @@ secret_map = {
 
 
 class KubeTaskLauncher(TaskLauncher):
-    def launch_task(self, name, config):
+    def launch_task(self, name, config, block=False):
         repository = config['repository']
         registry = os.getenv('REGISTRY', 'localhost:32000')
         if len(registry) > 0:
             registry += '/'
         version = '0.0.0'
         image = registry + repository + ':' + version
-        cmd = TaskLauncher._generate_command(name, config, 'web', full_path=False)
+        cmd = TaskLauncher._generate_command(name, config, full_path=False)
 
         job_object = create_job_object(name=name + '-' + id_generator(size=10), container_image=image,
                                        command=["bash", "-c"],
                                        args=["export PYTHONPATH=/app:$PYTHONPATH && " + cmd],
                                        secret_names=secret_map[repository])
-        run_job(job_object)
+        run_job(job_object, block=block)
 
 
 class LocalTaskLauncher(TaskLauncher):
-    def launch_task(self, name, config):
+    def launch_task(self, name, config, block=False):
         launch_env = os.environ.copy()
         launch_env.pop("DJANGO_SETTINGS_MODULE")
 
-        cmd = TaskLauncher._generate_command(name, config, 'web')
-        subprocess.Popen(cmd, shell=True, env=launch_env)
+        cmd = TaskLauncher._generate_command(name, config)
+
+        if block:
+            subprocess.run(cmd, shell=True, env=launch_env)
+        else:
+            subprocess.Popen(cmd, shell=True, env=launch_env)
 
 
 def get_task_launcher():

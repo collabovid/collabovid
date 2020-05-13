@@ -6,7 +6,7 @@ def search(request):
     if request.method == "GET":
         start_date = request.GET.get("published_at_start", "")
         end_date = request.GET.get("published_at_end", "")
-        score_min = float(request.GET.get("score_min", ""))
+        score_min = float(request.GET.get("score_min", "0"))
 
         search_query = request.GET.get("search", "").strip()
         search_engine = get_default_search_engine()

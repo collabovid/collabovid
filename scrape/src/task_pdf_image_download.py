@@ -10,13 +10,13 @@ from data.models import Paper
 
 
 @register_task
-class PdfImageDownloader(Runnable):
+class PdfImageDownloadTask(Runnable):
     @staticmethod
     def task_name():
         return "download-pdf-images"
 
     def __init__(self, papers=None, *args, **kwargs):
-        super(PdfImageDownloader, self).__init__(*args, **kwargs)
+        super(PdfImageDownloadTask, self).__init__(*args, **kwargs)
 
         if papers:
             self.papers = papers

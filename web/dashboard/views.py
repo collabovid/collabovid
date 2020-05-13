@@ -44,7 +44,8 @@ def create_task(request, task_id):
 
             task_config = {
                 'service': service,
-                'parameters': []
+                'parameters': [],
+                'started_by': request.user.username
             }
 
             for parameter in task_definition['parameters']:
@@ -57,7 +58,7 @@ def create_task(request, task_id):
                         }
                     )
 
-            task_launcher.launch_task(name=task_id, config=task_config)
+            task_launcher.launch_task(name=task_id, config=task_config, block=False)
             messages.add_message(request, messages.SUCCESS, 'Task started.')
             return redirect('tasks')
 

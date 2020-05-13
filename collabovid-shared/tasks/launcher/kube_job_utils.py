@@ -1,6 +1,6 @@
 import string
 import random
-from kubernetes import client, config
+from kubernetes import client, config, watch
 import kubernetes.client
 from kubernetes.client.rest import ApiException
 
@@ -22,6 +22,8 @@ def create_job_object(name, container_image, command, args=None, namespace="defa
     template = client.V1PodTemplate()
     template.template = client.V1PodTemplateSpec()
 
+    api_client = client.BatchV1Api()
+
     # Set env variables
     env_list = []
     for env_name, env_value in env_vars.items():
@@ -39,16 +41,25 @@ def create_job_object(name, container_image, command, args=None, namespace="defa
     template.template.spec = client.V1PodSpec(containers=[container], restart_policy=restart_policy)
 
     body.spec = client.V1JobSpec(ttl_seconds_after_finished=ttl_finished, template=template.template, backoff_limit=backoff_limit)
+
     return body
 
 
-def run_job(job_object: client.V1Job):
+def run_job(job_object: client.V1Job, block=False):
     config.load_incluster_config()
     configuration = kubernetes.client.Configuration()
     api_instance = kubernetes.client.BatchV1Api(kubernetes.client.ApiClient(configuration))
     try:
         api_response = api_instance.create_namespaced_job("default", job_object, pretty=True)
         print(api_response)
+
+        if block:
+            w = watch.Watch()
+            for event in w.stream(api_instance.list_job_for_all_namespaces):
+                o = event['object']
+                if o.status.succeeded or o.status.failed:
+                    break
+
     except ApiException as e:
         print("Exception when calling BatchV1Api->create_namespaced_job: %s\n" % e)
     return

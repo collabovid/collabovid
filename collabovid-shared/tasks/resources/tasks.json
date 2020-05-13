@@ -23,15 +23,7 @@
         "scrape": {
             "name": "Scrape",
             "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "started_by",
-                    "required": false,
-                    "type": "_empty",
-                    "default": "",
-                    "is_primitive": false
-                }
-            ]
+            "parameters": []
         },
         "check-covid-related": {
             "name": "Check Covid Related",

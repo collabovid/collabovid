@@ -7,7 +7,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: localhost:32000/web:0.0.0
+          image: web
           command: ["bash","-c"]
           args: ["echo Running on: $RDS_HOSTNAME && python manage.py migrate && python manage.py loaddata db-202003292022 topics"]
           envFrom:
