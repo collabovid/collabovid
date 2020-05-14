@@ -25,5 +25,3 @@ secretGenerator:
   - name: scrape
     envs:
       - scrape.env
-generatorOptions:
-  disableNameSuffixHash: true

@@ -12,6 +12,8 @@ output_dir=$(dirname "$0")/dist
 # e.g. k8s/dist/dev
 env_path=$output_dir/$env
 
+rm -rf $env_path
+
 # build the specified path with kustomize
 kustomize build $path | kubesplit -o $env_path -p
 

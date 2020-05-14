@@ -19,6 +19,8 @@ class ClusterCommand(KubectlCommand):
         path = ''
         if not args.resource and args.all:
             path = '-f ' + self.k8s_dist_env_path
+            self.call_command('jobs delete --all')
+            self.call_command('cronjobs delete --all')
         elif args.resource:
             if args.all:
                 for file in os.listdir(self.k8s_dist_env_path):

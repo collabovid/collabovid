@@ -10,14 +10,14 @@ class ReleaseCommand(Command):
         release_dict = {}
 
         result = self.call_command('version', collect_output=True)
-        output = result.stdout.decode('utf8').strip()
+        version = result.stdout.decode('utf8').strip()
         if result.returncode != 0:
-            print('Getting version failed: ' + output)
+            print('Getting version failed: ' + version)
             exit(4)
 
         # saving previous running version
-        release_dict['old_version'] = output
-        print(f'Current version on the cluster: {output}')
+        release_dict['old_version'] = version
+        print(f'Current version on the cluster: {version}')
 
         # Building and pushing
         if not args.no_build:
@@ -28,14 +28,25 @@ class ReleaseCommand(Command):
         # Build config ones and then specify --no-config build for the next calls
         self.build_kubernetes_config()
 
+        # Apply all secrets (jobs need the secrets)
+        self.call_command('cluster apply -r secret --all --no-config-build')
+
+        # In order to check if migrations are pending we have to communicate with the database
+        if self.current_env() == 'dev':
+            # Start the postgres deployment if in dev mode
+            self.call_command('cluster apply -r deployment -n postgres --no-config-build')
+
+        # The start the service, in prod we only need the service
+        self.call_command('cluster apply -r service -n postgres --no-config-build')
+
         # Checking for migrations
         job_name = 'check-migrations'
-        success, output = self.run_job_to_completion(job_name, timeout=args.timeout)
+        success, version = self.run_job_to_completion(job_name, timeout=args.timeout)
         if not success:
             print(f"{job_name} did not complete")
             exit(1)
 
-        migration_state = json.loads(output)
+        migration_state = json.loads(version)
 
         # Check if migrations have to be applied
         if migration_state['is_synchronized']:
@@ -54,10 +65,10 @@ class ReleaseCommand(Command):
                 self.print_info('Creating db snapshot')
                 self.create_db_snapshot()
             self.print_info('Migrating')
-            success, output = self.run_job_to_completion('migrate', timeout=args.timeout)
+            success, version = self.run_job_to_completion('migrate', timeout=args.timeout)
             if success:
                 self.print_info('Migration completed successfully')
-                print(output)
+                print(version)
             else:
                 self.print_info('Migration failed')
                 exit(3)
@@ -76,7 +87,7 @@ class ReleaseCommand(Command):
 
     def run_job_to_completion(self, job_name, timeout):
         kubectl = self.current_env_config()['kubectl']
-        self.run_shell_command(f"cvid jobs run {job_name} --no-config-build")
+        self.run_shell_command(f"cvid jobs run -n {job_name} --no-config-build")
         result = self.run_shell_command(
             f"{kubectl} wait --for=condition=complete job/{job_name} --timeout={timeout}s", collect_output=True)
         if result.returncode != 0:

@@ -135,19 +135,27 @@ class AbstractJobsCommand(KubectlCommand):
         job_file = join(self.k8s_dist_path, f"{job_identifier}s", self.current_env(),
                         f'{job_identifier}--{args.name}.yml')
         if args.command == 'run':
-            self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
+            result = self.run_shell_command(f'kubectl get jobs --selector={job_identifier}-name={args.name} -o jsonpath={{.items}}',
+                                            collect_output=True, print_command=False)
+            if result.stdout.decode('utf8') != '[]':
+                self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
             self.run_shell_command(f"{self.kubectl} apply -f {job_file}")
         elif args.command == 'logs':
             self.run_shell_command(f"{self.kubectl} logs  --tail=-1 --selector={job_identifier}-name={args.name}")
         elif args.command == 'status':
             self.run_shell_command(f"{self.kubectl} get pods --selector={job_identifier}-name={args.name}")
         elif args.command == 'delete':
-            self.run_shell_command(f"{self.kubectl} delete job {args.name}")
+            if args.all:
+                self.run_shell_command('kubectl delete jobs `kubectl get jobs -o custom-columns=:.metadata.name`')
+            else:
+                self.run_shell_command(f"{self.kubectl} delete job {args.name}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument('command', choices=['run', 'logs', 'status', 'delete'])
-        parser.add_argument('name')
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--all', action='store_true')
+        group.add_argument('-n', '--name')
 
     def get_job_identifier(self):
         return ''
