@@ -1,5 +1,8 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from src.search.search_engine import get_default_search_engine
+from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing
+
+from threading import Thread
 
 
 def search(request):
@@ -15,3 +18,15 @@ def search(request):
                                              end_date=end_date, score_min=score_min)
 
         return JsonResponse(search_result)
+
+
+def startup_probe(request):
+
+    if is_analyzer_initialized():
+        return HttpResponse("OK")
+
+    if not is_analyzer_initializing():
+        thread = Thread(target=get_analyzer)
+        thread.start()
+
+    return HttpResponseServerError()

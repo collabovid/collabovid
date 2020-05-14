@@ -17,7 +17,7 @@ spec:
       volumes:
         - name: vol
           hostPath:
-            path: /usr/local/kubedata/s3
+            path: /.docker/collabovid-data/s3
       containers:
         - name: s3
           image: adobe/s3mock

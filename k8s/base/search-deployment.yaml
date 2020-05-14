@@ -19,16 +19,29 @@ spec:
         - name: search
           image: search
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
           envFrom:
             - secretRef:
                 name: shared
             - secretRef:
                 name: search
           volumeMounts:
-            - name: vol
+            - name: models
               mountPath: /models
+          startupProbe:
+            httpGet:
+              path: /status
+              port: http
+            failureThreshold: 80
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+            periodSeconds: 10
+            initialDelaySeconds: 5
       volumes:
-        - name: vol
+        - name: models
           hostPath:
-            path: /usr/local/kubedata/models
+            path: /models

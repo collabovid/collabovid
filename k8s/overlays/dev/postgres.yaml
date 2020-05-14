@@ -17,7 +17,7 @@ spec:
       volumes:
         - name: vol
           hostPath:
-            path: /usr/local/kubedata/postgres
+            path: /.docker/collabovid-data/postgres
       containers:
         - name: postgres
           image: postgres:12
