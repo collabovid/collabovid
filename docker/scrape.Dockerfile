@@ -14,8 +14,8 @@ RUN pip install --no-cache -r /requirements.txt
 # Downloads tika server jar
 RUN python -c "from tika import tika; tika.checkTikaServer()"
 
-COPY collabovid-shared/ /collabovid-shared
-RUN (cd collabovid-shared; python setup.py sdist) && pip install --no-cache /collabovid-shared/dist/collabovid-shared-0.1.tar.gz && rm -rf /collabovid-shared
+COPY collabovid-shared/dist /collabovid-shared/dist
+RUN pip install --no-cache /collabovid-shared/dist/*.whl && rm -rf /collabovid-shared
 
 COPY ${PROJECT_DIR} /app
 WORKDIR /app

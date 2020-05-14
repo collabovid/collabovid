@@ -6,6 +6,8 @@ class BuildCommand(CommandWithServices):
         super().run(args)
         self.run_shell_command(
             "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
+
+        self.run_shell_command("cd collabovid-shared; python setup.py bdist_wheel")
         for service, config in args.services:
             self.print_info("Building service: {}".format(service))
             tag = self.generate_tag()
