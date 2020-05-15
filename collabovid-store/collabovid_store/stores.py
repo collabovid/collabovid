@@ -19,14 +19,14 @@ class SyncableStore:
         self.remote_root_path = remote_root_path
         self.remote_timestamp_file_path = join(remote_root_path, timestamp_file_name)
 
-    def sync_to_local_directory(self, local_root_path: str):
+    def sync_to_local_directory(self, local_root_path: str, verbose=True):
         local_root_path = local_root_path
         local_timestamp_file_path = join(local_root_path, self.timestamp_file_name)
 
         os.makedirs(local_root_path, exist_ok=True)
 
         # Download remote timestamps
-        timestamps_remote = self._get_remote_timestamps()
+        timestamps_remote = self._get_remote_timestamps(verbose=verbose)
 
         # Loading local timestamps file if present
         if not exists(local_timestamp_file_path):
@@ -39,7 +39,8 @@ class SyncableStore:
         for key, timestamp in timestamps_remote.items():
             if key not in timestamps_local or dateutil.parser.parse(timestamps_local[key]) < dateutil.parser.parse(
                     timestamp):
-                print("\tRefreshing: " + key)
+                if verbose:
+                    print("Refreshing: " + key)
                 local_file_path = join(local_root_path, key)
                 self.s3_bucket_client.download_file(join(self.remote_root_path, key), local_file_path)
                 self._post_file_download(local_root_path, key)
@@ -48,11 +49,12 @@ class SyncableStore:
         with open(local_timestamp_file_path, 'w') as f:
             json.dump(timestamps_remote, f)
 
-    def update_remote(self, directory_path: str, keys: List[str]):
-        timestamp_data = self._get_remote_timestamps()
+    def update_remote(self, directory_path: str, keys: List[str], verbose=True):
+        timestamp_data = self._get_remote_timestamps(verbose=verbose)
 
         for key in keys:
-            print("\tUploading: " + key)
+            if verbose:
+                print("Uploading: " + key)
             self._pre_file_upload(directory_path, key)
             file_name = key
             path = join(directory_path, file_name)
@@ -61,15 +63,15 @@ class SyncableStore:
             self._post_file_upload(directory_path, key)
         self.s3_bucket_client.upload_as_json(self.remote_timestamp_file_path, timestamp_data)
 
-    def _get_remote_timestamps(self):
+    def _get_remote_timestamps(self, verbose=True):
         # Downloading remote timestamps json file
         try:
             timestamp_data = self.s3_bucket_client.get_json(self.remote_timestamp_file_path)
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "NoSuchKey":
                 # The object does not exist.
-                print('No remote timestamps file found')
-                print("\tNo remote timestamp file found. Creating new one...")
+                if verbose:
+                    print("No remote timestamp file found. Creating new one...")
                 timestamp_data = {}
             else:
                 # Something else has gone wrong.
@@ -98,7 +100,7 @@ class PaperMatrixStore(SyncableStore):
     def sync(self):
         self.sync_to_local_directory('/models/paper_matrix')
 
-    def update_remote(self, directory_path: str, keys: List[str]):
+    def update_remote(self, directory_path: str, keys: List[str], verbose=True):
         super().update_remote(directory_path=directory_path, keys=[f'{key}.pkl' for key in keys])
 
 
@@ -124,5 +126,5 @@ class ModelsStore(SyncableStore):
     def _post_file_upload(self, directory, file_name):
         os.remove(join(directory, file_name))
 
-    def update_remote(self, directory_path: str, keys: List[str]):
+    def update_remote(self, directory_path: str, keys: List[str], verbose=True):
         super().update_remote(directory_path=directory_path, keys=[f'{key}.zip' for key in keys])
