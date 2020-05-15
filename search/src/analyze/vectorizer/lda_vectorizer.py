@@ -5,7 +5,7 @@ from src.analyze.similarity import JensonShannonSimilarity
 from . import TextVectorizer
 import os
 from django.conf import settings
-
+from .exceptions import *
 
 class PretrainedLDA(TextVectorizer):
     LDA_BASE_DIR = os.path.join(settings.MODELS_BASE_DIR, "lda/")
@@ -21,7 +21,14 @@ class PretrainedLDA(TextVectorizer):
 
         self.fix_imports()
 
+        if not os.path.exists(vectorizer_file):
+            raise CouldNotLoadVectorizer("Could not load the lda vectorizer from {}".format(vectorizer_file))
+
         self.vectorizer = joblib.load(vectorizer_file)
+
+        if not os.path.exists(lda_file):
+            raise CouldNotLoadModel("Could not load the lda model from {}".format(lda_file))
+
         self.lda = joblib.load(lda_file)
 
         self.similarity_computer = JensonShannonSimilarity()

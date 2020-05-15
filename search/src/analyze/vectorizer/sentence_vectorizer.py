@@ -6,7 +6,7 @@ from src.analyze.similarity import CosineDistance
 from . import TextVectorizer
 from src.analyze.vectorizer.utils.splitter import TextToChunksSplitter
 from django.conf import settings
-
+from .exceptions import CouldNotLoadModel
 
 class TitleSentenceVectorizer(TextVectorizer):
     """
@@ -18,6 +18,12 @@ class TitleSentenceVectorizer(TextVectorizer):
         super(TitleSentenceVectorizer, self).__init__(matrix_file_name=matrix_file_name, *args, **kwargs)
 
         self.similarity_computer = CosineDistance()
+
+        sentence_transformer_path = os.path.join(settings.MODELS_BASE_DIR, 'sentence_transformer')
+
+        if not os.path.exists(sentence_transformer_path):
+            raise CouldNotLoadModel("Could not load model from {}".format(sentence_transformer_path))
+
         self.model = SentenceTransformer(os.path.join(settings.MODELS_BASE_DIR, 'sentence_transformer'),
                                          device='cpu')
 

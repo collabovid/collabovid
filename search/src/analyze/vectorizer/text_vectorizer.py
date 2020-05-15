@@ -6,6 +6,7 @@ from django.conf import settings
 from collabovid_store.auto_update_reference import AutoUpdateReference
 from collabovid_store.stores import PaperMatrixStore, refresh_local_timestamps
 from collabovid_store.s3_utils import S3BucketClient
+from .exceptions import *
 
 
 class TextVectorizer:
@@ -13,6 +14,11 @@ class TextVectorizer:
     def __init__(self, matrix_file_name, *args, **kwargs):
         self.matrix_file_name = matrix_file_name
         self._similarity_computer = None
+
+        if not os.path.exists(self.matrix_file_name):
+            raise CouldNotLoadPaperMatrix(
+                "Could not initialize with paper matrix file {}".format(self.matrix_file_name))
+
         self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_DIR,
                                                            key=matrix_file_name, load_function=lambda x: joblib.load(x))
 
