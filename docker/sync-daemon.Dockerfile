@@ -5,6 +5,9 @@ RUN apt-get update && apt-get -y --no-install-recommends install cron && rm -rf 
 COPY ./sync-daemon/requirements.txt /requirements.txt
 RUN pip install --no-cache -r /requirements.txt
 
+COPY ./collabovid-store/dist /collabovid-store
+RUN pip install --no-cache /collabovid-store/*.whl
+
 COPY sync-daemon/src /app
 
 # Copy executable file to the cron.d directory

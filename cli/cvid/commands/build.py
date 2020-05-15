@@ -8,6 +8,7 @@ class BuildCommand(CommandWithServices):
             "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
 
         self.run_shell_command("cd collabovid-shared; make")
+        self.run_shell_command("cd collabovid-store; make")
         for service, config in args.services:
             self.print_info("Building service: {}".format(service))
             tag = self.generate_tag()
