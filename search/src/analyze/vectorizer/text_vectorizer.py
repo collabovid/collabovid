@@ -15,10 +15,6 @@ class TextVectorizer:
         self.matrix_file_name = matrix_file_name
         self._similarity_computer = None
 
-        if not os.path.exists(self.matrix_file_name):
-            raise CouldNotLoadPaperMatrix(
-                "Could not initialize with paper matrix file {}".format(self.matrix_file_name))
-
         self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_DIR,
                                                            key=matrix_file_name, load_function=lambda x: joblib.load(x))
 
@@ -34,7 +30,11 @@ class TextVectorizer:
 
     @property
     def paper_matrix(self):
-        return self._paper_matrix_reference.reference
+        matrix = self._paper_matrix_reference.reference
+        if matrix is None:
+            raise CouldNotLoadPaperMatrix(
+                "Could not initialize with paper matrix file {}".format(self.matrix_file_name))
+        return matrix
 
     def _calculate_paper_matrix(self, papers):
         matrix = self.vectorize_paper(papers)
@@ -115,7 +115,7 @@ class TextVectorizer:
         s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key,
                                           endpoint_url=endpoint_url, bucket=bucket)
         paper_matrix_store = PaperMatrixStore(s3_bucket_client)
-        paper_matrix_store.update_remote(settings.PAPER_MATRIX_DIR, [self.matrix_file_name])
+        paper_matrix_store.update_remote(settings.PAPER_MATRIX_DIR, [self.matrix_file_name.replace('.pkl', '')])
 
     def compute_similarity_scores(self, embedding_vec):
         matrix = self.paper_matrix['matrix']

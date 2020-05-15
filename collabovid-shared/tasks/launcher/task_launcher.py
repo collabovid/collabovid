@@ -41,17 +41,16 @@ class TaskLauncher:
 
 
 secret_map = {
-    'scrape': ['scrape', 'shared'],
-    'web': ['web', 'shared'],
-    'search': ['search', 'shared']
+    'scrape': ['scrape-latest', 'shared-latest'],
+    'web': ['web-latest', 'shared-latest'],
+    'search': ['search-latest', 'shared-latest']
 }
 
 volume_map = {
     'scrape': [],
     'web': [],
     'search': [{
-        # Todo make configurable
-        'host_path': '/usr/local/kubedata/models',
+        'host_path': settings.SEARCH_MODELS_HOST_PATH,
         'mount_path': '/models'
     }]
 }

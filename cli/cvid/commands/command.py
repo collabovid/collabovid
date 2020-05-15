@@ -20,9 +20,11 @@ class Command:
     def kubectl(self):
         return self.current_env_config()['kubectl']
 
-    def run_shell_command(self, cmd, cwd=None, collect_output=False, print_command=True):
-        if print_command:
+    def run_shell_command(self, cmd, cwd=None, collect_output=False, print_command=True, quiet=False):
+        if print_command and not quiet:
             self.print_info("Running: {}".format(cmd))
+
+        collect_output = collect_output or quiet
         if collect_output:
             return subprocess.run(cmd, shell=True, cwd=cwd, stdout=PIPE)
         else:
@@ -57,7 +59,7 @@ class Command:
         tag = result.stdout.decode('utf-8').strip()
         return tag
 
-    def build_kubernetes_config(self, image_tag=None, customize_callback=None):
+    def build_kubernetes_config(self, image_tag=None, customize_callback=None, quiet=True):
         env = self.current_env()
         kubernetes_dir = join(os.getcwd(), 'k8s')
         if not exists(kubernetes_dir):
@@ -65,7 +67,7 @@ class Command:
             exit(1)
         temp_dir = join(kubernetes_dir, 'tmp')
         kubernetes_env_dir = join(kubernetes_dir, 'overlays', env)
-        self.run_shell_command('mkdir -p {} && cp -r {} {}'.format(temp_dir, kubernetes_env_dir, temp_dir))
+        self.run_shell_command('mkdir -p {} && cp -r {} {}'.format(temp_dir, kubernetes_env_dir, temp_dir), quiet=quiet)
         for repo, config in self.config['services'].items():
             if image_tag is None:
                 image_tag = self.generate_tag()
@@ -74,7 +76,7 @@ class Command:
                 registry += '/'
             self.run_shell_command(
                 '(cd {} && kustomize edit set image {}={}{}:{})'.format(join(temp_dir, env), repo, registry, repo,
-                                                                        image_tag))
+                                                                        image_tag), quiet=quiet)
 
         options_dir = join(kubernetes_dir, 'options')
         for option in self.current_env_config()['optionFiles']:
@@ -82,16 +84,17 @@ class Command:
             if not exists(option_file_path):
                 print("Unknown optionFiles item specified in config: {}".format(option))
                 exit(2)
-            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option)))
+            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option)),
+                                   quiet=quiet)
             self.run_shell_command(
-                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option)))
+                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option)), quiet=quiet)
 
         # allow caller to add further customization
         if customize_callback is not None:
             customize_callback(join(temp_dir, env))
 
-        self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env))
-        self.run_shell_command('rm -rf {}'.format(temp_dir))
+        self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env), quiet=quiet)
+        self.run_shell_command('rm -rf {}'.format(temp_dir), quiet=quiet)
 
 
 class CommandWithServices(Command):
@@ -135,8 +138,9 @@ class AbstractJobsCommand(KubectlCommand):
         job_file = join(self.k8s_dist_path, f"{job_identifier}s", self.current_env(),
                         f'{job_identifier}--{args.name}.yml')
         if args.command == 'run':
-            result = self.run_shell_command(f'kubectl get jobs --selector={job_identifier}-name={args.name} -o jsonpath={{.items}}',
-                                            collect_output=True, print_command=False)
+            result = self.run_shell_command(
+                f'kubectl get jobs --selector={job_identifier}-name={args.name} -o jsonpath={{.items}}',
+                collect_output=True, print_command=False)
             if result.stdout.decode('utf8') != '[]':
                 self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
             self.run_shell_command(f"{self.kubectl} apply -f {job_file}")
@@ -146,7 +150,7 @@ class AbstractJobsCommand(KubectlCommand):
             self.run_shell_command(f"{self.kubectl} get pods --selector={job_identifier}-name={args.name}")
         elif args.command == 'delete':
             if args.all:
-                self.run_shell_command('kubectl delete jobs `kubectl get jobs -o custom-columns=:.metadata.name`')
+                self.run_shell_command(f'kubectl delete {job_identifier}s --all')
             else:
                 self.run_shell_command(f"{self.kubectl} delete job {args.name}")
 

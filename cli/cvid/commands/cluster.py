@@ -18,9 +18,14 @@ class ClusterCommand(KubectlCommand):
             return
         path = ''
         if not args.resource and args.all:
-            path = '-f ' + self.k8s_dist_env_path
-            self.call_command('jobs delete --all')
-            self.call_command('cronjobs delete --all')
+            if args.command == 'restart':
+                for file in os.listdir(self.k8s_dist_env_path):
+                    if file.startswith('deployment') or file.startswith('daemonset'):
+                        path += f" -f {join(self.k8s_dist_env_path, file)}"
+            else:
+                path = '-f ' + self.k8s_dist_env_path
+            self.call_command('jobs delete --all --no-config-build')
+            self.call_command('cronjobs delete --all --no-config-build')
         elif args.resource:
             if args.all:
                 for file in os.listdir(self.k8s_dist_env_path):

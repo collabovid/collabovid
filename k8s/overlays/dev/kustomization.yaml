@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
+  - envs
   - postgres.yaml
   - s3.yaml
 
@@ -12,16 +13,16 @@ patchesStrategicMerge:
 secretGenerator:
   - name: web
     envs:
-      - web.env
+      - envs/web.env
   - name: search
     envs:
-      - search.env
+      - envs/search.env
   - name: daemon
     envs:
-      - daemon.env
+      - envs/daemon.env
   - name: shared
     envs:
-      - shared.env
+      - envs/shared.env
   - name: scrape
     envs:
-      - scrape.env
+      - envs/scrape.env

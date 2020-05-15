@@ -8,6 +8,7 @@ resources:
 patchesStrategicMerge:
   - search.yaml
   - web.yaml
+  - sync-daemon.yaml
 
 secretGenerator:
   - name: web
@@ -16,8 +17,12 @@ secretGenerator:
   - name: search
     envs:
       - search.env
+  - name: daemon
+    envs:
+      - daemon.env
   - name: shared
     envs:
       - shared.env
-generatorOptions:
-  disableNameSuffixHash: true
+  - name: scrape
+    envs:
+      - scrape.env

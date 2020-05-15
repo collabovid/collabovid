@@ -12,6 +12,9 @@ RUN python -c "import nltk; import os; nltk.download('stopwords', download_dir=o
 COPY collabovid-shared/dist /collabovid-shared/dist
 RUN pip install --no-cache /collabovid-shared/dist/*.whl && rm -rf /collabovid-shared
 
+COPY ./collabovid-store/dist /collabovid-store
+RUN pip install --no-cache /collabovid-store/*.whl
+
 COPY ${PROJECT_DIR} /app
 WORKDIR /app
 ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings_prod

@@ -9,7 +9,6 @@ paper_matrices = [
     'title_sentence_vectorizer'
 ]
 
-
 class UploadModelsCommand(Command):
     def run(self, args):
         models_directory = join(os.getcwd(), args.directory)
@@ -31,7 +30,7 @@ class UploadModelsCommand(Command):
 
     def add_arguments(self, parser):
         parser.add_argument('-d', '--directory', help="Models directory", default='models')
-        parser.add_argument('-m', '--models', nargs='*', choices=['lda', 'sentence_transformer'])
+        parser.add_argument('-m', '--models', nargs='*', choices=['lda', 'small_sentence_transformer'])
         parser.add_argument('-p', '--paper-matrices', nargs='*', choices=paper_matrices)
 
     def help(self):
