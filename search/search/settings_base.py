@@ -112,3 +112,5 @@ STATIC_URL = '/static/'
 STATIC_ROOT= 'static'
 
 MODELS_BASE_DIR = '/models'
+PAPER_MATRIX_DIR = os.path.join(MODELS_BASE_DIR, 'paper_matrix')
+PUSH_PAPER_MATRIX = True

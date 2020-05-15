@@ -10,6 +10,22 @@ import zipfile
 import shutil
 
 
+def current_timestamp():
+    return str(datetime.datetime.utcnow().replace(microsecond=0))
+
+
+def refresh_local_timestamps(local_directory, keys, timestamp_file_name='timestamps.json'):
+    timestamp_file_path = join(local_directory, timestamp_file_name)
+    if not exists(timestamp_file_path):
+        timestamp_data = {}
+    else:
+        with open(timestamp_file_path, 'r') as f:
+            timestamp_data = json.load(f)
+
+    for key in keys:
+        timestamp_data[key] = current_timestamp()
+
+
 class SyncableStore:
     def __init__(self, remote_root_path: str, s3_bucket_client: S3BucketClient, timestamp_file_name='timestamps.json'):
 
@@ -59,7 +75,7 @@ class SyncableStore:
             file_name = key
             path = join(directory_path, file_name)
             self.s3_bucket_client.upload(path, join(self.remote_root_path, file_name))
-            timestamp_data[key] = self._current_timestamp()
+            timestamp_data[key] = current_timestamp()
             self._post_file_upload(directory_path, key)
         self.s3_bucket_client.upload_as_json(self.remote_timestamp_file_path, timestamp_data)
 
@@ -79,9 +95,6 @@ class SyncableStore:
                 print(e.response)
                 raise e
         return timestamp_data
-
-    def _current_timestamp(self):
-        return str(datetime.datetime.utcnow().replace(microsecond=0))
 
     def _post_file_download(self, directory, file_name):
         pass

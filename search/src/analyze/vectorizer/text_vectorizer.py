@@ -3,13 +3,18 @@ import numpy as np
 import os
 from data.models import Paper
 from django.conf import settings
+from collabovid_store.auto_update_reference import AutoUpdateReference
+from collabovid_store.stores import PaperMatrixStore, refresh_local_timestamps
+from collabovid_store.s3_utils import S3BucketClient
+
 
 class TextVectorizer:
 
     def __init__(self, matrix_file_name, *args, **kwargs):
         self.matrix_file_name = matrix_file_name
         self._similarity_computer = None
-        self._paper_matrix = None
+        self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_DIR,
+                                                           key=matrix_file_name, load_function=lambda x: joblib.load(x))
 
     @property
     def similarity_computer(self):
@@ -23,30 +28,16 @@ class TextVectorizer:
 
     @property
     def paper_matrix(self):
-
-        if not self._paper_matrix:
-            if os.path.exists(self.matrix_file_name):
-                self._paper_matrix = joblib.load(self.matrix_file_name)
-
-        return self._paper_matrix
-
-    @paper_matrix.setter
-    def paper_matrix(self, value):
-        self._paper_matrix = value
+        return self._paper_matrix_reference.reference
 
     def _calculate_paper_matrix(self, papers):
         matrix = self.vectorize_paper(papers)
-        print(matrix.shape)
         return {'matrix': matrix}
 
     def generate_paper_matrix(self, force_recompute=False):
-        matrix_path = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   os.path.join('res', self.matrix_file_name))
-
         # initialize the id_map with saved values if possible
-        if self.paper_matrix is not None and os.path.exists(matrix_path):
-            print(matrix_path, "exists, overwriting..")
-            id_map = self._paper_matrix['id_map']
+        if self.paper_matrix is not None:
+            id_map = self.paper_matrix['id_map']
         else:
             id_map = {}
 
@@ -100,11 +91,25 @@ class TextVectorizer:
                     matrix[matrix_idx] = computed_matrix[i]
                 paper_matrix[key] = matrix
 
-            self.paper_matrix = paper_matrix
-            joblib.dump(self.paper_matrix, matrix_path)
+            # Write out matrix
+            joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_DIR, self.matrix_file_name))
+            refresh_local_timestamps(settings.PAPER_MATRIX_DIR, [self.matrix_file_name])
+            if settings.PUSH_PAPER_MATRIX:
+                self._update_remote_paper_matrix()
+
             print("Paper matrix exported completed")
         else:
             print("No recomputing of matrix necessary")
+
+    def _update_remote_paper_matrix(self):
+        aws_access_key = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        endpoint_url = settings.AWS_S3_ENDPOINT_URL
+        s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key,
+                                          endpoint_url=endpoint_url, bucket=bucket)
+        paper_matrix_store = PaperMatrixStore(s3_bucket_client)
+        paper_matrix_store.update_remote(settings.PAPER_MATRIX_DIR, [self.matrix_file_name])
 
     def compute_similarity_scores(self, embedding_vec):
         matrix = self.paper_matrix['matrix']
