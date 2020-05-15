@@ -48,7 +48,7 @@ spec:
               port: http
             failureThreshold: 80
             periodSeconds: 5
-          livenessProbe:
+          readinessProbe:
             httpGet:
               path: /status
               port: http
