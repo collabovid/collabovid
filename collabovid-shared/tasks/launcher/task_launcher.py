@@ -3,9 +3,19 @@ import os
 from os.path import join
 import subprocess
 from django.conf import settings
+import requests
+import logging
+from tasks.models import Task
+import time
 
 
 class TaskLauncher:
+    def launch_task(self, name, config, block=False):
+        raise NotImplementedError
+
+
+class TaskCommandLauncher(TaskLauncher):
+
     def launch_task(self, name, config, block=False):
         raise NotImplementedError
 
@@ -56,7 +66,59 @@ volume_map = {
 }
 
 
-class KubeTaskLauncher(TaskLauncher):
+class WebTaskLauncher(TaskLauncher):
+
+    def _generate_web_params(self, config):
+        parameter_values = {}
+
+        parameter_values["started_by"] = config['started_by']
+
+        for parameter in config['parameters']:
+            if parameter['type'] == 'bool':
+                if parameter['value'] == '1':
+                    parameter_values[parameter['name']] = True
+            else:
+                parameter_values[parameter['name']] = parameter['value']
+
+        return parameter_values
+
+    def launch_task(self, name, config, block=False):
+
+        service = config['service']
+
+        if service != 'search':
+            raise PermissionError("Web launch only allowed for search tasks.")
+
+        try:
+            res = requests.post(settings.SEARCH_SERVICE_URL + "/tasks/start/" + name,
+                                data=self._generate_web_params(config))
+
+            res.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            logger = logging.getLogger(__name__)
+            logger.error("Some unknown request exception occured when starting a task" + str(
+                e) + " Task: " + name + ", Config: " + str(config))
+            return False
+
+        if block:
+            response = res.json()
+
+            task = Task.objects.get(pk=response['task'])
+
+            timeout = 1200
+
+            timeout_start = time.time()
+
+            while time.time() < timeout_start + timeout and task.status == Task.STATUS_PENDING:
+                time.sleep(10)
+                task.refresh_from_db()
+
+            return task.status != Task.STATUS_PENDING
+
+        return True
+
+
+class KubeTaskLauncher(TaskCommandLauncher):
     def launch_task(self, name, config, block=False):
         service = config['service']
         registry = os.getenv('REGISTRY', 'localhost:32000')
@@ -65,7 +127,7 @@ class KubeTaskLauncher(TaskLauncher):
         # we assume that the web deployment holds te newest version
         version = get_deployment_version('web')
         image = registry + service + ':' + version
-        cmd = TaskLauncher._generate_command(name, config, full_path=False)
+        cmd = TaskCommandLauncher._generate_command(name, config, full_path=False)
 
         job_object = create_job_object(name=name + '-' + id_generator(size=10), container_image=image,
                                        command=["bash", "-c"],
@@ -73,26 +135,34 @@ class KubeTaskLauncher(TaskLauncher):
                                        secret_names=secret_map[service], volume_mappings=volume_map[service])
         run_job(job_object, block=block)
 
+        return True
 
-class LocalTaskLauncher(TaskLauncher):
+
+class LocalTaskLauncher(TaskCommandLauncher):
     def launch_task(self, name, config, block=False):
         launch_env = os.environ.copy()
         launch_env.pop("DJANGO_SETTINGS_MODULE")
 
-        cmd = TaskLauncher._generate_command(name, config)
+        cmd = TaskCommandLauncher._generate_command(name, config)
 
         if block:
             subprocess.run(cmd, shell=True, env=launch_env)
         else:
             subprocess.Popen(cmd, shell=True, env=launch_env)
 
+        return True
 
-def get_task_launcher():
+
+def get_task_launcher(service):
     """
     Returns the correct task launcher for the given environment.
     :return:
     """
-    if settings.TASK_LAUNCHER_LOCAL:
-        return LocalTaskLauncher()
+
+    if service == 'search':
+        return WebTaskLauncher()
     else:
-        return KubeTaskLauncher()
+        if settings.TASK_LAUNCHER_LOCAL:
+            return LocalTaskLauncher()
+        else:
+            return KubeTaskLauncher()

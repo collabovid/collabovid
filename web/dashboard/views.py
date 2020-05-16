@@ -40,7 +40,7 @@ def create_task(request, task_id):
                           {'task_id': task_id, 'definition': task_definition})
         elif request.method == 'POST':
 
-            task_launcher = get_task_launcher()
+            task_launcher = get_task_launcher(service)
 
             task_config = {
                 'service': service,
@@ -58,8 +58,12 @@ def create_task(request, task_id):
                         }
                     )
 
-            task_launcher.launch_task(name=task_id, config=task_config, block=False)
-            messages.add_message(request, messages.SUCCESS, 'Task started.')
+            result = task_launcher.launch_task(name=task_id, config=task_config, block=False)
+
+            if result:
+                messages.add_message(request, messages.SUCCESS, 'Task started.')
+            else:
+                messages.add_message(request, messages.ERROR, 'Some exception was thrown when starting the task.')
             return redirect('tasks')
 
     return HttpResponseNotFound()

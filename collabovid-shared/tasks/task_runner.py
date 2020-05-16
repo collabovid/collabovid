@@ -7,12 +7,16 @@ from threading import Thread
 class TaskRunner:
 
     @staticmethod
-    def run_task(cls, *args, **kwargs):
+    def create_database_task(cls, *args, **kwargs):
         task = Task(name=cls.task_name(),
                     started_at=timezone.now(),
                     status=Task.STATUS_PENDING,
                     started_by=kwargs['started_by'])
         task.save()
+        return task
+
+    @staticmethod
+    def execute_task(task, cls, *args, **kwargs):
         runnable = cls(*args, **dict(kwargs, task=task))
 
         try:
@@ -34,9 +38,20 @@ class TaskRunner:
         task.save()
 
     @staticmethod
+    def run_task(cls, *args, **kwargs):
+        task = TaskRunner.create_database_task(cls, *args, **kwargs)
+        TaskRunner.execute_task(task, cls, *args, **kwargs)
+
+        return task
+
+    @staticmethod
     def run_task_async(cls, *args, **kwargs):
-        thread = Thread(target=TaskRunner.run_task, args=args, kwargs=dict(kwargs, cls=cls))
+        task = TaskRunner.create_database_task(cls, *args, **kwargs)
+
+        thread = Thread(target=TaskRunner.execute_task, args=args, kwargs=dict(kwargs, cls=cls, task=task))
         thread.start()
+
+        return task
 
 
 class CommandLineTaskRunner:
