@@ -34,7 +34,7 @@ class ScrapeTask(Runnable):
 
         if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")
-            task_launcher = get_task_launcher()
+            task_launcher = get_task_launcher('search')
 
             task_config = {
                 'service': 'search',
