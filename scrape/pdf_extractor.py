@@ -1,3 +1,5 @@
+from time import sleep
+
 import requests
 import re
 
@@ -26,6 +28,7 @@ class PdfExtractor:
         self._pdf_url = pdf_url
 
     def _load_pdf_response(self):
+        #sleep(3)
         if not self._pdf_response:
             try:
                 self._pdf_response = requests.get(self._pdf_url)
@@ -44,15 +47,11 @@ class PdfExtractor:
         """
         self._load_pdf_response()
 
-        if not self._pdf_response or self._pdf_response.status_code != 200:
-            print(f'No response for pdf url: {self._pdf_url}')
-            return None
-
         content = parser.from_buffer(self._pdf_response.content)
         if 'content' in content:
             text = content['content']
         else:
-            return None
+            raise PdfExtractError("PDF has no content")
 
         # Convert to string
         text = str(text)
@@ -99,13 +98,10 @@ class PdfExtractor:
         """
         self._load_pdf_response()
 
-        if not self._pdf_response or self._pdf_response.status_code != 200:
-            print(f'Problem with response in extracting image from {self._pdf_url}')
-            return None
         try:
             pages = convert_from_bytes(self._pdf_response.content, first_page=page, last_page=page)
-        except (PDFPageCountError, PDFSyntaxError):
-            return None
+        except (PDFPageCountError, PDFSyntaxError) as ex:
+            raise PdfExtractError(f"Couldn't extract image from PDF: {ex}")
 
         if len(pages) != 1:
             return None

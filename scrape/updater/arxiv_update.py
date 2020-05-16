@@ -51,9 +51,6 @@ class ArxivDataPoint(ArticleDataPoint):
             authors.append((last_name, first_name))
         return authors
 
-    def extract_content(self):
-        return None
-
     @property
     def data_source_name(self):
         return DataSource.ARXIV_DATASOURCE_NAME

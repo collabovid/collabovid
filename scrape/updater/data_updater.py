@@ -1,6 +1,3 @@
-import re
-from time import sleep
-
 from django.db import transaction
 from django.db.utils import IntegrityError, DataError as DjangoDataError
 from django.utils import timezone
@@ -12,32 +9,22 @@ from scrape.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
 from scrape.static_functions import sanitize_doi, covid_related
+from scrape.updater.update_error import UpdateError
 
 
-class UpdateException(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return self.msg
-
-
-class DifferentDataSourceError(UpdateException):
+class DifferentDataSourceError(UpdateError):
     pass
 
 
-class MissingDataError(UpdateException):
+class MissingDataError(UpdateError):
     pass
 
 
-class SkipArticle(UpdateException):
+class SkipArticle(UpdateError):
     pass
 
 
-class DataError(UpdateException):
+class DataError(UpdateError):
     pass
 
 
@@ -64,12 +51,16 @@ class ArticleDataPoint(object):
     def extract_authors(self):
         return []
 
-    @property
-    def data_source_name(self):
-        raise NotImplementedError
+    def extract_content(self):
+        self._setup_pdf_extractor()
+        return self._pdf_extractor.extract_contents()
+
+    def extract_preview_image(self):
+        self._setup_pdf_extractor()
+        return self._pdf_extractor.extract_image()
 
     @property
-    def data_source_priority(self):
+    def data_source_name(self):
         raise NotImplementedError
 
     @property
@@ -104,37 +95,6 @@ class ArticleDataPoint(object):
     def category_name(self):
         return None
 
-    @staticmethod
-    def _update_pdf_data(db_article, extract_image=True, extract_content=True):
-        if not extract_image and not extract_content:
-            return
-        if not db_article.pdf_url:
-            return
-
-        sleep(3)
-        pdf_extractor = PdfExtractor(db_article.pdf_url)
-
-        if extract_image:
-            image = pdf_extractor.extract_image()
-            if image:
-                img_name = sanitize_doi(db_article.doi) + ".jpg"
-                db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                    image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    image.tell,  # size
-                    None))
-
-        if extract_content:
-            content = pdf_extractor.extract_contents()
-            if content:
-                if db_article.data:
-                    db_article.data.content = content
-                else:
-                    db_content = PaperData.objects.create(content=content)
-                    db_article.data = db_content
-
     def update_db(self, update_existing, pdf_content, pdf_image):
         doi = self.doi
         title = self.title
@@ -147,6 +107,7 @@ class ArticleDataPoint(object):
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
 
+        pdf_error = None
         with transaction.atomic():
             datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
 
@@ -176,33 +137,62 @@ class ArticleDataPoint(object):
 
             db_article.save()
 
+            if self.category_name:
+                db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
+
+            try:
+                if pdf_content:
+                    content = self.extract_content()
+                    if content:
+                        if db_article.data:
+                            db_article.data.content = content
+                        else:
+                            db_content = PaperData.objects.create(content=content)
+                            db_article.data = db_content
+            except PdfExtractError as ex:
+                pdf_error = ex
+
+            try:
+                if pdf_image:
+                    preview_image = self.extract_preview_image()
+                    if preview_image:
+                        img_name = sanitize_doi(db_article.doi) + ".jpg"
+                        db_article.preview_image.save(
+                            img_name, InMemoryUploadedFile(preview_image, None, img_name, 'image/jpeg', preview_image.tell, None)
+                        )
+            except PdfExtractError as ex:
+                pdf_error = ex
+
+
+            db_article.version = self.version
+            db_article.covid_related = covid_related(db_article=db_article)
+
+
             try:
                 authors = self.extract_authors()
             except AttributeError:
                 raise MissingDataError("Couldn't extract authors, error in HTML soup")
 
-            if len(authors) > 0:
-                db_article.authors.clear()
-            for author in authors:
-                try:
-                    db_author, _ = Author.objects.get_or_create(
-                        first_name=author[1],
-                        last_name=author[0],
-                        data_source=db_article.data_source,
-                    )
-                    db_article.authors.add(db_author)
-                except DjangoDataError as ex:
-                    raise DataError(f"Author {author[1]} {author[0]}: {ex}")
+            if db_article.covid_related:
+                if len(authors) > 0:
+                    db_article.authors.clear()
+                for author in authors:
+                    try:
+                        db_author, _ = Author.objects.get_or_create(
+                            first_name=author[1],
+                            last_name=author[0],
+                            data_source=db_article.data_source,
+                        )
+                        db_article.authors.add(db_author)
+                    except DjangoDataError as ex:
+                        raise DataError(f"Author {author[1]} {author[0]}: {ex}")
 
-            if self.category_name:
-                db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
-
-            if pdf_content or pdf_image:
-                self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
-            db_article.version = self.version
-            db_article.covid_related = covid_related(db_article=db_article)
-            db_article.last_scrape = timezone.now()
-            db_article.save()
+                db_article.last_scrape = timezone.now()
+                db_article.save()
+            else:
+                raise SkipArticle("Not covid Related")
+        if pdf_error:
+            raise pdf_error
         return db_article, created
 
 
@@ -218,6 +208,9 @@ class DataUpdater(object):
     @property
     def data_source_name(self):
         raise NotImplementedError
+
+    def _preprocess(self):
+        pass
 
     def _get_data_points(self):
         raise NotImplementedError
@@ -245,9 +238,12 @@ class DataUpdater(object):
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_already_tracked += 1
-        except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
+        except (IntegrityError, DjangoDataError, DataError) as ex:
             self.log(f"Error: {datapoint.doi}: {ex}")
             self.n_errors += 1
+        except PdfExtractError as ex:
+            self.log(f"PDF Error: {datapoint.doi}: {ex}")
+            self.n_success += 1
         return None, None
 
     def get_new_data(self, pdf_content=True, pdf_image=True):
@@ -255,6 +251,8 @@ class DataUpdater(object):
         self.n_skipped = 0
         self.n_already_tracked = 0
         self.n_success = 0
+
+        self._preprocess()
 
         total = self._count()
         self.log(f"Check {total} publications")
@@ -282,6 +280,8 @@ class DataUpdater(object):
         self.n_skipped = 0
         self.n_already_tracked = 0
         self.n_success = 0
+
+        self._preprocess()
 
         total = self._count()
 

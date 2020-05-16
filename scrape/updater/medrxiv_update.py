@@ -157,7 +157,6 @@ class MedrxivUpdater(DataUpdater):
         for article in self._article_json:
             yield MedrxivDataPoint(article)
 
-
     def _get_data_point(self, doi):
         self._get_article_json()
         try:
