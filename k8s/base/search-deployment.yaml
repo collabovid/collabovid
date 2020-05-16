@@ -21,6 +21,9 @@ spec:
           ports:
             - name: http
               containerPort: 80
+          resources:
+            requests:
+              memory: "100Mi"
           envFrom:
             - secretRef:
                 name: shared

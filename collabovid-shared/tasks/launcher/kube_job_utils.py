@@ -46,10 +46,11 @@ def create_job_object(name, container_image, command, args=None, namespace="defa
 
     # set container options
     container = client.V1Container(name=container_name, image=container_image, env=env_list,
-                                   command=command, args=args, env_from=env_from, volume_mounts=volume_mounts)
+                                   command=command, args=args, env_from=env_from, volume_mounts=volume_mounts, image_pull_policy='Always')
 
     # set pod options
-    template.template.spec = client.V1PodSpec(containers=[container], restart_policy=restart_policy, volumes=volumes)
+    template.template.spec = client.V1PodSpec(containers=[container], restart_policy=restart_policy, volumes=volumes,
+                                              service_account_name='collabovid-sa')
 
     body.spec = client.V1JobSpec(ttl_seconds_after_finished=ttl_finished, template=template.template,
                                  backoff_limit=backoff_limit)
@@ -63,7 +64,7 @@ def run_job(job_object: client.V1Job, block=False):
     api_instance = kubernetes.client.BatchV1Api(kubernetes.client.ApiClient(configuration))
     try:
         api_response = api_instance.create_namespaced_job("default", job_object, pretty=True)
-        print(api_response)
+        print(api_response, flush=True)
 
         if block:
             w = watch.Watch()
@@ -73,7 +74,7 @@ def run_job(job_object: client.V1Job, block=False):
                     break
 
     except ApiException as e:
-        print("Exception when calling BatchV1Api->create_namespaced_job: %s\n" % e)
+        print("Exception when calling BatchV1Api->create_namespaced_job: %s\n" % e, flush=True)
     return
 
 

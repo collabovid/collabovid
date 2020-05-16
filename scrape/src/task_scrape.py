@@ -8,6 +8,7 @@ from src.task_arxiv_update import ArxivNewArticlesTask
 
 from tasks.definitions import Runnable, register_task
 from tasks.launcher.task_launcher import get_task_launcher
+from django.conf import settings
 
 
 @register_task
@@ -31,7 +32,7 @@ class ScrapeTask(Runnable):
                             started_by=self._task.started_by)
         self.log("Finished getting new medRxiv/bioRxiv articles...")
 
-        if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
+        if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")
             task_launcher = get_task_launcher()
 

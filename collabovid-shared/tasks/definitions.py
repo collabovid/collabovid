@@ -92,7 +92,7 @@ class Runnable:
         self.__message_buffer.append(message)
 
         if settings.DEBUG:
-            print(message)
+            print(message, flush=True)
 
         if flush or (
                 datetime.now() - self.__log_updated_at).total_seconds() > settings.TASK_LOGGING_DB_FLUSH_SECONDS:

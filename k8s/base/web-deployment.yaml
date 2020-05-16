@@ -25,3 +25,4 @@ spec:
                 name: shared
             - secretRef:
                 name: web
+      serviceAccountName: collabovid-sa
