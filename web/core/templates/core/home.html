@@ -22,7 +22,7 @@
                     </p>
                 </div>
                 <div class="col-lg-4">
-                    <img src="{% static "core/img/research-2.png" %}" class="img-fluid rounded">
+                    <img src="{% static "core/img/research.png" %}" class="img-fluid rounded">
                 </div>
             </div>
 
@@ -173,8 +173,10 @@
                         <div class="col-md-5 col-lg-5 col-sm-2 mx-auto stack stack-fanout">
                             {% for paper in most_recent_papers reversed %}
                                 <div style="height: 240px; background: white">
+                                    {% if paper.preview_image %}
                                     <img style="max-height: 200px" class="img-fluid"
-                                         src="{% if paper.preview_image %}{{ paper.preview_image.url }}{% else %}{% static "core/img/paper-blank.png" %}{% endif %}">
+                                         src="{{ paper.preview_image.url }}">
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         </div>
