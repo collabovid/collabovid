@@ -10,6 +10,7 @@ from cvid.commands.collect_tasks import CollectTasksCommand
 from cvid.commands.upload_models import UploadModelsCommand
 from cvid.commands.release import ReleaseCommand
 from cvid.commands.version import VersionCommand
+from cvid.commands.register import RegisterCommand
 from cvid.commands.configure_k8s import ConfigureKubernetes
 import json
 from os.path import join, dirname, realpath
@@ -37,7 +38,7 @@ def main():
     commands = [UseCommand(**args), BuildCommand(**args), PushCommand(**args),
                 ClusterCommand(**args), JobsCommand(**args), AWSRegistryLoginCommand(**args),
                 CronJobsCommand(**args), CollectTasksCommand(**args), UploadModelsCommand(**args), ReleaseCommand(**args),
-                VersionCommand(**args), ConfigureKubernetes(**args)]
+                VersionCommand(**args), ConfigureKubernetes(**args), RegisterCommand(**args)]
 
     parser = argparse.ArgumentParser(prog='cvid')
     subparsers = parser.add_subparsers()

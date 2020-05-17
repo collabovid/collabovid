@@ -152,7 +152,7 @@ class AbstractJobsCommand(KubectlCommand):
             if args.all:
                 self.run_shell_command(f'kubectl delete {job_identifier}s --all')
             else:
-                self.run_shell_command(f"{self.kubectl} delete job {args.name}")
+                self.run_shell_command(f"{self.kubectl} delete {job_identifier} {args.name}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

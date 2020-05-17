@@ -9,3 +9,6 @@ spec:
         - name: models
           hostPath:
             path: /opt/models
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0

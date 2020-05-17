@@ -13,4 +13,5 @@ resources:
   - job-test.yaml
   - sync-daemon.yaml
   - job-check-migrations.yaml
+  - cronjob-scrape.yaml
   - permissions.yaml
