@@ -1,17 +1,14 @@
-import re
+from datetime import timedelta
 from time import sleep
-
-from django.db import transaction
-from django.db.utils import IntegrityError, DataError as DjangoDataError
-from django.utils import timezone
-from datetime import timedelta, date
-
-from data.models import Author, Category, Paper, PaperHost, DataSource, PaperData
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
-from scrape.static_functions import sanitize_doi, covid_related
+from django.db import transaction
+from django.db.utils import DataError as DjangoDataError, IntegrityError
+from django.utils import timezone
+
+from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
+from scrape.pdf_extractor import PdfExtractError, PdfExtractor
+from scrape.static_functions import covid_related
 
 
 class UpdateException(Exception):
@@ -117,14 +114,7 @@ class ArticleDataPoint(object):
         if extract_image:
             image = pdf_extractor.extract_image()
             if image:
-                img_name = sanitize_doi(db_article.doi) + ".jpg"
-                db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                    image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    image.tell,  # size
-                    None))
+                db_article.add_preview_image(image)
 
         if extract_content:
             content = pdf_extractor.extract_contents()

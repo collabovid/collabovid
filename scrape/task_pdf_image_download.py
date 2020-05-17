@@ -1,12 +1,8 @@
 from time import sleep
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
-
-from scrape.pdf_extractor import PdfExtractor, PdfExtractError
-from scrape.static_functions import sanitize_doi
-from tasks.definitions import register_task, Runnable
-
 from data.models import Paper
+from scrape.pdf_extractor import PdfExtractError, PdfExtractor
+from tasks.definitions import register_task, Runnable
 
 
 @register_task
@@ -36,14 +32,7 @@ class PdfImageDownloader(Runnable):
                     image = pdf_extractor.extract_image()
 
                     if image:
-                        img_name = sanitize_doi(paper.doi) + ".jpg"
-                        paper.preview_image.save(img_name, InMemoryUploadedFile(
-                            image,  # file
-                            None,  # field_name
-                            img_name,  # file name
-                            'image/jpeg',  # content_type
-                            image.tell,  # size
-                            None))
+                        paper.add_preview_image(image)
                         paper.save()
                 except PdfExtractError as ex:
                     self.log(f"Error: {paper.doi}, {ex}")
