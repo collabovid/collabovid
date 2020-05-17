@@ -9,6 +9,7 @@ from search.search import Search, PaperResult
 from typing import List
 from data.models import Paper
 
+# TODO: Adjust scores after more testing.
 AUTHOR_ADDITIVE_SCORE = 0.5  # Score per matching author
 TITLE_ADDITIVE_SCORE = 0.2  # Score per matching keyword in title
 ABSTRACT_ADDITIVE_SCORE = 0.1  # Score per matching keyword in abstract
@@ -28,13 +29,14 @@ stopwords = set(nltk.corpus.stopwords.words('english'))
 class KeywordSearch(Search):
     @staticmethod
     def _get_score(summed_score, word_count):
+        """ Returns score in [0,1], depending on the matches of the query. Summed score may be larger, if query is short
+        and a large portion of words match an author. """
         return min(1, summed_score / (word_count * TITLE_ADDITIVE_SCORE))
 
     def find(self, query: str) -> List[PaperResult]:
         """
-        Search for records, containing all keywords of query, either in the title, abstract, or an authors lastname. Stopwords are excluded before. If all words in query are
-        stopwords, use stopwords instead.
-
+        Search for records, containing all keywords of query, either in the title, abstract, or an authors last name.
+        Stopwords are excluded before. If all words in query are stopwords, use stopwords instead.
         :param query: Search query.
         :return: DOIs of papers, containing the keywords.
         """
@@ -45,14 +47,15 @@ class KeywordSearch(Search):
 
         filtered_papers = Paper.objects.all()
         for word in keywords:
-            filtered_papers = filtered_papers.filter((Q(title__icontains=word) | Q(abstract__icontains=word) | Q(authors__last_name__iexact=word)))
+            filtered_papers = filtered_papers.filter(
+                (Q(title__icontains=word) | Q(abstract__icontains=word) | Q(authors__last_name__iexact=word)))
 
         filtered_papers = filtered_papers.distinct()
 
-        # Evaluate the individual paper scores based on the matches
+        # Compute the individual paper scores based on the matches
         summed_scores = defaultdict(int)
         for paper in filtered_papers:
-              for word in keywords:
+            for word in keywords:
                 # We only count the first type of match (which gives the most points). So we do not count any word twice
                 author_matched = False
                 for author in paper.authors.all():
@@ -66,4 +69,6 @@ class KeywordSearch(Search):
                     summed_scores[paper.doi] += TITLE_ADDITIVE_SCORE
                 elif re.search(word, paper.abstract, re.IGNORECASE):
                     summed_scores[paper.doi] += ABSTRACT_ADDITIVE_SCORE
-        return [PaperResult(paper_doi=paper.doi, score=KeywordSearch._get_score(summed_scores[paper.doi], len(keywords))) for paper in filtered_papers]
+        return [PaperResult(paper_doi=paper.doi,
+                            score=KeywordSearch._get_score(summed_scores[paper.doi], len(keywords)))
+                for paper in filtered_papers]
