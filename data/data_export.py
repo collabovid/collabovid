@@ -35,7 +35,8 @@ class UidDict(dict):
 class DataExporter:
     @staticmethod
     def export_data(queryset, output_directory='resources'):
-        """Exports database data in json format and preview images to a tar.gz archive."""
+        """Exports database data in json format and preview images to a tar.gz archive. Returns the path to the
+        newly created archive."""
         start = timer()
 
         datasources = set()
@@ -44,7 +45,8 @@ class DataExporter:
         categories = set()
         papers = []
 
-        tar = tarfile.open(f"{output_directory}/{datetime.strftime(datetime.now(), '%Y-%m-%d-%H%M')}.tar.gz", 'w:gz')
+        output_path = f"{output_directory}/{datetime.strftime(datetime.now(), '%Y-%m-%d-%H%M')}.tar.gz"
+        tar = tarfile.open(output_path, 'w:gz')
 
         for paper in queryset:
             if paper.data_source:
@@ -94,6 +96,8 @@ class DataExporter:
 
         end = timer()
         print(f"Finished export in {timedelta(seconds=end - start)}")
+
+        return output_path
 
     @staticmethod
     def import_data(path):
