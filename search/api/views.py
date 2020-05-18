@@ -1,6 +1,6 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from src.search.search_engine import get_default_search_engine
-from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing
+from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing, CouldNotLoadPaperMatrix
 
 from threading import Thread
 
@@ -30,3 +30,20 @@ def startup_probe(request):
         thread.start()
 
     return HttpResponseServerError()
+
+
+def liveness_probe(request):
+    if not is_analyzer_initialized():
+        return HttpResponseServerError()
+
+    try:
+        matrix = get_analyzer().vectorizer.paper_matrix
+
+    except CouldNotLoadPaperMatrix:
+        return HttpResponseServerError()
+
+    if matrix:
+        return HttpResponse("OK")
+
+    return HttpResponseServerError()
+

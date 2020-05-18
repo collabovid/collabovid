@@ -58,10 +58,16 @@ spec:
             periodSeconds: 5
           readinessProbe:
             httpGet:
-              path: /status
+              path: /alive
               port: http
             periodSeconds: 10
             initialDelaySeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /alive
+              port: http
+            periodSeconds: 10
+            initialDelaySeconds: 20
           securityContext:
             runAsUser: 0
       volumes:
