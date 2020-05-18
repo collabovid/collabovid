@@ -9,6 +9,7 @@ resources:
 
 patchesStrategicMerge:
   - search.yaml
+  - web.yaml
 
 secretGenerator:
   - name: web

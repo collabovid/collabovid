@@ -150,7 +150,7 @@ class AbstractJobsCommand(KubectlCommand):
             self.run_shell_command(f"{self.kubectl} get pods --selector={job_identifier}-name={args.name}")
         elif args.command == 'delete':
             if args.all:
-                self.run_shell_command(f'kubectl delete {job_identifier}s --all')
+                self.run_shell_command(f'{self.kubectl} delete {job_identifier}s --all')
             else:
                 self.run_shell_command(f"{self.kubectl} delete {job_identifier} {args.name}")
 

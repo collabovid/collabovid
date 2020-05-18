@@ -10,6 +10,11 @@ spec:
   selector:
     matchLabels:
       app: search
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge:
   template:
     metadata:
       labels:
@@ -23,7 +28,7 @@ spec:
               containerPort: 80
           resources:
             requests:
-              memory: "3000Mi"
+              memory: 3000Mi
           envFrom:
             - secretRef:
                 name: shared

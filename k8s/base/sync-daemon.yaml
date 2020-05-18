@@ -25,6 +25,8 @@ spec:
           envFrom:
             - secretRef:
                 name: daemon
+            - secretRef:
+                name: shared
       terminationGracePeriodSeconds: 5
       volumes:
         - name: models
