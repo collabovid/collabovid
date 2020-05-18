@@ -1,14 +1,13 @@
 import os
-from tasks.task_runner import TaskRunner
-from scrape.task_medrxiv_update import MedBiorxivUpdateTask, MedBiorxivNewArticlesTask
-from scrape.task_arxiv_update import ArxivUpdateTask,ArxivNewArticlesTask
-from scrape.task_check_covid_related import CheckCovidRelatedTask
-from analyze.update_topic_assignment import UpdateTopicAssignment
-from analyze.setup_vectorizer import SetupVectorizer
-from tasks.definitions import Runnable, register_task
-from data.models import Paper
 
-from django.conf import settings
+from analyze.setup_vectorizer import SetupVectorizer
+from analyze.update_topic_assignment import UpdateTopicAssignment
+from scrape.task_arxiv_update import ArxivNewArticlesTask
+from scrape.task_medrxiv_update import MedBiorxivNewArticlesTask
+from tasks.definitions import register_task, Runnable
+from tasks.task_runner import TaskRunner
+
+
 @register_task
 class Scrape(Runnable):
     @staticmethod

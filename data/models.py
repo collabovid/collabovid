@@ -19,6 +19,7 @@ class PaperHost(models.Model):
 class DataSource(models.Model):
     MEDBIORXIV_DATASOURCE_NAME = 'medbiorxiv-updater'
     ARXIV_DATASOURCE_NAME = 'arxiv-updater'
+    PUBMED_DATASOURCE_NAME = 'pubmed-updater'
 
     name = models.CharField(max_length=120, unique=True)
 
@@ -28,6 +29,8 @@ class DataSource(models.Model):
             return 1
         elif self.name == DataSource.ARXIV_DATASOURCE_NAME:
             return 2
+        elif self.name == DataSource.PUBMED_DATASOURCE_NAME:
+            return 3
         else:
             return 100
 

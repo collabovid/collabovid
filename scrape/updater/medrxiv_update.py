@@ -1,13 +1,12 @@
 import json
 import re
+from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
 
 from data.models import DataSource
-from datetime import datetime
 from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
-
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
@@ -66,6 +65,7 @@ class MedrxivDataPoint(ArticleDataPoint):
 
     @property
     def data_source_priority(self):
+        # TODO remove
         return _MEDBIORXIV_DATA_PRIORITY
 
     @property

@@ -1,17 +1,15 @@
-import re
+from datetime import timedelta
 from time import sleep
-
-from django.db import transaction
-from django.db.utils import IntegrityError, DataError as DjangoDataError
-from django.utils import timezone
-from datetime import timedelta, date
-
-from data.models import Author, Category, Paper, PaperHost, DataSource, PaperData
-from django.core.files.uploadedfile import InMemoryUploadedFile
-from scrape.pdf_extractor import PdfExtractor, PdfExtractError
 from timeit import default_timer as timer
 
-from scrape.static_functions import sanitize_doi, covid_related
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.db import transaction
+from django.db.utils import DataError as DjangoDataError, IntegrityError
+from django.utils import timezone
+
+from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
+from scrape.pdf_extractor import PdfExtractError, PdfExtractor
+from scrape.static_functions import covid_related, sanitize_doi
 
 
 class UpdateException(Exception):
@@ -139,6 +137,7 @@ class ArticleDataPoint(object):
         doi = self.doi
         title = self.title
         paperhost_name = self.paperhost_name
+        abstract = self.abstract
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
@@ -146,6 +145,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract title")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
+        if not abstract:
+            raise MissingDataError("Couldn't extract abstract")
 
         with transaction.atomic():
             datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
@@ -162,7 +163,7 @@ class ArticleDataPoint(object):
                 created = True
 
             db_article.title = title
-            db_article.abstract = self.abstract
+            db_article.abstract = abstract
             db_article.data_source = datasource
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
@@ -181,8 +182,10 @@ class ArticleDataPoint(object):
             except AttributeError:
                 raise MissingDataError("Couldn't extract authors, error in HTML soup")
 
-            if len(authors) > 0:
-                db_article.authors.clear()
+            if len(authors) == 0:
+                raise MissingDataError("Found no authors")
+
+            db_article.authors.clear()
             for author in authors:
                 try:
                     db_author, _ = Author.objects.get_or_create(
@@ -240,7 +243,7 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            # self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
