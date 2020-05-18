@@ -23,27 +23,20 @@ def search(request):
 def startup_probe(request):
 
     if is_analyzer_initialized():
-        return HttpResponse("OK")
+        try:
+            matrix = get_analyzer().vectorizer.paper_matrix
+
+        except CouldNotLoadPaperMatrix:
+            return HttpResponseServerError()
+
+        if matrix:
+            return HttpResponse("OK")
+
+        return HttpResponseServerError()
 
     if not is_analyzer_initializing():
         thread = Thread(target=get_analyzer)
         thread.start()
-
-    return HttpResponseServerError()
-
-
-def liveness_probe(request):
-    if not is_analyzer_initialized():
-        return HttpResponseServerError()
-
-    try:
-        matrix = get_analyzer().vectorizer.paper_matrix
-
-    except CouldNotLoadPaperMatrix:
-        return HttpResponseServerError()
-
-    if matrix:
-        return HttpResponse("OK")
 
     return HttpResponseServerError()
 
