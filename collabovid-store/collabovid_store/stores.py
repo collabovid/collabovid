@@ -118,7 +118,7 @@ class PaperMatrixStore(SyncableStore):
 
     def _post_file_download(self, directory, file_name):
         file_path = join(directory, file_name)
-        os.chmod(file_path, stat.S_IROTH | stat.S_IWOTH)
+        os.chmod(file_path, 0o666)
 
     def update_remote(self, directory_path: str, keys: List[str], verbose=True):
         super().update_remote(directory_path=directory_path, keys=[f'{key}.pkl' for key in keys])
