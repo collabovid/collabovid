@@ -42,7 +42,7 @@ class TextVectorizer:
 
     def generate_paper_matrix(self, force_recompute=False):
         # initialize the id_map with saved values if possible
-        if self.paper_matrix is not None:
+        if self.paper_matrix and not force_recompute:
             id_map = self.paper_matrix['id_map']
         else:
             id_map = {}
@@ -50,6 +50,10 @@ class TextVectorizer:
         # determines if a paper needs an update
         def needs_update(paper):
             return force_recompute
+
+        if self.paper_matrix:
+            print("Current paper matrix has size ", self.paper_matrix.shape, "with", Paper.objects.all().count(),
+                  "in database")
 
         # all papers
         papers = Paper.objects.all()
@@ -86,7 +90,10 @@ class TextVectorizer:
                 # dimension of newly computed values
                 matrix = np.zeros((newly_added, computed_matrix.shape[1]))
 
-                if self.paper_matrix is not None:
+                print("Matrix", matrix.shape)
+                print("Computed Matrix", computed_matrix.shape)
+
+                if self.paper_matrix and not force_recompute:
                     # extend old matrix with dimensions of newly computed values
                     matrix = np.append(self.paper_matrix[key], computed_matrix, axis=0)
 
