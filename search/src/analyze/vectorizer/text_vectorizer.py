@@ -52,7 +52,7 @@ class TextVectorizer:
             return force_recompute
 
         if self.paper_matrix:
-            print("Current paper matrix has size ", self.paper_matrix.shape, "with", Paper.objects.all().count(),
+            print("Current paper matrix has size ", self.paper_matrix['matrix'].shape, "with", Paper.objects.all().count(),
                   "in database")
 
         # all papers
