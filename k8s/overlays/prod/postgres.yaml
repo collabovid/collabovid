@@ -5,7 +5,6 @@ metadata:
     app: postgres
   name: postgres
 spec:
-  externalName: collabovid-test.ckubb15iiala.us-east-1.rds.amazonaws.com
   selector:
     app: postgres
   type: ExternalName

@@ -15,7 +15,7 @@ class TextVectorizer:
         self.matrix_file_name = matrix_file_name
         self._similarity_computer = None
 
-        self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_DIR,
+        self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_BASE_DIR,
                                                            key=matrix_file_name, load_function=lambda x: joblib.load(x))
 
     @property
@@ -98,8 +98,8 @@ class TextVectorizer:
                 paper_matrix[key] = matrix
 
             # Write out matrix
-            joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_DIR, self.matrix_file_name))
-            refresh_local_timestamps(settings.PAPER_MATRIX_DIR, [self.matrix_file_name])
+            joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_BASE_DIR, self.matrix_file_name))
+            refresh_local_timestamps(settings.PAPER_MATRIX_BASE_DIR, [self.matrix_file_name])
             if settings.PUSH_PAPER_MATRIX:
                 self._update_remote_paper_matrix()
 
@@ -115,7 +115,7 @@ class TextVectorizer:
         s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key,
                                           endpoint_url=endpoint_url, bucket=bucket)
         paper_matrix_store = PaperMatrixStore(s3_bucket_client)
-        paper_matrix_store.update_remote(settings.PAPER_MATRIX_DIR, [self.matrix_file_name.replace('.pkl', '')])
+        paper_matrix_store.update_remote(settings.PAPER_MATRIX_BASE_DIR, [self.matrix_file_name.replace('.pkl', '')])
 
     def compute_similarity_scores(self, embedding_vec):
         matrix = self.paper_matrix['matrix']

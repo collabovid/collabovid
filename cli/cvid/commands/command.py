@@ -84,10 +84,11 @@ class Command:
             if not exists(option_file_path):
                 print("Unknown optionFiles item specified in config: {}".format(option))
                 exit(2)
-            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option)),
+            option_name = option.replace('/', '-')
+            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option_name)),
                                    quiet=quiet)
             self.run_shell_command(
-                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option)), quiet=quiet)
+                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option_name)), quiet=quiet)
 
         # allow caller to add further customization
         if customize_callback is not None:

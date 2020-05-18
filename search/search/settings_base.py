@@ -111,7 +111,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT= 'static'
 
-MODELS_BASE_DIR = '/models'
-PAPER_MATRIX_DIR = os.path.join(MODELS_BASE_DIR, 'paper_matrix')
+MODELS_BASE_DIR = os.getenv('MODELS_BASE_DIR', None)
+PAPER_MATRIX_BASE_DIR = os.getenv('PAPER_MATRIX_BASE_DIR', None)
 PUSH_PAPER_MATRIX = True
 SENTENCE_TRANSFORMER_MODEL_NAME = os.getenv('SENTENCE_TRANSFORMER_MODEL_NAME', 'sentence_transformer')
