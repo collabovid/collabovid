@@ -1,5 +1,6 @@
 import json
 from os.path import join, exists
+import dateutil.parser
 
 
 class AutoUpdateReference():
@@ -21,8 +22,9 @@ class AutoUpdateReference():
             if self._key not in timestamp_data:
                 return None
 
-            if self._timestamp is None or timestamp_data[self._key] > self._timestamp:
+            file_timestamp = dateutil.parser.parse(timestamp_data[self._key])
+            if self._timestamp is None or file_timestamp > self._timestamp:
                 self._reference = self._load_function(join(self._base_path, self._key))
-                self._timestamp = timestamp_data[self._key]
+                self._timestamp = file_timestamp
 
         return self._reference

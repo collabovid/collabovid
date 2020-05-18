@@ -27,6 +27,10 @@ def refresh_local_timestamps(local_directory, keys, timestamp_file_name='timesta
     for key in keys:
         timestamp_data[key] = current_timestamp()
 
+    with open(timestamp_file_path, 'w') as f:
+        json.dump(timestamp_data, f)
+
+
 
 class SyncableStore:
     def __init__(self, remote_root_path: str, s3_bucket_client: S3BucketClient, timestamp_file_name='timestamps.json'):
