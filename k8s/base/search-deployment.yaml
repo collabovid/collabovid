@@ -67,7 +67,7 @@ spec:
               path: /alive
               port: http
             periodSeconds: 10
-            initialDelaySeconds: 20
+            failureThreshold: 40
           securityContext:
             runAsUser: 0
       volumes:
