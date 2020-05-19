@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from data.models import DataSource
-from scrape.updater.data_updater import ArticleDataPoint, DataUpdater
+from scrape.updater.data_updater import ArticleDataPoint, DataUpdater, DataError
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
@@ -43,10 +43,11 @@ class MedrxivDataPoint(ArticleDataPoint):
     def extract_authors(self):
         self._setup_article_soup()
 
-        author_webelements = self._article_soup.find(
-            'span', attrs={'class': 'highwire-citation-authors'}
-        ).find_all('span', recursive=False)
-
+        try:
+            author_webelements = self._article_soup.find('span', attrs={'class': 'highwire-citation-authors'}).find_all(
+                'span', recursive=False)
+        except AttributeError:
+            raise DataError("Error in HTML soup when extracting authors.")
         authors = []
         for author_webelement in author_webelements:
             try:

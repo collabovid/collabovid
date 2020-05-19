@@ -4,6 +4,7 @@ from analyze.setup_vectorizer import SetupVectorizer
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from scrape.task_arxiv_update import ArxivNewArticlesTask
 from scrape.task_medrxiv_update import MedBiorxivNewArticlesTask
+from scrape.task_pubmed_update import PubmedNewArticlesTask
 from tasks.definitions import register_task, Runnable
 from tasks.task_runner import TaskRunner
 

@@ -43,3 +43,4 @@ markdown==3.2.1
 nltk~=3.4.5
 arxiv>=0.5.3
 nameparser>=1.0.6
+git+https://github.com/iacopy/pymed.git@fork-fixes#egg=pymed

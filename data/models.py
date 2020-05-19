@@ -35,6 +35,10 @@ class DataSource(models.Model):
             return 100
 
 
+class Journal(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+
+
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
@@ -81,6 +85,8 @@ class Paper(models.Model):
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
+    pubmed_id = models.CharField(max_length=20, unique=True, null=True, default=None)
+
     topic = models.ForeignKey(Topic,
                               related_name="papers",
                               null=True,
@@ -95,6 +101,7 @@ class Paper(models.Model):
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField(null=True, default=None)
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
     latent_topic_score = models.BinaryField(null=True)
 
