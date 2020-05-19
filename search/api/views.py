@@ -7,8 +7,8 @@ from threading import Thread
 
 def search(request):
     if request.method == "GET":
-        start_date = request.GET.get("published_at_start", "")
-        end_date = request.GET.get("published_at_end", "")
+        start_date = request.GET.get("start_date", "")
+        end_date = request.GET.get("end_date", "")
         score_min = float(request.GET.get("score_min", "0"))
 
         search_query = request.GET.get("search", "").strip()
