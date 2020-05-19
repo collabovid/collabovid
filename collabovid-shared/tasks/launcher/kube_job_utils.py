@@ -4,10 +4,49 @@ from kubernetes import client, config, watch
 import kubernetes.client
 from kubernetes.client.rest import ApiException
 
+from django.conf import settings
+
+
+def cleanup_pods(delete_succeeded=True, delete_failed=True, namespace="default"):
+    """
+    Cleans up finished or failed pods.
+    :param delete_succeeded:
+    :param delete_failed:
+    :param namespace:
+    :return:
+    """
+
+    if not delete_failed and not delete_succeeded:
+        return
+
+    api_instance = kubernetes.client.CoreV1Api()
+
+    try:
+        if delete_succeeded:
+            succeeded_pods = api_instance.list_namespaced_pod(namespace,  field_selector="status.phase==Succeeded")
+            for pod in succeeded_pods.items:
+                print("deleting succeeded pod", pod.metadata.name)
+                api_instance.delete_namespaced_pod(pod.metadata.name, namespace)
+
+        if delete_failed:
+            failed_pods = api_instance.list_namespaced_pod(namespace, field_selector="status.phase==Failed")
+            for pod in failed_pods.items:
+                print("deleting failed pod", pod.metadata.name)
+                api_instance.delete_namespaced_pod(pod.metadata.name, namespace)
+
+    except ApiException as e:
+        print("Exception when calling CoreV1Api from cleanup: %s\n" % e)
+
 
 def create_job_object(name, container_image, command, args=None, namespace="default", container_name="jobcontainer",
                       env_vars=None, restart_policy='Never', ttl_finished=180, secret_names=None, backoff_limit=0,
                       volume_mappings=None):
+
+    if settings.TASK_DELETE_SUCCESSFUL_PODS or settings.TASK_DELETE_FAILED_PODS:
+        cleanup_pods(delete_succeeded=settings.TASK_DELETE_SUCCESSFUL_PODS,
+                     delete_failed=settings.TASK_DELETE_FAILED_PODS,
+                     namespace=namespace)
+
     if env_vars is None:
         env_vars = {}
     if secret_names is None:
@@ -46,7 +85,8 @@ def create_job_object(name, container_image, command, args=None, namespace="defa
 
     # set container options
     container = client.V1Container(name=container_name, image=container_image, env=env_list,
-                                   command=command, args=args, env_from=env_from, volume_mounts=volume_mounts, image_pull_policy='Always')
+                                   command=command, args=args, env_from=env_from, volume_mounts=volume_mounts,
+                                   image_pull_policy=settings.TASK_IMAGE_PULL_POLICY)
 
     # set pod options
     template.template.spec = client.V1PodSpec(containers=[container], restart_policy=restart_policy, volumes=volumes,
@@ -56,6 +96,7 @@ def create_job_object(name, container_image, command, args=None, namespace="defa
                                  backoff_limit=backoff_limit)
 
     return body
+
 
 
 def run_job(job_object: client.V1Job, block=False):
