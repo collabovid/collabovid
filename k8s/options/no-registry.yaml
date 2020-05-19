@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+spec:
+  template:
+    spec:
+      containers:
+        - name: search
+          env:
+            - name: REGISTRY
+              value: ""
+            - name: TASK_IMAGE_PULL_POLICY
+              value: "Never"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          env:
+            - name: REGISTRY
+              value: ""
+            - name: TASK_IMAGE_PULL_POLICY
+              value: "Never"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: scrape-latest
+data:
+  REGISTRY: ""
+  # Never in base64
+  TASK_IMAGE_PULL_POLICY: "TmV2ZXI="
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: web-latest
+data:
+  REGISTRY: ""
+  # Never in base64
+  TASK_IMAGE_PULL_POLICY: "TmV2ZXI="
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: search-latest
+data:
+  REGISTRY: ""
+  # Never in base64
+  TASK_IMAGE_PULL_POLICY: "TmV2ZXI="
+
+
+
