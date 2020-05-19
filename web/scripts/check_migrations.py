@@ -1,6 +1,6 @@
 import os
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'web.dev_settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'web.settings_dev')
 import django
 
 django.setup()

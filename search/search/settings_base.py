@@ -109,7 +109,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT= 'static'
+STATIC_ROOT = 'static'
 
 MODELS_BASE_DIR = os.getenv('MODELS_BASE_DIR', None)
 PAPER_MATRIX_BASE_DIR = os.getenv('PAPER_MATRIX_BASE_DIR', None)

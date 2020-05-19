@@ -4,6 +4,8 @@ from collabovid_settings.postgres_settings import *
 from collabovid_settings.tasks_settings import *
 from collabovid_settings.aws_settings import *
 
+DEBUG = False
+
 ALLOWED_HOSTS += [SEARCH_SERVICE_HOST]
 
 POD_IP = os.getenv('POD_IP', None)
