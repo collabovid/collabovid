@@ -80,6 +80,15 @@ class ReleaseCommand(Command):
         if args.restart:
             self.call_command('cluster restart --all --no-config-build')
 
+        if not args.no_cronjob:
+            if self.resource_exists('cronjob', 'scrape-cron'):
+                self.print_info("Applying scrape cronjob")
+                self.call_command(f'cronjobs apply -n scrape-cron')
+            else:
+                self.print_info("Not applying cronjob because no one is currently in the cluster applied")
+        else:
+            self.print_info("Not applying scrape cronjob")
+
         self.save_release_file(release_dict)
 
     def create_db_snapshot(self):
@@ -119,6 +128,7 @@ class ReleaseCommand(Command):
         parser.add_argument('--no-build', action='store_true')
         parser.add_argument('--no-push', action='store_true')
         parser.add_argument('--no-db-snapshot', action='store_true')
+        parser.add_argument('--no-cronjob', action='store_true')
         parser.add_argument('-y', action='store_true')
         parser.add_argument('-t', '--timeout', type=int, default=120)
 

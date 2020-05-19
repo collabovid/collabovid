@@ -88,14 +88,22 @@ class Command:
             self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option_name)),
                                    quiet=quiet)
             self.run_shell_command(
-                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option_name)), quiet=quiet)
+                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option_name)),
+                quiet=quiet)
 
         # allow caller to add further customization
         if customize_callback is not None:
             customize_callback(join(temp_dir, env))
 
-        self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env), quiet=quiet)
+        self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env),
+                               quiet=quiet)
         self.run_shell_command('rm -rf {}'.format(temp_dir), quiet=quiet)
+
+    def resource_exists(self, resource, name):
+        result = self.run_shell_command(
+            f'{self.kubectl} get {resource} --field-selector=metadata.name={name} -o jsonpath={{.items}}',
+            collect_output=True, print_command=False)
+        return result.stdout.decode('utf8') != '[]'
 
 
 class CommandWithServices(Command):
@@ -135,32 +143,32 @@ class KubectlCommand(Command):
 class AbstractJobsCommand(KubectlCommand):
     def run(self, args):
         super().run(args)
-        job_identifier = self.get_job_identifier()
-        job_file = join(self.k8s_dist_path, f"{job_identifier}s", self.current_env(),
-                        f'{job_identifier}--{args.name}.yml')
-        if args.command == 'run':
-            result = self.run_shell_command(
-                f'kubectl get jobs --selector={job_identifier}-name={args.name} -o jsonpath={{.items}}',
-                collect_output=True, print_command=False)
-            if result.stdout.decode('utf8') != '[]':
-                self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
-            self.run_shell_command(f"{self.kubectl} apply -f {job_file}")
-        elif args.command == 'logs':
-            self.run_shell_command(f"{self.kubectl} logs  --tail=-1 --selector={job_identifier}-name={args.name}")
+        if args.command == 'logs':
+            self.run_shell_command(
+                f"{self.kubectl} logs  --tail=-1 --selector={self.get_job_identifier()}-name={args.name}")
+        elif args.command == 'apply':
+            self.run_shell_command(f"{self.kubectl} apply -f {self.get_job_file(args.name)}")
         elif args.command == 'status':
-            self.run_shell_command(f"{self.kubectl} get pods --selector={job_identifier}-name={args.name}")
+            self.run_shell_command(f"{self.kubectl} get pods --selector={self.get_job_identifier()}-name={args.name}")
         elif args.command == 'delete':
             if args.all:
-                self.run_shell_command(f'{self.kubectl} delete {job_identifier}s --all')
+                self.run_shell_command(f'{self.kubectl} delete {self.get_job_identifier()}s --all')
             else:
-                self.run_shell_command(f"{self.kubectl} delete {job_identifier} {args.name}")
+                self.run_shell_command(f"{self.kubectl} delete {self.get_job_identifier()} {args.name}")
+
+    def get_job_file(self, job_name):
+        return join(self.k8s_dist_path, f"{self.get_job_identifier()}s", self.current_env(),
+                    f'{self.get_job_identifier()}--{job_name}.yml')
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
-        parser.add_argument('command', choices=['run', 'logs', 'status', 'delete'])
+        parser.add_argument('command', choices=self.command_choices())
         group = parser.add_mutually_exclusive_group(required=True)
         group.add_argument('--all', action='store_true')
         group.add_argument('-n', '--name')
+
+    def command_choices(self):
+        return ['logs', 'status', 'delete', 'apply']
 
     def get_job_identifier(self):
         return ''

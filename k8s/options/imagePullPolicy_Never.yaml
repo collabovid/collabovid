@@ -45,28 +45,6 @@ spec:
         - name: web
           imagePullPolicy: Never
 ---
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: scrape
-spec:
-  template:
-    spec:
-      containers:
-        - name: scrape
-          imagePullPolicy: Never
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: test
-spec:
-  template:
-    spec:
-      containers:
-        - name: web
-          imagePullPolicy: Never
----
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

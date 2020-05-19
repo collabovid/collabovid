@@ -3,9 +3,9 @@ kind: CronJob
 metadata:
   name: scrape-cron
 spec:
-  schedule: "10 * * * *"
-  successfulJobsHistoryLimit: 0
-  failedJobsHistoryLimit: 0
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
