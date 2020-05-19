@@ -19,7 +19,6 @@ RUN pip install --no-cache /collabovid-shared/dist/*.whl && rm -rf /collabovid-s
 
 COPY ${PROJECT_DIR} /app
 WORKDIR /app
-ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings
 
 EXPOSE 80
 STOPSIGNAL SIGTERM

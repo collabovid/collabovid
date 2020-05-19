@@ -11,8 +11,10 @@ RUN pip install --no-cache /collabovid-shared/dist/*.whl && rm -rf /collabovid-s
 
 COPY ${PROJECT_DIR} /app
 WORKDIR /app
-ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.test_settings
+ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings_prod
+ENV SECRET_KEY='xyz'
 RUN python manage.py collectstatic
+ENV SECRET_KEY=''
 
 EXPOSE 80
 STOPSIGNAL SIGTERM
