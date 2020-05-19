@@ -6,13 +6,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from data.models import DataSource
-from scrape.updater.data_updater import ArticleDataPoint, DataUpdater, DataError
+from scrape.updater.data_updater import ArticleDataPoint, DataError, DataUpdater
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
 _BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
-_MEDBIORXIV_DATA_PRIORITY = 1
 
 
 class MedrxivDataPoint(ArticleDataPoint):
@@ -59,15 +58,9 @@ class MedrxivDataPoint(ArticleDataPoint):
                 continue
         return authors
 
-
     @property
     def data_source_name(self):
         return DataSource.MEDBIORXIV_DATASOURCE_NAME
-
-    @property
-    def data_source_priority(self):
-        # TODO remove
-        return _MEDBIORXIV_DATA_PRIORITY
 
     @property
     def paperhost_name(self):
@@ -157,7 +150,6 @@ class MedrxivUpdater(DataUpdater):
 
         for article in self._article_json:
             yield MedrxivDataPoint(article)
-
 
     def _get_data_point(self, doi):
         self._get_article_json()

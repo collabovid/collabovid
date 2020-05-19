@@ -1,5 +1,6 @@
 from django.db import models
 from django.db.models import F
+from django.utils.translation import gettext_lazy
 
 
 class Topic(models.Model):
@@ -48,6 +49,7 @@ class Author(models.Model):
     split_name = models.BooleanField(default=False)  # True iff the name was split by us at the time of creation.
     data_source = models.ForeignKey(DataSource, related_name="authors", on_delete=models.CASCADE, null=True,
                                     default=None)
+
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
 
@@ -66,6 +68,13 @@ class PaperData(models.Model):
     content = models.TextField(null=True, default=None)
 
 
+class PaperState(models.IntegerChoices):
+    BULLSHIT = 0, gettext_lazy('Declined')  # Manually decided to not use this record
+    UNKNOWN = 2, gettext_lazy('Unknown')  # Automatic check not executed or returned False
+    AUTOMATICALLY_ACCEPTED = 3, gettext_lazy('Automatically accepted')  # Automatic check returned True
+    VERIFIED = 4, gettext_lazy('Verified')  # Manually verified
+
+
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
@@ -80,7 +89,7 @@ class Paper(models.Model):
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
-                                      default=None)
+                                    default=None)
     version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
@@ -93,6 +102,7 @@ class Paper(models.Model):
                               default=None,
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
+    paper_state = models.IntegerField(choices=PaperState.choices, default=PaperState.UNKNOWN)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
@@ -108,6 +118,18 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
+
+    def automatic_state_check(self, save=False):
+        if self.paper_state in (PaperState.UNKNOWN, PaperState.AUTOMATICALLY_ACCEPTED):
+            success = len(self.title.split()) > 4 and len(self.abstract.split()) >= 20
+            self.paper_state = PaperState.AUTOMATICALLY_ACCEPTED if success else PaperState.UNKNOWN
+            if save:
+                self.save()
+
+    @property
+    def visible(self):
+        return (self.covid_related or self.data_source.name == DataSource.MEDBIORXIV_DATASOURCE_NAME) \
+               and self.paper_state in (PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED)
 
     @property
     def percentage_topic_score(self):

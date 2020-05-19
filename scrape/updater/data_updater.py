@@ -67,10 +67,6 @@ class ArticleDataPoint(object):
         raise NotImplementedError
 
     @property
-    def data_source_priority(self):
-        raise NotImplementedError
-
-    @property
     def paperhost_name(self):
         raise NotImplementedError
 
@@ -212,6 +208,7 @@ class ArticleDataPoint(object):
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
             db_article.covid_related = covid_related(db_article=db_article)
+            db_article.automatic_state_check(save=False)
             db_article.last_scrape = timezone.now()
             db_article.save()
         return db_article, created
@@ -251,7 +248,7 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
-            # self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
