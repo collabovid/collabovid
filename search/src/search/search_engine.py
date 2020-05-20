@@ -6,6 +6,7 @@ from .search import Search
 from .exact_search import ExactSearch
 from .keyword_search import KeywordSearch
 from .semantic_search import SemanticSearch
+from .doi_search import DoiSearch
 
 
 class SearchEngine:
@@ -45,4 +46,4 @@ class SearchEngine:
 
 
 def get_default_search_engine():
-    return SearchEngine([ExactSearch(), KeywordSearch(), SemanticSearch()])
+    return SearchEngine([ExactSearch(), KeywordSearch(), SemanticSearch(), DoiSearch()])

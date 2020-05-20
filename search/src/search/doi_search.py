@@ -1,9 +1,6 @@
 import re
 from typing import List
-
-from data.models import Paper
 from django.db.models import QuerySet
-
 from .search import Search, PaperResult
 
 DOI_SEARCH_SCORE = 10
@@ -26,13 +23,12 @@ class DoiSearch(Search):
         """
         if doi_regex.fullmatch(query):
             paper_dois = papers.filter(doi=query).values_list('doi', flat=True)
-            paper_dois = Paper.objects.filter(doi=query).values_list('doi', flat=True)
             return [PaperResult(paper_doi=doi, score=DOI_SEARCH_SCORE) for doi in paper_dois]
         elif arxiv_regex.fullmatch(query):
             match = arxiv_regex.match(query)
             # make sure that the prefix 'arXiv:' (case sensitive!) is there, because we save it like this in the DB
             arxiv_id = 'arXiv:' + match.group('numeric_id')
-            paper_dois = Paper.objects.filter(doi=arxiv_id).values_list('doi', flat=True)
+            paper_dois = papers.filter(doi=arxiv_id).values_list('doi', flat=True)
             return [PaperResult(paper_doi=doi, score=DOI_SEARCH_SCORE) for doi in paper_dois]
         else:
             return []
