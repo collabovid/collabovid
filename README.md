@@ -1,8 +1,10 @@
-# covid19-publications
+# Collabovid
 
 ## Installation
 
     # Run all commands from project root directory
+    
+    pip install -e collabovid-shared
     
     # Remove existing database
     rm -f db.sqlite3

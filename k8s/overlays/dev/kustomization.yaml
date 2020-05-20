@@ -1,0 +1,29 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+  - envs
+  - postgres.yaml
+  - s3.yaml
+
+patchesStrategicMerge:
+  - search.yaml
+  - web.yaml
+
+secretGenerator:
+  - name: web
+    envs:
+      - envs/web.env
+  - name: search
+    envs:
+      - envs/search.env
+  - name: daemon
+    envs:
+      - envs/daemon.env
+  - name: shared
+    envs:
+      - envs/shared.env
+  - name: scrape
+    envs:
+      - envs/scrape.env
