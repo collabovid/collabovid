@@ -13,7 +13,6 @@ from cvid.commands.release import ReleaseCommand
 from cvid.commands.version import VersionCommand
 from cvid.commands.register import RegisterCommand
 from cvid.commands.configure_k8s import ConfigureKubernetes
-from cvid.commands.test import TestCommand
 import json
 from os.path import join, dirname, realpath
 import os
