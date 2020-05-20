@@ -1,4 +1,4 @@
-from .settings_base import *
+from .settings_prod import *
 from collabovid_settings.tasks_settings import *
 
 DEBUG=True

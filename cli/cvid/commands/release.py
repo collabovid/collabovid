@@ -101,7 +101,7 @@ class ReleaseCommand(Command):
             return False, None
         else:
             result = self.run_shell_command(f"{self.kubectl} logs --tail=-1 --selector=job-name={job_name}",
-                                            collect_output=True)
+                                            collect_output=True, quiet=True)
             output = result.stdout.decode('utf-8').strip()
             return True, output
 
