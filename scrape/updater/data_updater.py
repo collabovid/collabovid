@@ -10,17 +10,7 @@ from django.utils import timezone
 from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
 from scrape.pdf_extractor import PdfExtractError, PdfExtractor
 from scrape.static_functions import covid_related, sanitize_doi
-
-
-class UpdateException(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return self.msg
+from .update_exception import UpdateException
 
 
 class DifferentDataSourceError(UpdateException):

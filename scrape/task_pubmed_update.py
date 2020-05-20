@@ -1,5 +1,7 @@
 from django.conf import settings
 
+from data.models import DataSource, Paper
+from scrape.updater.cord19_fulltext_update import Cord19FulltextUpdater
 from scrape.updater.pubmed_update import PubmedUpdater
 from tasks.definitions import register_task, Runnable
 
@@ -41,3 +43,6 @@ class PubmedNewArticlesTask(Runnable):
 
         updater = PubmedUpdater(log=self.log)
         updater.get_new_data(pdf_content=True, pdf_image=pdf_image)
+
+        pubmed_datasource = DataSource.objects.get(name=DataSource.PUBMED_DATASOURCE_NAME)
+        Cord19FulltextUpdater.update(papers=Paper.objects.filter(data_source=pubmed_datasource))
