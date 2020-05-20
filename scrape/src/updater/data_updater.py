@@ -8,19 +8,8 @@ from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
 
 from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
-from src.pdf_extractor import PdfExtractError, PdfExtractor
 from src.static_functions import covid_related, sanitize_doi
-
-
-class UpdateException(Exception):
-    def __init__(self, msg):
-        self.msg = msg
-
-    def __str__(self):
-        return self.msg
-
-    def __repr__(self):
-        return self.msg
+from .update_exception import UpdateException
 
 
 class DifferentDataSourceError(UpdateException):
