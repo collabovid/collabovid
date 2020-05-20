@@ -3,7 +3,22 @@
         "update-medbiorxiv": {
             "name": "Update Medbiorxiv",
             "description": "No description provided.",
-            "parameters": []
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 200,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
         },
         "get-new-medbiorxiv": {
             "name": "Get New Medbiorxiv",
@@ -13,7 +28,22 @@
         "update-arxiv": {
             "name": "Update Arxiv",
             "description": "No description provided.",
-            "parameters": []
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 10,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
         },
         "get-new-arxiv": {
             "name": "Get New Arxiv",
