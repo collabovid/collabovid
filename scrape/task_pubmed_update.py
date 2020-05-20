@@ -8,7 +8,7 @@ from tasks.definitions import register_task, Runnable
 class PubmedUpdateTask(Runnable):
     @staticmethod
     def task_name():
-        return "update-medbiorxiv"
+        return "update-pubmed"
 
     def __init__(self, *args, **kwargs):
         super(PubmedUpdateTask, self).__init__(*args, **kwargs)
@@ -19,6 +19,8 @@ class PubmedUpdateTask(Runnable):
             self.log("Scraping images disabled in settings")
         else:
             pdf_image = True
+        updater = PubmedUpdater(log=self.log)
+        updater.update_existing_data(count=200, pdf_image=pdf_image)
 
 
 @register_task

@@ -4,6 +4,7 @@ from analyze.setup_vectorizer import SetupVectorizer
 from analyze.update_topic_assignment import UpdateTopicAssignment
 from scrape.task_arxiv_update import ArxivNewArticlesTask
 from scrape.task_medrxiv_update import MedBiorxivNewArticlesTask
+from scrape.task_pubmed_update import PubmedNewArticlesTask
 from tasks.definitions import register_task, Runnable
 from tasks.task_runner import TaskRunner
 
@@ -30,6 +31,11 @@ class Scrape(Runnable):
         TaskRunner.run_task(ArxivNewArticlesTask,
                             started_by=self._started_by)
         self.log("Finished getting new medRxiv/bioRxiv articles...")
+
+        self.log("Get new Pubmed articles...")
+        TaskRunner.run_task(PubmedNewArticlesTask,
+                            started_by=self._started_by)
+        self.log("Finished getting new Pubmed articles...")
 
         if 'USE_PAPER_ANALYZER' in os.environ and os.environ['USE_PAPER_ANALYZER'] == '1':
             self.log("Updating Topic assigment...")

@@ -92,10 +92,11 @@ class PubmedUpdater(DataUpdater):
     def _load_query_result(self):
         if not self._query_result:
             pubmed = PubMed(tool='Collabovid', email='info@collabovid.org')
-            self._query_result = pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=30000)
+            self._query_result = list(pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=30000))
 
     def _count(self):
-        pass
+        self._load_query_result()
+        return len(self._query_result)
 
     def _get_data_points(self):
         self._load_query_result()
@@ -103,5 +104,8 @@ class PubmedUpdater(DataUpdater):
             yield PubMedDatapoint(pubmed_article)
 
     def _get_data_point(self, doi):
-        #TODO: send query for pubmed id?
-        raise NotImplementedError
+        self._load_query_result()
+        try:
+            return PubMedDatapoint(next(x for x in self._query_result if x.doi == doi))
+        except StopIteration:
+            return None
