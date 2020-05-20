@@ -9,11 +9,8 @@ class ReleaseCommand(Command):
     def run(self, args):
         release_dict = {}
 
-        result = self.call_command('version', collect_output=True)
+        result = self.call_command('version', collect_output=True, exit_on_fail=True, quiet=True)
         version = result.stdout.decode('utf8').strip()
-        if result.returncode != 0:
-            print('Getting version failed: ' + version)
-            exit(4)
 
         # saving previous running version
         release_dict['old_version'] = version
@@ -95,15 +92,15 @@ class ReleaseCommand(Command):
         pass
 
     def run_job_to_completion(self, job_name, timeout):
-        kubectl = self.current_env_config()['kubectl']
         self.run_shell_command(f"cvid jobs run -n {job_name} --no-config-build")
         result = self.run_shell_command(
-            f"{kubectl} wait --for=condition=complete job/{job_name} --timeout={timeout}s", collect_output=True)
+            f"{self.kubectl} wait --for=condition=complete job/{job_name} --timeout={timeout}s",
+            collect_output=True, exit_on_fail=False)
         if result.returncode != 0:
             # job was not completed
             return False, None
         else:
-            result = self.run_shell_command(f"{kubectl} logs --tail=-1 --selector=job-name={job_name}",
+            result = self.run_shell_command(f"{self.kubectl} logs --tail=-1 --selector=job-name={job_name}",
                                             collect_output=True)
             output = result.stdout.decode('utf-8').strip()
             return True, output

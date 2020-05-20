@@ -1,5 +1,4 @@
 import subprocess
-import argparse
 from os.path import join, exists
 import os
 from subprocess import PIPE
@@ -16,40 +15,53 @@ class Command:
     def add_arguments(self, parser):
         pass
 
-    @property
-    def kubectl(self):
-        return self.current_env_config()['kubectl']
-
-    def run_shell_command(self, cmd, cwd=None, collect_output=False, print_command=True, quiet=False):
-        if print_command and not quiet:
-            self.print_info("Running: {}".format(cmd))
-
-        collect_output = collect_output or quiet
-        if collect_output:
-            return subprocess.run(cmd, shell=True, cwd=cwd, stdout=PIPE)
-        else:
-            subprocess.run(cmd, shell=True, cwd=cwd)
-
-    def print_info(self, info):
-        ansi_cyan = "\033[1;36m"
-        ansi_reset = "\u001B[0m"
-        print(ansi_cyan + info + ansi_reset)
-
-    def current_env(self):
-        return self.config['env']
+    def name(self):
+        raise NotImplementedError()
 
     def help(self):
         return ""
 
+    def print_info(self, info):
+        bold = '\033[1m'
+        ansi_reset = "\u001B[0m"
+        print(bold + info + ansi_reset)
+
+    def current_env(self):
+        return self.config['env']
+
     def current_env_config(self):
         return self.config['envs'][self.current_env()]
+
+    def resource_exists(self, resource, name):
+        result = self.run_shell_command(
+            f'{self.kubectl} get {resource} --field-selector=metadata.name={name} -o jsonpath={{.items}}',
+            collect_output=True, print_command=False)
+        return result.stdout.decode('utf8') != '[]'
+
+    @property
+    def kubectl(self):
+        return self.current_env_config()['kubectl']
+
+    def run_shell_command(self, cmd, cwd=None, collect_output=False, print_command=True,
+                          quiet=False, exit_on_fail=True):
+        if print_command:
+            self.print_info("\033[1;36m" + f"Running: {cmd}" + "\u001B[0m")
+        try:
+            if collect_output:
+                result = subprocess.run(cmd, shell=True, cwd=cwd, stdout=PIPE, check=exit_on_fail)
+                stdout = result.stdout.decode('utf8')
+                if not quiet:
+                    print(stdout.rstrip())
+                return result
+            else:
+                subprocess.run(cmd, shell=True, cwd=cwd, check=exit_on_fail)
+        except subprocess.CalledProcessError as e:
+            print('\033[91m' + f"Aborting. {str(e)}" + "\u001B[0m")
+            exit(42)
 
     @property
     def services(self):
         return self.config['services']
-
-    def name(self):
-        return ""
 
     def call_command(self, cmd, *args, **kwargs):
         return self.run_shell_command(f'cvid {cmd}', *args, **kwargs)
@@ -98,77 +110,3 @@ class Command:
         self.run_shell_command('{} {} {}'.format(join(kubernetes_dir, 'build.sh'), join(temp_dir, env), env),
                                quiet=quiet)
         self.run_shell_command('rm -rf {}'.format(temp_dir), quiet=quiet)
-
-    def resource_exists(self, resource, name):
-        result = self.run_shell_command(
-            f'{self.kubectl} get {resource} --field-selector=metadata.name={name} -o jsonpath={{.items}}',
-            collect_output=True, print_command=False)
-        return result.stdout.decode('utf8') != '[]'
-
-
-class CommandWithServices(Command):
-    def run(self, args):
-        if args.all:
-            args.services = self.config['services'].items()
-            print("No Service specified: Running for all..")
-        else:
-            args.services = [(service, self.config['services'][service]) for service in args.services]
-
-    def add_arguments(self, parser):
-        group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument('--all', action='store_true')
-        group.add_argument('-s', '--services', nargs='*', choices=self.config['services'].keys(),
-                           help="Specify multiple values of {} or use all".format(self.config['services'].keys()))
-
-
-class KubectlCommand(Command):
-    def run(self, args):
-        if not args.no_config_build:
-            self.build_kubernetes_config(image_tag=args.tag)
-
-    def add_arguments(self, parser):
-        parser.add_argument('-t', '--tag', default=None,
-                            help="Specifies the image tag that should be used when building the cluster config")
-        parser.add_argument('--no-config-build', action='store_true')
-
-    @property
-    def k8s_dist_path(self):
-        return join('k8s', 'dist')
-
-    @property
-    def k8s_dist_env_path(self):
-        return join(self.k8s_dist_path, self.current_env())
-
-
-class AbstractJobsCommand(KubectlCommand):
-    def run(self, args):
-        super().run(args)
-        if args.command == 'logs':
-            self.run_shell_command(
-                f"{self.kubectl} logs  --tail=-1 --selector={self.get_job_identifier()}-name={args.name}")
-        elif args.command == 'apply':
-            self.run_shell_command(f"{self.kubectl} apply -f {self.get_job_file(args.name)}")
-        elif args.command == 'status':
-            self.run_shell_command(f"{self.kubectl} get pods --selector={self.get_job_identifier()}-name={args.name}")
-        elif args.command == 'delete':
-            if args.all:
-                self.run_shell_command(f'{self.kubectl} delete {self.get_job_identifier()}s --all')
-            else:
-                self.run_shell_command(f"{self.kubectl} delete {self.get_job_identifier()} {args.name}")
-
-    def get_job_file(self, job_name):
-        return join(self.k8s_dist_path, f"{self.get_job_identifier()}s", self.current_env(),
-                    f'{self.get_job_identifier()}--{job_name}.yml')
-
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-        parser.add_argument('command', choices=self.command_choices())
-        group = parser.add_mutually_exclusive_group(required=True)
-        group.add_argument('--all', action='store_true')
-        group.add_argument('-n', '--name')
-
-    def command_choices(self):
-        return ['logs', 'status', 'delete', 'apply']
-
-    def get_job_identifier(self):
-        return ''

@@ -7,16 +7,19 @@ from cvid.commands.jobs import JobsCommand
 from cvid.commands.aws_registry_login import AWSRegistryLoginCommand
 from cvid.commands.cronjobs import CronJobsCommand
 from cvid.commands.collect_tasks import CollectTasksCommand
-from cvid.commands.upload_models import UploadModelsCommand
+from cvid.commands.models import ModelsCommand
+from cvid.commands.paper_matrices import PaperMatricesCommand
 from cvid.commands.release import ReleaseCommand
 from cvid.commands.version import VersionCommand
 from cvid.commands.register import RegisterCommand
 from cvid.commands.configure_k8s import ConfigureKubernetes
+from cvid.commands.test import TestCommand
 import json
 from os.path import join, dirname, realpath
 import os
 
 from .utils.dict_utils import DictUtils
+
 
 def main():
     config_path = join(os.getcwd(), 'cvid-config.json')
@@ -37,8 +40,9 @@ def main():
     args = {'config': config, 'user_config': user_config}
     commands = [UseCommand(**args), BuildCommand(**args), PushCommand(**args),
                 ClusterCommand(**args), JobsCommand(**args), AWSRegistryLoginCommand(**args),
-                CronJobsCommand(**args), CollectTasksCommand(**args), UploadModelsCommand(**args), ReleaseCommand(**args),
-                VersionCommand(**args), ConfigureKubernetes(**args), RegisterCommand(**args)]
+                CronJobsCommand(**args), CollectTasksCommand(**args), ReleaseCommand(**args), VersionCommand(**args),
+                ConfigureKubernetes(**args), RegisterCommand(**args),
+                ModelsCommand(**args), PaperMatricesCommand(**args)]
 
     parser = argparse.ArgumentParser(prog='cvid')
     subparsers = parser.add_subparsers()

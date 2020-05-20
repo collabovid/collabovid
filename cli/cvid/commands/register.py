@@ -1,8 +1,4 @@
-#
-
-from .command import Command, KubectlCommand
-import os
-from os.path import join
+from .command import Command
 
 
 class RegisterCommand(Command):

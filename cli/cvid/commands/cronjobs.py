@@ -1,4 +1,4 @@
-from .command import AbstractJobsCommand
+from cvid.commands.abstract.abstract_jobs import AbstractJobsCommand
 
 
 class CronJobsCommand(AbstractJobsCommand):

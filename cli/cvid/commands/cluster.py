@@ -1,4 +1,4 @@
-from .command import Command, KubectlCommand
+from cvid.commands.abstract.kubectl import KubectlCommand
 import os
 from os.path import join
 
@@ -16,14 +16,15 @@ class ClusterCommand(KubectlCommand):
         if args.name and not args.resource:
             print('No resource type supplied. Use -r <resource>. Exiting.')
             return
-        path = ''
+
+        kubectl_args = ''
         if not args.resource and args.all:
             if args.command == 'restart':
                 for file in os.listdir(self.k8s_dist_env_path):
                     if file.startswith('deployment') or file.startswith('daemonset'):
-                        path += f" -f {join(self.k8s_dist_env_path, file)}"
+                        kubectl_args += f" -f {join(self.k8s_dist_env_path, file)}"
             else:
-                path = '-f ' + self.k8s_dist_env_path
+                kubectl_args = '-f ' + self.k8s_dist_env_path
             if args.command == 'delete':
                 self.call_command('jobs delete --all --no-config-build')
                 self.call_command('cronjobs delete --all --no-config-build')
@@ -31,10 +32,10 @@ class ClusterCommand(KubectlCommand):
             if args.all:
                 for file in os.listdir(self.k8s_dist_env_path):
                     if file.startswith(args.resource):
-                        path += f" -f {join(self.k8s_dist_env_path, file)}"
+                        kubectl_args += f" -f {join(self.k8s_dist_env_path, file)}"
             elif args.name:
-                path = '-f ' + join(self.k8s_dist_env_path, f"{args.resource}--{args.name}.yml")
-        self.run_shell_command(f"{self.kubectl} {commands[args.command]} {path}")
+                kubectl_args = '-f ' + join(self.k8s_dist_env_path, f"{args.resource}--{args.name}.yml")
+        self.run_shell_command(f"{self.kubectl} {commands[args.command]} {kubectl_args}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

@@ -31,7 +31,6 @@ def refresh_local_timestamps(local_directory, keys, timestamp_file_name='timesta
         json.dump(timestamp_data, f)
 
 
-
 class SyncableStore:
     def __init__(self, remote_root_path: str, s3_bucket_client: S3BucketClient, timestamp_file_name='timestamps.json'):
 
@@ -41,7 +40,7 @@ class SyncableStore:
         self.remote_root_path = remote_root_path
         self.remote_timestamp_file_path = join(remote_root_path, timestamp_file_name)
 
-    def sync_to_local_directory(self, local_root_path: str, verbose=True):
+    def sync_to_local_directory(self, local_root_path: str, verbose=True, keys=None, force=False):
         local_root_path = local_root_path
         local_timestamp_file_path = join(local_root_path, self.timestamp_file_name)
 
@@ -57,15 +56,24 @@ class SyncableStore:
             with open(local_timestamp_file_path, 'r') as f:
                 timestamps_local = json.load(f)
 
+        if keys is not None:
+            for key in list(timestamps_remote.keys()):
+                if key not in keys and key not in timestamps_local.keys():
+                    del timestamps_remote[key]
+
         # Download new files if remote timestamp is older than local timestamp
         for key, timestamp in timestamps_remote.items():
-            if key not in timestamps_local or dateutil.parser.parse(timestamps_local[key]) < dateutil.parser.parse(
-                    timestamp):
+            needs_update = key not in timestamps_local or dateutil.parser.parse(
+                timestamps_local[key]) < dateutil.parser.parse(timestamp) or force
+            if needs_update:
                 if verbose:
                     print("Refreshing: " + key)
                 local_file_path = join(local_root_path, key)
                 self.s3_bucket_client.download_file(join(self.remote_root_path, key), local_file_path)
                 self._post_file_download(local_root_path, key)
+            else:
+                if verbose:
+                    print(f'{key} already up to date')
 
         # Write new timestamps file
         with open(local_timestamp_file_path, 'w') as f:

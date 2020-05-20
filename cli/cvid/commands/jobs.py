@@ -1,4 +1,4 @@
-from .command import AbstractJobsCommand
+from cvid.commands.abstract.abstract_jobs import AbstractJobsCommand
 
 
 class JobsCommand(AbstractJobsCommand):
@@ -6,10 +6,8 @@ class JobsCommand(AbstractJobsCommand):
     def run(self, args):
         if args.command == 'run':
             job_file = self.get_job_file(job_name=args.name)
-            result = self.run_shell_command(
-                f'{self.kubectl} get jobs --selector={self.get_job_identifier()}-name={args.name} -o jsonpath={{.items}}',
-                collect_output=True, print_command=False)
-            if result.stdout.decode('utf8') != '[]':
+            # Check if the old job is still present because when starting a job, the old one must be deleted
+            if self.resource_exists('job', args.name):
                 self.run_shell_command(f"{self.kubectl} delete -f {job_file}")
             self.run_shell_command(f"{self.kubectl} apply -f {job_file}")
         else:

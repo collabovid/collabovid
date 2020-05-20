@@ -12,7 +12,7 @@ class AWSRegistryLoginCommand(Command):
         parser.add_argument('-r', '--region', choices=['us-east-1', 'eu-central-1'])
 
     def help(self):
-        return "Login the docker client into the registry"
+        return "Login the docker client into the aws registry"
 
     def name(self):
         return "aws-registry-login"

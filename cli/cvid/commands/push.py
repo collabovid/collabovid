@@ -1,4 +1,4 @@
-from .command import Command, CommandWithServices
+from cvid.commands.abstract.with_services import CommandWithServices
 
 
 class PushCommand(CommandWithServices):

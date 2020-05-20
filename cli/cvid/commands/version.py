@@ -21,7 +21,7 @@ class VersionCommand(Command):
         print(version)
 
     def run_with_output(self, cmd):
-        output = self.run_shell_command(cmd, collect_output=True,print_command=False)
+        output = self.run_shell_command(cmd, collect_output=True, print_command=False, quiet=True)
         output = output.stdout.decode('utf8').strip()
         return output
 

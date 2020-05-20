@@ -1,19 +1,27 @@
-from .command import Command, CommandWithServices
+from cvid.commands.abstract.with_services import CommandWithServices
 
 
 class BuildCommand(CommandWithServices):
     def run(self, args):
         super().run(args)
-        self.run_shell_command(
-            "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
 
+        # Make the common shared libraries
         self.run_shell_command("cd collabovid-shared; make")
         self.run_shell_command("cd collabovid-store; make")
+
+        if "search" in args.services or "web" in args.services:
+            # First build the collabovid base image where search and web depend upon
+            self.run_shell_command(
+                "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
+
+        # Build all services with docker buildkit enabled and tag them with an automatically generated tag
         for service, config in args.services:
             self.print_info("Building service: {}".format(service))
             tag = self.generate_tag()
             image = f"{service}:{tag}"
             self.run_shell_command(f"DOCKER_BUILDKIT=1 docker build -t {image} -f docker/{service}.Dockerfile .")
+
+            # delete/untag all old images from that service
             if args.delete_old:
                 self.run_shell_command(
                     f"docker rmi $(docker image ls --filter reference=\"*/{service}\" --filter reference=\"{service}\" --format '{{{{.Repository}}}}:{{{{.Tag}}}}' | grep -v '...:{tag}')")
