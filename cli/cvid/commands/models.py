@@ -12,7 +12,7 @@ class ModelsCommand(S3SyncCommand):
         models_store = ModelsStore(s3_bucket_client)
 
         if args.command == 'upload':
-            self.print_info('Uploading Paper Matrices')
+            self.print_info('Uploading Models')
             models_store.update_remote(directory, args.names)
         elif args.command == 'download':
             self.print_info("Downloading")

@@ -7,11 +7,15 @@ class S3Command(Command):
     def setup_s3_bucket_client(self):
         aws_access_key = self.current_env_config()['s3_access_key']
         aws_secret_access_key = self.current_env_config()['s3_secret_access_key']
-        endpoint_url = self.current_env_config()['s3_endpoint_url']
+        endpoint_url = self.endpoint_url
         bucket = self.current_env_config()['s3_bucket_name']
         s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key,
                                           endpoint_url=endpoint_url, bucket=bucket)
         return s3_bucket_client
+
+    @property
+    def endpoint_url(self):
+        return self.current_env_config()['s3_endpoint_url']
 
     def add_arguments(self, parser):
         pass
@@ -22,6 +26,11 @@ class S3SyncCommand(S3Command):
     def run(self, args):
         if args.all:
             args.names = self.name_choices
+        if args.command == 'upload':
+            self.print_info(f"Uploading will happen in env '{self.current_env()}' to url: {self.endpoint_url}")
+            confirmation = self.ask_for_confirmation("Do you want to continue?")
+            if not confirmation:
+                exit(1)
         os.makedirs(args.directory, exist_ok=True)
 
     def add_arguments(self, parser):

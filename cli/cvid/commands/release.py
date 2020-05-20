@@ -105,14 +105,6 @@ class ReleaseCommand(Command):
             output = result.stdout.decode('utf-8').strip()
             return True, output
 
-    def ask_for_confirmation(self, question):
-        print(f"{question} (y/n)")
-        answer = input()
-        while answer not in ['y', 'n']:
-            print('Please specify \'y\' or \'n\'')
-            answer = input()
-        return answer == 'y'
-
     def save_release_file(self, release_dict):
         deploy_time = datetime.datetime.utcnow().replace(microsecond=0).strftime('%Y-%m-%d-%H-%M-%S')
         release_dir = join(os.getcwd(), 'release')

@@ -35,7 +35,7 @@ class Command:
     def resource_exists(self, resource, name):
         result = self.run_shell_command(
             f'{self.kubectl} get {resource} --field-selector=metadata.name={name} -o jsonpath={{.items}}',
-            collect_output=True, print_command=False)
+            collect_output=True, print_command=False, quiet=True)
         return result.stdout.decode('utf8') != '[]'
 
     @property
@@ -70,6 +70,14 @@ class Command:
         result = subprocess.run("echo $(date +%Y%m%d).$(git log -1 --pretty=%h)", shell=True, stdout=PIPE)
         tag = result.stdout.decode('utf-8').strip()
         return tag
+
+    def ask_for_confirmation(self, question):
+        print(f"{question} (y/n)")
+        answer = input()
+        while answer not in ['y', 'n']:
+            print('Please specify \'y\' or \'n\'')
+            answer = input()
+        return answer == 'y'
 
     def build_kubernetes_config(self, image_tag=None, customize_callback=None, quiet=True):
         env = self.current_env()

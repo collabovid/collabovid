@@ -53,9 +53,12 @@ def main():
     args = parser.parse_args()
     try:
         args.func(args)
-    except AttributeError:
-        parser.print_help()
-        parser.exit()
+    except AttributeError as e:
+        if str(e) == "'Namespace' object has no attribute 'func'":
+            parser.print_help()
+            parser.exit()
+        else:
+            raise e
 
     with open(config_path, 'w') as f:
         json.dump(user_config, f, indent=4)
