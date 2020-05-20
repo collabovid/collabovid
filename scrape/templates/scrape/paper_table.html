@@ -6,61 +6,64 @@
         <h1 class="h2">Classify Paper</h1>
     </div>
     <div class="container-fluid">
-        <table border=1>
-            <th class="center">Decline</th>
-            <th>Unknown</th>
-            <th>Accept</th>
-            <th>DOI</th>
-            <th>Title</th>
-            <th>Publishing Date</th>
-            <th>Abstract</th>
-            <th>Datasource</th>
-            <th>Authors</th>
-            <th>URL</th>
-            {% for paper in papers %}
-                <tr>
-                    <td class="decline-btn"><input type="radio" id="male" name="{{ paper.doi }}" value="decline"
-                                                   onclick="submit_change('{{ paper.doi }}', 'decline');"></td>
-                    <td class="unknown-btn"><input type="radio" id="male" name="{{ paper.doi }}" value="unknown"
-                                                   onclick="submit_change('{{ paper.doi }}', 'unknown')"></td>
-                    <td class="accept-btn"><input type="radio" id="male" name="{{ paper.doi }}" value="accept"
-                                                  onclick="submit_change('{{ paper.doi }}', 'accept')"></td>
-                    <td>{{ paper.doi }}</td>
-                    <td class="title-col">{{ paper.title }}</td>
-                    <td>{{ paper.published_at }}</td>
-                    <td>{{ paper.abstract }}</td>
-                    <td>{{ paper.data_source.name }}</td>
-                    <td class="author-col">
-                        {% for author in paper.authors.all %}
-                            {{ author.last_name }}; {{ author.first_name }} <br>
-                        {% endfor %}
-                    </td>
-                    <td><a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">Link</a></td>
-                </tr>
-            {% endfor %}
-        </table>
+        {% csrf_token %}
+            <table border=1>
+                <th class="center">Decline</th>
+                <th>Unknown</th>
+                <th>Accept</th>
+                <th>DOI</th>
+                <th>Title</th>
+                <th>Publishing Date</th>
+                <th>Abstract</th>
+                <th>Datasource</th>
+                <th>Authors</th>
+                <th>URL</th>
+
+                    {% for paper in papers %}
+
+                        <tr>
+                            <td class="decline-btn"><input type="radio" id="{{ paper.doi }}-DCL" name="{{ paper.doi }}" value="decline"></td>
+                            <td class="unknown-btn"><input type="radio" id="{{ paper.doi }}-UNK" name="{{ paper.doi }}" value="unknown" checked></td>
+                            <td class="accept-btn"><input type="radio" id="{{ paper.doi }}-ACC" name="{{ paper.doi }}" value="accept"></td>
+
+                            <td>{{ paper.doi }}</td>
+                            <td class="title-col">{{ paper.title }}</td>
+                            <td>{{ paper.published_at }}</td>
+                            <td>{{ paper.abstract }}</td>
+                            <td>{{ paper.data_source.name }}</td>
+                            <td class="author-col">
+                                {% for author in paper.authors.all %}
+                                    {{ author.last_name }}; {{ author.first_name }} <br>
+                                {% endfor %}
+                            </td>
+                            <td><a href="{{ paper.url }}" target="_blank" rel="noopener noreferrer">Link</a></td>
+                        </tr>
+
+                    {% endfor %}
+            </table>
     </div>
 {% endblock %}
 
 {% block script %}
-    <script type="text/javascript">
-        function submit_change(doi, action) {
-            console.log(doi)
-            console.log(action)
-            var xhr = new XMLHttpRequest();
-            var params = "doi=" + doi + "&action=" + action
-            xhr.open("POST", "/data-sanitizing/", true);
-            xhr.onload = function (e) {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        console.log(xhr.responseText);
-                    } else {
-                        console.error(xhr.statusText);
-                    }
-                }
-            };
+    {{ block.super }}
 
-            xhr.send(params);
-        }
+    <script type="text/javascript">
+
+        $(document).ready(function (e) {
+            $("input[type='radio']").click(function(e) {
+                $.ajax({
+                    beforeSend: function(request) {
+                        let csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+                        request.setRequestHeader("X-CSRFToken", csrftoken);
+                    },
+                    type: "POST",
+                    url: "/data-sanitizing/",
+                    data: {
+                        doi: $(this).attr('name'),
+                        action: $(this).val()
+                    },
+                });
+            });
+        });
     </script>
 {% endblock %}
