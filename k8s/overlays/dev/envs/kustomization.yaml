@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# This is necessary for the tasks. They need secrets without suffixes
+secretGenerator:
+  - name: search-latest
+    envs:
+      - search.env
+  - name: shared-latest
+    envs:
+      - shared.env
+  - name: scrape-latest
+    envs:
+      - scrape.env
+  - name: web-latest
+    envs:
+      - web.env
+generatorOptions:
+    disableNameSuffixHash: true
