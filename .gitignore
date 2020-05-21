@@ -2,7 +2,7 @@
 generated
 models
 cvid-config.json
-
+.deployment/
 release
 
 set_secret_envs.sh
