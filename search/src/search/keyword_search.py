@@ -9,9 +9,8 @@ from .search import Search, PaperResult
 from typing import List
 from data.models import Paper
 
-# TODO: Adjust scores after more testing.
-AUTHOR_ADDITIVE_SCORE = 0.5  # Score per matching author
-TITLE_ADDITIVE_SCORE = 0.2  # Score per matching keyword in title
+AUTHOR_ADDITIVE_SCORE = 2  # Score per matching author
+TITLE_ADDITIVE_SCORE = 0.4  # Score per matching keyword in title
 ABSTRACT_ADDITIVE_SCORE = 0.1  # Score per matching keyword in abstract
 
 # Download nltk stopwords, if not exist
@@ -27,11 +26,6 @@ stopwords = set(nltk.corpus.stopwords.words('english'))
 
 
 class KeywordSearch(Search):
-    @staticmethod
-    def _get_score(summed_score, word_count):
-        """ Returns score in [0,1], depending on the matches of the query. Summed score may be larger, if query is short
-        and a large portion of words match an author. """
-        return min(1, summed_score / (word_count * TITLE_ADDITIVE_SCORE))
 
     def find(self, query: str, papers: QuerySet) -> List[PaperResult]:
         """
@@ -48,14 +42,15 @@ class KeywordSearch(Search):
         filtered_papers = Paper.objects.all()
         for word in keywords:
             filtered_papers = filtered_papers.filter(
-                (Q(title__icontains=word) | Q(abstract__icontains=word) | Q(authors__last_name__iexact=word)))
+                (Q(title__icontains=word) | Q(abstract__icontains=word) | Q(authors__last_name__icontains=word) | Q(
+                    authors__first_name__icontains=word)))
 
         filtered_papers = filtered_papers.distinct()
 
         paper_dois = filtered_papers.values_list('doi', flat=True)
 
         # Compute the individual paper scores based on the matches
-        summed_scores = defaultdict(int)
+        summed_scores = defaultdict(float)
         for paper in filtered_papers:
             for word in keywords:
                 # We only count the first type of match (which gives the most points). So we do not count any word twice
@@ -71,6 +66,9 @@ class KeywordSearch(Search):
                     summed_scores[paper.doi] += TITLE_ADDITIVE_SCORE
                 elif re.search(word, paper.abstract, re.IGNORECASE):
                     summed_scores[paper.doi] += ABSTRACT_ADDITIVE_SCORE
+
+        max_score = max(max(summed_scores.values()), 1)
+
         return [PaperResult(paper_doi=doi,
-                            score=KeywordSearch._get_score(summed_scores[doi], len(keywords)))
+                            score=summed_scores[doi] / max_score)
                 for doi in paper_dois]
