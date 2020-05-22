@@ -2,12 +2,12 @@ from datetime import timedelta
 from time import sleep
 from timeit import default_timer as timer
 
+from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
 
-from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
-from sr.pdf_extractor import PdfExtractError, PdfExtractor
+from src.pdf_extractor import PdfExtractError, PdfExtractor
 from src.static_functions import covid_related
 
 
