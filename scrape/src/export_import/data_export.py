@@ -104,5 +104,6 @@ class DataExport:
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
+        log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
         return filename
