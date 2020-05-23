@@ -2,10 +2,6 @@ import re
 from datetime import date
 
 
-def sanitize_doi(doi):
-    return doi.replace("/", "_").replace(".", "_").replace(",", "_").replace(":", "_")
-
-
 def covid_related(db_article):
     if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
         return False
