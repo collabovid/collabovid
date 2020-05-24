@@ -72,6 +72,24 @@
                     "is_primitive": false
                 }
             ]
+        },
+        "import-database-records": {
+            "name": "Import Database Records",
+            "description": "Import database records from S3 bucket. Topics, topic assignments and topic scores are excluded.",
+            "parameters": [
+                {
+                    "name": "filename",
+                    "required": true,
+                    "type": "str",
+                    "default": null,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "export-database-records": {
+            "name": "Export Database Records",
+            "description": "Export all database records to disk or to S3. Topics, topic assignments and topic scores are excluded.",
+            "parameters": []
         }
     },
     "search": {

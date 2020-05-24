@@ -22,3 +22,6 @@ USE_L10N = True
 USE_TZ = True
 
 UPDATE_VECTORIZER = True
+
+DB_EXPORT_STORE_LOCALLY = True
+DB_EXPORT_LOCAL_DIR = os.path.join(os.path.dirname(BASE_DIR), "resources/export")

@@ -110,7 +110,7 @@ def data_import(request):
         bucket=settings.AWS_STORAGE_BUCKET_NAME,
     )
 
-    import_archives = reversed(s3_client.all_objects(prefix='dbexport'))
+    import_archives = reversed(s3_client.all_objects(prefix=settings.S3_DB_EXPORT_LOCATION))
     return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': import_archives})
 
 @staff_member_required
