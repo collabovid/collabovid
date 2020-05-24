@@ -3,6 +3,8 @@
 # Byte-compiled / optimized / DLL files
 **/__pycache__/
 
+/web/include
+
 **/*.py[cod]
 **/*$py.class
 

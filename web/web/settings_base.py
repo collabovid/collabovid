@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'classification.apps.ClassificationConfig',
     'tasks',
     'data',
-    'dashboard.apps.DashboardConfig'
+    'dashboard.apps.DashboardConfig',
+    'pipeline'
 ]
 
 MIDDLEWARE = [
@@ -114,7 +115,6 @@ FIXTURE_DIRS = (
 MEDIA_URL = '/media/'
 MEDIA_ROOT = 'generated/'
 
-
 if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:
     LOGGING = {
         'version': 1,
@@ -141,3 +141,15 @@ IMPRINT_URL = os.getenv("IMPRINT_URL", "")
 DATA_PROTECTION_URL = os.getenv("DATA_PROTECTION_URL", "")
 
 USING_ANALYTICS = False
+
+STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'pipeline.finders.PipelineFinder',
+)
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'assets'),
+)
+
+from web.pipeline import *

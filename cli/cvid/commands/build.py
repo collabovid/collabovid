@@ -9,7 +9,11 @@ class BuildCommand(CommandWithServices):
         self.run_shell_command("cd collabovid-shared; make")
         self.run_shell_command("cd collabovid-store; make")
 
-        if "search" in args.services or "web" in args.services:
+        service_names = [service for service, _ in args.services]
+        if "web" in service_names:
+            self.run_shell_command("cd web; python manage.py collectstatic --noinput")
+
+        if "search" in service_names or "web" in service_names:
             # First build the collabovid base image where search and web depend upon
             self.run_shell_command(
                 "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
