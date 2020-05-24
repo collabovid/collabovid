@@ -12,6 +12,8 @@ from tasks.launcher.task_launcher import get_task_launcher
 
 from tasks.load import AVAILABLE_TASKS, get_task_by_id
 
+import os
+
 
 @staff_member_required
 def tasks(request):
@@ -110,24 +112,35 @@ def data_import(request):
         bucket=settings.AWS_STORAGE_BUCKET_NAME,
     )
 
-    import_archives = reversed(s3_client.all_objects(prefix=settings.S3_DB_EXPORT_LOCATION))
+    if settings.DB_EXPORT_STORE_LOCALLY:
+        import_archives = reversed(os.listdir(settings.DB_EXPORT_LOCAL_DIR))
+    else:
+        import_archives_paths = s3_client.all_objects(prefix=settings.S3_DB_EXPORT_LOCATION)
+        # get only filenames and list newest first
+        import_archives = [os.path.basename(archive_path) for archive_path in reversed(import_archives_paths)]
     return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': import_archives})
 
 @staff_member_required
 def delete_archive(request, archive_path):
-    if request.method == 'GET':
+    if request.method == 'POST':
         filename = archive_path
-
         if filename:
-            s3_client = S3BucketClient(
-                aws_access_key=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                endpoint_url=settings.AWS_S3_ENDPOINT_URL,
-                bucket=settings.AWS_STORAGE_BUCKET_NAME,
-            )
-
-            s3_client.delete_file(filename)
-            messages.add_message(request, messages.SUCCESS, f"Deleted {filename}")
+            if settings.DB_EXPORT_STORE_LOCALLY:
+                file_path = os.path.join(settings.DB_EXPORT_LOCAL_DIR, filename)
+                if os.path.exists(file_path):
+                    messages.add_message(request, messages.SUCCESS, f"Deleted {filename}")
+                    os.remove(file_path)
+                else:
+                    messages.add_message(request, messages.ERROR, f"File: {file_path} does not exist")
+            else:
+                s3_client = S3BucketClient(
+                    aws_access_key=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+                    bucket=settings.AWS_STORAGE_BUCKET_NAME,
+                )
+                s3_client.delete_file(filename)
+                messages.add_message(request, messages.SUCCESS, f"Deleted {filename}")
         else:
             messages.add_message(request, messages.ERROR, 'Error: No filename specified')
         return redirect('data_import')

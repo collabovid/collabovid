@@ -21,8 +21,9 @@ class ExportDataTask(Runnable):
             "and topic scores are excluded."
         )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, export_images: bool = False, *args, **kwargs):
         super(ExportDataTask, self).__init__(*args, **kwargs)
+        self.export_images = export_images
 
     def run(self):
         if settings.DB_EXPORT_STORE_LOCALLY:
@@ -33,7 +34,7 @@ class ExportDataTask(Runnable):
         out_dir = settings.DB_EXPORT_LOCAL_DIR
 
         filename = DataExport.export_data(
-            Paper.objects.all(), out_dir=out_dir, log=self.log
+            Paper.objects.all(), out_dir=out_dir, log=self.log, export_images=self.export_images
         )
         filepath = f"{out_dir}/{filename}"
 

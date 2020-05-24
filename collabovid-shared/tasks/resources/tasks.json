@@ -89,7 +89,15 @@
         "export-database-records": {
             "name": "Export Database Records",
             "description": "Export all database records to disk or to S3. Topics, topic assignments and topic scores are excluded.",
-            "parameters": []
+            "parameters": [
+                {
+                    "name": "export_images",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                }
+            ]
         }
     },
     "search": {

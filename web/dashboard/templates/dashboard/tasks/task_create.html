@@ -22,10 +22,9 @@
                         {% if param.is_primitive %}
 
                             {% if param.type == 'bool' %}
-
                                 <select name="{{ param.name }}">
-                                    <option value="1">True</option>
-                                    <option value="0">False</option>
+                                    <option value="1" {% if param.default == True %}selected{% endif %}>True</option>
+                                    <option value="0" {% if param.default == False %}selected{% endif %}>False</option>
                                 </select>
 
                             {% else %}

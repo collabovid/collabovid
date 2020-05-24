@@ -8,7 +8,7 @@ from timeit import default_timer as timer
 
 class DataExport:
     @staticmethod
-    def export_data(queryset, out_dir, log=print):
+    def export_data(queryset, out_dir, export_images=True, log=print):
         """Exports database data in json format and preview images to a tar.gz archive.
         Returns the path to the newly created archive."""
         start = timer()
@@ -71,12 +71,13 @@ class DataExport:
                         )
                         if paper.last_scrape
                         else None,
-                        "image": paper.preview_image.name,
+                        "image": paper.preview_image.name if export_images else None,
                         "datasource_id": paper.data_source_id,
                     }
                 )
 
-                if paper.preview_image and paper.preview_image.path:
+                if export_images and paper.preview_image and paper.preview_image.path:
+                    # Todo: this does not work for images stored on s3
                     tar.add(paper.preview_image.path, arcname=paper.preview_image.name)
 
             data = {

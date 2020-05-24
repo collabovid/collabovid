@@ -14,12 +14,15 @@
             <div class="col-1 text-right">
                 <form action="{% url "task_create" "import-database-records" %}" method="post">
                     {% csrf_token %}
-                    <input type="hidden" value="{{ archive }}" name="s3_key">
+                    <input type="hidden" value="{{ archive }}" name="filename">
                     <button type="submit" class="btn btn-outline-primary">Import</button>
                 </form>
             </div>
             <div class="col-1">
-                <a class="btn btn-outline-danger" href="{% url "delete_archive" archive %}">Delete</a>
+                <form action="{% url "delete_archive" archive %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger" type="submit">Delete</button>
+                </form>
             </div>
         </div>
     {% empty %}
