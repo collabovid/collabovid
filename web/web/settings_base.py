@@ -142,6 +142,7 @@ DATA_PROTECTION_URL = os.getenv("DATA_PROTECTION_URL", "")
 
 USING_ANALYTICS = False
 
+# django-pipeline settings
 STATICFILES_STORAGE = 'pipeline.storage.PipelineCachedStorage'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
@@ -151,5 +152,5 @@ STATICFILES_FINDERS = (
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'assets'),
 )
-
+# noinspection PyUnresolvedReferences
 from web.pipeline import *

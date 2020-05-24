@@ -41,6 +41,7 @@ PIPELINE = {
             'source_filenames': (
                 'css/fontawesome.min.css',
                 'css/fa-solid.min.css',
+                'css/fa-brands.css',
                 'css/roboto.css',
                 'core/css/cookie.css',
                 'core/css/info-cards.css',
