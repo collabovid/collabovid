@@ -18,7 +18,6 @@ RUN pip install --no-cache /collabovid-store/*.whl
 COPY ${PROJECT_DIR} /app
 WORKDIR /app
 ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings_prod
-RUN python manage.py collectstatic
 
 EXPOSE 80
 STOPSIGNAL SIGTERM

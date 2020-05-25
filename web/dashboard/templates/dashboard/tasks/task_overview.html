@@ -1,5 +1,6 @@
 {% extends "dashboard/base.html" %}
 {% load static %}
+{% load pipeline %}
 {% block content %}
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
@@ -32,5 +33,5 @@
 {% endblock %}
 
 {% block script %}
-    <script src="{% static 'dashboard/tasks/delete.js' %}"></script>
+    {% javascript 'task-delete' %}
 {% endblock %}

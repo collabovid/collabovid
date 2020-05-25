@@ -27,16 +27,16 @@ def startup_probe(request):
             matrix = get_analyzer().vectorizer.paper_matrix
 
         except CouldNotLoadPaperMatrix:
-            return HttpResponseServerError()
+            return HttpResponseServerError("Could not load paper matrix file.")
 
         if matrix:
             return HttpResponse("OK")
 
-        return HttpResponseServerError()
+        return HttpResponseServerError("Loaded matrix is empty.")
 
     if not is_analyzer_initializing():
         thread = Thread(target=get_analyzer)
         thread.start()
 
-    return HttpResponseServerError()
+    return HttpResponseServerError("Analyzer is initializing.")
 
