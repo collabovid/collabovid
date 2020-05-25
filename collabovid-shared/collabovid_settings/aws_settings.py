@@ -16,3 +16,4 @@ AWS_S3_ENDPOINT_URL = f'{AWS_S3_PROTOCOL}://{AWS_S3_HOST}'
 
 MEDIAFILES_LOCATION = 'media'
 DEFAULT_FILE_STORAGE = 'storage.custom_storage.MediaStorage'
+S3_DB_EXPORT_LOCATION = 'export'

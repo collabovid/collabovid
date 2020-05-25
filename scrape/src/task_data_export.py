@@ -21,48 +21,41 @@ class ExportDataTask(Runnable):
             "and topic scores are excluded."
         )
 
-    def __init__(self, locally: bool = False, s3: bool = True, *args, **kwargs):
+    def __init__(self, export_images: bool = False, *args, **kwargs):
         super(ExportDataTask, self).__init__(*args, **kwargs)
-        self.locally = locally
-        self.s3 = s3
+        self.export_images = export_images
 
     def run(self):
-        if self.locally:
-            out_dir = "resources/dbexport"
-        elif self.s3:
-            out_dir = "tmp"
+        if settings.DB_EXPORT_STORE_LOCALLY:
+            self.log(f"Export {Paper.objects.count()} articles locally")
         else:
-            self.log("Neither S3 nor local export specified. Abort.")
-            return
+            self.log(f"Export {Paper.objects.count()} articles to S3")
 
-        self.log(
-            f"Export {Paper.objects.count()} articles to "
-            f"{'S3' if self.s3 else 'local disk'}"
-            f"{' and local disk' if self.s3 and self.locally else ''}"
-        )
+        out_dir = settings.DB_EXPORT_LOCAL_DIR
 
         filename = DataExport.export_data(
-            Paper.objects.all(), out_dir=out_dir, log=self.log
+            Paper.objects.all(), out_dir=out_dir, log=self.log, export_images=self.export_images
         )
         filepath = f"{out_dir}/{filename}"
 
-        if self.locally:
-            self.log(f'Store export archive at "{filepath}"')
-
-        if self.s3:
-            s3_client = S3BucketClient(
+        if not settings.DB_EXPORT_STORE_LOCALLY:
+            s3_bucket_client = S3BucketClient(
                 aws_access_key=settings.AWS_ACCESS_KEY_ID,
                 aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                 endpoint_url=settings.AWS_S3_ENDPOINT_URL,
                 bucket=settings.AWS_STORAGE_BUCKET_NAME,
             )
-            s3_key = f"dbexport/{filename}"
-            s3_client.upload(filepath, s3_key)
+            s3_key = f"{settings.S3_DB_EXPORT_LOCATION}/{filename}"
+            s3_bucket_client.upload(filepath, s3_key)
             self.log(
                 "Upload export archive to "
-                f"{s3_client.endpoint_url}/{s3_client.bucket}/{s3_key}"
+                f"{s3_bucket_client.endpoint_url}/{s3_bucket_client.bucket}/{s3_key}"
             )
 
-        if not self.locally:
             self.log(f'Remove "{filepath}"')
             os.remove(filepath)
+        else:
+            self.log(
+                "Store archive at "
+                f"{filepath}"
+            )
