@@ -31,7 +31,8 @@
                     {% endif %}
 
                     {% if show_score %}
-                        <span class="badge badge-pill" style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
+                        <span class="badge badge-pill"
+                              style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
                     {% endif %}
 
                 </div>
@@ -48,12 +49,21 @@
                                                        class="text-muted">{{ paper.host.name }}</a>
 
                         &nbsp;|&nbsp;
-                        {% for author in paper.authors.all|slice:":5" %}
-                            {% if not forloop.first %}&nbsp;{% endif %}
-                            <span class="text-nowrap text-muted">
+                        {% for author in paper.authors.all %}
+                            <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                                {% if not forloop.first %}&nbsp;{% endif %}
                                 <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
                             </span>
                         {% endfor %}
+
+                        {% if paper.authors.count > 5 %}
+                            {% with paper.authors.count|add:"-5" as remaining_authors %}
+                                <br>
+                                <a class="d-inline show-authors small" href="#">
+                                    show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}s{% endif %}
+                                </a>
+                            {% endwith %}
+                        {% endif %}
                     </h6>
 
                     <div class="abstract-container card-text">
@@ -123,6 +133,12 @@
                     $(this).parent().find('.toggle-description.hide').show();
                     $(this).hide();
                 }
+            });
+
+            $(document).on('click', '.show-authors', function (e) {
+                e.preventDefault();
+                $(this).parent().find('.author.d-none').removeClass('d-none');
+                $(this).remove();
             });
         })
     </script>
