@@ -40,10 +40,13 @@ class KeywordSearch(Search):
             keywords = query.split()
 
         filtered_papers = Paper.objects.all()
+
+        query = Q()
         for word in keywords:
-            filtered_papers = filtered_papers.filter(
-                (Q(title__icontains=word) | Q(abstract__icontains=word) | Q(authors__last_name__icontains=word) | Q(
-                    authors__first_name__icontains=word)))
+            query |= Q(title__icontains=word)
+            query |= Q(abstract__icontains=word)
+
+        filtered_papers = filtered_papers.filter(query)
 
         filtered_papers = filtered_papers.distinct()
 
@@ -52,16 +55,12 @@ class KeywordSearch(Search):
         # Compute the individual paper scores based on the matches
         summed_scores = defaultdict(float)
         for paper in filtered_papers:
+
+            if paper.title == query:
+                summed_scores[paper.doi] += 2
+
             for word in keywords:
                 # We only count the first type of match (which gives the most points). So we do not count any word twice
-                author_matched = False
-                for author in paper.authors.all():
-                    if author.last_name.lower() == word.lower():
-                        summed_scores[paper.doi] += AUTHOR_ADDITIVE_SCORE
-                        author_matched = True
-                        break
-                if author_matched:
-                    continue
                 if re.search(word, paper.title, re.IGNORECASE):
                     summed_scores[paper.doi] += TITLE_ADDITIVE_SCORE
                 elif re.search(word, paper.abstract, re.IGNORECASE):
