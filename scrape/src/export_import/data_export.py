@@ -1,12 +1,24 @@
 import getpass
+import io
 import json
 import os
 import tarfile
 from datetime import datetime, timedelta
 from timeit import default_timer as timer
 
+import requests
+from django.conf import settings
+
 
 class DataExport:
+    @staticmethod
+    def download_image(url):
+        response = requests.get(url, stream=True)
+        if not response.ok:
+            return None
+        else:
+            return io.BytesIO(response.content)
+
     @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
         """Exports database data in json format and preview images to a tar.gz archive.
@@ -23,32 +35,34 @@ class DataExport:
             os.makedirs(out_dir)
 
         time = datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M")
-        filename = f"dbexport_{getpass.getuser()}_{time}.tar.gz"
+        filename = f"export_{getpass.getuser()}_{time}.tar.gz"
         path = f"{out_dir}/{filename}"
+        json_path = f"{out_dir}/data.json"
 
         log(f"Create archive \"{path}\"")
-        with tarfile.open(path, "w:gz") as tar:
-            for paper in queryset:
-                if paper.data_source and paper.data_source_id not in datasources:
-                    datasources[paper.data_source_id] = {"name": paper.data_source.name}
+        image_id_counter = 0
+        try:
+            with tarfile.open(path, "w:gz") as tar:
+                for paper in queryset:
+                    if paper.data_source and paper.data_source_id not in datasources:
+                        datasources[paper.data_source_id] = {"name": paper.data_source.name}
 
-                if paper.host_id not in paperhosts:
-                    paperhosts[paper.host_id] = {"name": paper.host.name}
+                    if paper.host_id not in paperhosts:
+                        paperhosts[paper.host_id] = {"name": paper.host.name}
 
-                for author in paper.authors.all():
-                    if author.pk not in authors:
-                        authors[author.pk] = {
-                            "lastname": author.last_name,
-                            "firstname": author.first_name,
-                            "split_name": author.split_name,
-                            "datasource_id": author.data_source_id,
-                        }
+                    for author in paper.authors.all():
+                        if author.pk not in authors:
+                            authors[author.pk] = {
+                                "lastname": author.last_name,
+                                "firstname": author.first_name,
+                                "split_name": author.split_name,
+                                "datasource_id": author.data_source_id,
+                            }
 
-                if paper.category and paper.category not in categories:
-                    categories[paper.category_id] = {"name": paper.category.name}
+                    if paper.category and paper.category not in categories:
+                        categories[paper.category_id] = {"name": paper.category.name}
 
-                papers.append(
-                    {
+                    paper_data = {
                         "doi": paper.doi,
                         "title": paper.title,
                         "abstract": paper.abstract,
@@ -66,35 +80,59 @@ class DataExport:
                         "url": paper.url,
                         "pdf_url": paper.pdf_url,
                         "is_preprint": paper.is_preprint,
+                        "image": None,
                         "last_scrape": datetime.strftime(
                             paper.last_scrape, "%Y-%m-%d %H:%M:%S"
                         )
                         if paper.last_scrape
                         else None,
-                        "image": paper.preview_image.name if export_images else None,
                         "datasource_id": paper.data_source_id,
                     }
-                )
 
-                if export_images and paper.preview_image and paper.preview_image.path:
-                    # Todo: this does not work for images stored on s3
-                    tar.add(paper.preview_image.path, arcname=paper.preview_image.name)
+                    if export_images and paper.preview_image and paper.preview_image.path:
+                        image_path = f"thumbnails/{image_id_counter}.png"
+                        if settings.DEFAULT_FILE_STORAGE == 'django.core.files.storage.FileSystemStorage':
+                            tar.add(paper.preview_image.path, arcname=f"thumbnails/{image_id_counter}.png")
+                            image_id_counter += 1
+                            paper_data['image'] = image_path
+                        elif settings.DEFAULT_FILE_STORAGE == 'storage.custom_storage.MediaStorage':
+                            image = DataExport.download_image(paper.preview_image.name)
+                            if image:
+                                tarinfo = tarfile.TarInfo(name=f"thumbnails/{image_id_counter}.png")
+                                tarinfo.size = len(image.getbuffer())
+                                tar.addfile(tarinfo, fileobj=image)
+                                image_id_counter += 1
+                                paper_data['image'] = image_path
 
-            data = {
-                "datasources": datasources,
-                "categories": categories,
-                "authors": authors,
-                "paperhosts": paperhosts,
-                "papers": papers,
-            }
+                    papers.append(paper_data)
 
-            json_path = f"{out_dir}/data.json"
-            with open(json_path, "w") as file:
-                json.dump(data, file)
+                data = {
+                    "datasources": datasources,
+                    "categories": categories,
+                    "authors": authors,
+                    "paperhosts": paperhosts,
+                    "papers": papers,
+                }
 
-            tar.add(json_path, arcname="data.json")
+                # json_io = io.BytesIO()
+                # json.dump(data, json_io)
+                #
+                # tarinfo = tarfile.TarInfo(name='data.json')
+                # tarinfo.size = len(json_io.getbuffer())
+                # tar.addfile(tarinfo, fileobj=json_io)
+                with open(json_path, "w") as file:
+                    json.dump(data, file)
 
-        os.remove(json_path)
+                tar.add(json_path, arcname="data.json")
+        except Exception as ex:
+            # Remove tar archive, if export was not successful
+            if os.path.exists(path):
+                os.remove(path)
+
+            raise ex
+        finally:
+            if os.path.exists(json_path):
+                os.remove(json_path)
 
         end = timer()
 
@@ -105,6 +143,7 @@ class DataExport:
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
+        log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
         return filename
