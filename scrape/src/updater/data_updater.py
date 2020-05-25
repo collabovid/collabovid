@@ -2,14 +2,24 @@ from datetime import timedelta
 from time import sleep
 from timeit import default_timer as timer
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
+from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
 
-from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
-from src.static_functions import covid_related, sanitize_doi
-from .update_exception import UpdateException
+from src.pdf_extractor import PdfExtractError, PdfExtractor
+from src.static_functions import covid_related
+
+
+class UpdateException(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+    def __repr__(self):
+        return self.msg
 
 
 class DifferentDataSourceError(UpdateException):
@@ -108,14 +118,7 @@ class ArticleDataPoint(object):
         if extract_image:
             image = pdf_extractor.extract_image()
             if image:
-                img_name = sanitize_doi(db_article.doi) + ".jpg"
-                db_article.preview_image.save(img_name, InMemoryUploadedFile(
-                    image,  # file
-                    None,  # field_name
-                    img_name,  # file name
-                    'image/jpeg',  # content_type
-                    image.tell,  # size
-                    None))
+                db_article.add_preview_image(image)
 
         if extract_content:
             content = pdf_extractor.extract_contents()

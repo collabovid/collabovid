@@ -1,3 +1,4 @@
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.models import F
 from django.utils.translation import gettext_lazy
@@ -134,3 +135,8 @@ class Paper(models.Model):
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
+
+    def add_preview_image(self, pillow_image):
+        img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
+        self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
+                                                               'image/jpeg', pillow_image.tell, None))

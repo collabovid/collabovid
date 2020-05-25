@@ -29,7 +29,6 @@
     {% endblock %}
 </head>
 
-
 <body>
 
 <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
@@ -51,6 +50,12 @@
                         <a class="nav-link" href="{% url 'data-sanitizing' %}">
                             <i class="fa fa-tasks"></i>
                             Data Sanitizing
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'data_import' %}">
+                            <i class="fa fa-database"></i>
+                            Data import
                         </a>
                     </li>
                 </ul>
