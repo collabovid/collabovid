@@ -1,5 +1,5 @@
 {% for paper in papers %}
-    <div class="my-5">
+    <div class="mt-5">
         {% include 'core/partials/_paper_card.html' with html=True extended=False paper=paper score=paper.percentage_topic_score show_score=show_score %}
     </div>
 

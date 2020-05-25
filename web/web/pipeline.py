@@ -25,6 +25,7 @@ PIPELINE = {
             'source_filenames': (
                 'js/bootstrap-select.min.js',
                 'js/gijgo.min.js',
+                'js/tagify.js',
                 'core/js/pagination.js',
             ),
             'output_filename': 'search.js'
@@ -64,6 +65,7 @@ PIPELINE = {
             'source_filenames': (
                 'css/bootstrap-select.css',
                 'css/gijgo.min.css',
+                'css/tagify.css',
             ),
             'output_filename': 'search.css'
         },
