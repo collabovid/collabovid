@@ -7,6 +7,7 @@ import tarfile
 from datetime import datetime
 
 import requests
+from django.conf import settings
 
 from .update_exception import UpdateException
 
@@ -21,7 +22,7 @@ class Cord19Cache:
     __FULLTEXT_PATH = 'document_parses/{0}_json/{1}.json'
     __CORD19_BASE_URL = 'https://ai2-semanticscholar-cord-19.s3-us-west-2.amazonaws.com/latest/{0}'
 
-    def __init__(self, path='resources/cache/cord-19', log=print):
+    def __init__(self, path=f'{settings.RESOURCES_DIR}/cache/cord-19', log=print):
         self._path = pathlib.Path(path)
         self._log = log
         self._metadata = None
@@ -29,13 +30,18 @@ class Cord19Cache:
 
     @property
     def size(self):
-        return len(self.metadata)
+        return len(self.get_metadata())
 
-    @property
-    def metadata(self):
+    def get_metadata(self, doi=None):
         if not self._metadata:
             self.__open_metadata_file()
-        return self._metadata
+
+        if not doi:
+            return self._metadata
+        elif doi not in self._doimapping:
+            return None
+        else:
+            return self._doimapping[doi]
 
     def fulltext(self, relative_path=None, doi=None):
         if not self.cache_version():
@@ -66,9 +72,10 @@ class Cord19Cache:
             return None
 
     def refresh(self):
-        self._log("Check latest CORD-19 version with current cache version")
+        self._log("Check latest CORD-19 version against current cache version")
         cache_version = self.cache_version()
         latest_version = self.latest_version()
+        self._log(f"Cache version: {cache_version}, latest version: {latest_version}")
         if not cache_version or cache_version < latest_version:
             self._log(f"Found no or obsolete cache in {self._path}, load latest CORD-19 dataset")
             self.clear()

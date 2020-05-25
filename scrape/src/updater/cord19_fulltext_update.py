@@ -10,9 +10,17 @@ class Cord19FulltextUpdater:
         cache.refresh()
 
         count = 0
+        count_abstract = 0
 
         for paper in papers:
             if not paper.data:
+                if not paper.abstract:
+                    metadata = cache.get_metadata(paper.doi)
+                    if metadata and metadata['abstract']:
+                        paper.abstract = metadata['abstract']
+                        paper.save()
+                        count_abstract += 1
+
                 try:
                     fulltext = cache.fulltext(doi=paper.doi)
                     if fulltext:
@@ -23,3 +31,4 @@ class Cord19FulltextUpdater:
                     continue
 
         log(f"Updated {count} fulltext data records")
+        log(f"Updated {count_abstract} abstract data records")

@@ -9,5 +9,5 @@ def covid_related(db_article):
     COVID19_KEYWORDS = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?(20)?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
 
     return bool(re.search(COVID19_KEYWORDS, db_article.title, re.IGNORECASE)) \
-           or bool(re.search(COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
+           or bool(db_article.abstract and re.search(COVID19_KEYWORDS, db_article.abstract, re.IGNORECASE)) \
            or bool((db_article.data and re.search(COVID19_KEYWORDS, db_article.data.content, re.IGNORECASE)))

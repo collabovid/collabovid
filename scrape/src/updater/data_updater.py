@@ -56,7 +56,7 @@ class ArticleDataPoint(object):
 
     @property
     def abstract(self):
-        return ''
+        raise NotImplementedError
 
     def extract_authors(self):
         return []
@@ -141,8 +141,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract title")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
-        if not abstract:
-            raise MissingDataError("Couldn't extract abstract")
+        # if not abstract:
+        #     raise MissingDataError("Couldn't extract abstract")
 
         with transaction.atomic():
             datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)

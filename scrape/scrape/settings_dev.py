@@ -7,4 +7,5 @@ from collabovid_settings.development.export_settings import *
 
 DEBUG = True
 ALLOW_IMAGE_SCRAPING = False
+RESOURCES_DIR = os.path.join(os.path.dirname(BASE_DIR), 'resources')
 

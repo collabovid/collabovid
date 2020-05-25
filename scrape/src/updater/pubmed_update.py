@@ -19,7 +19,6 @@ class PubMedDatapoint(ArticleDataPoint):
 
     @property
     def abstract(self):
-        # TODO: approx. 3000/9000 wo abstract
         return self.pubmed_article.abstract
 
     def extract_authors(self):

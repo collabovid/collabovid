@@ -105,7 +105,7 @@ class Paper(models.Model):
     covid_related = models.BooleanField(null=True, default=None)
     paper_state = models.IntegerField(choices=PaperState.choices, default=PaperState.UNKNOWN)
     topic_score = models.FloatField(default=0.0)
-    abstract = models.TextField()
+    abstract = models.TextField(null=True)
 
     url = models.URLField(null=True, default=None)
     pdf_url = models.URLField(null=True, default=None)
@@ -122,7 +122,7 @@ class Paper(models.Model):
 
     def automatic_state_check(self, save=False):
         if self.paper_state in (PaperState.UNKNOWN, PaperState.AUTOMATICALLY_ACCEPTED):
-            success = len(self.title.split()) > 4 and len(self.abstract.split()) >= 20
+            success = len(self.title.split()) > 4 and self.abstract and len(self.abstract.split()) >= 20
             self.paper_state = PaperState.AUTOMATICALLY_ACCEPTED if success else PaperState.UNKNOWN
             if save:
                 self.save()
