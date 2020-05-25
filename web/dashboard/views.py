@@ -113,14 +113,13 @@ def data_import(request):
     )
 
     if settings.DB_EXPORT_STORE_LOCALLY:
-        import_archives = sorted([x for x in os.listdir(settings.DB_EXPORT_LOCAL_DIR) if x.endswith('.tar.gz')],
-                                 reverse=True)
+        import_archives = os.listdir(settings.DB_EXPORT_LOCAL_DIR)
     else:
-        import_archives_paths = s3_client.all_objects(prefix=settings.S3_DB_EXPORT_LOCATION)
-        # get only filenames and list newest first
-        import_archives = [os.path.basename(archive_path) for archive_path in reversed(import_archives_paths) if
-                           archive_path.endswith('.tar.gz')]
-    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': import_archives})
+        import_archives = s3_client.all_objects(prefix=settings.S3_DB_EXPORT_LOCATION)
+
+    sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
+
+    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives})
 
 @staff_member_required
 def delete_archive(request, archive_path):
