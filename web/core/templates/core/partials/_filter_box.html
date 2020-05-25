@@ -1,27 +1,26 @@
 {% load static %}
 <div class="filter-card collapse width" id="filter-container">
     <div class="card">
-        <form id="filter-form" class="search-form mr-3 mt-1">
-            <a href="#" class="float-right d-none d-lg-inline"
+        <form id="filter-form" class="search-form mt-1">
+            <a href="#" class="d-none d-lg-inline position-absolute filter-hide-button"
+               data-toggle="collapse"
+               data-target="#filter-container"
+               aria-expanded="false"
+               aria-controls="filter-container">Hide
+            </a>
+
+
+            <a href="#" class="position-absolute d-lg-none d-inline-block filter-back-button"
                data-toggle="collapse"
                data-target="#filter-container"
                aria-expanded="false"
                aria-controls="filter-container"
-               id="filterButton">Hide
+               id="filter-button-submit">
+                <i class="fas fa-2x fa-arrow-left"></i>
             </a>
 
-
-            <button type="submit" class="float-left ml-3 mt-2 d-lg-none d-block text-primary"
-                    data-toggle="collapse"
-                    data-target="#filter-container"
-                    aria-expanded="false"
-                    aria-controls="filter-container"
-                    id="filterButton">
-                <i class="fas fa-2x fa-arrow-left"></i>
-            </button>
-
-            <div class="card-body border-bottom pb-0 pt-2 mt-md-0 mt-2">
-                <h4 class="card-title text-lg-left text-center">Filter</h4>
+            <div class="clear card-body border-bottom pb-0 pt-lg-1 pt-2 mt-lg-2 mt-3">
+                <h4 class="card-title text-center">Filter</h4>
             </div>
 
 
@@ -168,6 +167,10 @@
         let form = $("#paper-search-form");
         let filter_form = $("#filter-form");
         let pagination_container = $("#pagination-container");
+
+        $("#filter-button-submit").click(function (e) {
+            filter_form.submit();
+        });
 
         update_pagination_container = pagination_container.paginate({
             searchQuery: search_query,
