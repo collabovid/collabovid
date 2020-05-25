@@ -1,29 +1,168 @@
 {% load static %}
+<div class="filter-card collapse width" id="filter-container">
+    <div class="card">
+        <form id="filter-form" class="search-form mr-3 mt-1">
+            <a href="#" class="float-right d-none d-lg-inline"
+               data-toggle="collapse"
+               data-target="#filter-container"
+               aria-expanded="false"
+               aria-controls="filter-container"
+               id="filterButton">Hide
+            </a>
 
-<div class="row mt-3">
-    <div class="col-12">
-        <label for="start-date">
-            Published After
-        </label>
+
+            <a href="#" class="float-left ml-3 mt-2 d-lg-none d-block"
+               data-toggle="collapse"
+               data-target="#filter-container"
+               aria-expanded="false"
+               aria-controls="filter-container"
+               id="filterButton">
+                <i class="fas fa-2x fa-arrow-left"></i>
+            </a>
+
+            <div class="card-body border-bottom pb-0 pt-2 mt-md-0 mt-2">
+                <h4 class="card-title text-lg-left text-center">Filter</h4>
+            </div>
+
+
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <label for="authors-input">
+                            Authors
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="authors-input" name="authors" class="tagify--outside"
+                               placeholder="Author name">
+                        <div class="text-muted small">If no author is selected the value defaults to all.</div>
+                    </div>
+                </div>
+
+                <div class="row mt-1">
+                    <div class="col-12">
+                        <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                            <label class="btn btn-light active">
+                                <input type="radio" data-no-url="true" name="authors-connection" checked="checked"
+                                       data-default="true"
+                                       value="one"/> One matching
+                            </label>
+                            <label class="btn btn-light">
+                                <input type="radio" data-no-url="false" name="authors-connection" value="all"/> All
+                                matching
+                            </label>
+
+                        </div>
+                        <div class="text-muted small">Decide whether some or all people should be author of the paper.
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="start-date">
+                            Published After
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input autocomplete="off" name="published_at_start" id="start-date"
+                               value="{{ form.start_date }}"/>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="start-date">
+                            Published Before
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input autocomplete="off" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12 text-right">
+                        <button id="filter-form-submit" type="submit" class="btn btn-success" disabled><i
+                                class="fas fa-sync"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
     </div>
 </div>
-<div class="row">
-    <div class="col-12">
-        <input autocomplete="off" name="published_at_start" id="start-date" value="{{ form.start_date }}"/>
-    </div>
-</div>
-<div class="row mt-3">
-    <div class="col-12">
-        <label for="start-date">
-            Published Before
-        </label>
-    </div>
-</div>
-<div class="row">
-    <div class="col-12">
-        <input autocomplete="off" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
-    </div>
-</div>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+
+        var inputElm = document.getElementById('authors-input');
+        var initialValues = JSON.parse('{{ form.authors|escapejs }}');
+
+        var tagify = new Tagify(inputElm, {
+            whitelist: initialValues,
+            enforceWhitelist: true,
+        });
+
+        tagify.addTags(initialValues);
+
+        window.pendingAuthorRequest = null;
+
+        var getAuthors = (function getAuthors(text, on_result) {
+
+            if (window.pendingAuthorRequest) {
+                window.pendingAuthorRequest.abort();
+            }
+
+            window.pendingAuthorRequest = $.ajax({
+                url: "{% url "get-authors" %}",
+                type: 'GET',
+                data: "query=" + text,
+                success: function (data) {
+                    on_result(data);
+                },
+                error: function (request, error) {
+                    console.log("Request: " + JSON.stringify(request));
+                    console.log("Error: " + error);
+                }
+            });
+
+        });
+
+
+// on character(s) added/removed (user is typing/deleting)
+        function onInput(e) {
+            console.log("onInput: ", e.detail);
+            tagify.settings.whitelist.length = 0; // reset current whitelist
+            tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
+
+            // get new whitelist from a delayed mocked request (Promise)
+            getAuthors(e.detail.value, function (result) {
+                console.log(e.detail.value);
+                console.log(result);
+
+                $.each(result.authors, function () {
+                    tagify.settings.whitelist.push(this.name);
+                });
+
+                console.log(tagify.settings.whitelist);
+
+                tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
+            });
+        }
+
+        tagify.on('input', onInput);
+
+    });
+</script>
 
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
@@ -31,7 +170,8 @@
 
         let indicator = $("#{{ indicator_id }}");
         let paper_container = $("#{{ result_container_id }}");
-        let form = $("#{{ form_id }}");
+        let form = $("#paper-search-form");
+        let filter_form = $("#filter-form");
         let pagination_container = $("#pagination-container");
 
         update_pagination_container = pagination_container.paginate({
@@ -42,9 +182,9 @@
             paper_container.hide();
             indicator.show();
 
-            console.log(data);
-
             data += "&page=" + page;
+
+            console.log(data);
 
             $.ajax({
                 url: form.attr("action"),
@@ -84,6 +224,17 @@
             format: 'yyyy-mm-dd'
         }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
 
+        filter_form.find("input").change(function (e) {
+            $("#filter-form-submit").prop("disabled", false)
+        });
+
+        filter_form.submit(function (e) {
+            e.preventDefault();
+
+            $("#filter-form-submit").prop("disabled", true)
+            form.submit();
+        });
+
 
         form.submit(function (e) {
             e.preventDefault();
@@ -97,14 +248,24 @@
 
             pagination_container.hide();
 
-            let submission_data = form.serialize();
+            let submission_data = $(".search-form input[data-no-url!=true]").serialize();
 
-            search_query(submission_data, 1, false, function () {
-                window.Pagination.last_request = submission_data;
+            let csrf_token = $('.search-form input[data-no-url=true]').serialize();
 
-                let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?"
-                    + form.find('input[name!=csrfmiddlewaretoken]').serialize();
+            let full_data = submission_data + "&" + csrf_token;
+
+            search_query(full_data, 1, false, function () {
+                window.Pagination.last_request = full_data;
+
+                let shortened_data = submission_data.replace(/[^&]+=\.?(?:&|$)/g, '').replace(/&$/, '');
+
+                let url = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                if (shortened_data.length > 0) {
+                    url += "?" + shortened_data;
+                }
+
                 window.history.pushState({path: url}, '', url);
+
 
                 window.formAjaxAllowed = true;
 

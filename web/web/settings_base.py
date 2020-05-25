@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'classification.apps.ClassificationConfig',
     'tasks',
     'data',
-    'dashboard.apps.DashboardConfig'
+    'dashboard.apps.DashboardConfig',
+    'django.contrib.postgres'
 ]
 
 MIDDLEWARE = [

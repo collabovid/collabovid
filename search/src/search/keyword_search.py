@@ -67,7 +67,10 @@ class KeywordSearch(Search):
                 elif re.search(word, paper.abstract, re.IGNORECASE):
                     summed_scores[paper.doi] += ABSTRACT_ADDITIVE_SCORE
 
-        max_score = max(max(summed_scores.values()), 1)
+        if len(summed_scores) > 0:
+            max_score = max(max(summed_scores.values()), 1)
+        else:
+            max_score = 1
 
         return [PaperResult(paper_doi=doi,
                             score=summed_scores[doi] / max_score)
