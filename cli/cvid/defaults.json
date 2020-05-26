@@ -23,5 +23,7 @@
     },
     "prod": {
     }
-  }
+  },
+  "local-export-dir" : "resources/export",
+  "s3-export-dir" : "export"
 }
