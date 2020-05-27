@@ -1,6 +1,6 @@
 from .settings_base import *
 from collabovid_settings.development.service_settings import *
-from collabovid_settings.postgres_settings import *
+from collabovid_settings.development.database_settings import *
 from collabovid_settings.development.tasks_settings import *
 
 ALLOWED_HOSTS += [SEARCH_SERVICE_HOST]
