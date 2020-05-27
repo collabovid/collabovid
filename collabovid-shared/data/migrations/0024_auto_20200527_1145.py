@@ -9,7 +9,7 @@ def transfer_datasource_values(apps, schema_editor):
     PaperModel = apps.get_model('data', 'Paper')
 
     for paper in PaperModel.objects.all():
-        if paper.data_source.name == 'medbiorxiv-updater':
+        if not paper.data_source or paper.data_source.name == 'medbiorxiv-updater':
             paper.data_source_value = DataSource.MEDBIORXIV
         elif paper.data_source.name == 'arxiv-updater':
             paper.data_source_value = DataSource.ARXIV
