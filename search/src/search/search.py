@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from django.db.models import QuerySet
 
 
@@ -12,6 +12,14 @@ class Search:
     def __init__(self, *args, **kwargs):
         pass
 
-    def find(self, query: str, papers: QuerySet) -> List[PaperResult]:
+    def find(self, query: str, papers: QuerySet, score_min) -> Tuple[List[PaperResult], str]:
         raise NotImplementedError()
+
+    @property
+    def weight(self):
+        return 1
+
+    @property
+    def exclusive(self):
+        return False
 
