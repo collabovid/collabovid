@@ -80,7 +80,7 @@ class DataExport:
                         )
                         if paper.last_scrape
                         else None,
-                        "datasource_id": paper.data_source_id,
+                        "datasource_id": paper.data_source_value,
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:

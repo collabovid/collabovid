@@ -10,11 +10,11 @@ def transfer_datasource_values(apps, schema_editor):
 
     for paper in PaperModel.objects.all():
         if paper.data_source.name == 'medbiorxiv-updater':
-            paper.data_source_id = DataSource.MEDBIORXIV
+            paper.data_source_value = DataSource.MEDBIORXIV
         elif paper.data_source.name == 'arxiv-updater':
-            paper.data_source_id = DataSource.ARXIV
+            paper.data_source_value = DataSource.ARXIV
         else:
-            raise Exception(f"Unknown datasource: {paper.data_source_id}")
+            raise Exception(f"Unknown datasource: {paper.data_source_value}")
         paper.save()
 
 
@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='paper',
-            name='data_source_id',
+            name='data_source_value',
             field=models.IntegerField(choices=[(0, 'medbioRxiv'), (1, 'arXiv')], null=True),
         ),
         migrations.RunPython(

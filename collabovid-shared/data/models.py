@@ -69,7 +69,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    data_source_id = models.IntegerField(choices=DataSource.choices, null=True)
+    data_source_value = models.IntegerField(choices=DataSource.choices, null=True)
     version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
