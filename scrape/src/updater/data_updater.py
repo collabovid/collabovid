@@ -4,6 +4,7 @@ from timeit import default_timer as timer
 
 from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
 from django.db import transaction
+from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
 
@@ -283,7 +284,7 @@ class DataUpdater(object):
         start = timer()
 
         filtered_articles = Paper.objects.all().filter(data_source__name=self.data_source_name).order_by(
-            'last_scrape')[:count]
+            F('last_scrape').asc(nulls_first=True))[:count]
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)
             if data_point:
