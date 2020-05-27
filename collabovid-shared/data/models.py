@@ -36,9 +36,6 @@ class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
 
-    class Meta:
-        ordering = [F('citation_count').desc(nulls_last=True)]
-
 
 class Category(models.Model):
     """

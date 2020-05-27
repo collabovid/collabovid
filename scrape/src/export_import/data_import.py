@@ -75,7 +75,7 @@ class DataImport:
                             host=paperhost_mapping[paper["paperhost_id"]]
                             if paper["paperhost_id"]
                             else None,
-                            data_source=paper["datasource_id"],
+                            data_source_value=paper["datasource_id"],
                         )
 
                         db_paper.save()
