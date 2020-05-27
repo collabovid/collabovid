@@ -1,6 +1,7 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.db.models import F
+from django.utils.translation import gettext_lazy
 
 
 class Topic(models.Model):
@@ -17,18 +18,16 @@ class PaperHost(models.Model):
     url = models.URLField(null=True, default=None)
 
 
-class DataSource(models.Model):
-    MEDBIORXIV_DATASOURCE_NAME = 'medbiorxiv-updater'
-    ARXIV_DATASOURCE_NAME = 'arxiv-updater'
-
-    name = models.CharField(max_length=120, unique=True)
+class DataSource(models.IntegerChoices):
+    MEDBIORXIV = 0, gettext_lazy('medbioRxiv')
+    ARXIV = 1, gettext_lazy('arXiv')
 
     @property
     def priority(self):
-        if self.name == DataSource.MEDBIORXIV_DATASOURCE_NAME:
+        if self.value == DataSource.MEDBIORXIV:
+            return 0
+        if self.value == DataSource.ARXIV:
             return 1
-        elif self.name == DataSource.ARXIV_DATASOURCE_NAME:
-            return 2
         else:
             return 100
 
@@ -39,9 +38,6 @@ class Author(models.Model):
     citation_count = models.IntegerField(null=True, default=None)
     citations_last_update = models.DateTimeField(null=True, default=None)
     scholar_url = models.URLField(null=True, default=None)
-    split_name = models.BooleanField(default=False)  # True iff the name was split by us at the time of creation.
-    data_source = models.ForeignKey(DataSource, related_name="authors", on_delete=models.CASCADE, null=True,
-                                    default=None)
     class Meta:
         ordering = [F('citation_count').desc(nulls_last=True)]
 
@@ -73,8 +69,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    data_source = models.ForeignKey(DataSource, related_name="papers", on_delete=models.CASCADE, null=True,
-                                      default=None)
+    data_source_id = models.IntegerField(choices=DataSource.choices, null=True)
     version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)

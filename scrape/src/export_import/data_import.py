@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
+from data.models import Author, Category, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -22,18 +22,7 @@ class DataImport:
 
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
-            data["datasources"] = {int(k): v for k, v in data["datasources"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
-
-            datasource_mapping = {}
-            datasources_created = 0
-            for id, datasource in data["datasources"].items():
-                db_datasource, created = DataSource.objects.get_or_create(
-                    name=datasource["name"]
-                )
-                datasource_mapping[id] = db_datasource
-                if created:
-                    datasources_created += 1
 
             category_mapping = {}
             categories_created = 0
@@ -86,7 +75,7 @@ class DataImport:
                             host=paperhost_mapping[paper["paperhost_id"]]
                             if paper["paperhost_id"]
                             else None,
-                            data_source=datasource_mapping[paper["datasource_id"]],
+                            data_source=paper["datasource_id"],
                         )
 
                         db_paper.save()
@@ -96,13 +85,8 @@ class DataImport:
                             db_author, created = Author.objects.get_or_create(
                                 first_name=author["firstname"],
                                 last_name=author["lastname"],
-                                data_source=datasource_mapping[
-                                    author["datasource_id"]
-                                ],
                             )
                             if created:
-                                db_author.split_name = author["split_name"]
-                                db_author.save()
                                 authors_created += 1
                             db_paper.authors.add(db_author)
 
@@ -120,7 +104,6 @@ class DataImport:
 
         log(f"Finished import in {timedelta(seconds=end - start)}")
         log("Imported")
-        log(f"\t{datasources_created} datasources")
         log(f"\t{paperhosts_created} paperhosts")
         log(f"\t{categories_created} categories")
         log(f"\t{authors_created} authors")

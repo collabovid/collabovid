@@ -61,12 +61,8 @@ class MedrxivDataPoint(ArticleDataPoint):
 
 
     @property
-    def data_source_name(self):
-        return DataSource.MEDBIORXIV_DATASOURCE_NAME
-
-    @property
-    def data_source_priority(self):
-        return _MEDBIORXIV_DATA_PRIORITY
+    def data_source(self):
+        return DataSource.MEDBIORXIV
 
     @property
     def paperhost_name(self):
@@ -133,7 +129,7 @@ class MedrxivUpdater(DataUpdater):
 
     @property
     def data_source_name(self):
-        return DataSource.MEDBIORXIV_DATASOURCE_NAME
+        return DataSource.MEDBIORXIV
 
     def __init__(self, log=print):
         super().__init__(log)
