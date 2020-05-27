@@ -5,6 +5,7 @@ from cvid.commands.command import Command
 class KubectlCommand(Command):
     def run(self, args):
         if not args.no_config_build:
+            print('Building')
             self.build_kubernetes_config(image_tag=args.tag)
 
     def add_arguments(self, parser):

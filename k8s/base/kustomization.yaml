@@ -13,3 +13,4 @@ resources:
   - job-check-migrations.yaml
   - cronjob-scrape.yaml
   - permissions.yaml
+  - job-author-cleanup.yaml

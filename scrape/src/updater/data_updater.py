@@ -63,11 +63,7 @@ class ArticleDataPoint(object):
         return []
 
     @property
-    def data_source_name(self):
-        raise NotImplementedError
-
-    @property
-    def data_source_priority(self):
+    def data_source(self):
         raise NotImplementedError
 
     @property
@@ -139,13 +135,11 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract paperhost")
 
         with transaction.atomic():
-            datasource, _ = DataSource.objects.get_or_create(name=self.data_source_name)
-
             try:
                 db_article = Paper.objects.get(doi=doi)
-                if db_article.data_source and db_article.data_source.priority < datasource.priority:
-                    raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source.name}")
-                elif not update_existing and db_article.data_source.priority == datasource.priority:
+                if db_article.data_source_value and DataSource(db_article.data_source_value).priority < self.data_source.priority:
+                    raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source_value.name}")
+                elif not update_existing and DataSource(db_article.data_source_value).priority == self.data_source.priority:
                     raise SkipArticle("Article already in database")
                 created = False
             except Paper.DoesNotExist:
@@ -154,7 +148,7 @@ class ArticleDataPoint(object):
 
             db_article.title = title
             db_article.abstract = self.abstract
-            db_article.data_source = datasource
+            db_article.data_source_value = self.data_source
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
             if self.paperhost_url:
@@ -179,7 +173,6 @@ class ArticleDataPoint(object):
                     db_author, _ = Author.objects.get_or_create(
                         first_name=author[1],
                         last_name=author[0],
-                        data_source=db_article.data_source,
                     )
                     db_article.authors.add(db_author)
                 except DjangoDataError as ex:
@@ -207,7 +200,7 @@ class DataUpdater(object):
         self.n_success = 0
 
     @property
-    def data_source_name(self):
+    def data_source(self):
         raise NotImplementedError
 
     def _get_data_points(self):
@@ -283,7 +276,7 @@ class DataUpdater(object):
 
         start = timer()
 
-        filtered_articles = Paper.objects.all().filter(data_source__name=self.data_source_name).order_by(
+        filtered_articles = Paper.objects.all().filter(data_source__name=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)

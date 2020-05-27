@@ -55,12 +55,8 @@ class ArxivDataPoint(ArticleDataPoint):
         return None
 
     @property
-    def data_source_name(self):
-        return DataSource.ARXIV_DATASOURCE_NAME
-
-    @property
-    def data_source_priority(self):
-        return _ARXIV_DATA_PRIORITY
+    def data_source(self):
+        return DataSource.ARXIV
 
     @property
     def paperhost_name(self):
@@ -105,7 +101,7 @@ class ArxivUpdater(DataUpdater):
 
     @property
     def data_source_name(self):
-        return DataSource.ARXIV_DATASOURCE_NAME
+        return DataSource.ARXIV
 
     def _load_query_result(self):
         if not self._query_result:
