@@ -13,7 +13,7 @@ arxiv_regex = re.compile(r'(?P<prefix>ar[xX]iv:)?(?P<numeric_id>\d{4}.\d{4,5}|[a
 
 
 class DoiSearch(Search):
-    def find(self, query: str, papers: QuerySet) -> List[PaperResult]:
+    def find(self, query: str, papers: QuerySet, score_min):
         """
         Searches List of papers, whose DOI matches exactly input query (at most one). If input query is not a DOI
         or an arXiv ID, an empty list is returned.
@@ -23,12 +23,20 @@ class DoiSearch(Search):
         """
         if doi_regex.fullmatch(query):
             paper_dois = papers.filter(doi=query).values_list('doi', flat=True)
-            return [PaperResult(paper_doi=doi, score=DOI_SEARCH_SCORE) for doi in paper_dois]
+            return [PaperResult(paper_doi=doi, score=1) for doi in paper_dois], query
         elif arxiv_regex.fullmatch(query):
             match = arxiv_regex.match(query)
             # make sure that the prefix 'arXiv:' (case sensitive!) is there, because we save it like this in the DB
             arxiv_id = 'arXiv:' + match.group('numeric_id')
             paper_dois = papers.filter(doi=arxiv_id).values_list('doi', flat=True)
-            return [PaperResult(paper_doi=doi, score=DOI_SEARCH_SCORE) for doi in paper_dois]
+            return [PaperResult(paper_doi=doi, score=1) for doi in paper_dois], query
         else:
-            return []
+            return [], query
+
+    @property
+    def weight(self):
+        return 2
+
+    @property
+    def exclusive(self):
+        return True

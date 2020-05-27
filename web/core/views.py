@@ -121,17 +121,17 @@ def search(request):
         authors_connection = request.GET.get("authors-connection", "one")
 
         if authors_connection not in ["one", "all"]:
-            connection = "one"
+            authors_connection = "one"
 
         if tab not in ["newest", "top", "statistics"]:
             tab = "top"
 
-        search = request.GET.get("search", "").strip()
+        search_query = request.GET.get("search", "").strip()
 
         form = {
             "start_date": start_date,
             "end_date": end_date,
-            "search": search,
+            "search": search_query,
             "tab": tab,
             "authors": json.dumps(authors),
             "authors-connection": authors_connection

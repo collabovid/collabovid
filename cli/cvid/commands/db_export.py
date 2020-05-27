@@ -37,7 +37,7 @@ class ExportCommand(S3Command):
                 return
 
             s3_bucket_client = self.setup_s3_bucket_client()
-            s3_bucket_client.upload(path, f"{self.config['s3-export-dir']}/{args.filename}")
+            s3_bucket_client.upload(path, f"{self.config['s3-export-dir']}/{filename}")
 
     def help(self):
         return (

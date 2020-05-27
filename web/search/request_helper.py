@@ -50,12 +50,12 @@ class SearchRequestHelper:
     def paginator_ordered_by(self, criterion, page_count=10):
 
         if criterion == Paper.SORTED_BY_TOPIC_SCORE:
-            paginator = Paginator(self.papers.order_by("-topic_score"), page_count)
+            paginator = Paginator(self.papers.order_by("-topic_score", "-published_at"), page_count)
         elif criterion == Paper.SORTED_BY_NEWEST:
             paginator = Paginator(self.papers.order_by("-published_at"), page_count)
         elif criterion == Paper.SORTED_BY_SCORE:
             filtered_items = []
-            for doi in self.papers.values_list('doi', flat=True):
+            for doi in self.papers.order_by("-published_at").values_list('doi', flat=True):
                 filtered_items.append((doi, self._response[doi]))
 
             paper_score_items = sorted(filtered_items, key=lambda x: x[1], reverse=True)

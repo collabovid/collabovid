@@ -44,10 +44,17 @@
                     </h5>
 
                     <h6 class="card-subtitle mb-2 text-muted small">
-                        <i class="fas fa-clock"></i> {{ paper.published_at }}&nbsp;&middot;&nbsp;
-                        <i class="fas fa-book"></i> <a href="{{ paper.url }}"
-                                                       class="text-muted">{{ paper.host.name }}</a>
-
+                        <div class="mb-1">
+                            <i class="fas fa-external-link-alt"></i>
+                            {% if paper.doi|first not in 'arXiv:' %}
+                                <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                            {% else %}
+                                {{ paper.doi }}
+                            {% endif %}
+                            from
+                            <a href="{{ paper.url }}">{{ paper.host.name }}</a>
+                        </div>
+                        <i class="fas fa-clock"></i> {{ paper.published_at }}
                         &nbsp;|&nbsp;
                         {% for author in paper.authors.all %}
                             <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
@@ -60,10 +67,12 @@
                             {% with paper.authors.count|add:"-5" as remaining_authors %}
                                 <br>
                                 <a class="d-inline show-authors small" href="#">
-                                    show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}s{% endif %}
+                                    show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}
+                                    s{% endif %}
                                 </a>
                             {% endwith %}
                         {% endif %}
+                        <br>
                     </h6>
 
                     <div class="abstract-container card-text">
@@ -79,7 +88,6 @@
                         </span>
 
                         <div class="mt-2 small text-muted text-right">
-
 
                             {% if paper.abstract|length >= 420 %}
                                 <span class="abstract-controls">
