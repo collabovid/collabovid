@@ -1,0 +1,64 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load tz %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Start Task: {{ definition.name }}</h1>
+    </div>
+    <form action="{% url 'task_create' task_id %}" method="post">
+
+        {% csrf_token %}
+
+        <div class="container">
+
+            <div class="row">
+                {% for param in definition.parameters %}
+                    <div class="form-check col-4 mt-2">
+                        <label for="input{{ param.name }}">{{ param.name.title }}</label>
+                    </div>
+                    <div class="form-check col-8 mt-2">
+
+                        {% if param.is_primitive %}
+
+                            {% if param.type == 'bool' %}
+                                <select name="{{ param.name }}">
+                                    <option value="1" {% if param.default == True %}selected{% endif %}>True</option>
+                                    <option value="0" {% if param.default == False %}selected{% endif %}>False</option>
+                                </select>
+
+                            {% else %}
+
+                                <input name="{{ param.name }}" id="input{{ param.name }}"
+                                        {% if param.type == 'int' %}
+                                       type="number"
+                                        {% else %}
+                                       type="text"
+                                        {% endif %}
+                                       {% if param.default %}value="{{ param.default }}"{% endif %}>
+                            {% endif %}
+
+                        {% endif %}
+                        <span class="text-muted">{{ param.type }}</span>
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <button class="btn btn-success float-right">Create Task</button>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+{% endblock %}
+
+{% block script %}
+    <script>
+
+    </script>
+
+{% endblock %}

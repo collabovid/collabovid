@@ -1,0 +1,39 @@
+{% for paper in papers %}
+    <div class="mt-5">
+        {% include 'core/partials/_paper_card.html' with html=True extended=False paper=paper score=paper.percentage_topic_score show_score=show_score %}
+    </div>
+
+{% empty %}
+    <div class="my-5 text-center font-weight-bold">No results were found for your query.</div>
+{% endfor %}
+
+
+<script type="text/javascript">
+
+    window.Pagination.result_size = {{ papers|length }};
+
+    {% if papers.has_previous or papers.has_next %}
+        window.Pagination.pagination_needed = true;
+
+        window.Pagination.first_page = 1;
+        window.Pagination.current_page = {{ papers.number }};
+
+        {% if papers.has_previous %}
+            window.Pagination.previous_page = {{ papers.previous_page_number }};
+        {% else %}
+            window.Pagination.previous_page = -1;
+        {% endif %}
+
+        {% if papers.has_next %}
+            window.Pagination.next_page = {{ papers.next_page_number }};
+            window.Pagination.last_page = {{ papers.paginator.num_pages }};
+        {% else %}
+            window.Pagination.next_page = -1;
+        {% endif %}
+
+    {% else %}
+        window.Pagination.pagination_needed = false;
+    {% endif %}
+
+    $(".need-tooltip").tooltip();
+</script>

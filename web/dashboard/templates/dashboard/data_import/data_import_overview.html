@@ -1,0 +1,35 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Data Import</h1>
+    </div>
+
+    {% for archive in archives %}
+        <div class="row mb-2">
+            <div class="col-6 my-auto">
+                {{ archive }}
+            </div>
+            <div class="col-1 text-right">
+                <form action="{% url "task_create" "import-database-records" %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" value="{{ archive }}" name="filename">
+                    <button type="submit" class="btn btn-outline-primary">Import</button>
+                </form>
+            </div>
+            <div class="col-1">
+                <form action="{% url "delete_archive" archive %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger" type="submit">Delete</button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="row mb-2">
+            <div class="col-4">
+                <span>No exported database archives.</span>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

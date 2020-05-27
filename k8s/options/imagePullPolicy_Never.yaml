@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search
+spec:
+  template:
+    spec:
+      containers:
+        - name: search
+          imagePullPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Never
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: superuser
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Never
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Never
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sync-daemon
+spec:
+  template:
+    spec:
+      containers:
+        - name: daemon-set
+          imagePullPolicy: Never
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sync-daemon
+spec:
+  template:
+    spec:
+      containers:
+        - name: daemon-set
+          imagePullPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: check-migrations
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: author-cleanup
+spec:
+  template:
+    spec:
+      - name: web
+        imagePullPolicy: Never

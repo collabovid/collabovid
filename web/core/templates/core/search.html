@@ -1,0 +1,140 @@
+{% extends "core/search_base.html" %}
+{% load static %}
+{% block content %}
+    <div id="paper-cover" class="paper-cover"></div>
+
+    <div class="gradient-header pb-0">
+        <div class="container">
+
+            <div class="row mt-5">
+                <div class="col-12">
+
+                    <form id="paper-search-form" class="search-form" method="post" action="{% url "search" %}">
+                        <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                        <input class="d-none" id="top-tab-input" data-no-url="true" type="radio" name="tab" value="top"
+                               {% if form.tab == 'top' %}checked="checked"{% endif %}/>
+                        <input class="d-none" id="newest-tab-input" type="radio" name="tab" value="newest"
+                               {% if form.tab == 'newest' %}checked="checked"{% endif %}/>
+                        <input class="d-none" id="statistics-tab-input" type="radio" name="tab" value="statistics"
+                               {% if form.tab == 'statistics' %}checked="checked"{% endif %}/>
+
+                        <!-- For desktop search -->
+
+                        <div class="input-group input-group-lg mb-3">
+                            <div class="input-group-prepend border-right-0">
+                                <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
+                                    <i class="fas fa-search"></i>
+                                </div>
+                            </div>
+
+                            <input type="text" value="{{ form.search }}" name="search"
+                                   class="border-left-0 form-control"
+                                   placeholder="Find papers by their title or content">
+                            <div class="input-group-append">
+                                <button class="btn btn-success" type="submit">Search</button>
+                            </div>
+                        </div>
+
+                        <!-- End desktop search -->
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-8">
+                    <ul class="nav nav-search-types nav-justified">
+                        <li class="nav-item">
+                            <label class="nav-link {% if form.tab == "top" %}active{% endif %}"
+                                   for="top-tab-input">
+                                Top
+                            </label>
+                        </li>
+
+                        <li class="nav-item">
+                            <label for="newest-tab-input"
+                                   class="nav-link {% if form.tab == "newest" %}active{% endif %}">
+                                Newest
+                            </label>
+
+                        </li>
+
+                        <li class="nav-item">
+                            <label class="nav-link {% if form.tab == "statistics" %}active{% endif %}"
+                                   for="statistics-tab-input">
+                                Statistics
+                            </label>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-4 text-right">
+
+                    <button class="btn btn-light mt-2"
+                            data-toggle="collapse"
+                            data-target="#filter-container"
+                            aria-expanded="false"
+                            aria-controls="filter-container">Filters
+                    </button>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="d-flex flex-row">
+
+            <div class="flex-fill" style="min-width: 0;">
+                <div id="paper-container"></div>
+
+                <div id="paper-loading-indicator"
+                     class="text-muted text-center fa-5x my-5"
+                     style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+
+                <nav class="mt-5" id="pagination-container"></nav>
+            </div>
+
+            <div>
+                {% include "core/partials/_filter_box.html" with form=form load_default=True categories=categories result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+
+            let form = $("#paper-search-form");
+
+
+            $("input[name=tab]").change(function (e) {
+
+                var label = $("label[for='" + $(this).attr('id') + "']");
+
+                if (label.hasClass('disabled')) {
+                    return;
+                }
+
+                $(".nav-search-types .nav-link.active").removeClass("active");
+                label.addClass("active");
+
+                form.submit();
+            });
+
+        });
+    </script>
+    {% include 'core/partials/_paper_card.html' with script=True html=False %}
+{% endblock %}

@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sync-daemon
+spec:
+  template:
+    spec:
+      volumes:
+        - name: models
+          hostPath:
+            path: /opt/models

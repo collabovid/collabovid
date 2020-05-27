@@ -1,0 +1,130 @@
+{
+    "scrape": {
+        "update-medbiorxiv": {
+            "name": "Update Medbiorxiv",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 200,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "get-new-medbiorxiv": {
+            "name": "Get New Medbiorxiv",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "update-arxiv": {
+            "name": "Update Arxiv",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 10,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "get-new-arxiv": {
+            "name": "Get New Arxiv",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "scrape": {
+            "name": "Scrape",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "check-covid-related": {
+            "name": "Check Covid Related",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "download-pdf-images": {
+            "name": "Download Pdf Images",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "papers",
+                    "required": false,
+                    "type": "_empty",
+                    "default": null,
+                    "is_primitive": false
+                }
+            ]
+        },
+        "import-database-records": {
+            "name": "Import Database Records",
+            "description": "Import database records from S3 bucket. Topics, topic assignments and topic scores are excluded.",
+            "parameters": [
+                {
+                    "name": "filename",
+                    "required": true,
+                    "type": "str",
+                    "default": null,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "export-database-records": {
+            "name": "Export Database Records",
+            "description": "Export all database records to disk or to S3. Topics, topic assignments and topic scores are excluded.",
+            "parameters": [
+                {
+                    "name": "export_images",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                }
+            ]
+        }
+    },
+    "search": {
+        "setup-vectorizer": {
+            "name": "Setup Vectorizer",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "analyzer",
+                    "required": false,
+                    "type": "PaperAnalyzer",
+                    "default": null,
+                    "is_primitive": false
+                },
+                {
+                    "name": "force_recompute",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "update-topic-assignment": {
+            "name": "Update Topic Assignment",
+            "description": "No description provided.",
+            "parameters": []
+        }
+    }
+}

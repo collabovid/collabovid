@@ -1,0 +1,37 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Tasks</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button class="btn btn-sm btn-outline-secondary" data-toggle="modal"
+                    data-target="#delete-all-modal">
+                Delete all Finished
+            </button>
+            <a href="{% url 'task_select' %}" class="ml-3">
+                <button class="btn btn-sm btn-outline-secondary">
+                    New Task
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            {% for task in tasks %}
+                <div class="col-lg-3 col-md-6 p-2">
+                    {% include 'dashboard/tasks/partials/_task_card.html' with task=task %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% include 'dashboard/tasks/partials/_task_delete_modal.html' %}
+    {% include 'dashboard/tasks/partials/_task_delete_all_modal.html' %}
+{% endblock %}
+
+{% block script %}
+    {% javascript 'task-delete' %}
+{% endblock %}

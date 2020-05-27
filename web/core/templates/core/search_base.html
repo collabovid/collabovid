@@ -1,0 +1,13 @@
+{% extends "core/base.html" %}
+{% load pipeline %}
+{% load static %}
+
+{% block script %}
+    {% javascript 'search' %}
+    {% javascript 'charts' %}
+{% endblock %}
+
+{% block css %}
+    {% stylesheet 'search' %}
+    {% stylesheet 'charts' %}
+{% endblock %}

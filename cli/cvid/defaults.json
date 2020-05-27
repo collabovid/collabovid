@@ -1,0 +1,29 @@
+{
+  "services": {
+    "web": {
+    },
+    "search": {
+    },
+    "scrape": {
+    },
+    "sync-daemon": {
+    }
+  },
+  "env-defaults": {
+    "kubectl": "kubectl",
+    "registry": "",
+    "optionFiles": [],
+    "s3_access_key": "",
+    "s3_secret_access_key": "",
+    "s3_endpoint_url": "http://localhost:30002",
+    "s3_bucket_name": "test"
+  },
+  "envs": {
+    "dev": {
+    },
+    "prod": {
+    }
+  },
+  "local-export-dir" : "resources/export",
+  "s3-export-dir" : "export"
+}
