@@ -5,6 +5,7 @@ class JobsCommand(AbstractJobsCommand):
 
     def run(self, args):
         if args.command == 'run':
+            self.build_kubernetes_config()
             job_file = self.get_job_file(job_name=args.name)
             # Check if the old job is still present because when starting a job, the old one must be deleted
             if self.resource_exists('job', args.name):
