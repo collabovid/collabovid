@@ -1,4 +1,4 @@
-{% extends "core/base.html" %}
+{% extends "core/search_base.html" %}
 {% load static %}
 {% block content %}
 
@@ -58,6 +58,8 @@
 {% endblock %}
 
 {% block script %}
+    {{ block.super }}
+
     {% include "core/partials/_filter.html" with load_default=True script=True filter=False css=False result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
 
     <script>
@@ -75,8 +77,4 @@
         })
     </script>
     {% include 'core/partials/_paper_card.html' with script=True html=False %}
-{% endblock %}
-
-{% block css %}
-    {% include "core/partials/_filter.html" with css=True filter=False script=False %}
 {% endblock %}

@@ -1,5 +1,7 @@
 import os
 
+USING_POSTGRES = False
+
 DEV_DATABASE_LOCATION = os.getenv('DEV_DATABASE_LOCATION',
                                   os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                                '../../db.sqlite3'))

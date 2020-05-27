@@ -77,3 +77,13 @@ spec:
       containers:
         - name: web
           imagePullPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: author-cleanup
+spec:
+  template:
+    spec:
+      - name: web
+        imagePullPolicy: Never

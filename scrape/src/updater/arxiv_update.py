@@ -1,14 +1,16 @@
-import datetime
 import re
 from time import sleep
 
 import arxiv
+import datetime
+
 from django.utils.dateparse import parse_datetime
 from nameparser import HumanName
 
 from data.models import DataSource
 from src.updater.data_updater import ArticleDataPoint, DataUpdater
 
+_ARXIV_DATA_PRIORITY = 2
 _ARXIV_PAPERHOST_NAME = 'arXiv'
 _ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
 
@@ -53,8 +55,8 @@ class ArxivDataPoint(ArticleDataPoint):
         return None
 
     @property
-    def data_source_name(self):
-        return DataSource.ARXIV_DATASOURCE_NAME
+    def data_source(self):
+        return DataSource.ARXIV
 
     @property
     def paperhost_name(self):
@@ -99,7 +101,7 @@ class ArxivUpdater(DataUpdater):
 
     @property
     def data_source_name(self):
-        return DataSource.ARXIV_DATASOURCE_NAME
+        return DataSource.ARXIV
 
     def _load_query_result(self):
         if not self._query_result:

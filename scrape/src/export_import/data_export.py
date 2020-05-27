@@ -25,7 +25,6 @@ class DataExport:
         Returns the path to the newly created archive."""
         start = timer()
 
-        datasources = {}
         authors = {}
         paperhosts = {}
         categories = {}
@@ -44,9 +43,6 @@ class DataExport:
         try:
             with tarfile.open(path, "w:gz") as tar:
                 for paper in queryset:
-                    if paper.data_source and paper.data_source_id not in datasources:
-                        datasources[paper.data_source_id] = {"name": paper.data_source.name}
-
                     if paper.host_id not in paperhosts:
                         paperhosts[paper.host_id] = {"name": paper.host.name}
 
@@ -55,8 +51,6 @@ class DataExport:
                             authors[author.pk] = {
                                 "lastname": author.last_name,
                                 "firstname": author.first_name,
-                                "split_name": author.split_name,
-                                "datasource_id": author.data_source_id,
                             }
 
                     if paper.category and paper.category not in categories:
@@ -86,7 +80,7 @@ class DataExport:
                         )
                         if paper.last_scrape
                         else None,
-                        "datasource_id": paper.data_source_id,
+                        "datasource_id": paper.data_source_value,
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
@@ -107,7 +101,6 @@ class DataExport:
                     papers.append(paper_data)
 
                 data = {
-                    "datasources": datasources,
                     "categories": categories,
                     "authors": authors,
                     "paperhosts": paperhosts,
@@ -138,7 +131,6 @@ class DataExport:
 
         log(f"Finished export in {timedelta(seconds=end - start)}")
         log("Exported")
-        log(f"\t{len(datasources)} datasources")
         log(f"\t{len(categories)} categories")
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")

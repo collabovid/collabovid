@@ -1,8 +1,10 @@
+from json import JSONDecodeError
+
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, reverse
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Category, Topic
+from data.models import Paper, Category, Topic, Author
 from data.statistics import Statistics
 
 import requests
@@ -10,6 +12,11 @@ import requests
 from django.conf import settings
 from search.request_helper import SearchRequestHelper
 
+from django.contrib.postgres.search import TrigramSimilarity
+from django.db.models import Value as V
+from django.db.models.functions import Concat
+
+import json
 
 PAPER_PAGE_COUNT = 10
 
@@ -57,7 +64,10 @@ def topic(request, id):
         else:
             sorted_by = Paper.SORTED_BY_NEWEST
 
-        search_request = SearchRequestHelper(start_date, end_date, search_query, score_threshold)
+        search_request = SearchRequestHelper(start_date, end_date, search_query,
+                                             score_min=score_threshold,
+                                             authors=[],
+                                             authors_connection="one")
 
         paginator = search_request.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
 
@@ -103,16 +113,28 @@ def search(request):
         end_date = request.GET.get("published_at_end", "")
         tab = request.GET.get("tab", "top")
 
+        try:
+            authors = json.loads(request.GET.get("authors", "[]"))
+        except JSONDecodeError:
+            return HttpResponseNotFound()
+
+        authors_connection = request.GET.get("authors-connection", "one")
+
+        if authors_connection not in ["one", "all"]:
+            authors_connection = "one"
+
         if tab not in ["newest", "top", "statistics"]:
             tab = "top"
 
-        search = request.GET.get("search", "").strip()
+        search_query = request.GET.get("search", "").strip()
 
         form = {
             "start_date": start_date,
             "end_date": end_date,
-            "search": search,
-            "tab": tab
+            "search": search_query,
+            "tab": tab,
+            "authors": json.dumps(authors),
+            "authors-connection": authors_connection
         }
 
         return render(request, "core/search.html", {'form': form})
@@ -123,11 +145,28 @@ def search(request):
 
         tab = request.POST.get("tab", "")
 
+        try:
+            content = request.POST.get("authors", "[]")
+
+            if len(content) == 0:
+                content = "[]"
+
+            authors = json.loads(content)
+        except JSONDecodeError:
+            return render(request, "core/partials/_search_result_error.html",
+                          {'message': 'Your request is malformed. Please reload the page.'})
+
+        authors_connection = request.POST.get("authors-connection", "one")
+
+        if authors_connection not in ["one", "all"]:
+            authors_connection = "one"
+
         search_query = request.POST.get("search", "").strip()
-        search_request = SearchRequestHelper(start_date, end_date, search_query)
+        search_request = SearchRequestHelper(start_date, end_date, search_query, authors, authors_connection)
 
         if search_request.error:
-            return render(request, "core/partials/_search_result_error.html")
+            return render(request, "core/partials/_search_result_error.html",
+                          {'message': 'We encountered an unexpected error. Please try again.'})
 
         if tab == "statistics":
             statistics = Statistics(search_request.papers)
@@ -149,3 +188,18 @@ def search(request):
 
             return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                           'show_score': False, })
+
+
+def list_authors(request):
+    possible_authors = Author.objects.all().annotate(name=Concat('first_name', V(' '), 'last_name'))
+
+    authors = possible_authors.annotate(similarity=TrigramSimilarity('name', request.GET.get('query', ''))).filter(
+        similarity__gt=0.3).order_by(
+        '-similarity')[:6]
+
+    return_json = []
+
+    for author in authors:
+        return_json.append({"name": author.name})
+
+    return JsonResponse({"authors": return_json})

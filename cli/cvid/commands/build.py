@@ -9,7 +9,11 @@ class BuildCommand(CommandWithServices):
         self.run_shell_command("cd collabovid-shared; make")
         self.run_shell_command("cd collabovid-store; make")
 
-        if "search" in args.services or "web" in args.services:
+        service_names = [service for service, _ in args.services]
+        if "web" in service_names:
+            self.run_shell_command("cd web; python manage.py collectstatic --noinput")
+
+        if "search" in service_names or "web" in service_names:
             # First build the collabovid base image where search and web depend upon
             self.run_shell_command(
                 "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
@@ -27,8 +31,10 @@ class BuildCommand(CommandWithServices):
                     f"docker image ls --filter reference=\"*/{service}\" --filter reference=\"{service}\" --format '{{{{.Repository}}}}:{{{{.Tag}}}}' | grep -v '...:{tag}'",
                     quiet=True, exit_on_fail=False, collect_output=True, print_command=False)
                 if result.returncode == 0:
-                    output = result.stdout.decode('utf8').strip()
-                    self.run_shell_command(f"docker rmi {output}")
+                    outputs = [out.strip() for out in result.stdout.decode('utf8').split('\n') if len(out) > 0]
+
+                    for output in outputs:
+                        self.run_shell_command(f"docker rmi {output}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)

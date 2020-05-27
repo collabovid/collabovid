@@ -7,6 +7,8 @@ from collabovid_settings.export_settings import *
 
 DEBUG = False
 
+PIPELINE['PIPELINE_ENABLED'] = True
+
 INSTALLED_APPS.append('storages')
 
 ALLOWED_HOSTS = ['www.collabovid.org', 'collabovid.org']

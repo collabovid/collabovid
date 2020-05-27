@@ -1,4 +1,5 @@
 {% load static %}
+{% load pipeline %}
 {% load settings_helper %}
 <!doctype html>
 <html lang="en">
@@ -17,16 +18,10 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static "core/img/favicon/favicon-16x16.png" %}">
 
     <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="{% static "core/include/bootstrap-4.4.1/css/bootstrap.css" %}">
 
-    <script defer src="{% static "core/include/fontawesome-5.13.0/js/all.js" %}"></script>
-
-    <link href="{% static "core/css/roboto.css" %}" rel="stylesheet">
-
-    <link rel="stylesheet" href="{% static "core/css/main.css" %}"/>
-    <link rel="stylesheet" href="{% static "core/css/cookie.css" %}"/>
-
-    <link rel="stylesheet" href="{% static "core/css/info-cards.css" %}"/>
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}"/>
+    {% stylesheet 'base' %}
+    {% stylesheet 'custom_base' %}
 
     {% settings_value "USING_ANALYTICS" as using_analytics %}
     {% if using_analytics %}
@@ -104,16 +99,7 @@
     </div>
 </footer>
 
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="{% static "core/include/jquery-3.4.1/js/jquery.min.js" %}"></script>
-
-<script src="{% static "core/include/popper-core-1.16.0/umd/popper.min.js" %}"></script>
-
-<script src="{% static "core/include/bootstrap-4.4.1/js/bootstrap.js" %}"></script>
-
-<script src="{% static "core/include/ihavecookies/jquery.ihavecookies.js" %}"></script>
+{% javascript 'base' %}
 
 <script>
 
