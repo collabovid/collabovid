@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Category, Paper, PaperData, PaperHost
+from data.models import Author, Category, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -23,6 +23,7 @@ class DataImport:
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
+            data["journals"] = {int(k): v for k, v in data["journals"].items()}
 
             category_mapping = {}
             categories_created = 0
@@ -43,6 +44,16 @@ class DataImport:
                 paperhost_mapping[id] = db_paperhost
                 if created:
                     paperhosts_created += 1
+
+            journal_mapping = {}
+            journals_created = 0
+            for id, journal in data["journals"].items():
+                db_journal, created = Journal.objects.get_or_create(
+                    name=journal["name"]
+                )
+                journal_mapping[id] = db_journal
+                if created:
+                    journals_created += 1
 
             papers_created = 0
             authors_created = 0
@@ -76,6 +87,10 @@ class DataImport:
                             if paper["paperhost_id"]
                             else None,
                             data_source_value=paper["datasource_id"],
+                            pubmed_id=paper["pubmed_id"],
+                            journal=journal_mapping[paper["journal_id"]]
+                            if paper["journal_id"]
+                            else None,
                         )
 
                         db_paper.save()
@@ -105,6 +120,7 @@ class DataImport:
         log(f"Finished import in {timedelta(seconds=end - start)}")
         log("Imported")
         log(f"\t{paperhosts_created} paperhosts")
+        log(f"\t{journals_created} journals")
         log(f"\t{categories_created} categories")
         log(f"\t{authors_created} authors")
         log(f"\t{papers_created} papers")

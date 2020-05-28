@@ -1,6 +1,5 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
-from django.db.models import Q
 from django.utils.translation import gettext_lazy
 
 
@@ -30,7 +29,7 @@ class DataSource(models.IntegerChoices):
         if self.value == DataSource.ARXIV:
             return 1
         elif self.value == DataSource.PUBMED:
-            return 0
+            return 10
         else:
             return 100
 
@@ -56,13 +55,6 @@ class PaperData(models.Model):
     Model to store large data which should not be loaded on each select on a regular Paper
     """
     content = models.TextField(null=True, default=None)
-
-
-class PaperState(models.IntegerChoices):
-    BULLSHIT = 0, gettext_lazy('Declined')  # Manually decided to not use this record
-    UNKNOWN = 2, gettext_lazy('Unknown')  # Automatic check not executed or returned False
-    AUTOMATICALLY_ACCEPTED = 3, gettext_lazy('Automatically accepted')  # Automatic check returned True
-    VERIFIED = 4, gettext_lazy('Verified')  # Manually verified
 
 
 class Paper(models.Model):
@@ -91,9 +83,8 @@ class Paper(models.Model):
                               default=None,
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
-    paper_state = models.IntegerField(choices=PaperState.choices, default=PaperState.UNKNOWN)
     topic_score = models.FloatField(default=0.0)
-    abstract = models.TextField(null=True)
+    abstract = models.TextField()
 
     url = models.URLField(null=True, default=None)
     pdf_url = models.URLField(null=True, default=None)
@@ -107,26 +98,6 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
-
-    def automatic_state_check(self, save=False):
-        if self.paper_state in (PaperState.UNKNOWN, PaperState.AUTOMATICALLY_ACCEPTED):
-            success = len(self.title.split()) > 4 and self.abstract and len(self.abstract.split()) >= 20
-            self.paper_state = PaperState.AUTOMATICALLY_ACCEPTED if success else PaperState.UNKNOWN
-            if save:
-                self.save()
-
-    @property
-    def visible(self):
-        return ((self.covid_related or self.data_source_value and DataSource(
-            self.data_source_value).name == DataSource.MEDBIORXIV.name)
-                and self.paper_state in (PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED))
-
-    @staticmethod
-    def get_visible_papers():
-        paper_query = (Q(covid_related=True) | Q(data_source_value=DataSource.MEDBIORXIV.value)) & Q(
-            paper_state__in=[PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED]
-        )
-        return Paper.objects.filter(paper_query)
 
     @property
     def percentage_topic_score(self):

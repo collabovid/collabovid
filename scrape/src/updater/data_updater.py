@@ -7,7 +7,6 @@ from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
-
 from src.pdf_extractor import PdfExtractError, PdfExtractor
 from src.static_functions import covid_related
 
@@ -134,6 +133,7 @@ class ArticleDataPoint(object):
         doi = self.doi
         title = self.title
         paperhost_name = self.paperhost_name
+        abstract = self.abstract
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
@@ -141,8 +141,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract title")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
-        # if not abstract:
-        #     raise MissingDataError("Couldn't extract abstract")
+        if not abstract:
+            raise MissingDataError("Couldn't extract abstract")
 
         with transaction.atomic():
             try:
@@ -157,7 +157,7 @@ class ArticleDataPoint(object):
                 created = True
 
             db_article.title = title
-            db_article.abstract = self.abstract
+            db_article.abstract = abstract
             db_article.data_source_value = self.data_source
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
@@ -197,7 +197,6 @@ class ArticleDataPoint(object):
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
             db_article.covid_related = covid_related(db_article=db_article)
-            db_article.automatic_state_check(save=False)
             db_article.last_scrape = timezone.now()
             db_article.save()
         return db_article, created
@@ -289,7 +288,7 @@ class DataUpdater(object):
 
         start = timer()
 
-        filtered_articles = Paper.objects.all().filter(data_source__value=self.data_source).order_by(
+        filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)

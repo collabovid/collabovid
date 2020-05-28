@@ -47,5 +47,4 @@ class PubmedNewArticlesTask(Runnable):
         updater = PubmedUpdater(log=self.log)
         updater.get_new_data(pdf_content=True, pdf_image=pdf_image)
 
-        pubmed_datasource = DataSource.objects.get(name=DataSource.PUBMED_DATASOURCE_NAME)
-        Cord19FulltextUpdater.update(papers=Paper.objects.filter(data_source=pubmed_datasource))
+        # Cord19FulltextUpdater.update(papers=Paper.objects.filter(data_source_value=DataSource.PUBMED))

@@ -25,8 +25,8 @@ class PubMedDatapoint(ArticleDataPoint):
         return [(a['lastname'], a['firstname']) for a in self.pubmed_article.authors if a['lastname'] or a['firstname']]
 
     @property
-    def data_source_name(self):
-        return DataSource.PUBMED_DATASOURCE_NAME
+    def data_source(self):
+        return DataSource.PUBMED
 
     @property
     def paperhost_name(self):
@@ -82,7 +82,7 @@ class PubmedUpdater(DataUpdater):
 
     @property
     def data_source(self):
-        return DataSource.PUBMED_DATASOURCE
+        return DataSource.PUBMED
 
     def __init__(self, log=print):
         super().__init__(log)

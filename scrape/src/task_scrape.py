@@ -34,7 +34,7 @@ class ScrapeTask(Runnable):
 
         self.log("Get new Pubmed articles...")
         TaskRunner.run_task(PubmedNewArticlesTask,
-                            started_by=self._started_by)
+                            started_by=self._task.started_by)
         self.log("Finished getting new Pubmed articles...")
 
         if settings.UPDATE_VECTORIZER:
