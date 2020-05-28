@@ -1,6 +1,6 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
-from django.db.models import F
+from django.db.models import Q
 from django.utils.translation import gettext_lazy
 
 
@@ -117,8 +117,16 @@ class Paper(models.Model):
 
     @property
     def visible(self):
-        return (self.covid_related or self.data_source.name == DataSource.MEDBIORXIV_DATASOURCE_NAME) \
-               and self.paper_state in (PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED)
+        return ((self.covid_related or self.data_source_value and DataSource(
+            self.data_source_value).name == DataSource.MEDBIORXIV.name)
+                and self.paper_state in (PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED))
+
+    @staticmethod
+    def get_visible_papers():
+        paper_query = (Q(covid_related=True) | Q(data_source_value=DataSource.MEDBIORXIV.value)) & Q(
+            paper_state__in=[PaperState.AUTOMATICALLY_ACCEPTED, PaperState.VERIFIED]
+        )
+        return Paper.objects.filter(paper_query)
 
     @property
     def percentage_topic_score(self):

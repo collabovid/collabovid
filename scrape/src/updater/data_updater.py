@@ -289,7 +289,7 @@ class DataUpdater(object):
 
         start = timer()
 
-        filtered_articles = Paper.objects.all().filter(data_source__name=self.data_source).order_by(
+        filtered_articles = Paper.objects.all().filter(data_source__value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)

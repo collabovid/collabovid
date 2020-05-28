@@ -8,6 +8,12 @@ class CheckPaperStateTask(Runnable):
     def task_name():
         return "check-paper-states-automatically"
 
+    @staticmethod
+    def description():
+        return (
+            "Automatically check the paper state of unknown and automatically accepted papers."
+        )
+
     def __init__(self, *args, **kwargs):
         super(CheckPaperStateTask, self).__init__(*args, **kwargs)
 

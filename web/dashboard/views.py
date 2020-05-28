@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.http import HttpResponseNotFound
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 
@@ -123,12 +122,14 @@ def data_sanitizing(request):
                 if action in valid_actions:
                     print(f"Set state of {paper.doi} to {action}")
                     paper.paper_state = valid_actions[action]
+                    paper.save()
                     return HttpResponse('')
                 else:
                     return HttpResponseNotFound('Invalid action')
             except Paper.DoesNotExist:
                 return HttpResponseNotFound('DOI not found.')
         return HttpResponseNotFound()
+
 
 @staff_member_required
 def data_import(request):
@@ -147,6 +148,7 @@ def data_import(request):
     sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
 
     return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives})
+
 
 @staff_member_required
 def delete_archive(request, archive_path):

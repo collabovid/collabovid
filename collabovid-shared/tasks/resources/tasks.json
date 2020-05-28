@@ -123,6 +123,11 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "check-paper-states-automatically": {
+            "name": "Check Paper States Automatically",
+            "description": "Automatically check the paper state of unknown and automatically accepted papers.",
+            "parameters": []
         }
     },
     "search": {

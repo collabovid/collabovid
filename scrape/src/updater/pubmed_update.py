@@ -81,8 +81,8 @@ class PubmedUpdater(DataUpdater):
     _PUBMED_SEARCH_QUERY = '("2019/12/01"[Date - Create] : "3000"[Date - Create]) AND ((COVID-19) OR (SARS-CoV-2) OR (Coronavirus)) AND Journal Article[ptyp]'
 
     @property
-    def data_source_name(self):
-        return DataSource.PUBMED_DATASOURCE_NAME
+    def data_source(self):
+        return DataSource.PUBMED_DATASOURCE
 
     def __init__(self, log=print):
         super().__init__(log)
