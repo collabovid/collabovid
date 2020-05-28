@@ -2,11 +2,13 @@ FROM python:3.7-slim-buster
 
 RUN mkdir -p /usr/share/man/man1
 
-RUN apt-get -y update && apt-get install -y --no-install-recommends poppler-utils default-jre \
+RUN apt-get -y update && apt-get install -y --no-install-recommends poppler-utils default-jre git \
 && rm -rf /var/lib/apt/lists/*
 
 ENV PROJECT_DIR=scrape
 ENV PROJECT_NAME=scrape
+
+RUN pip install --no-cache requests==2.23.0
 
 COPY ./${PROJECT_DIR}/requirements.txt /requirements.txt
 RUN pip install --no-cache -r /requirements.txt
