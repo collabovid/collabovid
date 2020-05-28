@@ -118,7 +118,7 @@ window.chartColors = {
         let hosts = [];
         let data = [];
 
-        let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue];
+        let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue, chartColors.yellow];
 
         Object.keys(plugin.settings.plot_data).forEach(function (key) {
             hosts.push(key);

@@ -20,10 +20,15 @@ class DataImport:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
 
+            journals = "journals" in data
+
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
-            data["journals"] = {int(k): v for k, v in data["journals"].items()}
+
+
+            if journals:
+                data["journals"] = {int(k): v for k, v in data["journals"].items()}
 
             category_mapping = {}
             categories_created = 0
@@ -47,13 +52,14 @@ class DataImport:
 
             journal_mapping = {}
             journals_created = 0
-            for id, journal in data["journals"].items():
-                db_journal, created = Journal.objects.get_or_create(
-                    name=journal["name"]
-                )
-                journal_mapping[id] = db_journal
-                if created:
-                    journals_created += 1
+            if journals:
+                for id, journal in data["journals"].items():
+                    db_journal, created = Journal.objects.get_or_create(
+                        name=journal["name"]
+                    )
+                    journal_mapping[id] = db_journal
+                    if created:
+                        journals_created += 1
 
             papers_created = 0
             authors_created = 0
@@ -87,9 +93,11 @@ class DataImport:
                             if paper["paperhost_id"]
                             else None,
                             data_source_value=paper["datasource_id"],
-                            pubmed_id=paper["pubmed_id"],
+                            pubmed_id=paper["pubmed_id"]
+                            if "pubmed_id" in paper
+                            else None,
                             journal=journal_mapping[paper["journal_id"]]
-                            if paper["journal_id"]
+                            if journals and paper["journal_id"]
                             else None,
                         )
 
