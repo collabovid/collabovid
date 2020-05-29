@@ -182,8 +182,8 @@ class ArticleDataPoint(object):
             for author in authors:
                 try:
                     if (
-                            len(author[1]) > Author.max_length("first_name") or
-                            len(author[0]) > Author.max_length("last_name")
+                            (author[1] and len(author[1]) > Author.max_length("first_name")) or
+                            (author[0] and len(author[0]) > Author.max_length("last_name"))
                     ):
                         raise DataError(f"Author exceeds maximum length: {author}")
 
