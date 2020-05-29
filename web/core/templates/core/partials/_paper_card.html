@@ -58,7 +58,12 @@
                                 from
                                 <a href="{{ paper.url }}">{{ paper.host.name }}</a>
                                 {% if paper.journal %}
-                                    in {{ paper.journal.name }}
+                                    in
+                                    {% if paper.journal.url %}
+                                        <a href="{{ paper.journal.url}}">{{ paper.journal.displayname }}</a>
+                                    {% else %}
+                                        {{ paper.journal.displayname }}
+                                    {% endif %}
                                 {% endif %}
                             </div>
                             <i class="fas fa-clock"></i> {{ paper.published_at }}
