@@ -21,73 +21,73 @@
                 </div>
             {% endif %}
 
-            {% if paper.preview_image %}
-                <div class="col-lg-10">
-            {% else %}
-                <div class="col-lg-12">
-            {%  endif %}
+            <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
-                    <div class="paper-card-badge">
-                        {% if paper.is_preprint %}
-                            <span class="badge badge-pill badge-secondary small">Preprint</span>
-    {#                    {% else %}#}
-    {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
-                        {% endif %}
+                <div class="paper-card-badge">
+                    {% if paper.is_preprint %}
+                        <span class="badge badge-pill badge-secondary small">Preprint</span>
+                        {#                    {% else %}#}
+                        {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
+                    {% endif %}
 
-                        {% if show_score %}
-                            <span class="badge badge-pill"
-                                  style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
-                        {% endif %}
+                    {% if show_score %}
+                        <span class="badge badge-pill"
+                              style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
+                    {% endif %}
 
-                    </div>
+                </div>
 
-                    <div class="card-block">
+                <div class="card-block">
 
-                        <h5 class="card-title font-weight-normal">
-                            {{ paper.title }}
-                        </h5>
+                    <h5 class="card-title font-weight-normal">
+                        {{ paper.title }}
+                    </h5>
 
-                        <h6 class="card-subtitle mb-2 text-muted small">
-                            <div class="mb-1">
-                                <i class="fas fa-external-link-alt"></i>
-                                {% if paper.doi|first not in 'arXiv:' %}
-                                    <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
-                                {% else %}
-                                    {{ paper.doi }}
-                                {% endif %}
-                                from
-                                <a href="{{ paper.url }}">{{ paper.host.name }}</a>
-                                {% if paper.journal %}
-                                    in
-                                    {% if paper.journal.url %}
-                                        <a href="{{ paper.journal.url}}">{{ paper.journal.displayname }}</a>
-                                    {% else %}
-                                        {{ paper.journal.displayname }}
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                            <i class="fas fa-clock"></i> {{ paper.published_at }}
-                            &nbsp;|&nbsp;
-                            {% for author in paper.authors.all %}
-                                <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
-                                    {% if not forloop.first %}&nbsp;{% endif %}
-                                    <i class="fas fa-user"></i> {{ author.first_name }} {{ author.last_name }}
-                                </span>
-                            {% endfor %}
-
-                            {% if paper.authors.count > 5 %}
-                                {% with paper.authors.count|add:"-5" as remaining_authors %}
-                                    <br>
-                                    <a class="d-inline show-authors small" href="#">
-                                        show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}
-                                        s{% endif %}
-                                    </a>
-                                {% endwith %}
+                    <h6 class="card-subtitle mb-2 text-muted small text-justify">
+                        <div class="mb-1">
+                            {% if paper.doi|first not in 'arXiv:' %}
+                                <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                            {% else %}
+                                {{ paper.doi }}
                             {% endif %}
-                            <br>
-                        </h6>
+                            from
+                            <a href="{{ paper.url }}">{{ paper.host.name }}</a>
+                            {% if paper.journal %}
+                                in
+                                {% if paper.journal.url %}
+                                    <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
+                                {% else %}
+                                    {{ paper.journal.displayname }}
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <i class="fas fa-clock"></i> {{ paper.published_at }}
+                        &nbsp;|&nbsp;
+                        <i class="fas fa-users"></i>
+                        {% for author in paper.authors.all %}
+                            {% if not forloop.first %}
+                                <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                                    &middot;
+                                </span>
+                            {% endif %}
+                            <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                                {{ author.first_name }} {{ author.last_name }}
+                            </span>
+                        {% endfor %}
 
-                        <div class="abstract-container card-text">
+                        {% if paper.authors.count > 5 %}
+                            {% with paper.authors.count|add:"-5" as remaining_authors %}
+                                <br>
+                                <a class="d-inline show-authors mt-2" href="#">
+                                    show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}
+                                    s{% endif %}
+                                </a>
+                            {% endwith %}
+                        {% endif %}
+                        <br>
+                    </h6>
+
+                    <div class="abstract-container card-text">
                             <span style="font-size: 0.8em">
                                 {% if paper.abstract|length >= 420 %}
                                     <span class="short">{{ paper.abstract|slice:":400" }}</span><span
@@ -99,10 +99,10 @@
                                 {% endif %}
                             </span>
 
-                            <div class="mt-2 small text-muted text-right">
+                        <div class="mt-2 small text-muted text-right">
 
-                                {% if paper.abstract|length >= 420 %}
-                                    <span class="abstract-controls">
+                            {% if paper.abstract|length >= 420 %}
+                                <span class="abstract-controls">
                                         <a href="#" class="toggle-description show"
                                            style="{% if extended %} display: none; {% endif %}">
                                             Expand the abstract
@@ -113,22 +113,22 @@
                                             Hide the full abstract
                                         </a>
                                     </span>
-                                {% endif %}
+                            {% endif %}
 
-                                {% if paper.abstract|length >= 420 and paper.pdf_url %}
-                                    |
-                                {% endif %}
+                            {% if paper.abstract|length >= 420 and paper.pdf_url %}
+                                |
+                            {% endif %}
 
-                                {% if paper.pdf_url %}
-                                    <a href="{{ paper.pdf_url }}" class="mt-2">
-                                        Read the full text
-                                    </a>
-                                {% endif %}
+                            {% if paper.pdf_url %}
+                                <a href="{{ paper.pdf_url }}" class="mt-2">
+                                    Read the full text
+                                </a>
+                            {% endif %}
 
-                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
 
         </div>
