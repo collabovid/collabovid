@@ -313,7 +313,7 @@ div.filter-card div.card {
     width: 100%;
     height: 100%;
 
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 div.filter-card.collapsing {
