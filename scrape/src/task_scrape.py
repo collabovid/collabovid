@@ -2,7 +2,7 @@ import os
 from tasks.task_runner import TaskRunner
 from src.task_medrxiv_update import MedBiorxivNewArticlesTask
 from src.task_arxiv_update import ArxivNewArticlesTask
-
+from src.task_pubmed_update import PubmedNewArticlesTask
 # from analyze.update_topic_assignment import UpdateTopicAssignment
 # from analyze.setup_vectorizer import SetupVectorizer
 
@@ -30,7 +30,12 @@ class ScrapeTask(Runnable):
         self.log("Get new arXiv articles...")
         TaskRunner.run_task(ArxivNewArticlesTask,
                             started_by=self._task.started_by)
-        self.log("Finished getting new medRxiv/bioRxiv articles...")
+        self.log("Finished getting new arXiv articles...")
+
+        self.log("Get new Pubmed articles...")
+        TaskRunner.run_task(PubmedNewArticlesTask,
+                            started_by=self._task.started_by)
+        self.log("Finished getting new Pubmed articles...")
 
         if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")

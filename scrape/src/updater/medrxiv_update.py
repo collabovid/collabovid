@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 from data.models import DataSource
 from datetime import datetime
-from src.updater.data_updater import ArticleDataPoint, DataUpdater
+from src.updater.data_updater import ArticleDataPoint, DataError, DataUpdater
 
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
@@ -44,10 +44,11 @@ class MedrxivDataPoint(ArticleDataPoint):
     def extract_authors(self):
         self._setup_article_soup()
 
-        author_webelements = self._article_soup.find(
-            'span', attrs={'class': 'highwire-citation-authors'}
-        ).find_all('span', recursive=False)
-
+        try:
+            author_webelements = self._article_soup.find('span', attrs={'class': 'highwire-citation-authors'}).find_all(
+                'span', recursive=False)
+        except AttributeError:
+            raise DataError("Error in HTML soup when extracting authors.")
         authors = []
         for author_webelement in author_webelements:
             try:
@@ -128,7 +129,7 @@ class MedrxivUpdater(DataUpdater):
     _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'
 
     @property
-    def data_source_name(self):
+    def data_source(self):
         return DataSource.MEDBIORXIV
 
     def __init__(self, log=print):

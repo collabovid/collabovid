@@ -2,12 +2,11 @@ from datetime import timedelta
 from time import sleep
 from timeit import default_timer as timer
 
-from data.models import Author, Category, DataSource, Paper, PaperData, PaperHost
+from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
-
 from src.pdf_extractor import PdfExtractError, PdfExtractor
 from src.static_functions import covid_related
 
@@ -75,6 +74,10 @@ class ArticleDataPoint(object):
         raise NotImplementedError
 
     @property
+    def pubmed_id(self):
+        return None
+
+    @property
     def published_at(self):
         return None
 
@@ -96,6 +99,10 @@ class ArticleDataPoint(object):
 
     @property
     def category_name(self):
+        return None
+
+    @property
+    def journal(self):
         return None
 
     @staticmethod
@@ -126,6 +133,7 @@ class ArticleDataPoint(object):
         doi = self.doi
         title = self.title
         paperhost_name = self.paperhost_name
+        abstract = self.abstract
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
@@ -133,6 +141,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract title")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
+        if not abstract:
+            raise MissingDataError("Couldn't extract abstract")
 
         with transaction.atomic():
             try:
@@ -147,7 +157,7 @@ class ArticleDataPoint(object):
                 created = True
 
             db_article.title = title
-            db_article.abstract = self.abstract
+            db_article.abstract = abstract
             db_article.data_source_value = self.data_source
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
@@ -158,16 +168,15 @@ class ArticleDataPoint(object):
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint
-
+            db_article.pubmed_id = self.pubmed_id
             db_article.save()
 
-            try:
-                authors = self.extract_authors()
-            except AttributeError:
-                raise MissingDataError("Couldn't extract authors, error in HTML soup")
+            authors = self.extract_authors()
 
-            if len(authors) > 0:
-                db_article.authors.clear()
+            if len(authors) == 0:
+                raise MissingDataError("Found no authors")
+
+            db_article.authors.clear()
             for author in authors:
                 try:
                     db_author, _ = Author.objects.get_or_create(
@@ -180,6 +189,9 @@ class ArticleDataPoint(object):
 
             if self.category_name:
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
+
+            if self.journal:
+                db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
 
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)

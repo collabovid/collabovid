@@ -7,11 +7,11 @@
         <div class="container py-3 text-white">
             <div class="row h-100 align-items-center py-5">
                 <div class="col-lg-8">
-                    <h1 class="display-4">Explore COVID-19 Preprints</h1>
+                    <h1 class="display-4">Explore COVID-19 Publications</h1>
                     <p class="muted-white lead mb-0">
                         A lot of articles concerning SARS-CoV-2/COVID-19 are
-                        published on preprint servers every day. Most of
-                        these papers are not reviewed in a professional reviewing process at the time of publication.
+                        published every day. Many of them, so-called <em>pre-prints</em>, are not reviewed in a professional reviewing process at the time of publication.
+                        Others are already reviewed and published in well-known journals.
                         Collabovid helps researchers to identify the most relevant information by using
                         Natural Language Processing.
                         You can search for any topic you want below.
@@ -91,7 +91,7 @@
                     <p class="font-italic text-muted">Since January 2020, <b>{{ statistics.paper_count }}</b>
                         articles
                         concerning the
-                        coronavirus were published on so-called preprint servers. Of these publications,
+                        coronavirus were indexed by our service. Of these publications,
                         <b>{{ statistics.paper_today_count }}</b> appeared today and
                         <b>{{ statistics.papers_last_week }}</b> have been released in the past week. For
                         researchers, it is impossible to review every single one manually.
@@ -113,11 +113,13 @@
                 <div class="col-lg-6 mt-4">
                     <h2 class="font-weight-light">Our data sources</h2>
                     <p class="font-italic text-muted">
-                        Collabovid currently indexes all COVID-19/SARS-CoV-2-related papers
+                        Collabovid currently indexes COVID-19/SARS-CoV-2-related papers
                         from
                         <a href="https://connect.medrxiv.org/relate/content/181">medRxiv</a>,
-                        <a href="https://connect.biorxiv.org/relate/content/181">bioRxiv</a> and
-                        <a href="https://arxiv.org/covid19search">arXiv</a>. This dataset is updated
+                        <a href="https://connect.biorxiv.org/relate/content/181">bioRxiv</a>,
+                        <a href="https://arxiv.org/covid19search">arXiv</a> and
+                        <a href="https://pubmed.ncbi.nlm.nih.gov/?term=(%222019/12/01%22[Date%20-%20Create]%20:%20%223000%22[Date%20-%20Create])%20AND%20((COVID-19)%20OR%20(SARS-CoV-2)%20OR%20(Coronavirus))%20AND%20Journal%20Article[ptyp]">PubMed</a>.
+                        This dataset is updated
                         automatically
                         several times a day. We are working hard
                         on including new data sources.</p>

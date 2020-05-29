@@ -100,7 +100,7 @@ class ArxivUpdater(DataUpdater):
         self._query_result = None
 
     @property
-    def data_source_name(self):
+    def data_source(self):
         return DataSource.ARXIV
 
     def _load_query_result(self):

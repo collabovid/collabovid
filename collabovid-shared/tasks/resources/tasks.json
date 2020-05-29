@@ -50,6 +50,31 @@
             "description": "No description provided.",
             "parameters": []
         },
+        "update-pubmed": {
+            "name": "Update Pubmed",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 10,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "get-new-pubmed": {
+            "name": "Get New Pubmed",
+            "description": "No description provided.",
+            "parameters": []
+        },
         "scrape": {
             "name": "Scrape",
             "description": "No description provided.",

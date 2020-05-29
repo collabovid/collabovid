@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.http import HttpResponseNotFound
+from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 
 from collabovid_store.s3_utils import S3BucketClient
@@ -103,6 +103,33 @@ def delete_all_finished(request):
         return redirect('tasks')
     return HttpResponseNotFound()
 
+
+# @staff_member_required
+# def data_sanitizing(request):
+#     if request.method == "GET":
+#         papers = Paper.objects.filter(paper_state=PaperState.UNKNOWN)[:100]
+#         return render(request, "dashboard/scrape/paper_table.html", {"papers": papers})
+#     elif request.method == "POST":
+#         doi = request.POST.get('doi', '')
+#         action = request.POST.get('action', '')
+#
+#         if doi and action:
+#             try:
+#                 paper = Paper.objects.get(doi=doi)
+#                 valid_actions = {'unknown': PaperState.UNKNOWN, 'accept': PaperState.VERIFIED,
+#                                  'decline': PaperState.BULLSHIT}
+#                 if action in valid_actions:
+#                     print(f"Set state of {paper.doi} to {action}")
+#                     paper.paper_state = valid_actions[action]
+#                     paper.save()
+#                     return HttpResponse('')
+#                 else:
+#                     return HttpResponseNotFound('Invalid action')
+#             except Paper.DoesNotExist:
+#                 return HttpResponseNotFound('DOI not found.')
+#         return HttpResponseNotFound()
+
+
 @staff_member_required
 def data_import(request):
     s3_client = S3BucketClient(
@@ -120,6 +147,7 @@ def data_import(request):
     sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
 
     return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives})
+
 
 @staff_member_required
 def delete_archive(request, archive_path):

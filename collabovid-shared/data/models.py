@@ -1,6 +1,5 @@
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
-from django.db.models import F
 from django.utils.translation import gettext_lazy
 
 
@@ -21,6 +20,7 @@ class PaperHost(models.Model):
 class DataSource(models.IntegerChoices):
     MEDBIORXIV = 0, gettext_lazy('medbioRxiv')
     ARXIV = 1, gettext_lazy('arXiv')
+    PUBMED = 2, gettext_lazy('pubmed')
 
     @property
     def priority(self):
@@ -28,8 +28,20 @@ class DataSource(models.IntegerChoices):
             return 0
         if self.value == DataSource.ARXIV:
             return 1
+        elif self.value == DataSource.PUBMED:
+            return 10
         else:
             return 100
+
+
+class Journal(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    alias = models.CharField(max_length=200, null=True, default=None)
+    url = models.URLField(null=True, default=None)
+
+    @property
+    def displayname(self):
+        return self.alias if self.alias else self.name
 
 
 class Author(models.Model):
@@ -69,6 +81,8 @@ class Paper(models.Model):
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
 
+    pubmed_id = models.CharField(max_length=20, unique=True, null=True, default=None)
+
     topic = models.ForeignKey(Topic,
                               related_name="papers",
                               null=True,
@@ -83,6 +97,7 @@ class Paper(models.Model):
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField(null=True, default=None)
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
     latent_topic_score = models.BinaryField(null=True)
 

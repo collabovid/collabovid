@@ -28,6 +28,7 @@ class DataExport:
         authors = {}
         paperhosts = {}
         categories = {}
+        journals = {}
         papers = []
 
         if not os.path.exists(out_dir):
@@ -55,6 +56,8 @@ class DataExport:
 
                     if paper.category and paper.category not in categories:
                         categories[paper.category_id] = {"name": paper.category.name}
+                    if paper.journal and paper.journal not in journals:
+                        journals[paper.journal_id] = {"name": paper.journal.name}
 
                     paper_data = {
                         "doi": paper.doi,
@@ -81,6 +84,8 @@ class DataExport:
                         if paper.last_scrape
                         else None,
                         "datasource_id": paper.data_source_value,
+                        "pubmed_id": paper.pubmed_id,
+                        "journal_id": paper.journal.pk if paper.journal else None
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
@@ -105,6 +110,7 @@ class DataExport:
                     "authors": authors,
                     "paperhosts": paperhosts,
                     "papers": papers,
+                    "journals": journals,
                 }
 
                 # json_io = io.BytesIO()

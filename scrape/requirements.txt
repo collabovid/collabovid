@@ -7,3 +7,4 @@ arxiv>=0.5.3
 nameparser>=1.0.6
 requests==2.23.0
 pdf2image==1.12.1
+git+https://github.com/iacopy/pymed.git@fork-fixes#egg=pymed
