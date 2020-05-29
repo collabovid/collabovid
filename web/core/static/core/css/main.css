@@ -424,3 +424,8 @@ div.paper-card-badge {
     margin-right: -15px;
     padding-left: 10px;
 }
+
+label.nav-link
+{
+    cursor: pointer;
+}

@@ -92,17 +92,17 @@
 
                         <div class="abstract-container card-text text-justify">
                             <span style="font-size: 0.8em">
-                                {% if paper.abstract|length >= preview_size %}
-                                    <span class="short">{{ paper.abstract|slice:":400" }}</span><span
+                                {% if not extended and paper.abstract|length >= preview_size %}
+                                    <span class="short">{{ paper|preview_slice }}</span><span
                                         class="dots">...</span><span
                                         class="long"
-                                        style="{% if not extended %}display: none; {% endif %}">{{ paper.abstract|slice:"400:" }}</span>
+                                        style="display: none;">{{ paper|full_text_slice }}</span>
                                 {% else %}
                                     <span class="short">{{ paper.abstract }}</span>
                                 {% endif %}
                             </span>
 
-                            <div class="mt-2 small text-muted text-right">
+                            <div class="mt-1 small text-muted text-right">
 
                                 {% if paper.abstract|length >= preview_size %}
                                     <span class="abstract-controls">
@@ -132,6 +132,7 @@
                         </div>
 
                     {% endwith %}
+
                 </div>
             </div>
 
