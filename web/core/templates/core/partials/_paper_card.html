@@ -1,5 +1,6 @@
 {% load static %}
 {% load score_helper %}
+{% load paper_card_extras %}
 {% if html %}
     <div class="card p-4 rounded shadow">
 
@@ -43,7 +44,7 @@
                         {{ paper.title }}
                     </h5>
 
-                    <h6 class="card-subtitle mb-2 text-muted small text-justify">
+                    <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
                         <div class="mb-1">
                             {% if paper.doi|first not in 'arXiv:' %}
                                 <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
@@ -77,19 +78,21 @@
 
                         {% if paper.authors.count > 5 %}
                             {% with paper.authors.count|add:"-5" as remaining_authors %}
-                                <br>
-                                <a class="d-inline show-authors mt-2" href="#">
-                                    show {{ remaining_authors }} remaining author{% if remaining_authors > 1 %}
-                                    s{% endif %}
+                                <br class="remove-on-show-authors">
+                                <a class="d-inline show-authors" href="#">
+                                    show {{ remaining_authors }}
+                                    remaining author{% if remaining_authors > 1 %}s{% endif %}
                                 </a>
                             {% endwith %}
                         {% endif %}
                         <br>
                     </h6>
 
-                    <div class="abstract-container card-text">
+                    {% with paper|abstract_preview_size as preview_size %}
+
+                        <div class="abstract-container card-text text-justify">
                             <span style="font-size: 0.8em">
-                                {% if paper.abstract|length >= 420 %}
+                                {% if paper.abstract|length >= preview_size %}
                                     <span class="short">{{ paper.abstract|slice:":400" }}</span><span
                                         class="dots">...</span><span
                                         class="long"
@@ -99,10 +102,10 @@
                                 {% endif %}
                             </span>
 
-                        <div class="mt-2 small text-muted text-right">
+                            <div class="mt-2 small text-muted text-right">
 
-                            {% if paper.abstract|length >= 420 %}
-                                <span class="abstract-controls">
+                                {% if paper.abstract|length >= preview_size %}
+                                    <span class="abstract-controls">
                                         <a href="#" class="toggle-description show"
                                            style="{% if extended %} display: none; {% endif %}">
                                             Expand the abstract
@@ -113,20 +116,22 @@
                                             Hide the full abstract
                                         </a>
                                     </span>
-                            {% endif %}
+                                {% endif %}
 
-                            {% if paper.abstract|length >= 420 and paper.pdf_url %}
-                                |
-                            {% endif %}
+                                {% if paper.abstract|length >= preview_size and paper.pdf_url %}
+                                    |
+                                {% endif %}
 
-                            {% if paper.pdf_url %}
-                                <a href="{{ paper.pdf_url }}" class="mt-2">
-                                    Read the full text
-                                </a>
-                            {% endif %}
+                                {% if paper.pdf_url %}
+                                    <a href="{{ paper.pdf_url }}">
+                                        Read the full text
+                                    </a>
+                                {% endif %}
 
+                            </div>
                         </div>
-                    </div>
+
+                    {% endwith %}
                 </div>
             </div>
 
@@ -158,6 +163,7 @@
             $(document).on('click', '.show-authors', function (e) {
                 e.preventDefault();
                 $(this).parent().find('.author.d-none').removeClass('d-none');
+                $(this).parent().find('.remove-on-show-authors').remove();
                 $(this).remove();
             });
         })
