@@ -193,13 +193,15 @@ def search(request):
 def list_authors(request):
     possible_authors = Author.objects.all().annotate(name=Concat('first_name', V(' '), 'last_name'))
 
-    authors = possible_authors.annotate(similarity=TrigramSimilarity('name', request.GET.get('query', ''))).filter(
-        similarity__gt=0.3).order_by(
-        '-similarity')[:6]
-
+    query = request.GET.get('query', '')
     return_json = []
 
-    for author in authors:
-        return_json.append({"name": author.name})
+    if query:
+
+        authors = possible_authors.annotate(similarity=TrigramSimilarity('name', query)).order_by(
+            '-similarity')[:6]
+
+        for author in authors:
+            return_json.append({"name": author.name})
 
     return JsonResponse({"authors": return_json})
