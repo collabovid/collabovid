@@ -44,13 +44,17 @@ class Journal(models.Model):
         return self.alias if self.alias else self.name
 
     @staticmethod
-    def max_name_length():
-        return Journal._meta.get_field("name").max_length
+    def max_length(field: str):
+        return Journal._meta.get_field(field).max_length
 
 
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
+    @staticmethod
+    def max_length(field: str):
+        return Author._meta.get_field(field).max_length
 
 
 class Category(models.Model):
@@ -117,3 +121,7 @@ class Paper(models.Model):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
         self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
                                                                'image/jpeg', pillow_image.tell, None))
+
+    @staticmethod
+    def max_length(field: str):
+        return Paper._meta.get_field(field).max_length

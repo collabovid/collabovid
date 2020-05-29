@@ -139,6 +139,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract doi")
         if not title:
             raise MissingDataError("Couldn't extract title")
+        if len(title) > Paper.max_length("title"):
+            raise DataError(f"Title exceeds maximum length: {title}")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
         if not abstract:
@@ -179,6 +181,12 @@ class ArticleDataPoint(object):
             db_article.authors.clear()
             for author in authors:
                 try:
+                    if (
+                            len(author[1]) > Author.max_length("first_name") or
+                            len(author[0]) > Author.max_length("last_name")
+                    ):
+                        raise DataError(f"Author exceeds maximum length: {author}")
+
                     db_author, _ = Author.objects.get_or_create(
                         first_name=author[1],
                         last_name=author[0],
@@ -192,7 +200,7 @@ class ArticleDataPoint(object):
 
             if self.journal:
                 db_article.journal, _ = Journal.objects.get_or_create(
-                    name=self.journal[:Journal.max_name_length()]
+                    name=self.journal[:Journal.max_length("name")]
                 )
 
             if pdf_content or pdf_image:
