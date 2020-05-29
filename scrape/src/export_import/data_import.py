@@ -55,7 +55,7 @@ class DataImport:
             if journals:
                 for id, journal in data["journals"].items():
                     db_journal, created = Journal.objects.get_or_create(
-                        name=journal["name"]
+                        name=journal["name"][:Journal.max_name_length()]
                     )
                     journal_mapping[id] = db_journal
                     if created:

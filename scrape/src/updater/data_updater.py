@@ -191,7 +191,9 @@ class ArticleDataPoint(object):
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
             if self.journal:
-                db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
+                db_article.journal, _ = Journal.objects.get_or_create(
+                    name=self.journal[:Journal.max_name_length()]
+                )
 
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)

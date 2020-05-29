@@ -43,6 +43,10 @@ class Journal(models.Model):
     def displayname(self):
         return self.alias if self.alias else self.name
 
+    @staticmethod
+    def max_name_length():
+        return Journal._meta.get_field("name").max_length
+
 
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
