@@ -14,3 +14,4 @@ resources:
   - cronjob-scrape.yaml
   - permissions.yaml
   - job-author-cleanup.yaml
+  - job-pubmed-cleanup.yaml
