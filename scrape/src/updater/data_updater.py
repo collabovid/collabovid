@@ -134,6 +134,7 @@ class ArticleDataPoint(object):
         title = self.title
         paperhost_name = self.paperhost_name
         abstract = self.abstract
+        published_at = self.published_at
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
@@ -145,6 +146,8 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract paperhost")
         if not abstract:
             raise MissingDataError("Couldn't extract abstract")
+        if not published_at:
+            raise MissingDataError("Couldn't extract date")
 
         with transaction.atomic():
             try:
@@ -166,7 +169,7 @@ class ArticleDataPoint(object):
             if self.paperhost_url:
                 db_article.host.url = self.paperhost_url
 
-            db_article.published_at = self.published_at
+            db_article.published_at = published_at
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint

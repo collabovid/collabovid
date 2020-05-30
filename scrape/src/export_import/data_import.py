@@ -65,6 +65,9 @@ class DataImport:
             authors_created = 0
             for i, paper in enumerate(data["papers"]):
                 if not Paper.objects.filter(doi=paper["doi"]).exists():
+                    if not paper["published_at"]:
+                        print(f"Not importing {paper['doi']} because the date is missing.")
+                        continue
                     with transaction.atomic():
                         db_paper = Paper(
                             doi=paper["doi"],
