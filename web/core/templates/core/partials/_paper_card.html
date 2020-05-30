@@ -42,6 +42,7 @@
 
                     <h5 class="card-title font-weight-normal">
                         {{ paper.title }}
+                        {{ request.user|edit_object_link:paper }}
                     </h5>
 
                     <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
@@ -58,8 +59,9 @@
                                 {% if paper.journal.url %}
                                     <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
                                 {% else %}
-                                    {{ paper.journal.displayname }}
+                                    {{ paper.journal.displayname.title }}
                                 {% endif %}
+                                {{ request.user|edit_object_link:paper.journal }}
                             {% endif %}
                         </div>
                         <i class="fas fa-clock"></i> {{ paper.published_at }}
@@ -73,6 +75,7 @@
                             {% endif %}
                             <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
                                 {{ author.first_name }} {{ author.last_name }}
+                                {{ request.user|edit_object_link:author }}
                             </span>
                         {% endfor %}
 

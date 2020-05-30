@@ -1,7 +1,36 @@
 from django import template
+from django.urls import reverse
+from data.models import Paper, Author, Journal
+from django.utils.safestring import mark_safe
+
 register = template.Library()
 
 SLICE_DIFFERENCE = 20
+
+
+@register.filter
+def edit_object_link(user, object):
+    """
+    Renders links for editing certain objects in the django admin panel once the current user is authenticated
+    and member of the staff.
+    :param user:
+    :param object:
+    :return:
+    """
+
+    if user.is_authenticated and user.is_staff:
+        url = None
+        if isinstance(object, Paper):
+            url = reverse("admin:data_paper_change", args=(object.pk,))
+        elif isinstance(object, Author):
+            url = reverse("admin:data_author_change", args=(object.pk,))
+        elif isinstance(object, Journal):
+            url = reverse("admin:data_journal_change", args=(object.pk,))
+
+        if url:
+            return mark_safe("<sup><a href='{}'>[Edit]</a></sup>".format(url))
+
+    return ""
 
 
 @register.filter
