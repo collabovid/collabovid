@@ -86,6 +86,21 @@
                     </div>
                 </div>
 
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="journals-input">
+                            Journals
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="journals-input" name="journals" class="tagify--outside"
+                               placeholder="Journal name">
+                        <div class="text-muted small">If no journal is selected the value defaults to all.</div>
+                    </div>
+                </div>
+
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
                         <button id="filter-form-submit" type="submit" class="btn btn-success" disabled><i
@@ -107,6 +122,7 @@
         var initialValues = JSON.parse('{{ form.authors|escapejs }}');
 
         var tagify = new Tagify(inputElm, {
+            originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
             whitelist: initialValues,
             enforceWhitelist: true,
         });
@@ -146,7 +162,71 @@
             getAuthors(e.detail.value, function (result) {
 
                 $.each(result.authors, function () {
-                    tagify.settings.whitelist.push(this.name);
+                    tagify.settings.whitelist.push(this);
+                });
+
+                tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
+            });
+        }
+
+        tagify.on('input', onInput);
+
+    });
+</script>
+
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+
+        var inputElm = document.getElementById('journals-input');
+        var initialValues = JSON.parse('{{ form.journals|escapejs }}');
+
+        var tagify = new Tagify(inputElm, {
+            whitelist: initialValues,
+            enforceWhitelist: true,
+            skipInvalid: true,
+            originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
+            dropdown: {
+                enabled: 0,
+                mapValueTo: data => data.value + " (" + data.count + ")"
+            }
+        });
+
+        tagify.addTags(initialValues);
+
+        window.pendingAuthorRequest = null;
+
+        var getAuthors = (function getAuthors(text, on_result) {
+
+            if (window.pendingAuthorRequest) {
+                window.pendingAuthorRequest.abort();
+            }
+
+            window.pendingAuthorRequest = $.ajax({
+                url: "{% url "get-journals" %}",
+                type: 'GET',
+                data: "query=" + text,
+                success: function (data) {
+                    on_result(data);
+                },
+                error: function (request, error) {
+                    console.log("Request: " + JSON.stringify(request));
+                    console.log("Error: " + error);
+                }
+            });
+
+        });
+
+
+        // on character(s) added/removed (user is typing/deleting)
+        function onInput(e) {
+            console.log("onInput: ", e.detail);
+            tagify.settings.whitelist.length = 0; // reset current whitelist
+            tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
+
+            getAuthors(e.detail.value, function (result) {
+
+                $.each(result.journals, function () {
+                    tagify.settings.whitelist.push(this);
                 });
 
                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value);

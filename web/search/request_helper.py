@@ -7,9 +7,10 @@ from search.paginator import ScoreSortPaginator
 
 import json
 
+
 class SearchRequestHelper:
 
-    def __init__(self, start_date, end_date, search_query, authors, authors_connection, score_min=0.6):
+    def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, score_min=0.6):
         logger = logging.getLogger(__name__)
 
         self._response = None
@@ -21,14 +22,17 @@ class SearchRequestHelper:
                 'end_date': end_date,
                 'search': search_query,
                 'score_min': score_min,
-                'authors': json.dumps(authors),
-                'authors_connection': authors_connection
+                'authors': authors,
+                'authors_connection': authors_connection,
+                'journals': journals
             })
             response.raise_for_status()
 
             self._response = response.json()
         except requests.exceptions.Timeout:
             logger.error("Search Request Connection Timeout")
+            self._error = True
+        except requests.exceptions.HTTPError:
             self._error = True
         except requests.exceptions.RequestException as e:
             logger.error("Some unknown request exception occured", e)
