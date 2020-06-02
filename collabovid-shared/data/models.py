@@ -36,8 +36,8 @@ class DataSource(models.IntegerChoices):
 
 class Journal(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    alias = models.CharField(max_length=200, null=True, default=None)
-    url = models.URLField(null=True, default=None)
+    alias = models.CharField(max_length=200, null=True, default=None, blank=True)
+    url = models.URLField(null=True, default=None, blank=True)
 
     @property
     def displayname(self):

@@ -14,7 +14,7 @@ from search.request_helper import SearchRequestHelper
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Greatest
 from django.db.models import Count
 
 import json
@@ -246,7 +246,9 @@ def list_journals(request):
     query = request.GET.get('query', '')
 
     if query:
-        journals = journals.annotate(similarity=TrigramSimilarity('name', query)).order_by('-similarity')[:6]
+        journals = journals.annotate(similarity_name=TrigramSimilarity('name', query)).annotate(
+            similarity_alias=TrigramSimilarity('alias', query)).annotate(
+            similarity=Greatest('similarity_name', 'similarity_alias')).order_by('-similarity')[:6]
     else:
         journals = journals.order_by('-paper_count')[:6]
 

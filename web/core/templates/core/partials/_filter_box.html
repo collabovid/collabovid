@@ -125,6 +125,7 @@
             originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
             whitelist: initialValues,
             enforceWhitelist: true,
+            skipInvalid: true
         });
 
         tagify.addTags(initialValues);
