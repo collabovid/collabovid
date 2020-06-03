@@ -125,7 +125,8 @@
             originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
             whitelist: initialValues,
             enforceWhitelist: true,
-            skipInvalid: true
+            skipInvalid: true,
+            delimiters: 'a^',
         });
 
         tagify.addTags(initialValues);
@@ -156,7 +157,6 @@
 
         // on character(s) added/removed (user is typing/deleting)
         function onInput(e) {
-            console.log("onInput: ", e.detail);
             tagify.settings.whitelist.length = 0; // reset current whitelist
             tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
 
@@ -185,6 +185,7 @@
             whitelist: initialValues,
             enforceWhitelist: true,
             skipInvalid: true,
+            delimiters: 'a^',
             originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
             dropdown: {
                 enabled: 0,
@@ -220,7 +221,6 @@
 
         // on character(s) added/removed (user is typing/deleting)
         function onInput(e) {
-            console.log("onInput: ", e.detail);
             tagify.settings.whitelist.length = 0; // reset current whitelist
             tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
 
@@ -229,7 +229,7 @@
                 $.each(result.journals, function () {
                     tagify.settings.whitelist.push(this);
                 });
-
+                
                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
             });
         }
