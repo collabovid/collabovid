@@ -17,14 +17,20 @@ class SearchEngine:
         self.search_pipeline = search_pipeline
 
     @staticmethod
-    def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None):
+    def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None,
+                      category_ids=None):
         papers = Paper.objects.all()
 
         filtered = False
 
+        if category_ids and len(category_ids) > 0:
+            papers = papers.filter(categories__pk__in=category_ids)
+            filtered = True
+
         if journal_ids and len(journal_ids) > 0:
             journals = Journal.objects.filter(pk__in=journal_ids)
             papers = papers.filter(journal__in=journals)
+            filtered = True
 
         if author_ids and len(author_ids) > 0:
             authors = Author.objects.filter(pk__in=author_ids)
@@ -51,11 +57,24 @@ class SearchEngine:
 
         return filtered, papers.distinct()
 
-    def search(self, query: str, start_date=None, end_date=None, topics=None, author_ids=None, author_and=False,
-               journal_ids=None, score_min=0.6):
+    def search(self, query: str,
+               start_date=None,
+               end_date=None,
+               topics=None,
+               author_ids=None,
+               author_and=False,
+               journal_ids=None,
+               category_ids=None,
+               score_min=0.6):
         paper_score_table = defaultdict(int)
 
-        filtered, papers = SearchEngine.filter_papers(start_date, end_date, topics, author_ids, author_and, journal_ids)
+        filtered, papers = SearchEngine.filter_papers(start_date,
+                                                      end_date,
+                                                      topics,
+                                                      author_ids,
+                                                      author_and,
+                                                      journal_ids,
+                                                      category_ids)
 
         combined_factor = 0
 

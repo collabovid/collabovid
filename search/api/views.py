@@ -6,6 +6,8 @@ from threading import Thread
 
 def search(request):
     if request.method == "GET":
+
+        categories = request.GET.getlist('categories', None)
         start_date = request.GET.get("start_date", "")
         end_date = request.GET.get("end_date", "")
         score_min = float(request.GET.get("score_min", "0"))
@@ -19,6 +21,9 @@ def search(request):
 
             if authors:
                 authors = [int(pk) for pk in authors.split(',')]
+
+            if categories:
+                categories = [int(pk) for pk in categories]
         except ValueError:
             return HttpResponseBadRequest("Request is malformed")
 
@@ -30,7 +35,8 @@ def search(request):
 
         search_result = search_engine.search(search_query, start_date=start_date,
                                              end_date=end_date, score_min=score_min, author_ids=authors,
-                                             author_and=(authors_connection == 'all'), journal_ids=journals)
+                                             author_and=(authors_connection == 'all'), journal_ids=journals,
+                                             category_ids=categories)
 
         return JsonResponse(search_result)
 

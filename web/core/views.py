@@ -4,7 +4,7 @@ from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Category, Topic, Author, Journal
+from data.models import Paper, Topic, Author, Category, Journal
 from data.statistics import Statistics
 
 import requests
@@ -111,6 +111,8 @@ def privacy(request):
 def search(request):
     if request.method == "GET":
 
+        categories = Category.objects.all().order_by("pk")
+
         start_date = request.GET.get("published_at_start", "")
         end_date = request.GET.get("published_at_end", "")
 
@@ -154,6 +156,7 @@ def search(request):
             "start_date": start_date,
             "end_date": end_date,
             "search": search_query,
+            "categories": categories,
             "tab": tab,
             "authors": json.dumps(authors_to_json(authors)),
             "authors-connection": authors_connection,
@@ -163,6 +166,8 @@ def search(request):
         return render(request, "core/search.html", {'form': form})
 
     elif request.method == "POST":
+
+        categories = request.POST.getlist("categories")
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
@@ -177,7 +182,9 @@ def search(request):
         journals = request.POST.get("journals")
 
         search_query = request.POST.get("search", "").strip()
-        search_request = SearchRequestHelper(start_date, end_date, search_query, authors, authors_connection, journals)
+        search_request = SearchRequestHelper(start_date, end_date,
+                                             search_query, authors, authors_connection, journals,
+                                             categories)
 
         if search_request.error:
             return render(request, "core/partials/_search_result_error.html",

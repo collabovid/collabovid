@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-12">
                         <label for="authors-input">
-                            Authors
+                            <strong>Authors</strong>
                         </label>
                     </div>
                 </div>
@@ -62,8 +62,41 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
+                        <label for="journals-input">
+                            <strong>Journals</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="journals-input" name="journals" class="tagify--outside"
+                               placeholder="Journal name">
+                        <div class="text-muted small">If no journal is selected the value defaults to all.</div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Categories</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-dark pt-1">
+                        {% for category in form.categories.all %}
+                            <label class="mb-0 d-lg-block">
+                                <input class="mr-1" type="checkbox" checked="checked" name="categories"
+                                       value="{{ category.pk }}">
+                                {{ category.name }} <span class="small text-muted">({{ category.papers.count }})</span>
+                            </label>
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
                         <label for="start-date">
-                            Published After
+                            <strong>Published After</strong>
                         </label>
                     </div>
                 </div>
@@ -76,7 +109,7 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <label for="start-date">
-                            Published Before
+                            <strong>Published Before</strong>
                         </label>
                     </div>
                 </div>
@@ -86,20 +119,6 @@
                     </div>
                 </div>
 
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <label for="journals-input">
-                            Journals
-                        </label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <input id="journals-input" name="journals" class="tagify--outside"
-                               placeholder="Journal name">
-                        <div class="text-muted small">If no journal is selected the value defaults to all.</div>
-                    </div>
-                </div>
 
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
@@ -229,7 +248,7 @@
                 $.each(result.journals, function () {
                     tagify.settings.whitelist.push(this);
                 });
-                
+
                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
             });
         }

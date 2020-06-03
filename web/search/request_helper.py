@@ -10,7 +10,8 @@ import json
 
 class SearchRequestHelper:
 
-    def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, score_min=0.6):
+    def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, categories,
+                 score_min=0.6):
         logger = logging.getLogger(__name__)
 
         self._response = None
@@ -24,6 +25,7 @@ class SearchRequestHelper:
                 'score_min': score_min,
                 'authors': authors,
                 'authors_connection': authors_connection,
+                'categories': categories,
                 'journals': journals
             })
             response.raise_for_status()

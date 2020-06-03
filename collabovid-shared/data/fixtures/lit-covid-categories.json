@@ -1,0 +1,66 @@
+[
+  {
+    "model": "data.category",
+    "pk": 0,
+    "fields": {
+      "name": "General",
+      "description": "General information and news"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 1,
+    "fields": {
+      "name": "Mechanism",
+      "description": "Underlying cause(s) of covid-19 infections and transmission & possible drug mechanism of action"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 2,
+    "fields": {
+      "name": "Transmission",
+      "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 3,
+    "fields": {
+      "name": "Diagnosis",
+      "description": "Disease assessment through symptoms, test results, and radiological features"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 4,
+    "fields": {
+      "name": "Treatment",
+      "description": "Treatment strategies, therapeutic procedures, and vaccine development"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 5,
+    "fields": {
+      "name": "Prevention",
+      "description": "Prevention, control, response and management strategies"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 6,
+    "fields": {
+      "name": "Case Report",
+      "description": "Descriptions of specific patient cases"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 7,
+    "fields": {
+      "name": "Epidemic Forecasting",
+      "description": "Modelling and estimating the trend of covid-19 spread"
+    }
+  }
+]
