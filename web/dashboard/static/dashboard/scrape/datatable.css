@@ -1,0 +1,33 @@
+table {
+    width: 100%;
+}
+
+th {
+    text-align: center;
+}
+
+.decline-btn {
+    width: 5%;
+    background-color: indianred;
+    text-align: center;
+}
+
+.unknown-btn {
+    width: 5%;
+    background-color: yellow;
+    text-align: center;
+}
+
+.accept-btn {
+    width: 5%;
+    background-color: greenyellow;
+    text-align: center;
+}
+
+.author-col {
+    width: 10%;
+}
+
+.title-col {
+    width: 20%;
+}

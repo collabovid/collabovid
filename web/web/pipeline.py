@@ -74,6 +74,12 @@ PIPELINE = {
                 'dashboard/tasks/dashboard.css',
             ),
             'output_filename': 'dashboard.css',
+        },
+        'datatable': {
+            'source_filenames': (
+                'dashboard/scrape/datatable.css',
+            ),
+            'output_filename': 'datatable.css',
         }
     },
 }

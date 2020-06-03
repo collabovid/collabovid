@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Category, Paper, PaperData, PaperHost
+from data.models import Author, Category, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -20,9 +20,15 @@ class DataImport:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
 
+            journals = "journals" in data
+
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
+
+
+            if journals:
+                data["journals"] = {int(k): v for k, v in data["journals"].items()}
 
             category_mapping = {}
             categories_created = 0
@@ -44,14 +50,28 @@ class DataImport:
                 if created:
                     paperhosts_created += 1
 
+            journal_mapping = {}
+            journals_created = 0
+            if journals:
+                for id, journal in data["journals"].items():
+                    db_journal, created = Journal.objects.get_or_create(
+                        name=journal["name"][:Journal.max_length("name")]
+                    )
+                    journal_mapping[id] = db_journal
+                    if created:
+                        journals_created += 1
+
             papers_created = 0
             authors_created = 0
             for i, paper in enumerate(data["papers"]):
                 if not Paper.objects.filter(doi=paper["doi"]).exists():
+                    if not paper["published_at"]:
+                        print(f"Not importing {paper['doi']} because the date is missing.")
+                        continue
                     with transaction.atomic():
                         db_paper = Paper(
                             doi=paper["doi"],
-                            title=paper["title"],
+                            title=paper["title"][:Paper.max_length("title")],
                             abstract=paper["abstract"],
                             version=paper["version"],
                             covid_related=paper["covid_related"],
@@ -76,6 +96,12 @@ class DataImport:
                             if paper["paperhost_id"]
                             else None,
                             data_source_value=paper["datasource_id"],
+                            pubmed_id=paper["pubmed_id"]
+                            if "pubmed_id" in paper
+                            else None,
+                            journal=journal_mapping[paper["journal_id"]]
+                            if journals and paper["journal_id"]
+                            else None,
                         )
 
                         db_paper.save()
@@ -83,8 +109,8 @@ class DataImport:
                         for author_id in paper["author_ids"]:
                             author = data["authors"][author_id]
                             db_author, created = Author.objects.get_or_create(
-                                first_name=author["firstname"],
-                                last_name=author["lastname"],
+                                first_name=author["firstname"][:Author.max_length("first_name")],
+                                last_name=author["lastname"][:Author.max_length("last_name")],
                             )
                             if created:
                                 authors_created += 1
@@ -105,6 +131,7 @@ class DataImport:
         log(f"Finished import in {timedelta(seconds=end - start)}")
         log("Imported")
         log(f"\t{paperhosts_created} paperhosts")
+        log(f"\t{journals_created} journals")
         log(f"\t{categories_created} categories")
         log(f"\t{authors_created} authors")
         log(f"\t{papers_created} papers")

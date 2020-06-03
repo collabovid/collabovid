@@ -5,6 +5,7 @@ urlpatterns = [
     path('', home, name='home'),
     path('search', search, name='search'),
     path('authors', list_authors, name='get-authors'),
+    path('journals', list_journals, name='get-journals'),
     path('about', about, name='about'),
     path('topic/<int:id>', topic, name='topic'),
     path('topics/', topic_overview, name='topic-overview'),

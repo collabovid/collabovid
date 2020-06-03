@@ -1,10 +1,8 @@
-from django.http import JsonResponse, HttpResponse, HttpResponseServerError
+from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from src.search.search_engine import get_default_search_engine
 from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing, CouldNotLoadPaperMatrix
 
 from threading import Thread
-import json
-
 
 def search(request):
     if request.method == "GET":
@@ -12,8 +10,17 @@ def search(request):
         end_date = request.GET.get("end_date", "")
         score_min = float(request.GET.get("score_min", "0"))
 
-        authors = json.loads(request.GET.get("authors", "[]"))
-        authors = [a["value"] for a in authors]
+        authors = request.GET.get("authors", None)
+        journals = request.GET.get("journals", None)
+
+        try:
+            if journals:
+                journals = [int(pk) for pk in journals.split(',')]
+
+            if authors:
+                authors = [int(pk) for pk in authors.split(',')]
+        except ValueError:
+            return HttpResponseBadRequest("Request is malformed")
 
         search_query = request.GET.get("search", "").strip()
 
@@ -22,8 +29,8 @@ def search(request):
         search_engine = get_default_search_engine()
 
         search_result = search_engine.search(search_query, start_date=start_date,
-                                             end_date=end_date, score_min=score_min, author_names=authors,
-                                             author_and=(authors_connection == 'all'))
+                                             end_date=end_date, score_min=score_min, author_ids=authors,
+                                             author_and=(authors_connection == 'all'), journal_ids=journals)
 
         return JsonResponse(search_result)
 

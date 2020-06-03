@@ -293,14 +293,12 @@ div.filter-card {
 
 }
 
-a.filter-back-button
-{
+a.filter-back-button {
     left: 1rem;
     top: 1.25rem
 }
 
-a.filter-hide-button
-{
+a.filter-hide-button {
     right: 1rem;
 }
 
@@ -313,7 +311,7 @@ div.filter-card div.card {
     width: 100%;
     height: 100%;
 
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 div.filter-card.collapsing {
@@ -322,13 +320,30 @@ div.filter-card.collapsing {
     opacity: 0;
 }
 
+.tagify__tag > div > * {
+    white-space: normal !important;
+}
+
+.tagify__tag {
+    background: #e5e5e5;
+    margin: 5px !important;
+}
+
+.tagify__tag__removeBtn:hover {
+    background: #0b2e13!important;
+}
+
+.tagify__tag:hover {
+    background: #D3E2E2;
+}
+
 @media (min-width: 992px) {
     div.filter-card {
-        position: sticky;
+        position: relative;
+
         width: auto;
         height: auto;
         background: none;
-        top: 3rem;
         margin-top: 3rem;
 
     }
@@ -423,4 +438,8 @@ div.paper-card-badge {
     margin-top: -15px;
     margin-right: -15px;
     padding-left: 10px;
+}
+
+label.nav-link {
+    cursor: pointer;
 }
