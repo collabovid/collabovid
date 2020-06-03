@@ -9,8 +9,9 @@
                 <div class="col-lg-8">
                     <h1 class="display-4">Explore COVID-19 Publications</h1>
                     <p class="muted-white lead mb-0">
-                        A lot of articles concerning SARS-CoV-2/COVID-19 are
-                        published every day. Many of them, so-called <em>pre-prints</em>, are not reviewed in a professional reviewing process at the time of publication.
+                        A lot of research articles concerning SARS-CoV-2/COVID-19 are
+                        published every day. Many of them, so-called <em>pre-prints</em>, are not reviewed in a
+                        professional reviewing process at the time of publication.
                         Others are already reviewed and published in well-known journals.
                         Collabovid helps researchers to identify the most relevant information by using
                         Natural Language Processing.
@@ -162,7 +163,7 @@
                                     {{ paper.title }}
                                     <div class="text-muted small mt-2">
                                         {{ paper.published_at }} &middot; {{ paper.host.name }}
-                                        <a href="{{ paper.pdf_url }}" class="float-right">
+                                        <a href="{{ paper.url }}" class="float-right">
                                             Read more
                                         </a>
                                     </div>
@@ -188,6 +189,34 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="container pt-5">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="display-5 font-weight-light">Partners and Sponsors</h2>
+                </div>
+            </div>
+
+            <div class="mentions-container">
+                <div class="row align-items-center text-center">
+                    <div class="offset-2 col-8 offset-md-0 col-md-6 col-lg-4 offset-lg-2">
+                        <a href="https://www.bmbf.de/" target="_blank">
+                            <img class="img-fluid"
+                                 src="{% static "core/img/partners/bmbf-long.png" %}">
+                        </a>
+                    </div>
+
+                    <div class="offset-2 col-8 offset-md-0 col-md-6 col-lg-4">
+                        <a href="https://wirvsvirus.org/solution-enabler/" target="_blank">
+                            <img class="img-fluid"
+                                 src="{% static "core/img/partners/solution-enabler.png" %}">
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -250,5 +279,5 @@
 {% endblock %}
 
 {% block css %}
-{% stylesheet 'charts' %}
+    {% stylesheet 'charts' %}
 {% endblock %}

@@ -134,15 +134,20 @@ class ArticleDataPoint(object):
         title = self.title
         paperhost_name = self.paperhost_name
         abstract = self.abstract
+        published_at = self.published_at
 
         if not doi:
             raise MissingDataError("Couldn't extract doi")
         if not title:
             raise MissingDataError("Couldn't extract title")
+        if len(title) > Paper.max_length("title"):
+            raise DataError(f"Title exceeds maximum length: {title}")
         if not paperhost_name:
             raise MissingDataError("Couldn't extract paperhost")
         if not abstract:
             raise MissingDataError("Couldn't extract abstract")
+        if not published_at:
+            raise MissingDataError("Couldn't extract date")
 
         with transaction.atomic():
             try:
@@ -164,7 +169,7 @@ class ArticleDataPoint(object):
             if self.paperhost_url:
                 db_article.host.url = self.paperhost_url
 
-            db_article.published_at = self.published_at
+            db_article.published_at = published_at
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint
@@ -179,6 +184,12 @@ class ArticleDataPoint(object):
             db_article.authors.clear()
             for author in authors:
                 try:
+                    if (
+                            (author[1] and len(author[1]) > Author.max_length("first_name")) or
+                            (author[0] and len(author[0]) > Author.max_length("last_name"))
+                    ):
+                        raise DataError(f"Author exceeds maximum length: {author}")
+
                     db_author, _ = Author.objects.get_or_create(
                         first_name=author[1],
                         last_name=author[0],
@@ -191,7 +202,9 @@ class ArticleDataPoint(object):
                 db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
             if self.journal:
-                db_article.journal, _ = Journal.objects.get_or_create(name=self.journal)
+                db_article.journal, _ = Journal.objects.get_or_create(
+                    name=self.journal[:Journal.max_length("name")]
+                )
 
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)

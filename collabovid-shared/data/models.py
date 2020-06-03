@@ -36,17 +36,25 @@ class DataSource(models.IntegerChoices):
 
 class Journal(models.Model):
     name = models.CharField(max_length=200, unique=True)
-    alias = models.CharField(max_length=200, null=True, default=None)
-    url = models.URLField(null=True, default=None)
+    alias = models.CharField(max_length=200, null=True, default=None, blank=True)
+    url = models.URLField(null=True, default=None, blank=True)
 
     @property
     def displayname(self):
         return self.alias if self.alias else self.name
 
+    @staticmethod
+    def max_length(field: str):
+        return Journal._meta.get_field(field).max_length
+
 
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
+    @staticmethod
+    def max_length(field: str):
+        return Author._meta.get_field(field).max_length
 
 
 class Category(models.Model):
@@ -113,3 +121,7 @@ class Paper(models.Model):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
         self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
                                                                'image/jpeg', pillow_image.tell, None))
+
+    @staticmethod
+    def max_length(field: str):
+        return Paper._meta.get_field(field).max_length

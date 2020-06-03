@@ -55,7 +55,7 @@ class DataImport:
             if journals:
                 for id, journal in data["journals"].items():
                     db_journal, created = Journal.objects.get_or_create(
-                        name=journal["name"]
+                        name=journal["name"][:Journal.max_length("name")]
                     )
                     journal_mapping[id] = db_journal
                     if created:
@@ -65,10 +65,13 @@ class DataImport:
             authors_created = 0
             for i, paper in enumerate(data["papers"]):
                 if not Paper.objects.filter(doi=paper["doi"]).exists():
+                    if not paper["published_at"]:
+                        print(f"Not importing {paper['doi']} because the date is missing.")
+                        continue
                     with transaction.atomic():
                         db_paper = Paper(
                             doi=paper["doi"],
-                            title=paper["title"],
+                            title=paper["title"][:Paper.max_length("title")],
                             abstract=paper["abstract"],
                             version=paper["version"],
                             covid_related=paper["covid_related"],
@@ -106,8 +109,8 @@ class DataImport:
                         for author_id in paper["author_ids"]:
                             author = data["authors"][author_id]
                             db_author, created = Author.objects.get_or_create(
-                                first_name=author["firstname"],
-                                last_name=author["lastname"],
+                                first_name=author["firstname"][:Author.max_length("first_name")],
+                                last_name=author["lastname"][:Author.max_length("last_name")],
                             )
                             if created:
                                 authors_created += 1

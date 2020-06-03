@@ -1,10 +1,10 @@
 from json import JSONDecodeError
 
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404, reverse
-from django.http import HttpResponseNotFound, JsonResponse
+from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Category, Topic, Author
+from data.models import Paper, Category, Topic, Author, Journal
 from data.statistics import Statistics
 
 import requests
@@ -14,7 +14,8 @@ from search.request_helper import SearchRequestHelper
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Greatest
+from django.db.models import Count
 
 import json
 
@@ -66,7 +67,8 @@ def topic(request, id):
 
         search_request = SearchRequestHelper(start_date, end_date, search_query,
                                              score_min=score_threshold,
-                                             authors=[],
+                                             authors='',
+                                             journals='',
                                              authors_connection="one")
 
         paginator = search_request.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
@@ -111,20 +113,40 @@ def search(request):
 
         start_date = request.GET.get("published_at_start", "")
         end_date = request.GET.get("published_at_end", "")
-        tab = request.GET.get("tab", "top")
-
-        try:
-            authors = json.loads(request.GET.get("authors", "[]"))
-        except JSONDecodeError:
-            return HttpResponseNotFound()
 
         authors_connection = request.GET.get("authors-connection", "one")
 
         if authors_connection not in ["one", "all"]:
             authors_connection = "one"
 
+        tab = request.GET.get("tab", "top")
+
         if tab not in ["newest", "top", "statistics"]:
             tab = "top"
+
+        journal_ids = request.GET.get("journals", None)
+
+        try:
+            if journal_ids:
+                journal_ids = [int(pk) for pk in journal_ids.split(',')]
+            else:
+                journal_ids = []
+        except ValueError:
+            journal_ids = []
+
+        journals = Journal.objects.filter(pk__in=journal_ids).annotate(paper_count=Count('papers')).order_by(
+            '-paper_count')
+
+        author_ids = request.GET.get("authors", None)
+        try:
+            if author_ids:
+                author_ids = [int(pk) for pk in author_ids.split(',')]
+            else:
+                author_ids = []
+        except ValueError:
+            author_ids = []
+
+        authors = Author.objects.filter(pk__in=author_ids).annotate(name=Concat('first_name', V(' '), 'last_name'))
 
         search_query = request.GET.get("search", "").strip()
 
@@ -133,8 +155,9 @@ def search(request):
             "end_date": end_date,
             "search": search_query,
             "tab": tab,
-            "authors": json.dumps(authors),
-            "authors-connection": authors_connection
+            "authors": json.dumps(authors_to_json(authors)),
+            "authors-connection": authors_connection,
+            "journals": json.dumps(journals_to_json(journals))
         }
 
         return render(request, "core/search.html", {'form': form})
@@ -145,24 +168,16 @@ def search(request):
 
         tab = request.POST.get("tab", "")
 
-        try:
-            content = request.POST.get("authors", "[]")
-
-            if len(content) == 0:
-                content = "[]"
-
-            authors = json.loads(content)
-        except JSONDecodeError:
-            return render(request, "core/partials/_search_result_error.html",
-                          {'message': 'Your request is malformed. Please reload the page.'})
-
+        authors = request.POST.get("authors", "")
         authors_connection = request.POST.get("authors-connection", "one")
 
         if authors_connection not in ["one", "all"]:
             authors_connection = "one"
 
+        journals = request.POST.get("journals")
+
         search_query = request.POST.get("search", "").strip()
-        search_request = SearchRequestHelper(start_date, end_date, search_query, authors, authors_connection)
+        search_request = SearchRequestHelper(start_date, end_date, search_query, authors, authors_connection, journals)
 
         if search_request.error:
             return render(request, "core/partials/_search_result_error.html",
@@ -190,18 +205,51 @@ def search(request):
                                                                           'show_score': False, })
 
 
-def list_authors(request):
-    possible_authors = Author.objects.all().annotate(name=Concat('first_name', V(' '), 'last_name'))
-
-    query = request.GET.get('query', '')
+def authors_to_json(authors):
     return_json = []
 
-    if query:
+    for author in authors:
+        return_json.append({
+            "value": author.name,
+            "pk": author.pk
+        })
+    return return_json
 
+
+def list_authors(request):
+    query = request.GET.get('query', '')
+
+    if query:
+        possible_authors = Author.objects.all().annotate(name=Concat('first_name', V(' '), 'last_name'))
         authors = possible_authors.annotate(similarity=TrigramSimilarity('name', query)).order_by(
             '-similarity')[:6]
+    else:
+        authors = []
 
-        for author in authors:
-            return_json.append({"name": author.name})
+    return JsonResponse({"authors": authors_to_json(authors)})
 
-    return JsonResponse({"authors": return_json})
+
+def journals_to_json(journals):
+    return_json = []
+    for journal in journals:
+        return_json.append({
+            "pk": journal.pk,
+            "value": journal.displayname,
+            "count": journal.paper_count
+        })
+    return return_json
+
+
+def list_journals(request):
+    journals = Journal.objects.all().annotate(paper_count=Count('papers'))
+
+    query = request.GET.get('query', '')
+
+    if query:
+        journals = journals.annotate(similarity_name=TrigramSimilarity('name', query)).annotate(
+            similarity_alias=TrigramSimilarity('alias', query)).annotate(
+            similarity=Greatest('similarity_name', 'similarity_alias')).order_by('-similarity')[:6]
+    else:
+        journals = journals.order_by('-paper_count')[:6]
+
+    return JsonResponse({"journals": journals_to_json(journals)})
