@@ -1,5 +1,5 @@
 from tasks.definitions import Runnable, register_task
-from . import get_topic_assignment_analyzer, get_analyzer
+from . import get_analyzer
 from src.analyze.analyzer import PaperAnalyzer
 
 
@@ -26,12 +26,9 @@ class SetupVectorizer(Runnable):
             self.log("Preprocess of given analyzer")
             self.analyzer.preprocess(force_recompute=self._force_recompute)
         else:
-            self.log("Preprocess of analyzer and topic analyzer")
+            self.log("Preprocess of analyzer")
 
             analyzer = get_analyzer()
             analyzer.preprocess(force_recompute=self._force_recompute)
-
-            topic_analyzer = get_topic_assignment_analyzer()
-            topic_analyzer.preprocess(force_recompute=self._force_recompute)
 
         self.log("Preprocessing finished")

@@ -21,7 +21,6 @@ import json
 
 PAPER_PAGE_COUNT = 10
 
-
 def home(request):
     if request.method == "GET":
         statistics = Statistics(Paper.objects.all())

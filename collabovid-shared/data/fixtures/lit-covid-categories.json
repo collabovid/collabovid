@@ -4,7 +4,8 @@
     "pk": 0,
     "fields": {
       "name": "General",
-      "description": "General information and news"
+      "description": "General information and news",
+      "model_identifier": "general"
     }
   },
   {
@@ -12,7 +13,8 @@
     "pk": 1,
     "fields": {
       "name": "Mechanism",
-      "description": "Underlying cause(s) of covid-19 infections and transmission & possible drug mechanism of action"
+      "description": "Underlying cause(s) of covid-19 infections and transmission & possible drug mechanism of action",
+      "model_identifier": "mechanism"
     }
   },
   {
@@ -20,7 +22,8 @@
     "pk": 2,
     "fields": {
       "name": "Transmission",
-      "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human"
+      "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human",
+      "model_identifier": "transmission"
     }
   },
   {
@@ -28,7 +31,8 @@
     "pk": 3,
     "fields": {
       "name": "Diagnosis",
-      "description": "Disease assessment through symptoms, test results, and radiological features"
+      "description": "Disease assessment through symptoms, test results, and radiological features",
+      "model_identifier": "diagnosis"
     }
   },
   {
@@ -36,7 +40,8 @@
     "pk": 4,
     "fields": {
       "name": "Treatment",
-      "description": "Treatment strategies, therapeutic procedures, and vaccine development"
+      "description": "Treatment strategies, therapeutic procedures, and vaccine development",
+      "model_identifier": "treatment"
     }
   },
   {
@@ -44,7 +49,8 @@
     "pk": 5,
     "fields": {
       "name": "Prevention",
-      "description": "Prevention, control, response and management strategies"
+      "description": "Prevention, control, response and management strategies",
+      "model_identifier": "prevention"
     }
   },
   {
@@ -52,7 +58,8 @@
     "pk": 6,
     "fields": {
       "name": "Case Report",
-      "description": "Descriptions of specific patient cases"
+      "description": "Descriptions of specific patient cases",
+      "model_identifier": "case-report"
     }
   },
   {
@@ -60,7 +67,8 @@
     "pk": 7,
     "fields": {
       "name": "Epidemic Forecasting",
-      "description": "Modelling and estimating the trend of covid-19 spread"
+      "description": "Modelling and estimating the trend of covid-19 spread",
+      "model_identifier": "forecasting"
     }
   }
 ]
