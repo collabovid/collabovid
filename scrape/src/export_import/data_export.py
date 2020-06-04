@@ -27,7 +27,6 @@ class DataExport:
 
         authors = {}
         paperhosts = {}
-        categories = {}
         journals = {}
         papers = []
 
@@ -54,8 +53,6 @@ class DataExport:
                                 "firstname": author.first_name,
                             }
 
-                    if paper.category and paper.category not in categories:
-                        categories[paper.category_id] = {"name": paper.category.name}
                     if paper.journal and paper.journal not in journals:
                         journals[paper.journal_id] = {"name": paper.journal.name}
 
@@ -70,7 +67,6 @@ class DataExport:
                         "published_at": datetime.strftime(paper.published_at, "%Y-%m-%d")
                         if paper.published_at
                         else None,
-                        "category_id": paper.category.pk if paper.category else None,
                         "paperhost_id": paper.host_id,
                         "version": paper.version,
                         "covid_related": paper.covid_related,
@@ -106,7 +102,6 @@ class DataExport:
                     papers.append(paper_data)
 
                 data = {
-                    "categories": categories,
                     "authors": authors,
                     "paperhosts": paperhosts,
                     "papers": papers,
@@ -137,7 +132,6 @@ class DataExport:
 
         log(f"Finished export in {timedelta(seconds=end - start)}")
         log("Exported")
-        log(f"\t{len(categories)} categories")
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
