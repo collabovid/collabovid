@@ -33,6 +33,13 @@ class DataSource(models.IntegerChoices):
         else:
             return 100
 
+    @property
+    def check_covid_related(self):
+        if self.value == DataSource.MEDBIORXIV:
+            return False
+        else:
+            return True
+
 
 class Journal(models.Model):
     name = models.CharField(max_length=200, unique=True)

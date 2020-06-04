@@ -38,6 +38,10 @@ class DataError(UpdateException):
     pass
 
 
+class NotCovidRelatedError(UpdateException):
+    pass
+
+
 class ArticleDataPoint(object):
     def __init__(self):
         self._pdf_extractor = None
@@ -209,7 +213,11 @@ class ArticleDataPoint(object):
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
+
             db_article.covid_related = covid_related(db_article=db_article)
+            if self.data_source.check_covid_related and not db_article.covid_related:
+                raise NotCovidRelatedError("Article not covid related.")
+
             db_article.last_scrape = timezone.now()
             db_article.save()
         return db_article, created
@@ -249,6 +257,9 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.n_skipped += 1
+        except NotCovidRelatedError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
