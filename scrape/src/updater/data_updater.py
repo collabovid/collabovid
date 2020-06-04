@@ -109,6 +109,10 @@ class ArticleDataPoint(object):
     def journal(self):
         return None
 
+    @property
+    def update_timestamp(self):
+        return None
+
     @staticmethod
     def _update_pdf_data(db_article, extract_image=True, extract_content=True):
         if not extract_image and not extract_content:
@@ -317,6 +321,8 @@ class DataUpdater(object):
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)
             if data_point:
+                if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+                    continue
                 self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content, pdf_image=pdf_image)
 
         end = timer()

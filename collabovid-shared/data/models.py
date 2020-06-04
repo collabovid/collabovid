@@ -21,6 +21,7 @@ class DataSource(models.IntegerChoices):
     MEDBIORXIV = 0, gettext_lazy('medbioRxiv')
     ARXIV = 1, gettext_lazy('arXiv')
     PUBMED = 2, gettext_lazy('pubmed')
+    ELSEVIER = 3, gettext_lazy('elsevier')
 
     @property
     def priority(self):
@@ -30,6 +31,8 @@ class DataSource(models.IntegerChoices):
             return 1
         elif self.value == DataSource.PUBMED:
             return 10
+        elif self.value == DataSource.ELSEVIER:
+            return 5
         else:
             return 100
 
@@ -132,3 +135,9 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class IgnoredPaper(models.Model):
+    doi = models.CharField(max_length=100, primary_key=True)
+    ignore_reason = models.TextField(null=True, default=None)
+    url = models.URLField(null=True, default=None)
