@@ -37,7 +37,9 @@ class UpdateCategoryAssignment(Runnable):
         for paper, result in classifier.prediction_iterator(papers):
             for category, score in result.items():
                 if score > self._category_threshold:
-                    paper.categories.add(Category.objects.get(model_identifier=category))
+                    paper.categories.add(Category.objects.get(model_identifier=category), through_defaults={
+                        'score': (score-self._category_threshold) * 2
+                    })
                     paper.save()
 
         self.log("Finished updating category assignment")

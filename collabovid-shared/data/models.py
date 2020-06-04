@@ -82,7 +82,7 @@ class Paper(models.Model):
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
-    categories = models.ManyToManyField(Category, related_name="papers")
+    categories = models.ManyToManyField(Category, related_name="papers", through='CategoryMembership')
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source_value = models.IntegerField(choices=DataSource.choices, null=True)
     version = models.CharField(max_length=40, null=True, default=None)
@@ -123,3 +123,9 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class CategoryMembership(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    score = models.FloatField(default=0.0)
