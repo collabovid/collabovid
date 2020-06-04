@@ -1,6 +1,6 @@
 .idea/
 generated
-models
+/models
 cvid-config.json
 .deployment/
 release
