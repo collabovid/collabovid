@@ -1,8 +1,8 @@
 from django.conf import settings
 
-from data.models import DataSource, IgnoredPaper
+from data.models import DataSource
 from src.updater.data_updater import ArticleDataPoint, DataUpdater
-from src.updater.elsevier_sftp_access import ElsevierSFTP
+from src.updater.elsevier_cache import ElsevierCache
 from nameparser import HumanName
 import datetime
 
@@ -10,7 +10,7 @@ import datetime
 class ElsevierDatapoint(ArticleDataPoint):
     def __init__(self, article_info):
         super().__init__()
-        self.coredata = article_info['data']['coredata']
+        self.coredata = article_info['coredata']
         self.last_updated = article_info['last_updated']
 
     @property
@@ -102,8 +102,6 @@ class ElsevierDatapoint(ArticleDataPoint):
 
 
 class ElsevierUpdater(DataUpdater):
-    PII_DOI_MATCH_FILE = f'{settings.RESOURCES_DIR}/pii_doi.txt'
-
     @property
     def data_source(self):
         return DataSource.ELSEVIER
@@ -111,29 +109,15 @@ class ElsevierUpdater(DataUpdater):
     def __init__(self, log=print):
         super().__init__(log)
         self._metadata = None
-        self._ignored_piis = None
-        self._doi_to_pii = None
 
     def _load_metadata(self):
-        if not self._ignored_piis:
-            self._load_ignored_piis()
         if not self._metadata:
-            with ElsevierSFTP(ignorelist=self._ignored_piis) as elsevier:
+            with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
                 self._metadata = elsevier.get_metadata()
 
     def _count(self):
         self._load_metadata()
         return len(self._metadata)
-
-    def _load_doi_to_pii_matching(self):
-        if not self._doi_to_pii:
-            with open(self.PII_DOI_MATCH_FILE) as f:
-                # line format: doi,pii
-                self._doi_to_pii = {doi: pii for doi, pii in [line.split(',') for line in f]}
-
-    def _load_ignored_piis(self):
-        self._load_doi_to_pii_matching()
-        self._ignored_piis = [self._doi_to_pii[doi] for doi in IgnoredPaper.objects.all() if doi in self._doi_to_pii]
 
     def _get_data_points(self):
         self._load_metadata()

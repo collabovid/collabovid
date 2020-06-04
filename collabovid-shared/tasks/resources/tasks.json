@@ -123,6 +123,11 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "get-new-elsevier": {
+            "name": "Get New Elsevier",
+            "description": "No description provided.",
+            "parameters": []
         }
     },
     "search": {
