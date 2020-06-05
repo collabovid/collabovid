@@ -68,7 +68,8 @@ class LitcovidMultiLabelClassifier():
         for papers in batch_iterator:
             input = [(paper.title, paper.abstract) for paper in papers]
             tokens = self._tokenize(input)
-            logits = self.model(**tokens)[0]
-            probabilities = torch.nn.functional.softmax(logits, dim=1).detach().cpu().numpy()
-            for paper, distribution in zip(papers, probabilities):
-                yield paper, {categories[idx]: prob.item() for idx, prob in enumerate(distribution)}
+            with torch.no_grad():
+                logits = self.model(**tokens)[0]
+                probabilities = torch.nn.functional.sigmoid(logits).detach().cpu().numpy()
+                for paper, distribution in zip(papers, probabilities):
+                    yield paper, {categories[idx]: prob.item() for idx, prob in enumerate(distribution)}
