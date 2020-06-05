@@ -84,7 +84,9 @@
                     <div class="col-12 text-dark pt-1">
                         {% for category in form.categories.all %}
                             <label class="mb-0 d-lg-block">
-                                <input class="mr-1" type="checkbox" checked="checked" name="categories"
+                                <input class="mr-1" type="checkbox"
+                                       {% if category.pk in form.selected_categories %}checked="checked"{% endif %}
+                                       name="categories"
                                        value="{{ category.pk }}">
                                 {{ category.name }} <span class="small text-muted">({{ category.papers.count }})</span>
                             </label>

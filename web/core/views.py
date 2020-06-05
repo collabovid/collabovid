@@ -5,7 +5,7 @@ from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Topic, Author, Category, Journal
-from data.statistics import Statistics
+from statistics import PaperStatistics, CategoryStatistics
 
 import requests
 
@@ -21,9 +21,10 @@ import json
 
 PAPER_PAGE_COUNT = 10
 
+
 def home(request):
     if request.method == "GET":
-        statistics = Statistics(Paper.objects.all())
+        statistics = PaperStatistics(Paper.objects.all())
         most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
         return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
@@ -32,62 +33,6 @@ def home(request):
 def about(request):
     paper_count = Paper.objects.count()
     return render(request, "core/about.html", {'paper_count': paper_count})
-
-
-def topic(request, id):
-    topic = get_object_or_404(Topic, pk=id)
-
-    if request.method == "GET":
-
-        return render(request, "core/topic.html",
-                      {'topic': topic,
-                       'search_url': reverse("topic", args=(topic.pk,))})
-
-    elif request.method == "POST":
-
-        start_date = request.POST.get("published_at_start", "")
-        end_date = request.POST.get("published_at_end", "")
-
-        sorted_by = request.POST.get("sorted_by", "")
-
-        search_query = request.POST.get("search", "").strip()
-
-        score_threshold = 0.0
-
-        if sorted_by == "relevance":
-
-            if len(search_query) > 0:
-                sorted_by = Paper.SORTED_BY_SCORE
-                score_threshold = 0.6
-            else:
-                sorted_by = Paper.SORTED_BY_TOPIC_SCORE
-        else:
-            sorted_by = Paper.SORTED_BY_NEWEST
-
-        search_request = SearchRequestHelper(start_date, end_date, search_query,
-                                             score_min=score_threshold,
-                                             authors='',
-                                             journals='',
-                                             authors_connection="one")
-
-        paginator = search_request.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
-
-        try:
-            page_number = request.POST.get('page')
-            page_obj = paginator.get_page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
-            page_obj = None
-
-        return render(request, "core/partials/_search_results.html",
-                      {'papers': page_obj, 'show_score': True})
-
-    return HttpResponseNotFound()
-
-
-def topic_overview(request):
-    return render(request, "core/topic_overview.html", {'topics': Topic.objects.all()})
 
 
 def imprint(request):
@@ -107,10 +52,18 @@ def privacy(request):
     return render(request, "core/data_protection.html", {"content": content})
 
 
+def category_overview(request):
+
+    category_statistics = [CategoryStatistics(category) for category in Category.objects.all()]
+
+    return render(request, "core/categories_overview.html", {"category_statistics": category_statistics})
+
+
 def search(request):
     if request.method == "GET":
 
         categories = Category.objects.all().order_by("pk")
+        selected_categories = request.GET.getlist("categories")
 
         start_date = request.GET.get("published_at_start", "")
         end_date = request.GET.get("published_at_end", "")
@@ -128,12 +81,14 @@ def search(request):
         journal_ids = request.GET.get("journals", None)
 
         try:
-            if journal_ids:
-                journal_ids = [int(pk) for pk in journal_ids.split(',')]
-            else:
-                journal_ids = []
+            journal_ids = [int(pk) for pk in journal_ids.split(',')] if journal_ids else []
         except ValueError:
             journal_ids = []
+
+        try:
+            selected_categories = [int(pk) for pk in selected_categories] if selected_categories else []
+        except ValueError:
+            selected_categories = []
 
         journals = Journal.objects.filter(pk__in=journal_ids).annotate(paper_count=Count('papers')).order_by(
             '-paper_count')
@@ -151,11 +106,15 @@ def search(request):
 
         search_query = request.GET.get("search", "").strip()
 
+        if len(selected_categories) == 0:
+            selected_categories = [category.pk for category in categories]
+
         form = {
             "start_date": start_date,
             "end_date": end_date,
             "search": search_query,
             "categories": categories,
+            'selected_categories': selected_categories,
             "tab": tab,
             "authors": json.dumps(authors_to_json(authors)),
             "authors-connection": authors_connection,
@@ -190,7 +149,7 @@ def search(request):
                           {'message': 'We encountered an unexpected error. Please try again.'})
 
         if tab == "statistics":
-            statistics = Statistics(search_request.papers)
+            statistics = PaperStatistics(search_request.papers)
             return render(request, "core/partials/statistics/_statistics.html", {'statistics': statistics})
         else:
             if tab == "top":

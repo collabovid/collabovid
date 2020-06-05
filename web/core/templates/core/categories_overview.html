@@ -1,0 +1,78 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+
+{% block content %}
+
+    <div class="gradient-header">
+        <div class="container">
+            <div class="row h-100 align-items-center py-5">
+
+                <div class="col-12">
+                    <h1 class="display-4 font-weight-light text-white">Categories</h1>
+
+                    <div class="muted-white pl-2">
+                        <p>
+                            LitCovid is a curated literature hub for tracking up-to-date scientific information about
+                            the 2019 novel Coronavirus. It is the most comprehensive resource on the subject, providing
+                            a central access to 18791 (and growing) relevant articles in PubMed. The articles are
+                            updated daily and are further categorized by different research topics and geographic
+                            locations for improved access. You can learn more at Chen et al. Nature (2020) or our FAQ,
+                            and download our data here.
+                        </p>
+                        <p>
+                            Since a lot of research papers cover exactly these questions, we misuse them to classify the
+                            COVID-19 preprints.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+
+
+    <div id="paper-container" class="container">
+
+        <div class="row align-items-stretch">
+            {% for category_statistic in category_statistics %}
+                {% include "core/partials/_category_card.html" with category_statistic=category_statistic %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="container">
+            <h2 class="mb-4">Emerging Categories over Time</h2>
+            <div>
+                <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {% javascript 'charts' %}
+
+    <script>
+        let published_at_data = [];
+        {% for category_statistic in category_statistics %}
+
+            published_at_data.push(JSON.parse('{{ category_statistic.published_at_complete|escapejs }}'));
+
+        {% endfor %}
+
+        $("#publicationsOverTimeChart").publicationsOverTimeComparison({plot_data: published_at_data});
+
+
+    </script>
+
+{% endblock %}
+
+{% block css %}
+{% endblock %}

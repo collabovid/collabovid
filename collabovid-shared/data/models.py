@@ -62,6 +62,7 @@ class Category(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField()
     model_identifier = models.CharField(max_length=100, unique=True)
+    color = models.CharField(max_length=7, default="#F0F0F0")
 
 
 class PaperData(models.Model):
