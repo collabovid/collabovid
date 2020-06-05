@@ -1,3 +1,5 @@
+from typing import Union
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
@@ -43,6 +45,13 @@ class DataSource(models.IntegerChoices):
         else:
             return True
 
+    @staticmethod
+    def prioritize_first(first: Union[int, None], second: Union[int, None]):
+        if not second:
+            return True
+        if not first:
+            return False
+        return DataSource(first).priority > DataSource(second).priority
 
 class Journal(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -57,6 +66,15 @@ class Journal(models.Model):
     def max_length(field: str):
         return Journal._meta.get_field(field).max_length
 
+    @staticmethod
+    def cleanup():
+        n = 0
+        for journal in list(Journal.objects.all()):
+            if journal.papers.count() == 0:
+                journal.delete()
+                n += 1
+        return n
+
 
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
@@ -65,6 +83,15 @@ class Author(models.Model):
     @staticmethod
     def max_length(field: str):
         return Author._meta.get_field(field).max_length
+
+    @staticmethod
+    def cleanup():
+        n = 0
+        for author in list(Author.objects.all()):
+            if author.publications.count() == 0:
+                author.delete()
+                n += 1
+        return n
 
 
 class Category(models.Model):
@@ -94,7 +121,7 @@ class Paper(models.Model):
     authors = models.ManyToManyField(Author, related_name="publications")
     category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
-    data_source_value = models.IntegerField(choices=DataSource.choices, null=True)
+    data_source_value = models.IntegerField(choices=DataSource.choices)
     version = models.CharField(max_length=40, null=True, default=None)
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)

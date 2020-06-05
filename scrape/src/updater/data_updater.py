@@ -290,6 +290,11 @@ class DataUpdater(object):
                 self.log(f"Progress: {i}/{total}")
             self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image, update_existing=False)
 
+
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
+
         end = timer()
         elapsed_time = timedelta(seconds=end - start)
         self.log(f"Time (total): {elapsed_time}")
@@ -300,6 +305,8 @@ class DataUpdater(object):
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")
 
     def update_existing_data(self, count=None, pdf_content=True, pdf_image=True):
         self.n_errors = 0
@@ -325,6 +332,10 @@ class DataUpdater(object):
                     continue
                 self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content, pdf_image=pdf_image)
 
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
+
         end = timer()
         elapsed_time = timedelta(seconds=end - start)
         self.log(f"Time (total): {elapsed_time}")
@@ -335,3 +346,5 @@ class DataUpdater(object):
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")

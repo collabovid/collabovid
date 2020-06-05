@@ -4,7 +4,15 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Category, Journal, Paper, PaperData, PaperHost
+from data.models import (
+    Author,
+    Category,
+    DataSource,
+    Journal,
+    Paper,
+    PaperData,
+    PaperHost,
+)
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -25,7 +33,6 @@ class DataImport:
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
-
 
             if journals:
                 data["journals"] = {int(k): v for k, v in data["journals"].items()}
@@ -64,68 +71,71 @@ class DataImport:
             papers_created = 0
             authors_created = 0
             for i, paper in enumerate(data["papers"]):
-                if not Paper.objects.filter(doi=paper["doi"]).exists():
-                    if not paper["published_at"]:
-                        print(f"Not importing {paper['doi']} because the date is missing.")
+                try:
+                    db_paper = Paper.objects.get(doi=paper["doi"])
+                    if DataSource.prioritize_first(db_paper.data_source_value, paper["datasource_id"]):
                         continue
-                    with transaction.atomic():
-                        db_paper = Paper(
-                            doi=paper["doi"],
-                            title=paper["title"][:Paper.max_length("title")],
-                            abstract=paper["abstract"],
-                            version=paper["version"],
-                            covid_related=paper["covid_related"],
-                            url=paper["url"],
-                            pdf_url=paper["pdf_url"],
-                            is_preprint=paper["is_preprint"],
-                            last_scrape=make_aware(
-                                datetime.strptime(
-                                    paper["last_scrape"], "%Y-%m-%d %H:%M:%S"
-                                )
-                            )
-                            if paper["last_scrape"]
-                            else None,
-                            published_at=paper["published_at"],
-                            category=category_mapping[paper["category_id"]]
-                            if paper["category_id"]
-                            else None,
-                            data=PaperData.objects.create(content=paper["content"])
-                            if paper["content"]
-                            else None,
-                            host=paperhost_mapping[paper["paperhost_id"]]
-                            if paper["paperhost_id"]
-                            else None,
-                            data_source_value=paper["datasource_id"],
-                            pubmed_id=paper["pubmed_id"]
-                            if "pubmed_id" in paper
-                            else None,
-                            journal=journal_mapping[paper["journal_id"]]
-                            if journals and paper["journal_id"]
-                            else None,
+                except Paper.DoesNotExist:
+                    db_paper = Paper(doi=paper["doi"])
+
+                if not paper["published_at"]:
+                    print(
+                        f"Not importing {paper['doi']} because the date is missing."
+                    )
+                    continue
+                with transaction.atomic():
+                    db_paper.title = paper["title"][:Paper.max_length("title")]
+                    db_paper.abstract = paper["abstract"]
+                    db_paper.data_source_value = paper["datasource_id"]
+                    db_paper.version = paper["version"]
+                    db_paper.covid_related = paper["covid_related"]
+                    db_paper.url = paper["url"]
+                    db_paper.pdf_url = paper["pdf_url"]
+                    db_paper.is_preprint = paper["is_preprint"]
+                    db_paper.published_at = paper["published_at"]
+
+                    db_paper.last_scrape = make_aware(
+                        datetime.strptime(paper["last_scrape"], "%Y-%m-%d %H:%M:%S")
+                    ) if paper["last_scrape"] else None
+
+                    db_paper.category = category_mapping[paper["category_id"]] if paper["category_id"] else None
+                    db_paper.data = PaperData.objects.create(content=paper["content"]) if paper["content"] else None
+                    db_paper.host = paperhost_mapping[paper["paperhost_id"]] if paper["paperhost_id"] else None
+                    db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None
+                    db_paper.journal = (
+                        journal_mapping[paper["journal_id"]] if journals and paper["journal_id"] else None
+                    )
+
+                    db_paper.save()
+
+                    db_paper.authors.clear()
+                    for author_id in paper["author_ids"]:
+                        author = data["authors"][author_id]
+                        db_author, created = Author.objects.get_or_create(
+                            first_name=author["firstname"][
+                                : Author.max_length("first_name")
+                            ],
+                            last_name=author["lastname"][
+                                : Author.max_length("last_name")
+                            ],
                         )
+                        if created:
+                            authors_created += 1
+                        db_paper.authors.add(db_author)
 
-                        db_paper.save()
-
-                        for author_id in paper["author_ids"]:
-                            author = data["authors"][author_id]
-                            db_author, created = Author.objects.get_or_create(
-                                first_name=author["firstname"][:Author.max_length("first_name")],
-                                last_name=author["lastname"][:Author.max_length("last_name")],
-                            )
-                            if created:
-                                authors_created += 1
-                            db_paper.authors.add(db_author)
-
-                        img_path = paper["image"]
-                        if img_path:
-                            with tar.extractfile(img_path) as img_file:
-                                image = Image.open(img_file)
-                                buffer = BytesIO()
-                                image.save(buffer, format="JPEG")
-                                db_paper.add_preview_image(buffer)
-                        db_paper.save()
+                    db_paper.preview_image.delete()
+                    img_path = paper["image"]
+                    if img_path:
+                        with tar.extractfile(img_path) as img_file:
+                            image = Image.open(img_file)
+                            buffer = BytesIO()
+                            image.save(buffer, format="JPEG")
+                            db_paper.add_preview_image(buffer)
+                    db_paper.save()
                     papers_created += 1
 
+        Author.cleanup()
+        Journal.cleanup()
         end = timer()
 
         log(f"Finished import in {timedelta(seconds=end - start)}")
