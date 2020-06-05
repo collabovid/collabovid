@@ -11,6 +11,7 @@ import datetime
 class ElsevierDatapoint(ArticleDataPoint):
     def __init__(self, article_info):
         super().__init__()
+        self.article_info = article_info
         self.coredata = article_info['coredata']
         self.last_updated = make_aware(datetime.datetime.fromtimestamp(article_info['last_updated']))
 
@@ -60,7 +61,12 @@ class ElsevierDatapoint(ArticleDataPoint):
 
     @property
     def published_at(self):
-        return datetime.datetime.strptime(self.coredata['prism:coverDate'], '%Y-%m-%d').date()
+        # We use the available online date because journal date (prism:coverDate) may be in the future
+        try:
+            return datetime.datetime.strptime(
+                self.article_info['originalText']['xocs:doc']['xocs:meta']['xocs:available-online-date']['$'], '%Y-%m-%d').date()
+        except KeyError:
+            return None
 
     @property
     def url(self):

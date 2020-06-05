@@ -172,12 +172,16 @@ class ArticleDataPoint(object):
             db_article.title = title
             db_article.abstract = abstract
             db_article.data_source_value = self.data_source
+            db_article.published_at = published_at
+
+            db_article.covid_related = covid_related(db_article=db_article)
+            if self.data_source.check_covid_related and not db_article.covid_related:
+                raise NotCovidRelatedError("Article not covid related.")
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
             if self.paperhost_url:
                 db_article.host.url = self.paperhost_url
 
-            db_article.published_at = published_at
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint
@@ -217,10 +221,6 @@ class ArticleDataPoint(object):
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
-
-            db_article.covid_related = covid_related(db_article=db_article)
-            if self.data_source.check_covid_related and not db_article.covid_related:
-                raise NotCovidRelatedError("Article not covid related.")
 
             db_article.last_scrape = timezone.now()
             db_article.save()
