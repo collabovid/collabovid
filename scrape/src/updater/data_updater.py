@@ -160,8 +160,8 @@ class ArticleDataPoint(object):
         with transaction.atomic():
             try:
                 db_article = Paper.objects.get(doi=doi)
-                if db_article.data_source_value and DataSource(db_article.data_source_value).priority < self.data_source.priority:
-                    raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source_value.name}")
+                if DataSource.prioritize_first(db_article.data_source_value, self.data_source):
+                    raise DifferentDataSourceError(f"Article already tracked by {DataSource(db_article.data_source_value).name}")
                 elif not update_existing and DataSource(db_article.data_source_value).priority == self.data_source.priority:
                     raise SkipArticle("Article already in database")
                 created = False

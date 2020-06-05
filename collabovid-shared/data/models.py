@@ -51,7 +51,8 @@ class DataSource(models.IntegerChoices):
             return True
         if not first:
             return False
-        return DataSource(first).priority > DataSource(second).priority
+        return DataSource(first).priority < DataSource(second).priority
+
 
 class Journal(models.Model):
     name = models.CharField(max_length=200, unique=True)
