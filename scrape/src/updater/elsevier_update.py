@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.utils.timezone import make_aware
 
 from data.models import DataSource
 from src.updater.data_updater import ArticleDataPoint, DataUpdater
@@ -11,7 +12,7 @@ class ElsevierDatapoint(ArticleDataPoint):
     def __init__(self, article_info):
         super().__init__()
         self.coredata = article_info['coredata']
-        self.last_updated = article_info['last_updated']
+        self.last_updated = make_aware(datetime.datetime.fromtimestamp(article_info['last_updated']))
 
     @property
     def doi(self):
@@ -109,11 +110,12 @@ class ElsevierUpdater(DataUpdater):
     def __init__(self, log=print):
         super().__init__(log)
         self._metadata = None
+        self._cache = ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier")
+        self._cache.refresh()
 
     def _load_metadata(self):
         if not self._metadata:
-            with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
-                self._metadata = elsevier.get_metadata()
+            self._metadata = self._cache.get_metadata()
 
     def _count(self):
         self._load_metadata()

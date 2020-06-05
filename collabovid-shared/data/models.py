@@ -135,9 +135,3 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
-
-
-class IgnoredPaper(models.Model):
-    doi = models.CharField(max_length=100, primary_key=True)
-    ignore_reason = models.TextField(null=True, default=None)
-    url = models.URLField(null=True, default=None)

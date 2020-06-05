@@ -10,14 +10,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.CreateModel(
-            name='IgnoredPaper',
-            fields=[
-                ('doi', models.CharField(max_length=100, primary_key=True, serialize=False)),
-                ('ignore_reason', models.TextField(default=None, null=True)),
-                ('url', models.URLField(default=None, null=True)),
-            ],
-        ),
         migrations.AlterField(
             model_name='paper',
             name='data_source_value',

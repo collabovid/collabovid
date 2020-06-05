@@ -124,6 +124,26 @@
                 }
             ]
         },
+        "update-elsevier": {
+            "name": "Update Elsevier",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 1000,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
+        },
         "get-new-elsevier": {
             "name": "Get New Elsevier",
             "description": "No description provided.",
