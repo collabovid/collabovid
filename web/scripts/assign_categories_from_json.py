@@ -8,7 +8,6 @@ from data.models import Category, Paper
 import random
 import argparse
 import json
-from tqdm import tqdm
 
 from data.models import CategoryMembership
 if __name__ == '__main__':
@@ -29,10 +28,12 @@ if __name__ == '__main__':
 
     skipping = 0
 
-    for data in tqdm(category_assignments):
+    print("Found", len(category_assignments), "entries")
+
+    finished = 0
+    for data in category_assignments:
 
         try:
-
             paper = Paper.objects.get(doi=data["doi"])
 
             paper.categories.clear()
@@ -49,5 +50,10 @@ if __name__ == '__main__':
         except Paper.DoesNotExist:
             print("Skipping", data["doi"])
             skipping += 1
+        else:
+            if finished % 500 == 0:
+                print("Progress", str(finished) + "/" + str(len(category_assignments)))
+
+            finished += 1
 
     print("Skipped", skipping)

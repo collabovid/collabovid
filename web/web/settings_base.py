@@ -112,6 +112,7 @@ STATIC_ROOT = 'static'
 
 FIXTURE_DIRS = (
     '/data/fixtures/',
+    os.path.join(BASE_DIR, 'fixtures/'),
 )
 
 MEDIA_URL = '/media/'
