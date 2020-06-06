@@ -84,7 +84,7 @@
                     <div class="col-12 text-dark pt-1">
                         {% for category in form.categories.all %}
                             <label class="mb-0 d-lg-block">
-                                <input class="mr-1" type="checkbox"
+                                <input data-url-manually="true" data-no-url="true" class="mr-1" type="checkbox"
                                        {% if category.pk in form.selected_categories %}checked="checked"{% endif %}
                                        name="categories"
                                        value="{{ category.pk }}">
@@ -347,8 +347,16 @@
             pagination_container.hide();
 
             let submission_data = $(".search-form input[data-no-url!=true]").serialize();
-            let csrf_token = $('.search-form input[data-no-url=true]').serialize();
-            let full_data = submission_data + "&" + csrf_token;
+            let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+
+            if ($('.search-form input[name=categories]:checked').length !== $('.search-form input[name=categories]').length) {
+                submission_data += "&categories=";
+                submission_data += $('.search-form input[name=categories]:checked').map(function () {
+                    return this.value;
+                }).get().join(',');
+            }
+
+            let full_data = submission_data + "&" + no_url_submission_data;
 
             search_query(full_data, 1, false, function () {
                 window.Pagination.last_request = full_data;

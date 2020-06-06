@@ -63,7 +63,7 @@ def search(request):
     if request.method == "GET":
 
         categories = Category.objects.all().order_by("pk")
-        selected_categories = request.GET.getlist("categories")
+        selected_categories = request.GET.get("categories", None)
 
         start_date = request.GET.get("published_at_start", "")
         end_date = request.GET.get("published_at_end", "")
@@ -86,7 +86,7 @@ def search(request):
             journal_ids = []
 
         try:
-            selected_categories = [int(pk) for pk in selected_categories] if selected_categories else []
+            selected_categories = [int(pk) for pk in selected_categories.split(',')] if selected_categories else []
         except ValueError:
             selected_categories = []
 
@@ -125,7 +125,16 @@ def search(request):
 
     elif request.method == "POST":
 
-        categories = request.POST.getlist("categories")
+        categories = request.POST.get("categories", None)
+
+        try:
+            categories = [int(pk) for pk in categories.split(',')] if categories else []
+        except ValueError:
+            categories = []
+
+        if len(categories) == 0:
+            categories = [category.pk for category in Category.objects.all()]
+
         start_date = request.POST.get("published_at_start", "")
         end_date = request.POST.get("published_at_end", "")
 
