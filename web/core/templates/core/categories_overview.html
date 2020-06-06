@@ -1,0 +1,81 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+
+{% block content %}
+
+    <div class="gradient-header">
+        <div class="container">
+            <div class="row h-100 align-items-center pt-5">
+
+                <div class="col-12">
+                    <h1 class="display-4 font-weight-light text-white">Categories</h1>
+
+                    <div class="muted-white">
+                        <p>
+                            Collabovid's main goal is to semantically analyze recent research on SARS-CoV-2 and help
+                            researchers to find relevant articles. As a first step in reaching our goal,
+                            we introduce <strong class="text-white">categories</strong>.
+                            Papers belong to <strong class="text-white">at least one</strong>
+                            but may be part of <strong class="text-white">multiple</strong>
+                            of the following categories.
+                            When <a class="muted-white" href="{% url "search" %}">searching</a> for papers you can
+                            filter for certain topics.
+                            The category
+                            assignment is computed by a machine learning algorithm. The model was trained with
+                            an existing dataset from
+                            <a class="muted-white" href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. LitCovid
+                            is a curated literature hub for tracking scientific information about SARS-CoV-2.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+
+
+    <div id="paper-container" class="container">
+
+        <div class="row align-items-stretch">
+            {% for category_statistic in category_statistics %}
+                {% include "core/partials/_category_card.html" with category_statistic=category_statistic %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <div class="container">
+            <h2 class="mb-4">Emerging Categories over Time</h2>
+            <div>
+                <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {% javascript 'charts' %}
+
+    <script>
+        let published_at_data = [];
+        {% for category_statistic in category_statistics %}
+
+            published_at_data.push(JSON.parse('{{ category_statistic.published_at_complete|escapejs }}'));
+
+        {% endfor %}
+
+        $("#publicationsOverTimeChart").publicationsOverTimeComparison({plot_data: published_at_data});
+
+
+    </script>
+
+{% endblock %}
+
+{% block css %}
+{% endblock %}

@@ -9,8 +9,6 @@ class Topic(models.Model):
     description_html = models.TextField()
     icon_path = models.CharField(max_length=100, default="")
 
-    latent_topic_score = models.BinaryField(null=True)
-
 
 class PaperHost(models.Model):
     name = models.CharField(max_length=60, unique=True)
@@ -59,9 +57,12 @@ class Author(models.Model):
 
 class Category(models.Model):
     """
-    e.g. Microbiology
+    Papers will be categorized with machine learning algorithms.
     """
-    name = models.CharField(max_length=200, primary_key=True)
+    name = models.CharField(max_length=200)
+    description = models.TextField()
+    model_identifier = models.CharField(max_length=100, unique=True)
+    color = models.CharField(max_length=7, default="#F0F0F0")
 
 
 class PaperData(models.Model):
@@ -82,7 +83,7 @@ class Paper(models.Model):
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
-    category = models.ForeignKey(Category, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
+    categories = models.ManyToManyField(Category, related_name="papers", through='CategoryMembership')
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source_value = models.IntegerField(choices=DataSource.choices, null=True)
     version = models.CharField(max_length=40, null=True, default=None)
@@ -107,8 +108,6 @@ class Paper(models.Model):
     published_at = models.DateField(null=True, default=None)
     journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
-    latent_topic_score = models.BinaryField(null=True)
-
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
@@ -125,3 +124,9 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class CategoryMembership(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    score = models.FloatField(default=0.0)

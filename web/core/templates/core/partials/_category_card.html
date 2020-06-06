@@ -1,0 +1,44 @@
+{% load static %}
+{% load humanize %}
+<div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 my-3">
+    <div class="card rounded shadow h-100 overflow-hidden">
+        <div style="width: 40px;
+                height: 40px;
+                background: {{ category_statistic.color }};
+                position: absolute;right:0;"></div>
+        <div class="card-body">
+
+            <h4 class="card-title">{{ category_statistic.name }}</h4>
+            <div class="card-subtitle text-muted">
+                {{ category_statistic.description }}
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-6 text-muted">
+                    <div><i class="fas fa-file"></i> Papers</div>
+                    <div class="text-right small">in the past &nbsp;&nbsp;7 days</div>
+                    <div class="text-right small">in the past 30 days</div>
+                </div>
+                <div class="col-6 text-dark">
+                    <div>{{ category_statistic.paper_count }}</div>
+                    <div class="small">{{ category_statistic.paper_count_past_week }}</div>
+                    <div class="small">{{ category_statistic.paper_count_past_month }}</div>
+                </div>
+            </div>
+
+            <div class="row mt-3 mb-4">
+                <div class="col-6 text-muted">
+                    <i class="fas fa-clock"></i> Recent Activity
+                </div>
+                <div class="col-6 text-dark">
+                    {{ category_statistic.newest_paper.created_at|naturaltime }}
+                </div>
+            </div>
+
+
+            <div class="position-absolute" style="right:2em; bottom: 1em;">
+                <a class="float-right" href="{% url "search" %}?categories={{ category_statistic.pk }}">Explore</a>
+            </div>
+        </div>
+    </div>
+</div>

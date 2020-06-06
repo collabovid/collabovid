@@ -65,10 +65,6 @@ class PubMedDatapoint(ArticleDataPoint):
         return False
 
     @property
-    def category_name(self):
-        return None
-
-    @property
     def journal(self):
         return self.pubmed_article.journal
 

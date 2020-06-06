@@ -15,3 +15,4 @@ resources:
   - permissions.yaml
   - job-author-cleanup.yaml
   - job-pubmed-cleanup.yaml
+  - job-litcovid-init.yaml

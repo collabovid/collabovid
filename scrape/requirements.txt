@@ -1,4 +1,4 @@
-Django==3.0.4
+Django==3.0.7
 tika==1.24
 pdf2image==1.12.1
 Pillow==7.0.0

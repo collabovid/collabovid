@@ -1,10 +1,12 @@
 from collections import defaultdict
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 
-from data.models import Paper, Author, Journal
+from data.models import Paper, Author, Journal, Category, CategoryMembership
 from typing import List
+
+from .exact_title_search import ExactTitleSearch
 from .search import Search
 from .semantic_search import SemanticSearch
 from .doi_search import DoiSearch
@@ -13,18 +15,32 @@ from .author_search import AuthorSearch
 
 
 class SearchEngine:
+    ARTICLE_TYPE_ALL = 3
+    ARTICLE_TYPE_PREPRINTS = 2
+    ARTICLE_TYPE_PEER_REVIEWED = 1
+
+
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
     @staticmethod
-    def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None):
+    def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None,
+                      category_ids=None, article_type=ARTICLE_TYPE_ALL):
         papers = Paper.objects.all()
 
         filtered = False
 
+        if article_type != SearchEngine.ARTICLE_TYPE_ALL:
+            papers = papers.filter(is_preprint=(article_type==SearchEngine.ARTICLE_TYPE_PREPRINTS))
+
+        if category_ids and len(category_ids) > 0:
+            papers = papers.filter(categories__pk__in=category_ids)
+            filtered = True
+
         if journal_ids and len(journal_ids) > 0:
             journals = Journal.objects.filter(pk__in=journal_ids)
             papers = papers.filter(journal__in=journals)
+            filtered = True
 
         if author_ids and len(author_ids) > 0:
             authors = Author.objects.filter(pk__in=author_ids)
@@ -51,19 +67,55 @@ class SearchEngine:
 
         return filtered, papers.distinct()
 
-    def search(self, query: str, start_date=None, end_date=None, topics=None, author_ids=None, author_and=False,
-               journal_ids=None, score_min=0.6):
+    def search(self, query: str,
+               start_date=None,
+               end_date=None,
+               topics=None,
+               author_ids=None,
+               author_and=False,
+               journal_ids=None,
+               category_ids=None,
+               article_type=ARTICLE_TYPE_ALL,
+               score_min=0.6):
         paper_score_table = defaultdict(int)
 
-        filtered, papers = SearchEngine.filter_papers(start_date, end_date, topics, author_ids, author_and, journal_ids)
+        filtered, papers = SearchEngine.filter_papers(start_date,
+                                                      end_date,
+                                                      topics,
+                                                      author_ids,
+                                                      author_and,
+                                                      journal_ids,
+                                                      category_ids,
+                                                      article_type)
 
         combined_factor = 0
 
         paper_scores_items = dict()
 
         if not query:
+            """
+            If the user did not provide a query we want to either show the newest papers or
+            show those papers first that have the best matching category. We sort by newest when two papers
+            have the same score. Therefore, we either give all papers score 1 or add Category Score.
+            """
+
             for doi in papers.values_list('doi', flat=True):
                 paper_scores_items[doi] = 1
+
+            if category_ids and len(category_ids) == 1:
+                try:
+                    category = Category.objects.get(pk=category_ids[0])
+
+                    memberships = CategoryMembership.objects.filter(paper__in=papers, category=category).\
+                        annotate(doi=F('paper__doi'))
+
+                    for membership in memberships:
+                        paper_scores_items[membership.doi] = membership.score
+
+                except Category.DoesNotExist:
+                    raise Exception("Provided unknown category")
+                except CategoryMembership.DoesNotExist:
+                    raise Exception("Filtering yielded incorrect papers for category")
         else:
             for search_component in self.search_pipeline:
                 paper_results, query = search_component.find(query, papers, score_min)
@@ -100,4 +152,4 @@ def get_default_search_engine():
 
     #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
     #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([DoiSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])
+    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch()])

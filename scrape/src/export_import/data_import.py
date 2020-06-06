@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Category, Journal, Paper, PaperData, PaperHost
+from data.models import Author, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
 
-
+#  TODO: Import new category data.
 class DataImport:
     @staticmethod
     def import_data(filepath, log=print):
@@ -26,19 +26,8 @@ class DataImport:
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
 
-
             if journals:
                 data["journals"] = {int(k): v for k, v in data["journals"].items()}
-
-            category_mapping = {}
-            categories_created = 0
-            for id, category in data["categories"].items():
-                db_category, created = Category.objects.get_or_create(
-                    name=category["name"]
-                )
-                category_mapping[id] = db_category
-                if created:
-                    categories_created += 1
 
             paperhost_mapping = {}
             paperhosts_created = 0
@@ -86,9 +75,6 @@ class DataImport:
                             if paper["last_scrape"]
                             else None,
                             published_at=paper["published_at"],
-                            category=category_mapping[paper["category_id"]]
-                            if paper["category_id"]
-                            else None,
                             data=PaperData.objects.create(content=paper["content"])
                             if paper["content"]
                             else None,
@@ -132,6 +118,5 @@ class DataImport:
         log("Imported")
         log(f"\t{paperhosts_created} paperhosts")
         log(f"\t{journals_created} journals")
-        log(f"\t{categories_created} categories")
         log(f"\t{authors_created} authors")
         log(f"\t{papers_created} papers")
