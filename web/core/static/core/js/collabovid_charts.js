@@ -159,7 +159,7 @@ window.chartColors = {
                         }
 
                     }],
-                     xAxes: [{
+                    xAxes: [{
                         scaleLabel: {
                             labelString: 'weeks in year',
                             display: true,
@@ -169,7 +169,12 @@ window.chartColors = {
                 tooltips:
                     {
                         enabled: true,
-                        mode: 'label'
+                        mode: 'label',
+                        callbacks: {
+                            title: function (tooltipItems, data) {
+                                return 'Week: ' + tooltipItems[0].xLabel;
+                            }
+                        }
                     },
             }
         });

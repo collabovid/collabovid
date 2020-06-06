@@ -13,16 +13,19 @@
 
                     <div class="muted-white pl-2">
                         <p>
-                            LitCovid is a curated literature hub for tracking up-to-date scientific information about
-                            the 2019 novel Coronavirus. It is the most comprehensive resource on the subject, providing
-                            a central access to 18791 (and growing) relevant articles in PubMed. The articles are
-                            updated daily and are further categorized by different research topics and geographic
-                            locations for improved access. You can learn more at Chen et al. Nature (2020) or our FAQ,
-                            and download our data here.
-                        </p>
-                        <p>
-                            Since a lot of research papers cover exactly these questions, we misuse them to classify the
-                            COVID-19 preprints.
+                            Collabovid's main goal is to semantically analyze recent research on SARS-CoV-2 and help
+                            researchers to find relevant articles. As a first step in reaching our goal,
+                            we introduce <strong class="text-white">categories</strong>.
+                            Papers belong to <strong class="text-white">at least one</strong>
+                            but may be part of <strong class="text-white">multiple</strong>
+                            of the following categories.
+                            When <a class="muted-white" href="{% url "search" %}">searching</a> for papers you can
+                            filter for certain topics.
+                            The category
+                            assignment is computed by a machine learning algorithm. The model was trained with
+                            an existing dataset from
+                            <a class="muted-white" href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. LitCovid
+                            is a curated literature hub for tracking scientific information about SARS-CoV-2.
                         </p>
                     </div>
 
