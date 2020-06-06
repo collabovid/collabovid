@@ -105,11 +105,11 @@
                                 {% endif %}
                             </span>
 
-                            <div class="mt-1 small text-muted">
+                            <div class="mt-1 text-muted">
 
                                 <div class="row">
 
-                                    <div class="col-4 text-left">
+                                    <div class="col-4 text-left small">
                                         {% for category in paper.categories.all %}
                                             <span class="badge badge-pill text-light"
                                                   style="background-color: {{ category.color }};">
@@ -118,7 +118,7 @@
                                         {% endfor %}
                                     </div>
 
-                                    <div class="col-8 text-right">
+                                    <div class="col-8 text-right small">
 
                                         {% if paper.abstract|length >= preview_size %}
                                             <span class="abstract-controls">
