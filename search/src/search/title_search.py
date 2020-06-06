@@ -5,7 +5,7 @@ from .search import Search, PaperResult
 from typing import List
 
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-
+from django.contrib.postgres.search import TrigramDistance
 
 class TitleSearch(Search):
 
@@ -19,6 +19,7 @@ class TitleSearch(Search):
         """
 
         if settings.USING_POSTGRES:
+
             vector = SearchVector('title', weight='A')
             search_query = SearchQuery(query, search_type="phrase")
             rank = SearchRank(vector, search_query)

@@ -5,6 +5,8 @@ from django.db.models.functions import Concat
 
 from data.models import Paper, Author, Journal, Category, CategoryMembership
 from typing import List
+
+from .exact_title_search import ExactTitleSearch
 from .search import Search
 from .semantic_search import SemanticSearch
 from .doi_search import DoiSearch
@@ -140,4 +142,4 @@ def get_default_search_engine():
 
     #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
     #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([DoiSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])
+    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])
