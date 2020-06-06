@@ -150,7 +150,7 @@ window.chartColors = {
                         type: 'linear',
                         position: 'left',
                         scaleLabel: {
-                            labelString: 'Total',
+                            labelString: 'papers published',
                             display: true,
                         },
 
@@ -158,6 +158,12 @@ window.chartColors = {
                             beginAtZero: true
                         }
 
+                    }],
+                     xAxes: [{
+                        scaleLabel: {
+                            labelString: 'weeks in year',
+                            display: true,
+                        }
                     }]
                 },
                 tooltips:

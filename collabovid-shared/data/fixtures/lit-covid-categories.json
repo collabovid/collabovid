@@ -16,7 +16,7 @@
       "name": "Mechanism",
       "description": "Underlying cause(s) of covid-19 infections and transmission & possible drug mechanism of action",
       "model_identifier": "mechanism",
-      "color": "#00879d"
+      "color": "#488f31"
     }
   },
   {
@@ -26,7 +26,7 @@
       "name": "Transmission",
       "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human",
       "model_identifier": "transmission",
-      "color": "#009692"
+      "color": "#bc5090"
     }
   },
   {
@@ -36,7 +36,7 @@
       "name": "Diagnosis",
       "description": "Disease assessment through symptoms, test results, and radiological features",
       "model_identifier": "diagnosis",
-      "color": "#00a379"
+      "color": "#c0af4a"
     }
   },
   {
@@ -46,7 +46,7 @@
       "name": "Treatment",
       "description": "Treatment strategies, therapeutic procedures, and vaccine development",
       "model_identifier": "treatment",
-      "color": "#41ac57"
+      "color": "#ffa49c"
     }
   },
   {
@@ -56,7 +56,7 @@
       "name": "Prevention",
       "description": "Prevention, control, response and management strategies",
       "model_identifier": "prevention",
-      "color": "#82b12f"
+      "color": "#ef9556"
     }
   },
   {
@@ -66,7 +66,7 @@
       "name": "Case Report",
       "description": "Descriptions of specific patient cases",
       "model_identifier": "case-report",
-      "color": "#c0b000"
+      "color": "#009692"
     }
   },
   {
@@ -76,7 +76,7 @@
       "name": "Epidemic Forecasting",
       "description": "Modelling and estimating the trend of covid-19 spread",
       "model_identifier": "forecasting",
-      "color": "#ffa600"
+      "color": "#de425b"
     }
   }
 ]
