@@ -78,6 +78,11 @@ def search(request):
         if tab not in ["newest", "top", "statistics"]:
             tab = "top"
 
+        article_type = request.GET.get("article-type", "all")
+
+        if article_type not in ["all", "reviewed", 'preprints']:
+            article_type = "all"
+
         journal_ids = request.GET.get("journals", None)
 
         try:
@@ -118,7 +123,8 @@ def search(request):
             "tab": tab,
             "authors": json.dumps(authors_to_json(authors)),
             "authors-connection": authors_connection,
-            "journals": json.dumps(journals_to_json(journals))
+            "journals": json.dumps(journals_to_json(journals)),
+            "article_type": article_type
         }
 
         return render(request, "core/search.html", {'form': form})
@@ -149,9 +155,12 @@ def search(request):
         journals = request.POST.get("journals")
 
         search_query = request.POST.get("search", "").strip()
+
+        article_type = request.POST.get("article-type", "all")
+
         search_request = SearchRequestHelper(start_date, end_date,
                                              search_query, authors, authors_connection, journals,
-                                             categories)
+                                             categories, article_type)
 
         if search_request.error:
             return render(request, "core/partials/_search_result_error.html",

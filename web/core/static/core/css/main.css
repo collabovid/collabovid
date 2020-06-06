@@ -293,6 +293,18 @@ div.filter-card {
 
 }
 
+@media (min-width: 1440px) {
+    .filter-toggle
+    {
+        display: none !important;
+    }
+
+    div.filter-card
+    {
+        display: block !important;
+    }
+}
+
 a.filter-back-button {
     left: 1rem;
     top: 1.25rem

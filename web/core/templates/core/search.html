@@ -45,49 +45,48 @@
 
             </div>
 
-            <div class="row mt-5">
-                <div class="col-8">
-                    <ul class="nav nav-search-types nav-justified">
-                        <li class="nav-item">
-                            <label class="nav-link {% if form.tab == "top" %}active{% endif %}"
-                                   for="top-tab-input">
-                                Top
-                            </label>
-                        </li>
+        </div>
 
-                        <li class="nav-item">
-                            <label for="newest-tab-input"
-                                   class="nav-link {% if form.tab == "newest" %}active{% endif %}">
-                                Newest
-                            </label>
+        <div class="row mt-5 mx-5">
+            <div class="col-8">
+                <ul class="nav nav-search-types nav-justified">
+                    <li class="nav-item">
+                        <label class="nav-link {% if form.tab == "top" %}active{% endif %}"
+                               for="top-tab-input">
+                            Top
+                        </label>
+                    </li>
 
-                        </li>
+                    <li class="nav-item">
+                        <label for="newest-tab-input"
+                               class="nav-link {% if form.tab == "newest" %}active{% endif %}">
+                            Newest
+                        </label>
 
-                        <li class="nav-item">
-                            <label class="nav-link {% if form.tab == "statistics" %}active{% endif %}"
-                                   for="statistics-tab-input">
-                                Statistics
-                            </label>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-4 text-right">
+                    </li>
 
-                    <button class="btn btn-light mt-2"
-                            data-toggle="collapse"
-                            data-target="#filter-container"
-                            aria-expanded="false"
-                            aria-controls="filter-container">Filters
-                    </button>
-
-                </div>
+                    <li class="nav-item">
+                        <label class="nav-link {% if form.tab == "statistics" %}active{% endif %}"
+                               for="statistics-tab-input">
+                            Statistics
+                        </label>
+                    </li>
+                </ul>
             </div>
+            <div class="col-4 text-right">
 
+                <button class="btn btn-light mt-2 filter-toggle"
+                        data-toggle="collapse"
+                        data-target="#filter-container"
+                        aria-expanded="false"
+                        aria-controls="filter-container">Filters
+                </button>
 
+            </div>
         </div>
     </div>
 
-    <div class="container">
+    <div class="px-5">
         <div class="d-flex flex-row">
 
             <div class="flex-fill" style="min-width: 0;">

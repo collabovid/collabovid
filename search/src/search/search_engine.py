@@ -15,15 +15,23 @@ from .author_search import AuthorSearch
 
 
 class SearchEngine:
+    ARTICLE_TYPE_ALL = 3
+    ARTICLE_TYPE_PREPRINTS = 2
+    ARTICLE_TYPE_PEER_REVIEWED = 1
+
+
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
     @staticmethod
     def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None,
-                      category_ids=None):
+                      category_ids=None, article_type=ARTICLE_TYPE_ALL):
         papers = Paper.objects.all()
 
         filtered = False
+
+        if article_type != SearchEngine.ARTICLE_TYPE_ALL:
+            papers = papers.filter(is_preprint=(article_type==SearchEngine.ARTICLE_TYPE_PREPRINTS))
 
         if category_ids and len(category_ids) > 0:
             papers = papers.filter(categories__pk__in=category_ids)
@@ -67,6 +75,7 @@ class SearchEngine:
                author_and=False,
                journal_ids=None,
                category_ids=None,
+               article_type=ARTICLE_TYPE_ALL,
                score_min=0.6):
         paper_score_table = defaultdict(int)
 
@@ -76,7 +85,8 @@ class SearchEngine:
                                                       author_ids,
                                                       author_and,
                                                       journal_ids,
-                                                      category_ids)
+                                                      category_ids,
+                                                      article_type)
 
         combined_factor = 0
 
@@ -142,4 +152,4 @@ def get_default_search_engine():
 
     #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
     #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])
+    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch()])
