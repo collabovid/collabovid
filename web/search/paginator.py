@@ -15,6 +15,9 @@ class ScoreSortPaginator(Paginator):
             paper_score_table[paper_doi] = score
         papers = Paper.objects.filter(pk__in=paper_score_table.keys()).order_by("-published_at")
         papers = sorted(papers, key=lambda paper: paper_score_table[paper.doi], reverse=True)
+
+        for paper in papers:
+            print(paper_score_table[paper.doi])
         return self._get_page(papers, number, self)
 
 

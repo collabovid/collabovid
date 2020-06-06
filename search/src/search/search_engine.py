@@ -1,9 +1,9 @@
 from collections import defaultdict
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 
-from data.models import Paper, Author, Journal
+from data.models import Paper, Author, Journal, Category, CategoryMembership
 from typing import List
 from .search import Search
 from .semantic_search import SemanticSearch
@@ -81,8 +81,29 @@ class SearchEngine:
         paper_scores_items = dict()
 
         if not query:
+            """
+            If the user did not provide a query we want to either show the newest papers or
+            show those papers first that have the best matching category. We sort by newest when two papers
+            have the same score. Therefore, we either give all papers score 1 or add Category Score.
+            """
+
             for doi in papers.values_list('doi', flat=True):
                 paper_scores_items[doi] = 1
+
+            if category_ids and len(category_ids) == 1:
+                try:
+                    category = Category.objects.get(pk=category_ids[0])
+
+                    memberships = CategoryMembership.objects.filter(paper__in=papers, category=category).\
+                        annotate(doi=F('paper__doi'))
+
+                    for membership in memberships:
+                        paper_scores_items[membership.doi] = membership.score
+
+                except Category.DoesNotExist:
+                    raise Exception("Provided unknown category")
+                except CategoryMembership.DoesNotExist:
+                    raise Exception("Filtering yielded incorrect papers for category")
         else:
             for search_component in self.search_pipeline:
                 paper_results, query = search_component.find(query, papers, score_min)
