@@ -216,6 +216,8 @@ class ArticleDataPoint(object):
             db_article.version = self.version
 
             db_article.last_scrape = timezone.now()
+
+            db_article.categories.clear()
             db_article.save()
         return db_article, created
 

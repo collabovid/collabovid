@@ -3,8 +3,7 @@ from tasks.task_runner import TaskRunner
 from src.task_medrxiv_update import MedBiorxivNewArticlesTask
 from src.task_arxiv_update import ArxivNewArticlesTask
 from src.task_pubmed_update import PubmedNewArticlesTask
-# from analyze.update_topic_assignment import UpdateTopicAssignment
-# from analyze.setup_vectorizer import SetupVectorizer
+from src.task_elsevier_update import ElsevierNewArticlesTask
 
 from tasks.definitions import Runnable, register_task
 from tasks.launcher.task_launcher import get_task_launcher
@@ -31,6 +30,10 @@ class ScrapeTask(Runnable):
         TaskRunner.run_task(ArxivNewArticlesTask,
                             started_by=self._task.started_by)
         self.log("Finished getting new arXiv articles...")
+
+        self.log("Get new Elsevier articles...")
+        TaskRunner.run_task(ElsevierNewArticlesTask,
+                            started_by=self._task.started_by)
 
         self.log("Get new Pubmed articles...")
         TaskRunner.run_task(PubmedNewArticlesTask,

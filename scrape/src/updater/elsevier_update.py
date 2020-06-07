@@ -116,7 +116,7 @@ class ElsevierUpdater(DataUpdater):
     def __init__(self, log=print):
         super().__init__(log)
         self._metadata = None
-        self._cache = ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier")
+        self._cache = ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier", log=log)
         self._cache.refresh()
 
     def _load_metadata(self):
