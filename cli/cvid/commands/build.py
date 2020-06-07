@@ -31,8 +31,9 @@ class BuildCommand(CommandWithServices):
                     f"docker image ls --filter reference=\"*/{service}\" --filter reference=\"{service}\" --format '{{{{.Repository}}}}:{{{{.Tag}}}}' | grep -v '...:{tag}'",
                     quiet=True, exit_on_fail=False, collect_output=True, print_command=False)
                 if result.returncode == 0:
-                    output = ' '.join(result.stdout.decode('utf8').strip().split('\n'))
-                    self.run_shell_command(f"docker rmi {output}")
+                    for output in result.stdout.decode('utf8').strip().split('\n'):
+                        if len(output) > 0:
+                            self.run_shell_command(f"docker rmi {output}")
 
     def add_arguments(self, parser):
         super().add_arguments(parser)
