@@ -115,15 +115,6 @@ class MedrxivDataPoint(ArticleDataPoint):
     def is_preprint(self):
         return True
 
-    @property
-    def category_name(self):
-        self._setup_article_soup()
-        categories = self._article_soup.find_all('span', {'class': 'highwire-article-collection-term'})
-        if len(categories) == 0:
-            return "Unknown"
-        else:
-            return categories[0].text.strip()
-
 
 class MedrxivUpdater(DataUpdater):
     _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'

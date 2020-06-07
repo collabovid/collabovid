@@ -9,6 +9,7 @@ from timeit import default_timer as timer
 import requests
 from django.conf import settings
 
+from data.models import CategoryMembership
 
 class DataExport:
     @staticmethod
@@ -27,8 +28,8 @@ class DataExport:
 
         authors = {}
         paperhosts = {}
-        categories = {}
         journals = {}
+        categories_ml = {}
         papers = []
 
         if not os.path.exists(out_dir):
@@ -54,10 +55,14 @@ class DataExport:
                                 "firstname": author.first_name,
                             }
 
-                    if paper.category and paper.category not in categories:
-                        categories[paper.category_id] = {"name": paper.category.name}
                     if paper.journal and paper.journal not in journals:
                         journals[paper.journal_id] = {"name": paper.journal.name}
+
+                    for category in paper.categories.all():
+                        if category.model_identifier not in categories_ml:
+                            categories_ml[category.model_identifier] = {"name": category.name,
+                                                                     "description": category.description,
+                                                                     "color": category.color}
 
                     paper_data = {
                         "doi": paper.doi,
@@ -70,7 +75,6 @@ class DataExport:
                         "published_at": datetime.strftime(paper.published_at, "%Y-%m-%d")
                         if paper.published_at
                         else None,
-                        "category_id": paper.category.pk if paper.category else None,
                         "paperhost_id": paper.host_id,
                         "version": paper.version,
                         "covid_related": paper.covid_related,
@@ -85,7 +89,11 @@ class DataExport:
                         else None,
                         "datasource_id": paper.data_source_value,
                         "pubmed_id": paper.pubmed_id,
-                        "journal_id": paper.journal.pk if paper.journal else None
+                        "journal_id": paper.journal.pk if paper.journal else None,
+                        "category_memberships": [{"identifier": c.model_identifier,
+                                                  "score": CategoryMembership.objects.get(
+                                                      category__model_identifier=c.model_identifier, paper=paper).score}
+                                                 for c in paper.categories.all()]
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
@@ -106,11 +114,11 @@ class DataExport:
                     papers.append(paper_data)
 
                 data = {
-                    "categories": categories,
                     "authors": authors,
                     "paperhosts": paperhosts,
                     "papers": papers,
                     "journals": journals,
+                    "categories_ml": categories_ml
                 }
 
                 # json_io = io.BytesIO()
@@ -137,10 +145,10 @@ class DataExport:
 
         log(f"Finished export in {timedelta(seconds=end - start)}")
         log("Exported")
-        log(f"\t{len(categories)} categories")
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
+        log(f"\t{len(categories_ml)} ML categories")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 

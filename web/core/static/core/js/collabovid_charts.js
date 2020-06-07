@@ -101,6 +101,87 @@ window.chartColors = {
     }
 }(jQuery));
 
+
+(function ($) {
+
+    $.fn.publicationsOverTimeComparison = function (options) {
+
+        let plugin = this;
+
+        plugin.init = function () {
+            plugin.settings = $.extend({
+                plot_data: null,
+            }, options);
+        };
+
+        plugin.init();
+
+        let datasets = [];
+
+        let published_dates = [];
+
+        plugin.settings.plot_data[0]['x'].forEach(function (item) {
+            published_dates.push(item["week"] + "/" + item["year"]);
+        });
+
+        plugin.settings.plot_data.forEach(function (data) {
+
+            datasets.push({
+                label: data['label'],
+                borderColor: data['color'],
+                fill: false,
+                data: data['total'],
+                yAxisID: 'total',
+            });
+        });
+
+
+        return new Chart(plugin, {
+            type: 'line',
+            data: {
+                labels: published_dates,
+                datasets: datasets
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        id: 'total',
+                        type: 'linear',
+                        position: 'left',
+                        scaleLabel: {
+                            labelString: 'papers published',
+                            display: true,
+                        },
+
+                        ticks: {
+                            beginAtZero: true
+                        }
+
+                    }],
+                    xAxes: [{
+                        scaleLabel: {
+                            labelString: 'weeks in year',
+                            display: true,
+                        }
+                    }]
+                },
+                tooltips:
+                    {
+                        enabled: true,
+                        mode: 'label',
+                        callbacks: {
+                            title: function (tooltipItems, data) {
+                                return 'Week: ' + tooltipItems[0].xLabel;
+                            }
+                        }
+                    },
+            }
+        });
+    }
+}(jQuery));
+
+
 (function ($) {
 
     $.fn.paperHostDistribution = function (options) {

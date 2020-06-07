@@ -2,7 +2,7 @@
 <div class="filter-card collapse width" id="filter-container">
     <div class="card">
         <form id="filter-form" class="search-form mt-1">
-            <a href="#" class="d-none d-lg-inline position-absolute filter-hide-button"
+            <a href="#" class="d-none d-lg-inline position-absolute filter-hide-button filter-toggle"
                data-toggle="collapse"
                data-target="#filter-container"
                aria-expanded="false"
@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-12">
                         <label for="authors-input">
-                            Authors
+                            <strong>Authors</strong>
                         </label>
                     </div>
                 </div>
@@ -62,8 +62,43 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
+                        <label for="journals-input">
+                            <strong>Journals</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="journals-input" name="journals" class="tagify--outside"
+                               placeholder="Journal name">
+                        <div class="text-muted small">If no journal is selected the value defaults to all.</div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Categories</strong>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12 text-dark pt-1">
+                        {% for category in form.categories.all %}
+                            <label class="mb-0 d-lg-block">
+                                <input data-url-manually="true" data-no-url="true" class="mr-1" type="checkbox"
+                                       {% if category.pk in form.selected_categories %}checked="checked"{% endif %}
+                                       name="categories"
+                                       value="{{ category.pk }}">
+                                {{ category.name }} <span class="small text-muted">({{ category.papers.count }})</span>
+                            </label>
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
                         <label for="start-date">
-                            Published After
+                            <strong>Published After</strong>
                         </label>
                     </div>
                 </div>
@@ -76,7 +111,7 @@
                 <div class="row mt-3">
                     <div class="col-12">
                         <label for="start-date">
-                            Published Before
+                            <strong>Published Before</strong>
                         </label>
                     </div>
                 </div>
@@ -88,18 +123,40 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
-                        <label for="journals-input">
-                            Journals
+                        <label for="start-date">
+                            <strong>Article Type</strong>
                         </label>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mt-1">
                     <div class="col-12">
-                        <input id="journals-input" name="journals" class="tagify--outside"
-                               placeholder="Journal name">
-                        <div class="text-muted small">If no journal is selected the value defaults to all.</div>
+                        <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+                            <label class="btn btn-light active">
+                                <input type="radio" data-no-url="true" name="article-type"
+                                       {% if form.article_type == 'all' %}checked="checked"{% endif %}
+                                       value="all"/> All
+                            </label>
+                            <label class="btn btn-light">
+                                <input type="radio" data-no-url="false" name="article-type"
+                                       {% if form.article_type == 'reviewed' %}checked="checked"{% endif %}
+                                       value="reviewed"/>
+                                Reviewed
+                            </label>
+                            <label class="btn btn-light">
+                                <input type="radio" data-no-url="false" name="article-type"
+                                       {% if form.article_type == 'preprints' %}checked="checked"{% endif %}
+                                       value="preprints"/>
+                                Preprints
+                            </label>
+                        </div>
+                        <div class="text-muted small">
+                            Reviewed articles were published in some journal while preprints are most often
+                            not peer-reviewed but publicly available.
+                        </div>
+
                     </div>
                 </div>
+
 
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
@@ -229,7 +286,7 @@
                 $.each(result.journals, function () {
                     tagify.settings.whitelist.push(this);
                 });
-                
+
                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
             });
         }
@@ -326,8 +383,16 @@
             pagination_container.hide();
 
             let submission_data = $(".search-form input[data-no-url!=true]").serialize();
-            let csrf_token = $('.search-form input[data-no-url=true]').serialize();
-            let full_data = submission_data + "&" + csrf_token;
+            let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+
+            if ($('.search-form input[name=categories]:checked').length !== $('.search-form input[name=categories]').length) {
+                submission_data += "&categories=";
+                submission_data += $('.search-form input[name=categories]:checked').map(function () {
+                    return this.value;
+                }).get().join(',');
+            }
+
+            let full_data = submission_data + "&" + no_url_submission_data;
 
             search_query(full_data, 1, false, function () {
                 window.Pagination.last_request = full_data;

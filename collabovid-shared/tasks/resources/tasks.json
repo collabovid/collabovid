@@ -171,10 +171,25 @@
                 }
             ]
         },
-        "update-topic-assignment": {
-            "name": "Update Topic Assignment",
+        "update-category-assignment": {
+            "name": "Update Category Assignment",
             "description": "No description provided.",
-            "parameters": []
+            "parameters": [
+                {
+                    "name": "force_recompute",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                },
+                {
+                    "name": "category_threshold",
+                    "required": false,
+                    "type": "float",
+                    "default": 0.5,
+                    "is_primitive": false
+                }
+            ]
         }
     }
 }

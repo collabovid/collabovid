@@ -48,8 +48,8 @@ class ScrapeTask(Runnable):
             }
 
             task_launcher.launch_task(name="setup-vectorizer", config=task_config, block=True)
-            task_launcher.launch_task(name="update-topic-assignment", config=task_config, block=True)
+            task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
 
-            self.log("Finished updating topic assigment")
+            self.log("Finished updating category assigment")
         else:
             self.log("Paper matrix update and topic assignment skipped.")

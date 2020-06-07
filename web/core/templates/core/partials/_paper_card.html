@@ -105,31 +105,47 @@
                                 {% endif %}
                             </span>
 
-                            <div class="mt-1 small text-muted text-right">
+                            <div class="mt-1 text-muted">
 
-                                {% if paper.abstract|length >= preview_size %}
-                                    <span class="abstract-controls">
-                                        <a href="#" class="toggle-description show"
-                                           style="{% if extended %} display: none; {% endif %}">
-                                            Expand the abstract
-                                        </a>
+                                <div class="row">
 
-                                        <a href="#" class="toggle-description hide"
-                                           style="{% if not extended %} display: none; {% endif %}">
-                                            Hide the full abstract
-                                        </a>
-                                    </span>
-                                {% endif %}
+                                    <div class="col-4 text-left small">
+                                        {% for category in paper.categories.all %}
+                                            <span class="badge badge-pill text-light"
+                                                  style="background-color: {{ category.color }};">
+                                                {{ category.name }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
 
-                                {% if paper.abstract|length >= preview_size and paper.pdf_url %}
-                                    |
-                                {% endif %}
+                                    <div class="col-8 text-right small">
 
-                                {% if paper.pdf_url %}
-                                    <a href="{{ paper.pdf_url }}">
-                                        Read the full text
-                                    </a>
-                                {% endif %}
+                                        {% if paper.abstract|length >= preview_size %}
+                                            <span class="abstract-controls">
+                                                <a href="#" class="toggle-description show"
+                                                   style="{% if extended %} display: none; {% endif %}">
+                                                    Expand the abstract
+                                                </a>
+
+                                                <a href="#" class="toggle-description hide"
+                                                   style="{% if not extended %} display: none; {% endif %}">
+                                                    Hide the full abstract
+                                                </a>
+                                            </span>
+                                        {% endif %}
+
+                                        {% if paper.abstract|length >= preview_size and paper.pdf_url %}
+                                            |
+                                        {% endif %}
+
+                                        {% if paper.pdf_url %}
+                                            <a href="{{ paper.pdf_url }}">
+                                                Read the full text
+                                            </a>
+                                        {% endif %}
+                                    </div>
+
+                                </div>
 
                             </div>
                         </div>

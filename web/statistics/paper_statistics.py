@@ -7,7 +7,7 @@ import json
 from django.utils.timezone import datetime, timedelta
 
 
-class Statistics:
+class PaperStatistics:
 
     def __init__(self, papers: QuerySet):
         self._papers = papers

@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'core.apps.CoreConfig',
     'health_check',
     'health_check.db',
@@ -111,6 +112,7 @@ STATIC_ROOT = 'static'
 
 FIXTURE_DIRS = (
     '/data/fixtures/',
+    os.path.join(BASE_DIR, 'fixtures/'),
 )
 
 MEDIA_URL = '/media/'

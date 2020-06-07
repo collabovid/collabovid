@@ -2,7 +2,7 @@ from datetime import timedelta
 from time import sleep
 from timeit import default_timer as timer
 
-from data.models import Author, Category, DataSource, Journal, Paper, PaperData, PaperHost
+from data.models import Author, DataSource, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
@@ -100,10 +100,6 @@ class ArticleDataPoint(object):
     @property
     def is_preprint(self):
         raise NotImplementedError
-
-    @property
-    def category_name(self):
-        return None
 
     @property
     def journal(self):
@@ -209,9 +205,6 @@ class ArticleDataPoint(object):
                     db_article.authors.add(db_author)
                 except DjangoDataError as ex:
                     raise DataError(f"Author {author[1]} {author[0]}: {ex}")
-
-            if self.category_name:
-                db_article.category, _ = Category.objects.get_or_create(name=self.category_name)
 
             if self.journal:
                 db_article.journal, _ = Journal.objects.get_or_create(

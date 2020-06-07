@@ -1,0 +1,82 @@
+[
+  {
+    "model": "data.category",
+    "pk": 0,
+    "fields": {
+      "name": "General",
+      "description": "General information and news",
+      "model_identifier": "general",
+      "color": "#007799"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 1,
+    "fields": {
+      "name": "Mechanism",
+      "description": "Underlying cause(s) of covid-19 infections and transmission & possible drug mechanism of action",
+      "model_identifier": "mechanism",
+      "color": "#488f31"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 2,
+    "fields": {
+      "name": "Transmission",
+      "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human",
+      "model_identifier": "transmission",
+      "color": "#bc5090"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 3,
+    "fields": {
+      "name": "Diagnosis",
+      "description": "Disease assessment through symptoms, test results, and radiological features",
+      "model_identifier": "diagnosis",
+      "color": "#c0af4a"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 4,
+    "fields": {
+      "name": "Treatment",
+      "description": "Treatment strategies, therapeutic procedures, and vaccine development",
+      "model_identifier": "treatment",
+      "color": "#ffa49c"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 5,
+    "fields": {
+      "name": "Prevention",
+      "description": "Prevention, control, response and management strategies",
+      "model_identifier": "prevention",
+      "color": "#ef9556"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 6,
+    "fields": {
+      "name": "Case Report",
+      "description": "Descriptions of specific patient cases",
+      "model_identifier": "case-report",
+      "color": "#009692"
+    }
+  },
+  {
+    "model": "data.category",
+    "pk": 7,
+    "fields": {
+      "name": "Epidemic Forecasting",
+      "description": "Modelling and estimating the trend of covid-19 spread",
+      "model_identifier": "forecasting",
+      "color": "#de425b"
+    }
+  }
+]
