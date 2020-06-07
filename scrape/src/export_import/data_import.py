@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
-from data.models import Author, Journal, Paper, PaperData, PaperHost
+from data.models import Author, Category, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
 
-#  TODO: Import new category data.
+
 class DataImport:
     @staticmethod
     def import_data(filepath, log=print):
@@ -21,6 +21,9 @@ class DataImport:
                 data = json.load(f)
 
             journals = "journals" in data
+
+            # Backward compatibility: only import the new ML-categories, not the old medrxiv ones.
+            categories_ml = "categories_ml" in data
 
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
@@ -50,10 +53,27 @@ class DataImport:
                     if created:
                         journals_created += 1
 
+            category_mapping = {}
+            categories_created = 0
+
+            if categories_ml:
+                for identifier, category in data["categories_ml"].items():
+                    try:
+                        db_category = Category.objects.get(model_identifier=identifier)
+                    except Category.DoesNotExist:
+                        db_category = Category(model_identifier=identifier, name=category["name"],
+                                               description=category["description"], color=category["color"])
+                        db_category.save()
+                        categories_created += 1
+                    category_mapping[identifier] = db_category
+
             papers_created = 0
             authors_created = 0
+            papers_w_new_category = 0
             for i, paper in enumerate(data["papers"]):
-                if not Paper.objects.filter(doi=paper["doi"]).exists():
+                try:
+                    db_paper = Paper.objects.get(doi=paper["doi"])
+                except Paper.DoesNotExist:
                     if not paper["published_at"]:
                         print(f"Not importing {paper['doi']} because the date is missing.")
                         continue
@@ -112,6 +132,14 @@ class DataImport:
                         db_paper.save()
                     papers_created += 1
 
+                if categories_ml and not db_paper.categories.exists():
+                    # Set paper categories if they were not set (even on existing papers)
+                    if paper["category_memberships"]:
+                        papers_w_new_category += 1
+                    for category in paper["category_memberships"]:
+                        db_paper.categories.add(category_mapping[category["identifier"]],
+                                                through_defaults={"score": category["score"]})
+                    db_paper.save()
         end = timer()
 
         log(f"Finished import in {timedelta(seconds=end - start)}")
@@ -119,4 +147,6 @@ class DataImport:
         log(f"\t{paperhosts_created} paperhosts")
         log(f"\t{journals_created} journals")
         log(f"\t{authors_created} authors")
+        log(f"\t{categories_created} ML categories")
         log(f"\t{papers_created} papers")
+        log(f"{papers_w_new_category} papers' categories were updated")
