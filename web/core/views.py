@@ -29,6 +29,15 @@ def home(request):
         return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
 
+def paper(request, doi):
+    current_paper = get_object_or_404(Paper, doi=doi)
+
+    similar_papers = Paper.objects.all()
+
+    return render(request, "core/paper.html", {
+        "paper": current_paper,
+        "similar_papers": similar_papers[:10]
+    })
 
 def about(request):
     paper_count = Paper.objects.count()

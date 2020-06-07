@@ -1,0 +1,138 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="gradient-header">
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-2 hidden-xs hidden-sm">
+                    {% if paper.preview_image %}
+                        <div class="card p-1" style="height: 200px">
+                            <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                                 class="img-fluid mx-auto d-block">
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="col-md-10">
+                    <h3 class="text-white">{{ paper.title }}</h3>
+                    <h6 class=" text-white" style="font-size: 0.9em">
+                        <i class="fas fa-layer-group"></i>
+
+                    </h6>
+                    <div class="mt-3">
+                        <a class="btn btn-dark" href="{{ paper.pdf_url }}">
+                            <i class="fa fa-file"></i> PDF
+                        </a>
+                        <a class="btn btn-info ml-3" href="{{ paper.url }}">
+                            <i class="fa fa-external-link-alt"></i>
+                            {{ paper.host.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-2">
+                            Abstract
+                        </h5>
+                        <p class="card-text mb-2" style="font-size: 15px">
+                            {{ paper.abstract }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-2">
+                            Published
+                        </h5>
+                        <div class="card-text mb-2 display-4" style="font-size: 35px">
+                            {{ paper.published_at }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-2">
+                            Authors
+                        </h5>
+                        <div class="authors-container card-text mb-2">
+                            {% if paper.authors.all|length >= 4 %}
+                                <div class="short">
+                                    {% include 'core/partials/_author_list.html' with authors=paper.authors.all|slice:":4" %}
+                                </div>
+                                <div class="long" style="display: none;">
+                                    {% include 'core/partials/_author_list.html' with authors=paper.authors.all %}
+                                </div>
+                            {% else %}
+                                {% include 'core/partials/_author_list.html' with authors=paper.authors.all %}
+                            {% endif %}
+                        </div>
+                        {% if paper.authors.all|length >= 4 %}
+                            <div class="authors-controls text-center">
+                                <a href="#"
+                                   class="btn w-50 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-authors show"
+                                   style="font-size: 10px; {% if extended %} display: none; {% endif %}">
+                                    <i class='fas fa-arrow-circle-down'></i> show all authors
+                                </a>
+                                <a href="#"
+                                   class="btn w-50 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-authors hide"
+                                   style="font-size: 10px; display: none;">
+                                    <i class='fas fa-arrow-circle-up'></i> hide all authors
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paper-container" class="container mt-4">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12 mt-5" style="margin-bottom: -20px">
+            <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-2">Similar Paper</h3>
+            <h3 class="text-muted d-md-inline-block">Similar Paper</h3>
+        </div>
+        {% for current_paper in similar_papers %}
+            <div class="my-5">
+                {% include 'core/partials/_paper_card.html' with html=True paper=current_paper %}
+            </div>
+        {% empty %}
+            <div class="my-5 text-center font-weight-bold">No similar papers found</div>
+        {% endfor %}
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        $(document).ready(function () {
+            $(document).on('click', '.toggle-authors', function (e) {
+                e.preventDefault();
+                if ($(this).hasClass('hide')) {
+                    console.log($(this).closest('.authors-container'));
+                    console.log($(this).closest('.long'));
+                    $('.authors-container').find('.long').hide();
+                    $('.toggle-authors.show').show();
+                    $(this).hide();
+                } else {
+                    $('.authors-container').find('.long').fadeIn();
+                    $('.toggle-authors.hide').show();
+                    $(this).hide();
+                }
+            });
+        })
+    </script>
+
+{% endblock %}
+
+{% block css %}
+{% endblock %}

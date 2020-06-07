@@ -10,4 +10,5 @@ urlpatterns = [
     path('about', about, name='about'),
     path('imprint/', imprint, name='imprint'),
     path('privacy/', privacy, name='privacy'),
+    path('paper/<path:doi>', paper, name='paper'),
 ]
