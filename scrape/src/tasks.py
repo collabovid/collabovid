@@ -5,3 +5,4 @@ from src.task_check_covid_related import CheckCovidRelatedTask
 from src.task_pdf_image_download import PdfImageDownloadTask
 from src.task_data_import import ImportDataTask
 from src.task_data_export import ExportDataTask
+from src.task_elsevier_update import ElsevierUpdateTask, ElsevierNewArticlesTask

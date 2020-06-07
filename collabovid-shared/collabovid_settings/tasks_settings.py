@@ -3,6 +3,7 @@ import os
 TASK_LOGGING_DB_FLUSH_SECONDS = int(os.getenv("TASK_LOGGING_DB_FLUSH_SECONDS", "20"))
 TASK_LAUNCHER_LOCAL = False
 SEARCH_MODELS_HOST_PATH = os.getenv('SEARCH_MODELS_HOST_PATH', '/.docker/collabovid-data/models')
+SCRAPE_DOWNLOADS_HOST_PATH = os.getenv('SCRAPE_DOWNLOADS_HOST_PATH', '/.docker/collabovid-data/downloads')
 
 TASK_IMAGE_PULL_POLICY = os.getenv("TASK_IMAGE_PULL_POLICY", "Always")
 TASK_DELETE_SUCCESSFUL_PODS = False

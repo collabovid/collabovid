@@ -38,6 +38,10 @@ class DataError(UpdateException):
     pass
 
 
+class NotCovidRelatedError(UpdateException):
+    pass
+
+
 class ArticleDataPoint(object):
     def __init__(self):
         self._pdf_extractor = None
@@ -101,6 +105,10 @@ class ArticleDataPoint(object):
     def journal(self):
         return None
 
+    @property
+    def update_timestamp(self):
+        return None
+
     @staticmethod
     def _update_pdf_data(db_article, extract_image=True, extract_content=True):
         if not extract_image and not extract_content:
@@ -148,8 +156,8 @@ class ArticleDataPoint(object):
         with transaction.atomic():
             try:
                 db_article = Paper.objects.get(doi=doi)
-                if db_article.data_source_value and DataSource(db_article.data_source_value).priority < self.data_source.priority:
-                    raise DifferentDataSourceError(f"Article already tracked by {db_article.data_source_value.name}")
+                if DataSource.prioritize_first(db_article.data_source_value, self.data_source):
+                    raise DifferentDataSourceError(f"Article already tracked by {DataSource(db_article.data_source_value).name}")
                 elif not update_existing and DataSource(db_article.data_source_value).priority == self.data_source.priority:
                     raise SkipArticle("Article already in database")
                 created = False
@@ -160,12 +168,16 @@ class ArticleDataPoint(object):
             db_article.title = title
             db_article.abstract = abstract
             db_article.data_source_value = self.data_source
+            db_article.published_at = published_at
+
+            db_article.covid_related = covid_related(db_article=db_article)
+            if self.data_source.check_covid_related and not db_article.covid_related:
+                raise NotCovidRelatedError("Article not covid related.")
 
             db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
             if self.paperhost_url:
                 db_article.host.url = self.paperhost_url
 
-            db_article.published_at = published_at
             db_article.url = self.url
             db_article.pdf_url = self.pdf_url
             db_article.is_preprint = self.is_preprint
@@ -202,8 +214,10 @@ class ArticleDataPoint(object):
             if pdf_content or pdf_image:
                 self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
-            db_article.covid_related = covid_related(db_article=db_article)
+
             db_article.last_scrape = timezone.now()
+
+            db_article.categories.clear()
             db_article.save()
         return db_article, created
 
@@ -244,6 +258,9 @@ class DataUpdater(object):
         except SkipArticle as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
+        except NotCovidRelatedError as ex:
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.n_skipped += 1
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_already_tracked += 1
@@ -268,6 +285,11 @@ class DataUpdater(object):
                 self.log(f"Progress: {i}/{total}")
             self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image, update_existing=False)
 
+
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
+
         end = timer()
         elapsed_time = timedelta(seconds=end - start)
         self.log(f"Time (total): {elapsed_time}")
@@ -278,6 +300,8 @@ class DataUpdater(object):
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")
 
     def update_existing_data(self, count=None, pdf_content=True, pdf_image=True):
         self.n_errors = 0
@@ -299,7 +323,13 @@ class DataUpdater(object):
         for article in filtered_articles:
             data_point = self._get_data_point(doi=article.doi)
             if data_point:
+                if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+                    continue
                 self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content, pdf_image=pdf_image)
+
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
 
         end = timer()
         elapsed_time = timedelta(seconds=end - start)
@@ -311,3 +341,5 @@ class DataUpdater(object):
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")
