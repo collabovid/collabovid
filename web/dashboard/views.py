@@ -18,19 +18,19 @@ import os
 @staff_member_required
 def tasks(request):
     tasks = Task.objects.all().order_by('-started_at')
-    return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks})
+    return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks, 'debug': settings.DEBUG})
 
 
 @staff_member_required
 def task_detail(request, id):
     task = Task.objects.get(pk=id)
-    return render(request, 'dashboard/tasks/task_detail.html', {'task': task})
+    return render(request, 'dashboard/tasks/task_detail.html', {'task': task, 'debug': settings.DEBUG})
 
 
 @staff_member_required
 def select_task(request):
     if request.method == 'GET':
-        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS})
+        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS, 'debug': settings.DEBUG})
 
     return HttpResponseNotFound()
 
@@ -42,7 +42,7 @@ def create_task(request, task_id):
     if service and task_definition:
         if request.method == 'GET':
             return render(request, 'dashboard/tasks/task_create.html',
-                          {'task_id': task_id, 'definition': task_definition})
+                          {'task_id': task_id, 'definition': task_definition, 'debug': settings.DEBUG})
         elif request.method == 'POST':
 
             task_launcher = get_task_launcher(service)
@@ -108,7 +108,7 @@ def delete_all_finished(request):
 # def data_sanitizing(request):
 #     if request.method == "GET":
 #         papers = Paper.objects.filter(paper_state=PaperState.UNKNOWN)[:100]
-#         return render(request, "dashboard/scrape/paper_table.html", {"papers": papers})
+#         return render(request, "dashboard/scrape/paper_table.html", {"papers": papers, 'debug': settings.DEBUG})
 #     elif request.method == "POST":
 #         doi = request.POST.get('doi', '')
 #         action = request.POST.get('action', '')
@@ -146,7 +146,7 @@ def data_import(request):
 
     sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
 
-    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives})
+    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives, 'debug': settings.DEBUG})
 
 
 @staff_member_required

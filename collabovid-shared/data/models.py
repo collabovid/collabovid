@@ -44,11 +44,14 @@ class DataSource(models.IntegerChoices):
             return True
 
     @staticmethod
-    def prioritize_first(first: Union[int, None], second: Union[int, None]):
-        if not second:
-            return True
-        if not first:
-            return False
+    def compare(first: Union[int, None], second: Union[int, None]):
+        if second is None and first is None:
+            return 0
+        elif second is None:
+            return 1
+        elif first is None:
+            return -1
+
         return DataSource(first).priority < DataSource(second).priority
 
 

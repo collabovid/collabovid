@@ -82,13 +82,13 @@ class DataImport:
                 update = True
                 try:
                     db_paper = Paper.objects.get(doi=paper["doi"])
-                    if DataSource.prioritize_first(db_paper.data_source_value, paper["datasource_id"]):
+                    if DataSource.compare(db_paper.data_source_value, paper["datasource_id"]) >= 0:
                         update = False
                 except Paper.DoesNotExist:
                     db_paper = Paper(doi=paper["doi"])
 
                 if not paper["published_at"]:
-                    print(
+                    log(
                         f"Not importing {paper['doi']} because the date is missing."
                     )
                     continue
