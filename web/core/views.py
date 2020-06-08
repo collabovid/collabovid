@@ -111,9 +111,6 @@ def search(request):
 
         search_query = request.GET.get("search", "").strip()
 
-        if len(selected_categories) == 0:
-            selected_categories = [category.pk for category in categories]
-
         form = {
             "start_date": start_date,
             "end_date": end_date,
