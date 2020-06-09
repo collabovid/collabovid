@@ -149,10 +149,11 @@ class Paper(models.Model):
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
 
-    def add_preview_image(self, pillow_image):
+    def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
         self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None))
+                                                               'image/jpeg', pillow_image.tell, None),
+                                save=save)
 
     @staticmethod
     def max_length(field: str):
