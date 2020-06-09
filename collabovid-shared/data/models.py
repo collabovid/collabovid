@@ -110,6 +110,38 @@ class PaperData(models.Model):
     content = models.TextField(null=True, default=None)
 
 
+class VerificationState(models.IntegerChoices):
+    REJECTED = 0, gettext_lazy('rejected')
+    AUTOMATICALLY_REJECTED = 1, gettext_lazy('rejected automatically')
+    UNKNOWN = 2, gettext_lazy('unknown')
+    AUTOMATICALLY_ACCEPTED = 3, gettext_lazy('added automatically')
+    ACCEPTED = 4, gettext_lazy('accepted')
+
+
+class GeoLocation(models.Model):
+    name = models.CharField(max_length=100, unique=True, null=False)
+    latitude = models.FloatField(null=False)
+    longitude = models.FloatField(null=False)
+    count = models.IntegerField(default=0)
+
+
+class GeoCountry(GeoLocation):
+    alpha_2 = models.CharField(max_length=2)
+
+    @property
+    def papers(self):
+        return super(GeoCountry, self).papers.all() | Paper.objects.filter(locations__in=self.cities.all())
+
+
+class GeoCity(GeoLocation):
+    country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
+
+
+class GeoAlias(models.Model):
+    name = models.CharField(max_length=100, unique=True, null=False)
+    geolocation = models.ForeignKey(GeoLocation, related_name="aliases", on_delete=models.CASCADE)
+
+
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
@@ -150,6 +182,9 @@ class Paper(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
 
+    locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+
+
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
@@ -162,6 +197,12 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class GeoLocationMembership(models.Model):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
+    state = models.IntegerField(choices=VerificationState.choices)
 
 
 class CategoryMembership(models.Model):

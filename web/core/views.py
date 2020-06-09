@@ -1,10 +1,13 @@
+from datetime import timedelta
 from json import JSONDecodeError
+
+from timeit import default_timer as timer
 
 from django.db.models import Q, Sum
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Topic, Author, Category, Journal
+from data.models import GeoCity, GeoCountry, Paper, Topic, Author, Category, Journal
 from statistics import PaperStatistics, CategoryStatistics
 
 import requests
@@ -186,6 +189,20 @@ def search(request):
 
             return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                           'show_score': False, })
+
+
+def geo(request):
+    start = timer()
+    end = timer()
+    print(timedelta(seconds=end - start))
+    return render(
+        request,
+        "core/map.html",
+        {
+            "countries": GeoCountry.objects.all(),
+            "cities": GeoCity.objects.all(),
+        }
+    )
 
 
 def authors_to_json(authors):
