@@ -198,6 +198,7 @@ class DataImport:
 
         Author.cleanup()
         Journal.cleanup()
+        PaperData.cleanup()
 
         end = timer()
 

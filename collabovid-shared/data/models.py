@@ -104,6 +104,12 @@ class PaperData(models.Model):
     """
     content = models.TextField(null=True, default=None)
 
+    @staticmethod
+    def cleanup():
+        used_paper_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
+        deleted, _ = PaperData.objects.exclude(id__in=used_paper_ids).delete()
+        return deleted
+
 
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
