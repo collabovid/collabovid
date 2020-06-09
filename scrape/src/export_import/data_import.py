@@ -20,6 +20,34 @@ from PIL import Image
 
 
 class DataImport:
+
+    @staticmethod
+    def _compute_updatable_papers(papers, log=print):
+        """
+        Computes which of the papers from the import will be touched for (re-)creation.
+        Returns a list of dicts of size len(papers). Dict has format {db_paper, will_update}.
+        db_paper=None indicates an error (possibly with the publication date), so the paper won't be created/updated.
+        """
+        paper_informations = []
+        for i, paper in enumerate(papers):
+            if not paper["published_at"]:
+                log(f"Not importing {paper['doi']} because the date is missing.")
+                paper_informations.append({"db_paper": None, "will_update": False})
+                continue
+            try:
+                db_paper = Paper.objects.get(doi=paper["doi"])
+                if DataSource.compare(db_paper.data_source_value, paper["datasource_id"]) >= 0:
+                    paper_informations.append({"db_paper": db_paper, "will_update": False})
+                    continue
+                else:
+                    # delete db_paper and recreate -> easier to handle using bulk create
+                    db_paper.delete()
+                    db_paper = Paper(doi=paper["doi"])
+            except Paper.DoesNotExist:
+                db_paper = Paper(doi=paper["doi"])
+            paper_informations.append({"db_paper": db_paper, "will_update": True})
+        return paper_informations
+
     @staticmethod
     def import_data(filepath, log=print):
         """Imports database data from .tar.gz archive to database."""
@@ -83,10 +111,12 @@ class DataImport:
                     category_mapping[identifier] = db_category
                 Category.objects.bulk_create(categories_to_create)
 
-            paperdata_mapping = defaultdict()
+            paper_informations = DataImport._compute_updatable_papers(data["papers"], log)
+
+            paperdata_mapping = {}
             paperdata_to_create = []
-            for i, paper in enumerate(data["papers"]):
-                if not paper["published_at"]:
+            for i, (paper, paper_info) in enumerate(zip(data["papers"], paper_informations)):
+                if not (paper_info["db_paper"] and paper_info["will_update"]):
                     continue
                 if paper["content"] and paper["content"] != "None":
                     db_paperdata = PaperData(content=paper["content"])
@@ -102,27 +132,12 @@ class DataImport:
             db_author_mapping = {}  # maps tuple (first name, last name) to dict:
                                     # {"db_author": db_author, "created": True / False}
 
-            for i, paper in enumerate(data["papers"]):
-                if i % 1000 == 0:
-                    log(i)
-
-                if not paper["published_at"]:
-                    log(f"Not importing {paper['doi']} because the date is missing.")
+            for i, (paper, paper_info) in enumerate(zip(data["papers"], paper_informations)):
+                db_paper = paper_info["db_paper"]
+                if not db_paper:
                     continue
 
-                update = True
-                try:
-                    db_paper = Paper.objects.get(doi=paper["doi"])
-                    if DataSource.compare(db_paper.data_source_value, paper["datasource_id"]) >= 0:
-                        update = False
-                    else:
-                        # delete db_paper and recreate -> easier to handle using bulk create
-                        db_paper.delete()
-                        db_paper = Paper(doi=paper["doi"])
-                except Paper.DoesNotExist:
-                    db_paper = Paper(doi=paper["doi"])
-
-                if update:
+                if paper_info["will_update"]:
                     db_paper.title = paper["title"][:PAPER_TITLE_MAX_LEN]
                     db_paper.abstract = paper["abstract"]
                     db_paper.data_source_value = paper["datasource_id"]
@@ -196,6 +211,7 @@ class DataImport:
                  for author in authors]
             )
 
+        log("Starting cleanup")
         Author.cleanup()
         Journal.cleanup()
         PaperData.cleanup()
