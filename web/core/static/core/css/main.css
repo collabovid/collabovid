@@ -455,3 +455,12 @@ div.paper-card-badge {
 label.nav-link {
     cursor: pointer;
 }
+
+.row.display-flex {
+  display: flex;
+  flex-wrap: wrap;
+}
+.row.display-flex > [class*='col-'] {
+  display: flex;
+  flex-direction: column;
+}

@@ -19,7 +19,7 @@
 
                         Our objective is to develop an easy to use interface to access, sort and classify the huge
                         amount of articles about the
-                        coronavirus.
+                        Coronavirus.
 
                     </p>
                 </div>
@@ -48,11 +48,15 @@
                         <hr>
                         <div class="card-body mt-0 pt-0 px-4 pb-4">
                             <ul>
-                                <li>List and access all available articles</li>
+                                <li>List and access published articles</li>
                                 <li>Sort and filter articles by publishing date, authors name, category, journal, title and
-                                    keywords
+                                    content
                                 </li>
-                                <li>Get a list of recommended papers related to a specific question
+                                <li>
+                                    Get a list of recommended papers related to a specific question
+                                </li>
+                                <li>
+                                    Classification of papers into one or more predefined categories
                                 </li>
                             </ul>
                         </div>
@@ -60,15 +64,17 @@
 
                     <div class="card-block shadow bg-white rounded mt-4">
 
-                        <h3 class="card-title px-4 pt-4 pb-0">Is this website ready-to-use?</h3>
+                        <h3 class="card-title px-4 pt-4 pb-0">Is Collabovid ready-to-use?</h3>
                         <hr>
                         <div class="card-body mt-0 pt-0">
                             This website was created during the
-                            <a href="https://covid-global-hackathon.devpost.com">COVID-19 Global Hackathon</a>
-                            and is still under development. We are always looking for feedback to improve the site.
+                            <a href="https://covid-global-hackathon.devpost.com">COVID-19 Global Hackathon</a> at the end
+                            of March 2020. Since then, Collabovid is updated and improved very frequently.
+                            Please note that the website
+                            is still under development. We are always looking for feedback to improve the site.
                             We kindly ask you to fill out our <a
-                                href="https://collabovid-feedback.limequery.org/317471?lang=en">feedback survey</a>
-                            or write an <a href="mailto:y.lieder@tu-bs.de?Subject=Collabovid%20Feedback">email</a>.
+                                href="https://collabovid-feedback.limequery.org/321314?lang=en">feedback survey</a>
+                            or write an <a href="mailto:info@collabovid.org?Subject=Collabovid%20Feedback">email</a>.
                         </div>
 
                     </div>
@@ -80,15 +86,17 @@
                         <div class="card-body mt-0 pt-0">
                             We use natural language processing techniques
                             to find correlations between a given query and the content of a paper. For semantic
-                            analysis,
-                            we use a combination of a pretrained BERT <a
-                                href="https://github.com/UKPLab/sentence-transformers">model</a>
-                            and a LDA model which is based on the great work from
-                            <a href="https://www.kaggle.com/danielwolffram/topic-modeling-finding-related-articles">Daniel
-                                Wolffram</a>
-                            during the <a
-                                href="https://www.kaggle.com/allen-institute-for-ai/CORD-19-research-challenge">COVID-19
-                            Open Research Dataset Challenge (CORD-19)</a>.
+                            analysis, we
+                            make use of a pretrained BERT
+                            <a href="https://github.com/UKPLab/sentence-transformers">model</a>.
+                            The category
+                            assignment is computed by a machine learning algorithm. The model was trained with
+                            an existing dataset from
+                            <a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. LitCovid
+                            is a curated literature hub for tracking scientific information about SARS-CoV-2.
+                            Collabovid is an open source project that is licenced under GNU General Public
+                            License v3.0. The source code can be found at
+                            <a href="https://github.com/michip/collabovid">GitHub</a>.
                         </div>
 
                     </div>
@@ -114,6 +122,9 @@
                                 <li>
                                     Integrate new data sources
                                 </li>
+                                <li>
+                                    Improve the search engine
+                                </li>
                             </ul>
                         </div>
                     </div>
@@ -136,8 +147,9 @@
                                     All sources are updated several times a day.
                                 </li>
 
-                                <li>The categories are taken from
-                                    <a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. We also use their dataset to train our machine learning classifier.
+                                <li>
+                                    The category assignment model was trained on the
+                                    <a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a> dataset.
                                 </li>
                             </ul>
                         </div>

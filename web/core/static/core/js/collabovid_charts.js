@@ -186,6 +186,7 @@ window.chartColors = {
 
     $.fn.paperHostDistribution = function (options) {
 
+
         let plugin = this;
 
         plugin.init = function () {
@@ -199,12 +200,31 @@ window.chartColors = {
         let hosts = [];
         let data = [];
 
-        let possible_colors = [chartColors.orange, chartColors.green, chartColors.blue, chartColors.yellow, chartColors.red];
+        let possible_colors = [chartColors.yellow, chartColors.green, chartColors.blue, chartColors.red, chartColors.limegreen];
 
         Object.keys(plugin.settings.plot_data).forEach(function (key) {
             hosts.push(key);
             data.push(plugin.settings.plot_data[key]);
         });
+
+        // Sorting by host name
+        //1) combine the arrays:
+        var list = [];
+        for (var j = 0; j < hosts.length; j++)
+            list.push({'host': hosts[j], 'count': data[j]});
+
+        //2) sort:
+        list.sort(function (a, b) {
+            return ((a.host.toLowerCase() < b.host.toLowerCase()) ? -1 : ((a.host === b.host) ? 0 : 1));
+            //Sort could be modified to, for example, sort on the age
+            // if the name is the same.
+        });
+
+        //3) separate them back out:
+        for (var k = 0; k < list.length; k++) {
+            hosts[k] = list[k].host;
+            data[k] = list[k].count;
+        }
 
         return new Chart(plugin, {
             type: "doughnut",
@@ -315,6 +335,66 @@ window.chartColors = {
 
                         }
                     }
+                }
+            }
+        );
+
+
+    }
+}(jQuery));
+
+(function ($) {
+
+    $.fn.paperCategoryDistribution = function (options) {
+
+        let plugin = this;
+
+        plugin.init = function () {
+            plugin.settings = $.extend({
+                plot_data: null,
+            }, options);
+        };
+
+        plugin.init();
+
+        let categories = [];
+        let data = [];
+        let backgroundColors = [];
+
+        Object.keys(plugin.settings.plot_data).forEach(function (key) {
+            categories.push(key);
+            data.push(plugin.settings.plot_data[key]['count']);
+            backgroundColors.push(plugin.settings.plot_data[key]['color']);
+        });
+
+        return new Chart(plugin, {
+                type: "horizontalBar",
+                data: {
+                    labels: categories,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Number of papers'
+                            },
+                            ticks: {
+                                beginAtZero: true
+                            },
+                        }],
+                        yAxes: [{}]
+                    },
+                    tooltips: {}
                 }
             }
         );

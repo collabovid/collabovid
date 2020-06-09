@@ -7,6 +7,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from data.models import Paper, Topic, Author, Category, Journal
 from statistics import PaperStatistics, CategoryStatistics
 
+from django.utils.timezone import datetime
 import requests
 
 from django.conf import settings
@@ -25,9 +26,14 @@ PAPER_PAGE_COUNT = 10
 def home(request):
     if request.method == "GET":
         statistics = PaperStatistics(Paper.objects.all())
-        most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
+
+        latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
+
+        most_recent_papers = Paper.objects.filter(published_at=latest_date).order_by('-created_at')
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_papers': most_recent_papers})
+                                                  'most_recent_papers': most_recent_papers,
+                                                  'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
+                                                  'most_recent_paper_date': latest_date})
 
 
 def about(request):
