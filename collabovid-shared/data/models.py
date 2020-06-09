@@ -70,12 +70,8 @@ class Journal(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for journal in list(Journal.objects.all()):
-            if journal.papers.count() == 0:
-                journal.delete()
-                n += 1
-        return n
+        deleted, _ = Journal.objects.filter(papers=None).delete()
+        return deleted
 
 
 class Author(models.Model):
@@ -88,12 +84,8 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for author in list(Author.objects.all()):
-            if author.publications.count() == 0:
-                author.delete()
-                n += 1
-        return n
+        deleted, _ = Author.objects.filter(publications=None).delete()
+        return deleted
 
 
 class Category(models.Model):
