@@ -124,6 +124,9 @@ class GeoLocation(models.Model):
     longitude = models.FloatField(null=False)
     count = models.IntegerField(default=0)
 
+    def __eq__(self, other):
+        return isinstance(other, GeoLocation) and self.pk == other.pk
+
 
 class GeoCountry(GeoLocation):
     alpha_2 = models.CharField(max_length=2)
@@ -135,11 +138,6 @@ class GeoCountry(GeoLocation):
 
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
-
-
-class GeoAlias(models.Model):
-    name = models.CharField(max_length=100, unique=True, null=False)
-    geolocation = models.ForeignKey(GeoLocation, related_name="aliases", on_delete=models.CASCADE)
 
 
 class Paper(models.Model):

@@ -55,6 +55,9 @@
                 <li class="nav-item {% if request.resolver_match.url_name == "category-overview" %}active{% endif %}">
                     <a class="nav-link" href="{% url "category-overview" %}">Categories</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "category-overview" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "geo" %}">Places</a>
+                </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
                     <a class="nav-link" href="{% url "about" %}">About</a>
                 </li>

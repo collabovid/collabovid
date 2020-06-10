@@ -1,9 +1,13 @@
 import itertools
 
-from data.models import GeoAlias, GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, Paper, VerificationState
+from django.conf import settings
+
+from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, Paper, VerificationState
 from src.geo.geo_parser import GeoParser
+from src.geo.country_data import CountryData
 from tasks.definitions import register_task, Runnable
 
+from termcolor import colored
 
 @register_task
 class GeoParserTask(Runnable):
@@ -17,7 +21,6 @@ class GeoParserTask(Runnable):
 
     def __init__(self, *args, **kwargs):
         super(GeoParserTask, self).__init__(*args, **kwargs)
-        self.force_recompute = False # TODO
 
     def update_counts(self):
         for location in itertools.chain(GeoCountry.objects.all(), GeoCity.objects.all()):
@@ -25,82 +28,74 @@ class GeoParserTask(Runnable):
             location.save()
 
     def run(self):
-        if self.force_recompute:
-            GeoLocationMembership.objects.exclude(state=VerificationState.ACCEPTED).delete()
-
-        geo = GeoParser(log=self.log)
-
         n_locations = 0
 
-        updated = False
-        for paper in Paper.objects.all():
-            locations = geo.parse(paper.title)
+        with GeoParser(log=self.log, db_path=f'{settings.RESOURCES_DIR}/geonames.sqlite3') as geo:
+            updated = False
+            for paper in Paper.objects.all():
+                locations, ignored_entities = geo.parse(paper.title, merge=True)
 
-            first = True
-            for location in locations:
-                if not location["certain"]:
-                    continue
+                first = True
+                for location, usage in locations:
+                    word = usage['word'].strip()
+                    if word == 'CT':
+                        # Ignore location CT, which refers in almost all cases to
+                        # "computed tomography" rather than Connecticut.
+                        continue
 
-                word = location["word"].strip()
-                if word == "CT":
-                    # Ignore location CT, which refers in almost all cases to "computed tomography" and not Connecticut.
-                    continue
+                    country_data = CountryData.get(location.country_code)
+                    db_country, country_created = GeoCountry.objects.get_or_create(
+                        name=country_data["name"],
+                        alpha_2=location.country_code,
+                        latitude=country_data["lat"],
+                        longitude=country_data["lon"],
+                    )
 
-                created = False
-                try:
-                    db_location = GeoAlias.objects.get(name=word).geolocation
-                except GeoAlias.DoesNotExist:
-                    name = location["geo"]["place_name"]
-                    try:
-                        db_location = GeoLocation.objects.get(name=name)
-                    except GeoLocation.DoesNotExist:
-                        alpha_2 = location["is_country"] if location["is_country"] else location["geo"]["country_code2"]
-                        country_data = GeoParser.get_country_data(alpha_2)
-
-                        country, created = GeoCountry.objects.get_or_create(
-                            name=country_data["name"],
-                            alpha_2=alpha_2,
-                            latitude=country_data["lat"],
-                            longitude=country_data["lon"],
-                        )
-
-                        if location["is_country"] is None:
+                    if location.feature_label.startswith('A.PCL'):
+                        db_location = db_country
+                        created = country_created
+                    else:
+                        try:
+                            db_location = GeoLocation.objects.get(name=location.name)
+                            created = False
+                        except GeoLocation.DoesNotExist:
                             db_location = GeoCity.objects.create(
-                                name=name,
-                                country=country,
-                                latitude=location["geo"]["lat"],
-                                longitude=location["geo"]["lon"],
+                                    name=location.name,
+                                    country=db_country,
+                                    latitude=location.latitude,
+                                    longitude=location.longitude,
                             )
                             created = True
-                        else:
-                            db_location = country
 
-                if db_location not in paper.locations.all():
-                    membership = GeoLocationMembership(
-                        paper=paper,
-                        location=db_location,
-                        state=VerificationState.AUTOMATICALLY_ACCEPTED,
-                    )
-                    membership.save()
-                    n_locations += 1
-                    updated = True
+                    if db_location not in paper.locations.all():
+                        membership = GeoLocationMembership(
+                            paper=paper,
+                            location=db_location,
+                            state=VerificationState.AUTOMATICALLY_ACCEPTED,
+                        )
+                        membership.save()
+                        n_locations += 1
+                        updated = True
+                        added = True
+                    else:
+                        added = False
 
-                if created:
-                    status = 'created'
-                elif updated:
-                    status = 'add'
-                else:
-                    status = 'exist'
+                    if first and (len(ignored_entities) > 0 or added or created):
+                        first = False
+                        self.log(paper.title)
 
-                if first:
-                    first = False
-                    self.log(paper.title)
-                self.log("\t{:7} {:30}, {:50}".format(
-                        status, word, db_location.name,
-                ))
-            if updated:
-                paper.save()
-                updated = False
+                        for ent in ignored_entities:
+                            self.log("\t[{:7}] {:30}".format(colored('ignored', 'red'), ent))
+
+                    if created or added:
+                        status = 'created' if created else 'added'
+                        self.log(
+                            "\t[{:7}] {:20} -> {}".format(colored(status, 'green'), word, db_location.name)
+                        )
+
+                if updated:
+                    paper.save()
+                    updated = False
 
         self.log(f"Found {n_locations} locations")
         self.log(f"Update counts")
