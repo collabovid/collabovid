@@ -10,7 +10,7 @@ from statistics import PaperStatistics, CategoryStatistics
 import requests
 
 from django.conf import settings
-from search.request_helper import SearchRequestHelper
+from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
@@ -29,15 +29,17 @@ def home(request):
         return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers})
 
+
 def paper(request, doi):
     current_paper = get_object_or_404(Paper, doi=doi)
-
-    similar_papers = Paper.objects.all()
+    similar_request = SimilarPaperRequestHelper(doi)
 
     return render(request, "core/paper.html", {
         "paper": current_paper,
-        "similar_papers": similar_papers[:10]
+        "similar_papers": similar_request.papers,
+        "error": similar_request.error
     })
+
 
 def about(request):
     paper_count = Paper.objects.count()
@@ -62,7 +64,6 @@ def privacy(request):
 
 
 def category_overview(request):
-
     category_statistics = [CategoryStatistics(category) for category in Category.objects.all()]
 
     return render(request, "core/categories_overview.html", {"category_statistics": category_statistics})

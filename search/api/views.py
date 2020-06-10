@@ -1,8 +1,10 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from src.search.search_engine import get_default_search_engine, SearchEngine
 from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing, CouldNotLoadPaperMatrix
+from data.models import Paper
 
 from threading import Thread
+
 
 def search(request):
     if request.method == "GET":
@@ -40,7 +42,6 @@ def search(request):
         elif article_type_string == 'preprints':
             article_type = SearchEngine.ARTICLE_TYPE_PREPRINTS
 
-
         search_engine = get_default_search_engine()
 
         search_result = search_engine.search(search_query, start_date=start_date,
@@ -49,6 +50,22 @@ def search(request):
                                              category_ids=categories, article_type=article_type)
 
         return JsonResponse(search_result)
+
+
+def similar(request):
+    """
+    Api method to retrieve the most similar paper given a doi.
+    :param request: Request containing the doi as a HTTP GET parameter
+    :return: json response with the list of papers and the corresponding similarity score
+    """
+    if request.method == "GET":
+        doi = request.GET.get('doi')
+        result = dict()
+        papers = Paper.objects.all()
+        for paper in papers[:20]:
+            result[paper.doi] = 0.7
+        return JsonResponse(result)
+    return HttpResponseBadRequest("Only Get is allowed here")
 
 
 def startup_probe(request):

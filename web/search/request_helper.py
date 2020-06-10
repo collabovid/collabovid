@@ -5,8 +5,6 @@ from data.models import Paper
 from django.core.paginator import Paginator
 from search.paginator import ScoreSortPaginator
 
-import json
-
 
 class SearchRequestHelper:
 
@@ -74,3 +72,41 @@ class SearchRequestHelper:
             logger = logging.getLogger(__name__)
             logger.warning("Unknown sorted by" + criterion)
         return paginator
+
+
+class SimilarPaperRequestHelper:
+
+    def __init__(self, doi):
+        logger = logging.getLogger(__name__)
+
+        self._response = None
+        self._error = False
+
+        try:
+            response = requests.get(settings.SEARCH_SERVICE_URL + '/similar', params={
+                'doi': doi,
+            })
+            response.raise_for_status()
+            self._response = response.json()
+        except requests.exceptions.Timeout:
+            logger.error("Similar Request Connection Timeout")
+            self._error = True
+        except requests.exceptions.HTTPError:
+            self._error = True
+        except requests.exceptions.RequestException as e:
+            logger.error("Some unknown request exception occured", e)
+            self._error = True
+
+        if self._response is None:
+            self._error = True
+        else:
+            print(self._response)
+            self._papers = Paper.objects.filter(pk__in=self._response.keys())
+
+    @property
+    def error(self):
+        return self._error
+
+    @property
+    def papers(self):
+        return self._papers
