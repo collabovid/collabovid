@@ -102,7 +102,7 @@
             </div>
 
             <div>
-                {% include "core/partials/_filter_box.html" with form=form load_default=True categories=categories result_container_id="paper-container" indicator_id="paper-loading-indicator" %}
+                {% include "core/partials/_filter_box.html" with form=form load_default=True categories=categories %}
             </div>
 
         </div>
@@ -117,11 +117,20 @@
         $(document).ready(function (e) {
 
             let form = $("#paper-search-form");
+            let indicator = $("#paper-loading-indicator");
+            let paper_container = $("#paper-container");
+            let pagination_container = $("#pagination-container");
+
+
+            let searchEngine = form.collabovidSearch({
+                indicator: indicator,
+                paper_container: paper_container,
+                pagination_container: pagination_container
+            });
 
 
             $("input[name=tab]").change(function (e) {
-
-                var label = $("label[for='" + $(this).attr('id') + "']");
+                let label = $("label[for='" + $(this).attr('id') + "']");
 
                 if (label.hasClass('disabled')) {
                     return;
@@ -129,11 +138,43 @@
 
                 $(".nav-search-types .nav-link.active").removeClass("active");
                 label.addClass("active");
-
                 form.submit();
             });
 
+            form.submit(function (e) {
+                e.preventDefault();
+
+                /**
+                 * We have three types of inputs:
+                 * data-no-url: These inputs will not be pushed to the url
+                 * data-url-manually: These inputs will not be pushed to the url automatically
+                 * other: Input will be submitted and pushed to url
+                 */
+
+                let submission_data = $(".search-form input[data-no-url!=true]").serialize();
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+
+                // Converting categories=x&categories=y to categories=x,y
+                let checked_categories = $('.search-form input[name=categories]:checked');
+                let categories = $('.search-form input[name=categories]');
+
+                if (checked_categories.length !== categories.length) {
+                    submission_data += "&categories=";
+                    submission_data += checked_categories.map(function () {
+                        return this.value;
+                    }).get().join(',');
+                }
+
+                // Full data must be submitted to the view. Submission data can be saved in the url.
+                let full_data = submission_data + "&" + no_url_submission_data;
+
+                searchEngine.searchQuery(full_data, 1, false, function () {
+                    $('.nav-search-types label.nav-link').addClass('disabled');
+                }, function () {
+                    $('.nav-search-types label.nav-link').removeClass('disabled');
+                    searchEngine.pushToUrl(submission_data);
+                });
+            });
         });
     </script>
-    {% include 'core/partials/_paper_card.html' with script=True html=False %}
 {% endblock %}
