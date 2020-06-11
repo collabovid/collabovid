@@ -294,13 +294,11 @@ div.filter-card {
 }
 
 @media (min-width: 1440px) {
-    .filter-toggle
-    {
+    .filter-toggle {
         display: none !important;
     }
 
-    div.filter-card
-    {
+    div.filter-card {
         display: block !important;
     }
 }
@@ -342,7 +340,7 @@ div.filter-card.collapsing {
 }
 
 .tagify__tag__removeBtn:hover {
-    background: #0b2e13!important;
+    background: #0b2e13 !important;
 }
 
 .tagify__tag:hover {
@@ -357,6 +355,7 @@ div.filter-card.collapsing {
         height: auto;
         background: none;
         margin-top: 3rem;
+        z-index: 0;
 
     }
 
@@ -393,58 +392,6 @@ div.score-helper {
     left: 4px;
 }
 
-
-div.stack-col {
-    overflow: hidden;
-}
-
-.stack {
-    padding: 0;
-    position: relative;
-    max-width: 100%;
-}
-
-.stack div {
-    width: 185px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    transition: all 1s;
-
-    -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
-    -moz-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
-    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.75);
-}
-
-.stack div:last-child {
-    position: relative;
-}
-
-.stack-fanout.active div:nth-child(3) {
-    -webkit-transform: rotate(-10deg) translateX(-35%) scale(0.8);
-    transform: rotate(-10deg) translateX(-35%) scale(0.8);
-}
-
-.stack-fanout.active div:nth-child(4) {
-    -webkit-transform: rotate(10deg) translateX(35%) scale(0.8);
-    transform: rotate(10deg) translateX(35%) scale(0.8);
-}
-
-.stack-fanout.active div:nth-child(5) {
-    -webkit-transform: scale(0.9);
-    transform: scale(0.9);
-}
-
-.stack-fanout.active div:first-child {
-    -webkit-transform: rotate(-20deg) translateX(-60%) scale(0.8);
-    transform: rotate(-20deg) translateX(-60%) scale(0.8);
-}
-
-.stack-fanout.active div:nth-child(2) {
-    -webkit-transform: rotate(20deg) translateX(60%) scale(0.8);
-    transform: rotate(20deg) translateX(60%) scale(0.8);
-}
-
 div.paper-card-badge {
     float: right;
     margin-top: -15px;
@@ -454,4 +401,14 @@ div.paper-card-badge {
 
 label.nav-link {
     cursor: pointer;
+}
+
+.row.display-flex {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.row.display-flex > [class*='col-'] {
+    display: flex;
+    flex-direction: column;
 }

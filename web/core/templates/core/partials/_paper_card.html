@@ -92,73 +92,91 @@
                     </h6>
 
                     {% with paper|abstract_preview_size as preview_size %}
+                        {% with paper|abstract_preview_size_mobile as mobile_preview_size %}
 
-                        <div class="abstract-container card-text text-justify">
-                            <span style="font-size: 0.8em">
-                                {% if not extended and paper.abstract|length >= preview_size %}
-                                    <span class="short">{{ paper|preview_slice }}</span><span
-                                        class="dots">...</span><span
-                                        class="long"
-                                        style="display: none;">{{ paper|full_text_slice }}</span>
-                                {% else %}
-                                    <span class="short">{{ paper.abstract }}</span>
-                                {% endif %}
-                            </span>
+                            <div class="abstract-container card-text text-justify">
 
-                            <div class="mt-1 text-muted">
+                                <!-- Mobile version of the abstract with less preview size. -->
+                                <span class="d-md-none d-inline" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= mobile_preview_size %}
+                                        <span class="short">{{ paper|preview_slice:True }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice:True }}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract }}</span>
+                                    {% endif %}
+                                </span>
 
-                                <div class="row">
+                                <!-- Desktop version of the abstract with more preview size. -->
+                                <span class="d-md-inline d-none" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= preview_size %}
+                                        <span class="short">{{ paper|preview_slice }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice }}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract }}</span>
+                                    {% endif %}
+                                </span>
 
-                                    <div class="col-4 text-left small">
-                                        {% for category in paper.categories.all %}
-                                            <span class="badge badge-pill text-light"
-                                                  style="background-color: {{ category.color }};">
+                                <div class="mt-1 text-muted">
+
+                                    <div class="row">
+
+                                        <div class="col-4 text-left small">
+                                            {% for category in paper.categories.all %}
+                                                <span class="badge badge-pill text-light"
+                                                      style="background-color: {{ category.color }};">
                                                 {{ category.name }}
                                             </span>
-                                        {% endfor %}
+                                            {% endfor %}
 
-                                        {% for location in paper.locations.all %}
+                                            {% for location in paper.locations.all %}
                                             <span class="badge badge-pill text-light"
                                                   style="background-color:#9E9E9E;">
                                                 <i class="fa fa-map-marker"></i>
                                                 {{ location.displayname }}
                                             </span>
                                         {% endfor %}
-                                    </div>
+                                        </div>
 
-                                    <div class="col-8 text-right small">
+                                        <div class="col-8 text-right small">
 
-                                        {% if paper.abstract|length >= preview_size %}
-                                            <span class="abstract-controls">
-                                                <a href="#" class="toggle-description show"
-                                                   style="{% if extended %} display: none; {% endif %}">
-                                                    Expand the abstract
+                                            {% if paper.abstract|length >= mobile_preview_size %}
+                                                <span class="abstract-controls
+                                                {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
+                                                    <a href="#" class="toggle-description show"
+                                                       style="{% if extended %} display: none; {% endif %}">
+                                                        Expand the abstract
+                                                    </a>
+
+                                                    <a href="#" class="toggle-description hide"
+                                                       style="{% if not extended %} display: none; {% endif %}">
+                                                        Hide the full abstract
+                                                    </a>
+                                                </span>
+                                            {% endif %}
+
+                                            {% if paper.abstract|length >= preview_size and paper.pdf_url %}
+                                                |
+                                            {% endif %}
+
+                                            {% if paper.pdf_url %}
+                                                <a href="{{ paper.pdf_url }}">
+                                                    Read the full text
                                                 </a>
+                                            {% endif %}
+                                        </div>
 
-                                                <a href="#" class="toggle-description hide"
-                                                   style="{% if not extended %} display: none; {% endif %}">
-                                                    Hide the full abstract
-                                                </a>
-                                            </span>
-                                        {% endif %}
-
-                                        {% if paper.abstract|length >= preview_size and paper.pdf_url %}
-                                            |
-                                        {% endif %}
-
-                                        {% if paper.pdf_url %}
-                                            <a href="{{ paper.pdf_url }}">
-                                                Read the full text
-                                            </a>
-                                        {% endif %}
                                     </div>
 
                                 </div>
-
                             </div>
-                        </div>
 
+                        {% endwith %}
                     {% endwith %}
+
 
                 </div>
             </div>

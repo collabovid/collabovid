@@ -49,10 +49,13 @@ class PaperStatistics:
     @property
     def category_data(self):
         if not self._category_data:
-            self._category_data = json.dumps(
-                {category.name: self._papers.filter(category=category).count() for category in Category.objects.all() if
-                 self._papers.filter(category=category).count() > 0},
-                cls=DjangoJSONEncoder)
+            self._category_data = json.dumps({
+                category.name: {
+                    'count': self._papers.filter(categories=category).count(),
+                    'color': category.color
+                }
+                for category in Category.objects.all().order_by('-pk')
+            }, cls=DjangoJSONEncoder)
 
         return self._category_data
 

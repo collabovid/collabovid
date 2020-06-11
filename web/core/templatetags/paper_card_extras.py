@@ -34,15 +34,22 @@ def edit_object_link(user, object):
 
 
 @register.filter
+def abstract_preview_size_mobile(paper):
+    return 150
+
+
+@register.filter
 def abstract_preview_size(paper):
     return 420 if paper.preview_image and len(paper.preview_image) > 0 else 900
 
 
 @register.filter
-def preview_slice(paper):
-    return paper.abstract[:abstract_preview_size(paper)-SLICE_DIFFERENCE]
+def preview_slice(paper, mobile=False):
+    slice_size_func = abstract_preview_size_mobile if mobile else abstract_preview_size
+    return paper.abstract[:slice_size_func(paper)-SLICE_DIFFERENCE]
 
 
 @register.filter
-def full_text_slice(paper):
-    return paper.abstract[abstract_preview_size(paper)-SLICE_DIFFERENCE:]
+def full_text_slice(paper, mobile=False):
+    slice_size_func = abstract_preview_size_mobile if mobile else abstract_preview_size
+    return paper.abstract[slice_size_func(paper)-SLICE_DIFFERENCE:]

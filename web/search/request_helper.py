@@ -5,9 +5,6 @@ from data.models import Paper
 from django.core.paginator import Paginator
 from search.paginator import ScoreSortPaginator
 
-import json
-
-
 class SearchRequestHelper:
 
     def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, categories,
@@ -38,8 +35,9 @@ class SearchRequestHelper:
             self._error = True
         except requests.exceptions.HTTPError:
             self._error = True
-        except requests.exceptions.RequestException as e:
-            logger.error("Some unknown request exception occured", e)
+            logger.error("Http Error occured")
+        except requests.exceptions.RequestException:
+            logger.error("Some unknown request exception occured")
             self._error = True
 
         if self._response is None:

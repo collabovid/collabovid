@@ -44,11 +44,14 @@ class DataSource(models.IntegerChoices):
             return True
 
     @staticmethod
-    def prioritize_first(first: Union[int, None], second: Union[int, None]):
-        if not second:
-            return True
-        if not first:
-            return False
+    def compare(first: Union[int, None], second: Union[int, None]):
+        if second is None and first is None:
+            return 0
+        elif second is None:
+            return 1
+        elif first is None:
+            return -1
+
         return DataSource(first).priority < DataSource(second).priority
 
 
@@ -67,12 +70,8 @@ class Journal(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for journal in list(Journal.objects.all()):
-            if journal.papers.count() == 0:
-                journal.delete()
-                n += 1
-        return n
+        deleted, _ = Journal.objects.filter(papers=None).delete()
+        return deleted
 
 
 class Author(models.Model):
@@ -85,12 +84,8 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for author in list(Author.objects.all()):
-            if author.publications.count() == 0:
-                author.delete()
-                n += 1
-        return n
+        deleted, _ = Author.objects.filter(publications=None).delete()
+        return deleted
 
 
 class Category(models.Model):
@@ -108,6 +103,12 @@ class PaperData(models.Model):
     Model to store large data which should not be loaded on each select on a regular Paper
     """
     content = models.TextField(null=True, default=None)
+
+    @staticmethod
+    def cleanup():
+        used_paper_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
+        deleted, _ = PaperData.objects.exclude(id__in=used_paper_ids).delete()
+        return deleted
 
 
 class VerificationState(models.IntegerChoices):
@@ -192,10 +193,11 @@ class Paper(models.Model):
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
 
-    def add_preview_image(self, pillow_image):
+    def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
         self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None))
+                                                               'image/jpeg', pillow_image.tell, None),
+                                save=save)
 
     @staticmethod
     def max_length(field: str):

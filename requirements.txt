@@ -1,0 +1,7 @@
+wheel
+-e cli
+-e collabovid-shared
+-e collabovid-store
+-r web/requirements.txt
+-r scrape/requirements.txt
+-r search-requirements.txt
