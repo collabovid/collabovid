@@ -9,6 +9,7 @@ from tasks.definitions import register_task, Runnable
 
 from termcolor import colored
 
+
 @register_task
 class GeoParserTask(Runnable):
     @staticmethod
@@ -21,11 +22,6 @@ class GeoParserTask(Runnable):
 
     def __init__(self, *args, **kwargs):
         super(GeoParserTask, self).__init__(*args, **kwargs)
-
-    def update_counts(self):
-        for location in itertools.chain(GeoCountry.objects.all(), GeoCity.objects.all()):
-            location.count = location.papers.count()
-            location.save()
 
     def run(self):
         n_locations = 0
@@ -99,5 +95,3 @@ class GeoParserTask(Runnable):
                     updated = False
 
         self.log(f"Found {n_locations} locations")
-        self.log(f"Update counts")
-        self.update_counts()

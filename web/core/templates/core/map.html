@@ -47,11 +47,11 @@
             let cities = JSON.parse("{{ cities|escapejs }}");
 
             let city_count = [];
-            let city_markers = []
+            let city_markers = [];
             $.each(cities, function (index, city) {
-                city_count.push(city.count)
-                city_markers.push({latLng: [city.lat, city.lon], name: city.name})
-            })
+                city_count.push(city.count);
+                city_markers.push({latLng: [city.lat, city.lon], name: city.name});
+            });
 
             $('#world-map').vectorMap({
                 map: 'world_merc',
@@ -87,10 +87,16 @@
                     }]
                 },
                 onRegionTipShow: function (e, el, code) {
-                    el.html(el.html() + ' (' + countries[code] + ')');
+                    let count = 0;
+                    if(countries[code] !== undefined) count = countries[code];
+
+                    el.html(el.html() + ' (' + count + ')');
                 },
                 onMarkerTipShow: function (e, el, code) {
-                    el.html(el.html() + ' (' + city_count[code] + ')');
+                    let count = 0;
+                    if(city_count[code] !== undefined) count = city_count[code];
+
+                    el.html(el.html() + ' (' + count + ')');
                 },
                 onRegionClick: function (event, code) {
                     let mapObject = $('#world-map .jvectormap-container').data('mapObject');
@@ -98,7 +104,7 @@
                     if (mapObject.getSelectedRegions().includes(code)) {
                         mapObject.clearSelectedRegions()
                     } else {
-                        mapObject.clearSelectedRegions()
+                        mapObject.clearSelectedRegions();
                         mapObject.setSelectedRegions([code])
                     }
                 },

@@ -75,6 +75,31 @@
             "description": "No description provided.",
             "parameters": []
         },
+        "update-elsevier": {
+            "name": "Update Elsevier",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "count",
+                    "required": false,
+                    "type": "int",
+                    "default": 100,
+                    "is_primitive": true
+                },
+                {
+                    "name": "update_pdf_image",
+                    "required": false,
+                    "type": "bool",
+                    "default": true,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "get-new-elsevier": {
+            "name": "Get New Elsevier",
+            "description": "No description provided.",
+            "parameters": []
+        },
         "scrape": {
             "name": "Scrape",
             "description": "No description provided.",
@@ -124,29 +149,9 @@
                 }
             ]
         },
-        "update-elsevier": {
-            "name": "Update Elsevier",
-            "description": "No description provided.",
-            "parameters": [
-                {
-                    "name": "count",
-                    "required": false,
-                    "type": "int",
-                    "default": 1000,
-                    "is_primitive": true
-                },
-                {
-                    "name": "update_pdf_image",
-                    "required": false,
-                    "type": "bool",
-                    "default": true,
-                    "is_primitive": true
-                }
-            ]
-        },
-        "get-new-elsevier": {
-            "name": "Get New Elsevier",
-            "description": "No description provided.",
+        "parse-geo-locations": {
+            "name": "Parse Geo Locations",
+            "description": "",
             "parameters": []
         }
     },

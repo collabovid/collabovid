@@ -3,6 +3,7 @@ from typing import Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
+from django.db.models import Q
 
 
 class Topic(models.Model):
@@ -124,7 +125,6 @@ class GeoLocation(models.Model):
     alias = models.CharField(max_length=40, unique=True, null=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
-    count = models.IntegerField(default=0)
 
     @property
     def displayname(self):
@@ -139,7 +139,7 @@ class GeoCountry(GeoLocation):
 
     @property
     def papers(self):
-        return super(GeoCountry, self).papers.all() | Paper.objects.filter(locations__in=self.cities.all())
+        return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
 
 
 class GeoCity(GeoLocation):

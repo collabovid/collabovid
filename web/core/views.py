@@ -3,7 +3,7 @@ from json import JSONDecodeError
 
 from timeit import default_timer as timer
 
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, F, Subquery, OuterRef, IntegerField
 from django.shortcuts import render, get_object_or_404, reverse
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -19,7 +19,7 @@ from search.request_helper import SearchRequestHelper
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
 from django.db.models.functions import Concat, Greatest
-from django.db.models import Count
+from django.db.models import Count, Max
 
 import json
 
@@ -62,7 +62,6 @@ def privacy(request):
 
 
 def category_overview(request):
-
     category_statistics = [CategoryStatistics(category) for category in Category.objects.all()]
 
     return render(request, "core/categories_overview.html", {"category_statistics": category_statistics})
@@ -195,7 +194,21 @@ def search(request):
 
 
 def geo(request):
-    countries = {country.alpha_2: country.count for country in GeoCountry.objects.all()}
+
+    # Using a subquery to find the directly associated paper count
+    paper_counts_subquery = Subquery(GeoCountry.objects.filter(pk=OuterRef('pk')).
+                                     annotate(count=Count('papers')).values('count'),
+                                     output_field=IntegerField())
+
+    # Counting indirectly associated papers. Afterwards we annotate the subquery result and sum up the values.
+    countries = GeoCountry.objects.annotate(count_indirect=Count('cities__papers', distinct=True))\
+        .annotate(count_direct=paper_counts_subquery)\
+        .annotate(count=F('count_indirect') + F('count_direct')).values('alpha_2', 'count')
+
+    countries = {country['alpha_2']: country['count'] for country in countries}
+
+    cities = GeoCity.objects.annotate(count=Count('papers'))
+
     cities = [
         {
             'name': city.name,
@@ -203,7 +216,7 @@ def geo(request):
             'lat': city.latitude,
             'count': city.count
         }
-        for city in GeoCity.objects.all()
+        for city in cities
     ]
 
     return render(
