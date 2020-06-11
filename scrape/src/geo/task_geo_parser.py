@@ -30,7 +30,7 @@ class GeoParserTask(Runnable):
     def run(self):
         n_locations = 0
 
-        with GeoParser(log=self.log, db_path=f'{settings.RESOURCES_DIR}/geonames.sqlite3') as geo:
+        with GeoParser(log=self.log, db_path=f'{settings.RESOURCES_DIR}/geonames/geonames.sqlite3') as geo:
             updated = False
             for paper in Paper.objects.all():
                 locations, ignored_entities = geo.parse(paper.title, merge=True)

@@ -35,7 +35,14 @@ PIPELINE = {
                 'dashboard/tasks/delete.js',
             ),
             'output_filename': 'task-delete.js'
-        }
+        },
+        'map': {
+            'source_filenames': (
+                'js/jquery-jvectormap-2.0.5.min.js',
+                'js/jquery-jvectormap-world-merc.js',
+            ),
+            'output_filename': 'map.js'
+        },
     },
     'STYLESHEETS': {
         'base': {
@@ -80,6 +87,12 @@ PIPELINE = {
                 'dashboard/scrape/datatable.css',
             ),
             'output_filename': 'datatable.css',
-        }
+        },
+        'map': {
+            'source_filenames': (
+                'css/jquery-jvectormap-2.0.5.css',
+            ),
+            'output_filename': 'map.css',
+        },
     },
 }

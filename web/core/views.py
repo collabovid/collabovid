@@ -192,15 +192,23 @@ def search(request):
 
 
 def geo(request):
-    start = timer()
-    end = timer()
-    print(timedelta(seconds=end - start))
+    countries = {country.alpha_2: country.count for country in GeoCountry.objects.all()}
+    cities = [
+        {
+            'name': city.name,
+            'lon': city.longitude,
+            'lat': city.latitude,
+            'count': city.count
+        }
+        for city in GeoCity.objects.all()
+    ]
+
     return render(
         request,
         "core/map.html",
         {
-            "countries": GeoCountry.objects.all(),
-            "cities": GeoCity.objects.all(),
+            "countries": json.dumps(countries),
+            "cities": json.dumps(cities),
         }
     )
 
