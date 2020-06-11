@@ -13,11 +13,11 @@ from termcolor import colored
 class GeoParserTask(Runnable):
     @staticmethod
     def task_name():
-        return "parse-geo-locations"
+        return 'parse-geo-locations'
 
     @staticmethod
     def description():
-        return ""
+        return ''
 
     def __init__(self, *args, **kwargs):
         super(GeoParserTask, self).__init__(*args, **kwargs)
@@ -38,17 +38,18 @@ class GeoParserTask(Runnable):
                 first = True
                 for location, usage in locations:
                     word = usage['word'].strip()
-                    if word == 'CT':
-                        # Ignore location CT, which refers in almost all cases to
-                        # "computed tomography" rather than Connecticut.
+                    if word in ('CT', 'MS'):
+                        # Ignore location CT and MS, which refers in almost all cases to
+                        # "computed tomography" and "MS" in medical context rather than Connecticut/Mississippi.
                         continue
 
                     country_data = CountryData.get(location.country_code)
                     db_country, country_created = GeoCountry.objects.get_or_create(
-                        name=country_data["name"],
+                        name=country_data['name'],
+                        alias=country_data['alias'],
                         alpha_2=location.country_code,
-                        latitude=country_data["lat"],
-                        longitude=country_data["lon"],
+                        latitude=country_data['lat'],
+                        longitude=country_data['lon'],
                     )
 
                     if location.feature_label.startswith('A.PCL'):
@@ -90,7 +91,7 @@ class GeoParserTask(Runnable):
                     if created or added:
                         status = 'created' if created else 'added'
                         self.log(
-                            "\t[{:7}] {:20} -> {}".format(colored(status, 'green'), word, db_location.name)
+                            "\t[{:16}] {:20} -> {}".format(colored(status, 'green'), word, db_location.name)
                         )
 
                 if updated:

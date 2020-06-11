@@ -104,15 +104,6 @@ class GeoParser:
     def _get_alternate_term(self, text):
         ltext = text.lower()
 
-        if ltext.startswith('the '):
-            return text[4:]
-        if ltext.endswith(' province'):
-            return text[:-9]
-        if ltext.endswith(' city'):
-            return text[:-5]
-        if ltext.endswith(' district'):
-            return text[:-9]
-
         prefixes = ['the ']
         suffices = [' province', ' city', ' district', ' state', ' region']
 
@@ -122,6 +113,6 @@ class GeoParser:
 
         for suffix in suffices:
             if ltext.endswith(suffix):
-                return text[:len(suffix)]
+                return text[:-len(suffix)]
 
         return text

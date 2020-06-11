@@ -120,9 +120,14 @@ class VerificationState(models.IntegerChoices):
 
 class GeoLocation(models.Model):
     name = models.CharField(max_length=100, unique=True, null=False)
+    alias = models.CharField(max_length=40, unique=True, null=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
     count = models.IntegerField(default=0)
+
+    @property
+    def displayname(self):
+        return self.alias if self.alias else self.name
 
     def __eq__(self, other):
         return isinstance(other, GeoLocation) and self.pk == other.pk

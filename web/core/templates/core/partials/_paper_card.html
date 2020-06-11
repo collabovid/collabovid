@@ -116,6 +116,14 @@
                                                 {{ category.name }}
                                             </span>
                                         {% endfor %}
+
+                                        {% for location in paper.locations.all %}
+                                            <span class="badge badge-pill text-light"
+                                                  style="background-color:#9E9E9E;">
+                                                <i class="fa fa-map-marker"></i>
+                                                {{ location.displayname }}
+                                            </span>
+                                        {% endfor %}
                                     </div>
 
                                     <div class="col-8 text-right small">
