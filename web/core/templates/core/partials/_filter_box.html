@@ -165,6 +165,29 @@
                 </div>
 
 
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="locations-input">
+                            <strong>Locations</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="locations-input"
+                               data-url="{% url "get-locations" %}"
+                               data-result-key="locations"
+                               name="locations"
+                               class="tagify--outside"
+                               placeholder="Location name">
+                        <div class="text-muted small">Locations are countries or cities a paper is referring to. Not
+                            every paper has an associated location. If no location is selected the value defaults to
+                            all.
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
                         <button id="filter-form-submit" type="submit" class="btn btn-success" disabled><i
@@ -173,6 +196,8 @@
                         </button>
                     </div>
                 </div>
+
+
             </div>
 
         </form>
@@ -194,6 +219,17 @@
 
         $("#journals-input").tagifyAjax({
             initialValues: journalInitialValues,
+            tagifySettings: {
+                dropdown: {
+                    enabled: 0,
+                    mapValueTo: data => data.value + " (" + data.count + ")"
+                }
+            }
+        });
+
+        let locationsInitialValues = JSON.parse('{{ form.locations|escapejs }}');
+        $("#locations-input").tagifyAjax({
+            initialValues: locationsInitialValues,
             tagifySettings: {
                 dropdown: {
                     enabled: 0,

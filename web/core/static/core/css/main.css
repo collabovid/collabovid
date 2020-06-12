@@ -412,3 +412,7 @@ label.nav-link {
     display: flex;
     flex-direction: column;
 }
+
+#world-map .jvectormap-container, #world-map .jvectormap-container svg {
+    overflow: visible;
+}

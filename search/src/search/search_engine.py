@@ -1,9 +1,9 @@
 from collections import defaultdict
-from django.db.models import Q, F
+from django.db.models import Q, F, Subquery
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 
-from data.models import Paper, Author, Journal, Category, CategoryMembership
+from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry
 from typing import List
 
 from .exact_title_search import ExactTitleSearch
@@ -25,7 +25,7 @@ class SearchEngine:
 
     @staticmethod
     def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None,
-                      category_ids=None, article_type=ARTICLE_TYPE_ALL):
+                      category_ids=None, location_ids=None, article_type=ARTICLE_TYPE_ALL):
         papers = Paper.objects.all()
 
         filtered = False
@@ -36,6 +36,12 @@ class SearchEngine:
         if category_ids and len(category_ids) > 0:
             papers = papers.filter(categories__pk__in=category_ids)
             filtered = True
+
+        if location_ids and len(location_ids) > 0:
+            countries = GeoCountry.objects.filter(pk__in=location_ids)
+            cities = GeoCity.objects.filter(Q(pk__in=location_ids) | Q(country__in=countries))
+
+            papers = papers.filter(Q(locations__in=cities) | Q(locations__in=countries))
 
         if journal_ids and len(journal_ids) > 0:
             journals = Journal.objects.filter(pk__in=journal_ids)
@@ -75,6 +81,7 @@ class SearchEngine:
                author_and=False,
                journal_ids=None,
                category_ids=None,
+               location_ids=None,
                article_type=ARTICLE_TYPE_ALL,
                score_min=0.6):
         paper_score_table = defaultdict(int)
@@ -86,6 +93,7 @@ class SearchEngine:
                                                       author_and,
                                                       journal_ids,
                                                       category_ids,
+                                                      location_ids,
                                                       article_type)
 
         combined_factor = 0

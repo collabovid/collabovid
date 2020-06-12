@@ -1,35 +1,50 @@
-{% extends "core/search_base.html" %}
+{% extends "core/base.html" %}
 {% load pipeline %}
 {% load static %}
 
-{% block css %}
-    {% stylesheet 'map' %}
-{% endblock %}
+
 
 {% block content %}
-    <div class="gradient-header pb-0">
-        <div class="container">
-            <div class="row mt-5 pb-5">
-                <div class="col-12">
-                    <h1 class="display-4 font-weight-light text-white">Places</h1>
+    <div class="gradient-header pb-0 overflow-hidden">
+        <div class="row">
+            <div class="col-12">
+                <div id="world-map" style="width: auto; height: 400px"></div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
 
-                    <div class="muted-white">
+
+    <form id="paper-search-form" method="post" action="{% url "search" %}">
+        {% csrf_token %}
+        <input type="hidden" name="tab" value="top">
+        <input id="locations-input" type="hidden" name="locations" value="">
+
+    </form>
+
+    <div class="container mt-5">
+        <div id="map-help-container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="display-4 font-weight-light">Research Map</h1>
+
+                    <div class="">
+                        <p>
+                            Collabovid provides users with information about locations (countries, cities or regions)
+                            that an articles covers. On the map above you can select a specific country or location.
+                            Once
+                            selected, the associated papers will be shown below. Alternatively one can use the location
+                            filter option at the <a href="{% url "search" %}">search</a> page to filter for multiple
+                            locations at the same time. Locations are mapped to real-world data using the
+                            <a href="http://www.geonames.org">GeoNames</a> database.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
-        {% include "core/partials/_rounded_bottom.html" %}
-    </div>
-
-    <form id="paper-search-form" method="post" action="{% url "search" %}">
-        <input type="hidden" name="tab" value="top">
-        {% csrf_token %}
-    </form>
-
-    <div class="container mt-5">
-        <div id="world-map" style="width: auto; height: 400px"></div>
-
-        <div>
+        <div id="paper-display-container" style="display: none;">
+            <h4 id="paper-result-title" style="display: none;">Papers that are associated with <span
+                    class="location"></span></h4>
             <div id="paper-container"></div>
 
             <div id="paper-loading-indicator"
@@ -44,7 +59,7 @@
 {% endblock %}
 
 {% block script %}
-    {{ block.super }}
+    {% javascript 'search' %}
     {% javascript 'map' %}
 
     <script>
@@ -52,10 +67,16 @@
             let countries = JSON.parse("{{ countries|escapejs }}");
             let cities = JSON.parse("{{ cities|escapejs }}");
 
+            let map_help_container = $("#map-help-container");
+            let paper_display_container = $("#paper-display-container");
+
             let form = $("#paper-search-form");
             let indicator = $("#paper-loading-indicator");
             let paper_container = $("#paper-container");
             let pagination_container = $("#pagination-container");
+            let paper_result_title = $("#paper-result-title");
+
+            let locations_input = $("#locations-input");
 
 
             let searchEngine = form.collabovidSearch({
@@ -66,9 +87,45 @@
 
             form.submit(function (e) {
                 e.preventDefault();
-                searchEngine.searchQuery(form.serialize(), 1, false, function () {
+                let mapObject = $('#world-map .jvectormap-container').data('mapObject');
+
+                let selected_countries = mapObject.getSelectedRegions();
+                let selected_cities = mapObject.getSelectedMarkers();
+
+                let selected_locations = [];
+
+                // Collect all selected countries
+                $.each(selected_countries, function (index, country_code) {
+                    selected_locations = selected_locations.concat(countries.filter(obj => {
+                        return obj.alpha2 === country_code
+                    }));
+                });
+
+                // Collect all selected markers
+                $.each(selected_cities, function (index, city_index) {
+                    selected_locations.push(cities[city_index])
+                });
+
+                searchEngine.searchQuery(function () {
+                    // Join pk values to a comma separated list and add them to the input, i.e. to the form
+                    locations_input.val(
+                        Array.prototype.map.call(selected_locations, function (item) {
+                            return item.pk;
+                        }).join(",")
+                    );
+                    return form.serialize();
+                }, 1, false, function () {
+                    paper_result_title.hide();
+                    map_help_container.hide();
+                    paper_display_container.show();
                 }, function () {
 
+                    let locations_title = Array.prototype.map.call(selected_locations, function (item) {
+                        return item.displayname;
+                    }).join(",");
+
+                    paper_result_title.find('.location').html(locations_title);
+                    paper_result_title.show();
                 });
             });
 
@@ -77,8 +134,18 @@
             let city_markers = [];
             $.each(cities, function (index, city) {
                 city_count.push(city.count);
-                city_markers.push({latLng: [city.lat, city.lon], name: city.name});
+                city_markers.push({latLng: [city.latitude, city.longitude], name: city.displayname});
             });
+
+            let country_counts = {};
+            let country_names = {};
+            $.each(countries, function (index, country) {
+                country_counts[country.alpha2] = country.count;
+                country_names[country.alpha2] = country.displayname;
+            });
+
+            console.log(city_markers);
+            console.log(country_names);
 
             $('#world-map').vectorMap({
                 map: 'world_merc',
@@ -104,20 +171,19 @@
                         fill: '#ffc000'
                     }
                 },
-                backgroundColor: '#F5F5F5',
+                backgroundColor: 'transparent',
                 markers: city_markers,
                 series: {
                     regions: [{
-                        values: countries,
+                        values: country_counts,
                         scale: ['#C8EEFF', '#0071A4'],
                         normalizeFunction: 'polynomial'
                     }]
                 },
                 onRegionTipShow: function (e, el, code) {
-                    let count = 0;
-                    if (countries[code] !== undefined) count = countries[code];
-
-                    el.html(el.html() + ' (' + count + ')');
+                    if (country_counts[code] !== undefined) {
+                        el.html(country_names[code] + " (" + country_counts[code] + ")");
+                    }
                 },
                 onMarkerTipShow: function (e, el, code) {
                     let count = 0;
@@ -128,12 +194,13 @@
                 onRegionClick: function (event, code) {
                     let mapObject = $('#world-map .jvectormap-container').data('mapObject');
                     mapObject.clearSelectedMarkers();
-                    if (mapObject.getSelectedRegions().includes(code)) {
-                        mapObject.clearSelectedRegions()
+                    if (country_names[code] === undefined || mapObject.getSelectedRegions().includes(code)) {
+                        mapObject.clearSelectedRegions();
+                        map_help_container.fadeIn();
+                        paper_display_container.hide();
                     } else {
                         mapObject.clearSelectedRegions();
                         mapObject.setSelectedRegions([code]);
-
                         form.submit();
                     }
                 },
@@ -144,10 +211,17 @@
                         mapObject.clearSelectedMarkers();
                     } else {
                         mapObject.clearSelectedMarkers();
-                        mapObject.setSelectedMarkers([code])
+                        mapObject.setSelectedMarkers([code]);
+
+                        form.submit();
                     }
                 }
             });
         });
     </script>
+{% endblock %}
+
+{% block css %}
+    {% stylesheet 'map' %}
+    {% stylesheet 'search' %}
 {% endblock %}

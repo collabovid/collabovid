@@ -51,6 +51,8 @@
                 data = data();
             }
 
+            let data_no_page = data;
+
             data += "&page=" + page;
 
             $.ajax({
@@ -69,7 +71,7 @@
                         $('html, body').scrollTop(plugin.settings.paper_container.offset().top - 50);
                     }
 
-                    window.Pagination.last_request = data;
+                    window.Pagination.last_request = data_no_page;
 
                     if (on_success) {
                         on_success();
