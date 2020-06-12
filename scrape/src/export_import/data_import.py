@@ -5,11 +5,16 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
+from django.db import transaction
+
 from data.models import (
     Author,
     Category,
     CategoryMembership,
     DataSource,
+    GeoCity,
+    GeoCountry,
+    GeoLocationMembership,
     Journal,
     Paper,
     PaperData,
@@ -68,12 +73,16 @@ class DataImport:
             # Backward compatibility: only import the new ML-categories, not the old medrxiv ones.
             categories_ml = "categories_ml" in data
 
+            locations = "locations" in data
+
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
 
             if journals:
                 data["journals"] = {int(k): v for k, v in data["journals"].items()}
+            if locations:
+                data["locations"] = {int(k): v for k, v in data["locations"].items()}
 
             paperhost_mapping = {}
             paperhosts_to_create = []
@@ -111,6 +120,42 @@ class DataImport:
                     category_mapping[identifier] = db_category
                 Category.objects.bulk_create(categories_to_create)
 
+            location_mapping = {}
+            countries_created = 0
+            cities_created = 0
+            if locations:
+                # Create countries first, because cities reference a country in foreign key
+                # Note: Bulk-Create is not possible with inheritance of models. So we create them one by one
+                # but in one transaction (for the speed).
+                with transaction.atomic():
+                    countries = {id: location for id, location in data["locations"].items()
+                                 if location["type"] == "country"}
+                    cities = {id: location for id, location in data["locations"].items()
+                              if location["type"] == "city"}
+
+                    for id, country in countries.items():
+                        try:
+                            db_country = GeoCountry.objects.get(name=country["name"])
+                        except GeoCountry.DoesNotExist:
+                            db_country = GeoCountry(name=country["name"], alias=country["alias"],
+                                                    latitude=country["latitude"], longitude=country["longitude"],
+                                                    alpha_2=country["alpha_2"])
+                            countries_created += 1
+                            db_country.save()
+
+                        location_mapping[id] = db_country
+
+                    for id, city in cities.items():
+                        try:
+                            db_city = GeoCity.objects.get(name=city["name"])
+                        except GeoCity.DoesNotExist:
+                            db_city = GeoCity(name=city["name"], alias=city["alias"],
+                                              latitude=city["latitude"], longitude=city["longitude"],
+                                              country=location_mapping[city["country_id"]])
+                            cities_created += 1
+                            db_city.save()
+                        location_mapping[id] = db_city
+
             paper_informations = DataImport._compute_updatable_papers(data["papers"], log)
 
             paperdata_mapping = {}
@@ -126,8 +171,10 @@ class DataImport:
 
             authors_created = 0
             papers_w_new_category = 0
+            papers_w_new_location = 0
             papers_to_add = []
             category_memberships_to_create = []
+            location_memberships_to_create = []
             doi_to_author_mapping = {}  # maps doi to list of db_authors for later insertion into m2m through table
             db_author_mapping = {}  # maps tuple (first name, last name) to dict:
                                     # {"db_author": db_author, "created": True / False}
@@ -184,7 +231,7 @@ class DataImport:
                                 db_author = db_author_mapping[author_tuple]["db_author"]
                             else:
                                 db_author = Author(first_name=author["firstname"][:AUTHOR_FIRSTNAME_MAX_LEN],
-                                    last_name=author["lastname"][:AUTHOR_LASTNAME_MAX_LEN])
+                                                   last_name=author["lastname"][:AUTHOR_LASTNAME_MAX_LEN])
                                 db_author_mapping[author_tuple] = {"db_author": db_author, "created": True}
                                 authors_created += 1
                         doi_to_author_mapping[db_paper.doi].append(db_author)
@@ -199,11 +246,20 @@ class DataImport:
                                                         score=category["score"])
                         category_memberships_to_create.append(membership)
 
+                if locations and not db_paper.locations.exists():
+                    # Set paper locations if they were not set (even on existing papers)
+                    if paper["locations"]:
+                        papers_w_new_location += 1
+                    for location in paper["locations"]:
+                        membership = GeoLocationMembership(paper=db_paper, location=location_mapping[location["id"]],
+                                                           state=location["state"])
+                        location_memberships_to_create.append(membership)
 
             Paper.objects.bulk_create(papers_to_add)
             Author.objects.bulk_create([author["db_author"] for author in db_author_mapping.values()
                                         if author["created"]])
             CategoryMembership.objects.bulk_create(category_memberships_to_create)
+            GeoLocationMembership.objects.bulk_create(location_memberships_to_create)
 
             ThroughModel = Paper.authors.through
             ThroughModel.objects.bulk_create(
@@ -225,4 +281,8 @@ class DataImport:
         log(f"\t{authors_created} authors")
         log(f"\t{len(categories_to_create)} ML categories")
         log(f"\t{len(papers_to_add)} papers")
+        log(f"\t{countries_created} countries")
+        log(f"\t{cities_created} cities")
+
         log(f"{papers_w_new_category} papers' categories were updated")
+        log(f"{papers_w_new_location} papers' locations were updated")
