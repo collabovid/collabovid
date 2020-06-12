@@ -240,8 +240,6 @@ def locations(request):
         for city in cities
     ]
 
-    print(cities)
-
     return render(
         request,
         "core/map.html",
