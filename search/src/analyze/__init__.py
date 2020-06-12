@@ -1,12 +1,11 @@
-from .vectorizer import PretrainedLDA
-from .similarity import JensonShannonSimilarity, CosineDistance
 import os
-from src.analyze.analyzer import CombinedPaperAnalyzer, BasicPaperAnalyzer
+from src.analyze.analyzer import BasicPaperAnalyzer
 from src.analyze.vectorizer.exceptions import *
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 analyzer = None
+similarity_analyzer = None
 analyzer_currently_initializing = False
 
 
@@ -36,3 +35,17 @@ def get_analyzer():
         analyzer_currently_initializing = False
 
     return analyzer
+
+
+def get_similarity_analyzer():
+    global similarity_analyzer
+
+    if not similarity_analyzer:
+        try:
+            print('initializing similarity')
+            similarity_analyzer = BasicPaperAnalyzer('transformer-paper')
+        except (CouldNotLoadModel, CouldNotLoadVectorizer, CouldNotLoadPaperMatrix) as e:
+            print(e)
+            similarity_analyzer = None
+        print('finished')
+    return similarity_analyzer

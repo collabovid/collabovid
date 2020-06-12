@@ -4,20 +4,24 @@
     <div class="gradient-header">
         <div class="container mt-4">
             <div class="row">
-                <div class="col-md-2 hidden-xs hidden-sm">
-                    {% if paper.preview_image %}
+                {% if paper.preview_image %}
+                    <div class="col-md-2 hidden-xs hidden-sm">
                         <div class="card p-1" style="height: 200px">
                             <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
                                  class="img-fluid mx-auto d-block">
                         </div>
-                    {% endif %}
-                </div>
-                <div class="col-md-10">
+                    </div>
+                {% endif %}
+                <div class="{% if paper.preview_image %}col-md-10 {% else %} col-md-12 {% endif %}">
                     <h3 class="text-white">{{ paper.title }}</h3>
-                    <h6 class=" text-white" style="font-size: 0.9em">
-                        <i class="fas fa-layer-group"></i>
-
-                    </h6>
+                    <div class="small text-left">
+                        {% for category in paper.categories.all %}
+                            <span class="badge badge-pill text-light"
+                                  style="background-color: {{ category.color }}; font-size: 14px">
+                                   {{ category.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
                     <div class="mt-3">
                         <a class="btn btn-dark" href="{{ paper.pdf_url }}">
                             <i class="fa fa-file"></i> PDF
@@ -35,8 +39,8 @@
 
     <div class="container mt-4">
         <div class="row">
-            <div class="col-md-8">
-                <div class="card">
+            <div class="col-md-9">
+                <div class="card" style="height: 100%">
                     <div class="card-body">
                         <h5 class="card-title text-muted mb-2">
                             Abstract
@@ -47,13 +51,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title text-muted mb-2">
                             Published
                         </h5>
-                        <div class="card-text mb-2 display-4" style="font-size: 35px">
+                        <div class="card-text mb-2 display-4" style="font-size: 25px">
                             {{ paper.published_at }}
                         </div>
                     </div>
@@ -64,9 +68,9 @@
                             Authors
                         </h5>
                         <div class="authors-container card-text mb-2">
-                            {% if paper.authors.all|length >= 4 %}
+                            {% if paper.authors.all|length >= 2 %}
                                 <div class="short">
-                                    {% include 'core/partials/_author_list.html' with authors=paper.authors.all|slice:":4" %}
+                                    {% include 'core/partials/_author_list.html' with authors=paper.authors.all|slice:":2" %}
                                 </div>
                                 <div class="long" style="display: none;">
                                     {% include 'core/partials/_author_list.html' with authors=paper.authors.all %}
@@ -75,7 +79,7 @@
                                 {% include 'core/partials/_author_list.html' with authors=paper.authors.all %}
                             {% endif %}
                         </div>
-                        {% if paper.authors.all|length >= 4 %}
+                        {% if paper.authors.all|length >= 2 %}
                             <div class="authors-controls text-center">
                                 <a href="#"
                                    class="btn w-50 mt-2 btn-outline-secondary py-0 text-center mx-auto toggle-authors show"
@@ -100,13 +104,17 @@
             <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-2">Similar Paper</h3>
             <h3 class="text-muted d-md-inline-block">Similar Paper</h3>
         </div>
-        {% for current_paper in similar_papers %}
-            <div class="my-5">
-                {% include 'core/partials/_paper_card.html' with html=True paper=current_paper %}
-            </div>
-        {% empty %}
-            <div class="my-5 text-center font-weight-bold">No similar papers found</div>
-        {% endfor %}
+        {% if error %}
+            <div class="my-5 text-center text-danger font-weight-bold">We encountered an unexpected error</div>
+        {% else %}
+            {% for current_paper in similar_papers %}
+                <div class="my-5">
+                    {% include 'core/partials/_paper_card.html' with html=True paper=current_paper %}
+                </div>
+            {% empty %}
+                <div class="my-5 text-center font-weight-bold">No similar papers found</div>
+            {% endfor %}
+        {% endif %}
     </div>
 
 {% endblock %}

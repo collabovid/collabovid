@@ -1,6 +1,7 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 from src.search.search_engine import get_default_search_engine, SearchEngine
-from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing, CouldNotLoadPaperMatrix
+from src.analyze import get_analyzer, is_analyzer_initialized, is_analyzer_initializing, CouldNotLoadPaperMatrix, \
+    get_similarity_analyzer
 from data.models import Paper
 
 from threading import Thread
@@ -59,12 +60,16 @@ def similar(request):
     :return: json response with the list of papers and the corresponding similarity score
     """
     if request.method == "GET":
+        analyzer = get_similarity_analyzer()
         doi = request.GET.get('doi')
-        result = dict()
-        papers = Paper.objects.all()
-        for paper in papers[:20]:
-            result[paper.doi] = 0.7
-        return JsonResponse(result)
+        similar_paper = analyzer.similar(doi)
+        result = []
+        for doi, score in similar_paper:
+            result.append({
+                'doi': doi,
+                'score': score
+            })
+        return JsonResponse({'similar': result})
     return HttpResponseBadRequest("Only Get is allowed here")
 
 

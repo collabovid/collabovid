@@ -36,7 +36,7 @@ def paper(request, doi):
 
     return render(request, "core/paper.html", {
         "paper": current_paper,
-        "similar_papers": similar_request.papers,
+        "similar_papers": similar_request.paginator.page(1),
         "error": similar_request.error
     })
 

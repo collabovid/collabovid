@@ -81,7 +81,7 @@ class SimilarPaperRequestHelper:
 
         self._response = None
         self._error = False
-
+        self._papers = None
         try:
             response = requests.get(settings.SEARCH_SERVICE_URL + '/similar', params={
                 'doi': doi,
@@ -99,9 +99,13 @@ class SimilarPaperRequestHelper:
 
         if self._response is None:
             self._error = True
-        else:
-            print(self._response)
-            self._papers = Paper.objects.filter(pk__in=self._response.keys())
+
+    @property
+    def paginator(self):
+        paper_score_items = [(result['doi'], result['score']) for result in self._response['similar']]
+        paper_score_items = sorted(paper_score_items, key=lambda x: x[1], reverse=True)
+        paginator = ScoreSortPaginator(paper_score_items, 10)
+        return paginator
 
     @property
     def error(self):

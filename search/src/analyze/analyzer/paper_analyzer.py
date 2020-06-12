@@ -3,16 +3,10 @@ class PaperAnalyzer:
         pass
 
     def preprocess(self, force_recompute=False):
-        raise NotImplementedError("Preprocess not implemented")
+        raise NotImplementedError("preprocess not implemented")
 
-    def assign_to_topics(self):
-        raise NotImplementedError("Assign to topics not implemented")
-
-    def related(self, query: str):
-        raise NotImplementedError("Related not implemented")
-
-    def compute_topic_score(self, topics):
-        raise NotImplementedError("Compute topic score not implemented")
+    def similar(self, doi: str):
+        raise NotImplementedError("similar not implemented")
 
     def query(self, query: str):
-        raise NotImplementedError("Compute Similarity Scores not implemented")
+        raise NotImplementedError("query not implemented")

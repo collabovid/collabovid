@@ -1,48 +1,49 @@
 import joblib
-import numpy as np
-import os
-from data.models import Paper
 from django.conf import settings
 from collabovid_store.auto_update_reference import AutoUpdateReference
-from collabovid_store.stores import PaperMatrixStore, refresh_local_timestamps
-from collabovid_store.s3_utils import S3BucketClient
 from .exceptions import *
+from data.models import Paper
+import numpy as np
 
 
 class TextVectorizer:
 
-    def __init__(self, matrix_file_name, *args, **kwargs):
+    def __init__(self, matrix_file_name, similarity_computer, *args, **kwargs):
         self.matrix_file_name = matrix_file_name
-        self._similarity_computer = None
-
+        self._similarity_computer = similarity_computer
         self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_BASE_DIR,
                                                            key=matrix_file_name, load_function=lambda x: joblib.load(x))
 
-    @property
-    def similarity_computer(self):
-        if not self._similarity_computer:
-            raise AttributeError("Similarity computer not set")
-        return self._similarity_computer
+    def vectorize_query(self, query: str):
+        raise NotImplementedError()
 
-    @similarity_computer.setter
-    def similarity_computer(self, value):
-        self._similarity_computer = value
+    def _compute_paper_matrix_contents(self, papers):
+        raise NotImplementedError()
+
+    def matching_to_query(self, query: str):
+        embedding = self.vectorize_query(query)
+        return self._compute_similarity_scores(embedding)
+
+    def similar_to_paper(self, doi: str):
+        matrix = self._paper_matrix['matrix']
+        matrix_index = self._paper_matrix['id_map']['doi']
+        return self._compute_similarity_scores(matrix[matrix_index])
 
     @property
-    def paper_matrix(self):
+    def _paper_matrix(self):
         matrix = self._paper_matrix_reference.reference
         if matrix is None:
             raise CouldNotLoadPaperMatrix(
                 "Could not initialize with paper matrix file {}".format(self.matrix_file_name))
         return matrix
 
-    def _calculate_paper_matrix(self, papers):
-        matrix = self.vectorize_paper(papers)
-        return {'matrix': matrix}
+    def _compute_similarity_scores(self, embedding_vec):
+        matrix = self._paper_matrix['matrix']
+        similarity_scores = self._similarity_computer.similarities(matrix, embedding_vec)
+        return self._paper_matrix['index_arr'], similarity_scores
 
-    def generate_paper_matrix(self, force_recompute=False):
-
-        old_paper_matrix = self.paper_matrix
+    def compute_paper_matrix(self, force_recompute=False):
+        old_paper_matrix = self._paper_matrix
         # initialize the id_map with saved values if possible
         if old_paper_matrix and not force_recompute:
             id_map = old_paper_matrix['id_map']
@@ -54,7 +55,8 @@ class TextVectorizer:
             return force_recompute
 
         if old_paper_matrix:
-            print("Current paper matrix has size ", old_paper_matrix['matrix'].shape, "with", Paper.objects.all().count(),
+            print("Current paper matrix has size ", old_paper_matrix['matrix'].shape, "with",
+                  Paper.objects.all().count(),
                   "in database")
 
         # all papers
@@ -88,7 +90,7 @@ class TextVectorizer:
             }
 
             # for every new embedding matrix that is computed, we extend the old one
-            for key, computed_matrix in self._calculate_paper_matrix(filtered_papers).items():
+            for key, computed_matrix in self._compute_paper_matrix_contents(filtered_papers).items():
                 # dimension of newly computed values
                 matrix = np.zeros((newly_added, computed_matrix.shape[1]))
 
@@ -106,38 +108,6 @@ class TextVectorizer:
                     matrix[matrix_idx] = computed_matrix[i]
                 paper_matrix[key] = matrix
 
-            # Write out matrix
-            joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_BASE_DIR, self.matrix_file_name))
-            refresh_local_timestamps(settings.PAPER_MATRIX_BASE_DIR, [self.matrix_file_name])
-            if settings.PUSH_PAPER_MATRIX:
-                self._update_remote_paper_matrix()
-
-            print("Paper matrix exported completed")
+            return paper_matrix
         else:
-            print("No recomputing of matrix necessary")
-
-    def _update_remote_paper_matrix(self):
-        aws_access_key = settings.AWS_ACCESS_KEY_ID
-        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
-        bucket = settings.AWS_STORAGE_BUCKET_NAME
-        endpoint_url = settings.AWS_S3_ENDPOINT_URL
-        s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_access_key=aws_secret_access_key,
-                                          endpoint_url=endpoint_url, bucket=bucket)
-        paper_matrix_store = PaperMatrixStore(s3_bucket_client)
-        paper_matrix_store.update_remote(settings.PAPER_MATRIX_BASE_DIR, [self.matrix_file_name.replace('.pkl', '')])
-
-    def compute_similarity_scores(self, embedding_vec):
-        matrix = self.paper_matrix['matrix']
-        similarity_scores = self.similarity_computer.similarities(matrix, embedding_vec)
-        return self.paper_matrix['index_arr'], similarity_scores
-
-    def vectorize(self, texts):
-        raise NotImplementedError()
-
-    def vectorize_paper(self, paper):
-        texts = [p.title + ". " + p.abstract for p in paper]
-        return self.vectorize(texts)
-
-    def vectorize_topics(self, topics):
-        texts = [t.name + ". " + t.description for t in topics]
-        return self.vectorize(texts)
+            return old_paper_matrix

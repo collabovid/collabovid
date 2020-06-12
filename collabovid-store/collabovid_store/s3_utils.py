@@ -17,7 +17,7 @@ class S3BucketClient:
         self.endpoint_url = endpoint_url
 
     def upload(self, local_file, remote_key):
-        config = TransferConfig(multipart_threshold=(1024 ** 3) * 2)
+        config = TransferConfig()
         self.s3.meta.client.upload_file(
             local_file, self.bucket, remote_key, Config=config
         )

@@ -1,112 +1,58 @@
-from src.analyze.vectorizer import PretrainedLDA
-import os
-
-import numpy as np
-from django.db import models
-from collections import defaultdict
-from data.models import Paper, Topic
 from . import PaperAnalyzer
-
+import joblib
+import os
 from django.conf import settings
+from collabovid_store.stores import PaperMatrixStore, refresh_local_timestamps
+from collabovid_store.s3_utils import S3BucketClient
+import heapq
 
 
 class BasicPaperAnalyzer(PaperAnalyzer):
-    TYPE_LDA = 'lda'
     TYPE_SENTENCE_TRANSFORMER = 'sentence-transformer'
-    TYPE_CHUNK_SENTENCE_TRANSFORMER = 'chunk-sentence-transformer'
+    TYPE_TRANSFORMER_PAPER = 'transformer-paper'
 
-    def __init__(self, type=TYPE_LDA, *args, **kwargs):
-
+    def __init__(self, type=TYPE_SENTENCE_TRANSFORMER, *args, **kwargs):
         super(BasicPaperAnalyzer, self).__init__(*args, **kwargs)
-
         self.type = type
-
-        if type == BasicPaperAnalyzer.TYPE_LDA:
-            self.vectorizer = PretrainedLDA()
-            print("Loaded lda vectorizer")
-        elif type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
+        if type == BasicPaperAnalyzer.TYPE_SENTENCE_TRANSFORMER:
             from src.analyze.vectorizer import TitleSentenceVectorizer
-            self.vectorizer = TitleSentenceVectorizer()
+            self._matrix_file_name = "title_sentence_vectorizer.pkl"
+            self._vectorizer = TitleSentenceVectorizer(matrix_file_name=self._matrix_file_name)
             print("Loaded paper matrix title sentence transformer")
-        elif type == BasicPaperAnalyzer.TYPE_CHUNK_SENTENCE_TRANSFORMER:
-            from src.analyze.vectorizer import SentenceChunkVectorizer
-            self.vectorizer = SentenceChunkVectorizer()
-            print("Loaded paper matrix chunk sentence transformer")
-        else:
-            raise ValueError('Unknown type')
-
-    def preprocess(self, force_recompute=False):
-        self.vectorizer.generate_paper_matrix(force_recompute)
+        elif type == BasicPaperAnalyzer.TYPE_TRANSFORMER_PAPER:
+            from src.analyze.vectorizer import TransformerPaperVectorizer
+            self._matrix_file_name = "transformer_paper.pkl"
+            self._vectorizer = TransformerPaperVectorizer(matrix_file_name=self._matrix_file_name)
 
     def query(self, query: str):
-        embedding = self.vectorizer.vectorize([query])[0]
-        return self.vectorizer.compute_similarity_scores(embedding)
+        indices, scores = self._vectorizer.matching_to_query(query)
+        return list(zip(indices, scores))
 
-    def assign_to_topics(self):
+    def similar(self, doi: str):
+        indices, scores = self._vectorizer.similar_to_paper(doi)
+        results = list(filter(lambda x: x[0] != doi, sorted(zip(indices, scores), key=lambda x: x[1], reverse=True)))
+        return results
 
-        print("Assigning to topics")
+    def preprocess(self, force_recompute=False):
+        paper_matrix = self._vectorizer.compute_paper_matrix(force_recompute=force_recompute)
 
-        print("Matrix not empty")
-        topics = list(Topic.objects.all())
-        print("Beginning Paper assignment")
-
-        topic_scores = self.compute_topic_score(topics)
-
-        papers = Paper.objects.all()
-        for paper in papers:
-            topic_idx = np.argmax(topic_scores[paper.doi]).item()
-            paper.topic = topics[topic_idx]
-            paper.topic_score = topic_scores[paper.doi][topic_idx]
-            paper.save()
-
-        for topic in topics:
-            topic.save()
-
-        print("Finished asignment to topics")
-
-    def related(self, query: str):
-        paper_ids, scores = self.query(query)
-        return list(zip(paper_ids, scores))
-
-    def compute_topic_score(self, topics):
-        if self.vectorizer.paper_matrix is None:
-            raise Exception("Paper matrix empty")
-
-        if self.type == BasicPaperAnalyzer.TYPE_CHUNK_SENTENCE_TRANSFORMER:
-            topic_scores = self._topics_scores_chunk_sentence_transformer(topics)
+        # Write out matrix
+        joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_BASE_DIR, self._matrix_file_name))
+        refresh_local_timestamps(settings.PAPER_MATRIX_BASE_DIR, [self._matrix_file_name])
+        if settings.PUSH_PAPER_MATRIX:
+            self._update_remote_paper_matrix()
+            print("Paper matrix exported completed")
         else:
-            topic_scores = defaultdict(list)
-            topic_embeddings = self.vectorizer.vectorize_topics(topics)
+            print("No recomputing of matrix necessary")
 
-            for idx, topic in enumerate(topics):
-                paper_ids, similarities = self.vectorizer.compute_similarity_scores(topic_embeddings[idx])
-
-                for id, score in zip(paper_ids, similarities):
-                    topic_scores[id].append(score)
-
-        return topic_scores
-
-    def _topics_scores_chunk_sentence_transformer(self, topics):
-        topic_scores = defaultdict(list)
-        topic_title_embeddings, topic_description_embeddings = self.vectorizer.vectorize_topics(topics)
-
-        for idx, topic in enumerate(topics):
-
-            paper_ids, title_similarities = self.vectorizer.compute_similarity_scores(topic_title_embeddings[idx])
-
-            description_similarities_raw = list()
-
-            for vec in topic_description_embeddings[idx]:
-                _, similarities = self.vectorizer.compute_similarity_scores(vec)
-                description_similarities_raw.append(similarities)
-
-            description_similarities = np.array([sum(similarities_for_paper) / len(similarities_for_paper)
-                                                 for similarities_for_paper in zip(*description_similarities_raw)])
-            title_similarities = np.array(title_similarities)
-
-            similarities = .5 * title_similarities + 0.5 * description_similarities
-
-            for id, score in zip(paper_ids, similarities):
-                topic_scores[id].append(score)
-
-        return topic_scores
+    def _update_remote_paper_matrix(self):
+        aws_access_key = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        endpoint_url = settings.AWS_S3_ENDPOINT_URL
+        s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key,
+                                          aws_secret_access_key=aws_secret_access_key,
+                                          endpoint_url=endpoint_url, bucket=bucket)
+        paper_matrix_store = PaperMatrixStore(s3_bucket_client)
+        paper_matrix_store.update_remote(settings.PAPER_MATRIX_BASE_DIR,
+                                         [self._matrix_file_name.replace('.pkl', '')])
