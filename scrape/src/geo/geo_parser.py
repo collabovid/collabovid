@@ -14,7 +14,7 @@ RESET = "\033[0;0m"
 
 class GeoParser:
     def __init__(self, db_path, log=print):
-        self.nlp = spacy.load('en_core_web_lg')
+        self.nlp = spacy.load('en_core_web_sm')
         self.log=log
         self.geonames_db = GeonamesDB(db_path)
         self.geonames_db.connect()

@@ -27,6 +27,9 @@ PIPELINE = {
                 'js/gijgo.min.js',
                 'js/tagify.js',
                 'core/js/pagination.js',
+                'core/js/collabovid_search.js',
+                'core/js/filter_utils.js',
+                'core/js/paper_cards.js'
             ),
             'output_filename': 'search.js'
         },

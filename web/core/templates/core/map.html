@@ -1,4 +1,4 @@
-{% extends "core/base.html" %}
+{% extends "core/search_base.html" %}
 {% load pipeline %}
 {% load static %}
 
@@ -21,6 +21,11 @@
         {% include "core/partials/_rounded_bottom.html" %}
     </div>
 
+    <form id="paper-search-form" method="post" action="{% url "search" %}">
+        <input type="hidden" name="tab" value="top">
+        {% csrf_token %}
+    </form>
+
     <div class="container mt-5">
         <div id="world-map" style="width: auto; height: 400px"></div>
 
@@ -39,12 +44,34 @@
 {% endblock %}
 
 {% block script %}
+    {{ block.super }}
     {% javascript 'map' %}
 
     <script>
         $(document).ready(function () {
             let countries = JSON.parse("{{ countries|escapejs }}");
             let cities = JSON.parse("{{ cities|escapejs }}");
+
+            let form = $("#paper-search-form");
+            let indicator = $("#paper-loading-indicator");
+            let paper_container = $("#paper-container");
+            let pagination_container = $("#pagination-container");
+
+
+            let searchEngine = form.collabovidSearch({
+                indicator: indicator,
+                paper_container: paper_container,
+                pagination_container: pagination_container
+            });
+
+            form.submit(function (e) {
+                e.preventDefault();
+                searchEngine.searchQuery(form.serialize(), 1, false, function () {
+                }, function () {
+
+                });
+            });
+
 
             let city_count = [];
             let city_markers = [];
@@ -88,13 +115,13 @@
                 },
                 onRegionTipShow: function (e, el, code) {
                     let count = 0;
-                    if(countries[code] !== undefined) count = countries[code];
+                    if (countries[code] !== undefined) count = countries[code];
 
                     el.html(el.html() + ' (' + count + ')');
                 },
                 onMarkerTipShow: function (e, el, code) {
                     let count = 0;
-                    if(city_count[code] !== undefined) count = city_count[code];
+                    if (city_count[code] !== undefined) count = city_count[code];
 
                     el.html(el.html() + ' (' + count + ')');
                 },
@@ -105,16 +132,18 @@
                         mapObject.clearSelectedRegions()
                     } else {
                         mapObject.clearSelectedRegions();
-                        mapObject.setSelectedRegions([code])
+                        mapObject.setSelectedRegions([code]);
+
+                        form.submit();
                     }
                 },
                 onMarkerClick: function (event, code) {
                     let mapObject = $('#world-map .jvectormap-container').data('mapObject');
                     mapObject.clearSelectedRegions();
                     if (mapObject.getSelectedMarkers().includes(code)) {
-                        mapObject.clearSelectedMarkers()
+                        mapObject.clearSelectedMarkers();
                     } else {
-                        mapObject.clearSelectedMarkers()
+                        mapObject.clearSelectedMarkers();
                         mapObject.setSelectedMarkers([code])
                     }
                 }
