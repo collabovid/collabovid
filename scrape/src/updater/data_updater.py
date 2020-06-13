@@ -7,7 +7,7 @@ from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
 from django.utils import timezone
-from src.pdf_extractor import PdfExtractError, PdfExtractor
+from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
 from src.static_functions import covid_related
 
 
@@ -48,7 +48,7 @@ class ArticleDataPoint(object):
 
     def _setup_pdf_extractor(self):
         if not self._pdf_extractor:
-            self._pdf_extractor = PdfExtractor(self.pdf_url)
+            self._pdf_extractor = PdfFromUrlExtractor(self.pdf_url)
 
     @property
     def doi(self):
@@ -117,7 +117,7 @@ class ArticleDataPoint(object):
             return
 
         sleep(3)
-        pdf_extractor = PdfExtractor(db_article.pdf_url)
+        pdf_extractor = PdfFromUrlExtractor(db_article.pdf_url)
 
         if extract_image:
             image = pdf_extractor.extract_image()
@@ -284,7 +284,6 @@ class DataUpdater(object):
             if i % 100 == 0:
                 self.log(f"Progress: {i}/{total}")
             self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image, update_existing=False)
-
 
         self.log("Delete orphaned authors and journals")
         authors_deleted = Author.cleanup()

@@ -2,6 +2,7 @@ from django.conf import settings
 from django.utils.timezone import make_aware
 
 from data.models import DataSource
+from src.pdf_extractor import PdfFromBytesExtractor
 from src.updater.data_updater import ArticleDataPoint, DataUpdater
 from src.updater.elsevier_cache import ElsevierCache
 from nameparser import HumanName
@@ -105,7 +106,18 @@ class ElsevierDatapoint(ArticleDataPoint):
 
     @staticmethod
     def _update_pdf_data(db_article, extract_image=True, extract_content=True):
-        return
+        if not extract_image and not extract_content:
+            return
+        with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
+            pdf = elsevier.get_pdf(db_article.doi)
+
+        if extract_image:
+            # The first page of all Elsevier PDFs is a Corona and license disclaimer
+            image = PdfFromBytesExtractor.image_from_bytes(pdf, page=2)
+            if image:
+                db_article.add_preview_image(image)
+        # TODO: Does not yet extract content from PDF.
+        #  The first page should be excluded for all Elsevier articles (cover page) for content detection
 
 
 class ElsevierUpdater(DataUpdater):

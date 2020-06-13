@@ -1,7 +1,7 @@
 from time import sleep
 
 from data.models import Paper
-from src.pdf_extractor import PdfExtractError, PdfExtractor
+from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
 from tasks.definitions import register_task, Runnable
 
 
@@ -28,7 +28,7 @@ class PdfImageDownloadTask(Runnable):
                 self.log(f"Download PDF preview image for {paper.doi}")
                 try:
                     sleep(3)
-                    pdf_extractor = PdfExtractor(paper.pdf_url)
+                    pdf_extractor = PdfFromUrlExtractor(paper.pdf_url)
                     image = pdf_extractor.extract_image()
 
                     if image:
