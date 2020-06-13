@@ -100,10 +100,16 @@
             window.history.pushState({path: url}, '', url);
         }
 
+        function search_possible()
+        {
+            return window.formAjaxAllowed
+        }
+
 
         return {
             searchQuery: search_query,
-            pushToUrl: push_request_to_url
+            pushToUrl: push_request_to_url,
+            searchPossible: search_possible
         }
     }
 }(jQuery));

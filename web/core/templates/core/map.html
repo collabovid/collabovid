@@ -192,6 +192,10 @@
                     el.html(el.html() + ' (' + count + ')');
                 },
                 onRegionClick: function (event, code) {
+                    event.preventDefault();
+
+                    if (!searchEngine.searchPossible()) return;
+
                     let mapObject = $('#world-map .jvectormap-container').data('mapObject');
                     mapObject.clearSelectedMarkers();
                     if (country_names[code] === undefined || mapObject.getSelectedRegions().includes(code)) {
@@ -205,6 +209,10 @@
                     }
                 },
                 onMarkerClick: function (event, code) {
+                    event.preventDefault();
+
+                    if (!searchEngine.searchPossible()) return;
+
                     let mapObject = $('#world-map .jvectormap-container').data('mapObject');
                     mapObject.clearSelectedRegions();
                     if (mapObject.getSelectedMarkers().includes(code)) {
