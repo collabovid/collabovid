@@ -131,15 +131,15 @@ class DataExport:
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
-                        image_path = f"thumbnails/{image_id_counter}.png"
+                        image_path = f"thumbnails/{image_id_counter}.jpg"
                         if settings.DEFAULT_FILE_STORAGE == 'django.core.files.storage.FileSystemStorage':
-                            tar.add(paper.preview_image.path, arcname=f"thumbnails/{image_id_counter}.png")
+                            tar.add(paper.preview_image.path, arcname=f"thumbnails/{image_id_counter}.jpg")
                             image_id_counter += 1
                             paper_data['image'] = image_path
                         elif settings.DEFAULT_FILE_STORAGE == 'storage.custom_storage.MediaStorage':
                             image = DataExport.download_image(paper.preview_image.name)
                             if image:
-                                tarinfo = tarfile.TarInfo(name=f"thumbnails/{image_id_counter}.png")
+                                tarinfo = tarfile.TarInfo(name=f"thumbnails/{image_id_counter}.jpg")
                                 tarinfo.size = len(image.getbuffer())
                                 tar.addfile(tarinfo, fileobj=image)
                                 image_id_counter += 1
@@ -156,12 +156,6 @@ class DataExport:
                     "locations": locations
                 }
 
-                # json_io = io.BytesIO()
-                # json.dump(data, json_io)
-                #
-                # tarinfo = tarfile.TarInfo(name='data.json')
-                # tarinfo.size = len(json_io.getbuffer())
-                # tar.addfile(tarinfo, fileobj=json_io)
                 with open(json_path, "w") as file:
                     json.dump(data, file)
 
@@ -184,7 +178,8 @@ class DataExport:
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
         log(f"\t{len(categories_ml)} ML categories")
-        log(f"\t{len(locations)} geolocations")
+        log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
+        log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
