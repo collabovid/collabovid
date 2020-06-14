@@ -61,13 +61,15 @@ def partition(lst, n):
 
 class DoiPiiMapping:
     """Stores a mapping from DOIs to PIIs as Dict. Reads and saves the mapping in a persistent file."""
-    def __init__(self, path):
+    def __init__(self, path, log=print):
         self._mapping = None
         self.path = pathlib.Path(path)
+        self.log = log
         if os.path.isfile(self.path):
             with open(self.path, 'r') as f:
                 self._mapping = json.load(f)
         else:
+            self.log(f"Mapping not found. Creating new one.")
             self._mapping = {}
 
     @staticmethod
@@ -225,7 +227,10 @@ class ElsevierCache:
         return self._metadata
 
     def get_pdf(self, doi):
-        """Retrieves the PDF file for the given DOI from the Elsevier server."""
+        """
+        Retrieves the PDF file for the given DOI from the Elsevier server.
+        Note: Requires that the Doi to Pii mapping was already built. So, _read_metadata() was already called.
+        """
         pii = self._doi_pii_mapping.get(doi)
         if not pii:
             self.log(f"No PII found for DOI {doi}")

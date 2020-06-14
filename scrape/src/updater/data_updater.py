@@ -110,7 +110,7 @@ class ArticleDataPoint(object):
         return None
 
     @staticmethod
-    def _update_pdf_data(db_article, extract_image=True, extract_content=True):
+    def update_pdf_data(db_article, extract_image=True, extract_content=True):
         if not extract_image and not extract_content:
             return
         if not db_article.pdf_url:
@@ -212,7 +212,7 @@ class ArticleDataPoint(object):
                 )
 
             if pdf_content or pdf_image:
-                self._update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
+                self.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
 
             db_article.last_scrape = timezone.now()
