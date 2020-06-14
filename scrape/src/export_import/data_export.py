@@ -9,7 +9,8 @@ from timeit import default_timer as timer
 import requests
 from django.conf import settings
 
-from data.models import CategoryMembership
+from data.models import CategoryMembership, GeoCity, GeoCountry, GeoLocationMembership
+
 
 class DataExport:
     @staticmethod
@@ -30,6 +31,7 @@ class DataExport:
         paperhosts = {}
         journals = {}
         categories_ml = {}
+        locations = {}
         papers = []
 
         if not os.path.exists(out_dir):
@@ -61,8 +63,37 @@ class DataExport:
                     for category in paper.categories.all():
                         if category.model_identifier not in categories_ml:
                             categories_ml[category.model_identifier] = {"name": category.name,
-                                                                     "description": category.description,
-                                                                     "color": category.color}
+                                                                        "description": category.description,
+                                                                        "color": category.color}
+                    for location in paper.locations.all():
+                        if location.pk not in locations:
+                            location_info = {"name": location.name, "alias": location.alias,
+                                             "latitude": location.latitude, "longitude": location.longitude}
+                            try:
+                                # Try whether the location is a country
+                                country = location.geocountry
+                                location_info["type"] = "country"
+                                location_info["alpha_2"] = country.alpha_2
+                            except GeoCountry.DoesNotExist:
+                                # Location has to be a city
+                                try:
+                                    city = location.geocity
+                                    location_info["type"] = "city"
+                                    location_info["country_id"] = city.country.pk
+                                    #  We need to export the city's country here as well, if it is not already
+                                    #  in the list. Can happen that this country is not added (because not referenced
+                                    #  from anywhere else (from no paper directly).
+                                    citys_country = city.country
+                                    if citys_country.pk not in locations:
+                                        locations[citys_country.pk] = {"name": citys_country.name,
+                                                                       "alias": citys_country.alias,
+                                                                       "latitude": citys_country.latitude,
+                                                                       "longitude": citys_country.longitude,
+                                                                       "type": "country",
+                                                                       "alpha_2": citys_country.alpha_2}
+                                except GeoCity.DoesNotExist:
+                                    raise Exception(f"Location {location.name} is neither city nor country!")
+                            locations[location.pk] = location_info
 
                     paper_data = {
                         "doi": paper.doi,
@@ -93,19 +124,22 @@ class DataExport:
                         "category_memberships": [{"identifier": c.model_identifier,
                                                   "score": CategoryMembership.objects.get(
                                                       category__model_identifier=c.model_identifier, paper=paper).score}
-                                                 for c in paper.categories.all()]
+                                                 for c in paper.categories.all()],
+                        "locations": [{"id": l.pk, "state": GeoLocationMembership.objects.get(paper=paper,
+                                                                                              location__id=l.pk).state}
+                                      for l in paper.locations.all()]
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
-                        image_path = f"thumbnails/{image_id_counter}.png"
+                        image_path = f"thumbnails/{image_id_counter}.jpg"
                         if settings.DEFAULT_FILE_STORAGE == 'django.core.files.storage.FileSystemStorage':
-                            tar.add(paper.preview_image.path, arcname=f"thumbnails/{image_id_counter}.png")
+                            tar.add(paper.preview_image.path, arcname=f"thumbnails/{image_id_counter}.jpg")
                             image_id_counter += 1
                             paper_data['image'] = image_path
                         elif settings.DEFAULT_FILE_STORAGE == 'storage.custom_storage.MediaStorage':
                             image = DataExport.download_image(paper.preview_image.name)
                             if image:
-                                tarinfo = tarfile.TarInfo(name=f"thumbnails/{image_id_counter}.png")
+                                tarinfo = tarfile.TarInfo(name=f"thumbnails/{image_id_counter}.jpg")
                                 tarinfo.size = len(image.getbuffer())
                                 tar.addfile(tarinfo, fileobj=image)
                                 image_id_counter += 1
@@ -118,15 +152,10 @@ class DataExport:
                     "paperhosts": paperhosts,
                     "papers": papers,
                     "journals": journals,
-                    "categories_ml": categories_ml
+                    "categories_ml": categories_ml,
+                    "locations": locations
                 }
 
-                # json_io = io.BytesIO()
-                # json.dump(data, json_io)
-                #
-                # tarinfo = tarfile.TarInfo(name='data.json')
-                # tarinfo.size = len(json_io.getbuffer())
-                # tar.addfile(tarinfo, fileobj=json_io)
                 with open(json_path, "w") as file:
                     json.dump(data, file)
 
@@ -149,6 +178,8 @@ class DataExport:
         log(f"\t{len(authors)} authors")
         log(f"\t{len(papers)} articles")
         log(f"\t{len(categories_ml)} ML categories")
+        log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
+        log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
