@@ -121,8 +121,8 @@ class VerificationState(models.IntegerChoices):
 
 
 class GeoLocation(models.Model):
-    name = models.CharField(max_length=100, unique=True, null=False)
-    alias = models.CharField(max_length=40, unique=True, null=True)
+    name = models.CharField(max_length=100, null=False)
+    alias = models.CharField(max_length=40, null=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
@@ -145,6 +145,9 @@ class GeoCountry(GeoLocation):
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
 
+
+class GeoStopword(models.Model):
+    word = models.CharField(max_length=50)
 
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
@@ -207,6 +210,7 @@ class Paper(models.Model):
 class GeoLocationMembership(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
+    word = models.CharField(max_length=50)
     state = models.IntegerField(choices=VerificationState.choices)
 
 

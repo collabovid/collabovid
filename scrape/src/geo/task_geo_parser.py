@@ -1,10 +1,9 @@
-import itertools
-
 from django.conf import settings
 
-from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, Paper, VerificationState
+from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, GeoStopword, Paper, VerificationState
 from src.geo.geo_parser import GeoParser
 from src.geo.country_data import CountryData
+from src.geo.paper_geo_extractor import PaperGeoExtractor
 from tasks.definitions import register_task, Runnable
 
 from termcolor import colored
@@ -26,72 +25,22 @@ class GeoParserTask(Runnable):
     def run(self):
         n_locations = 0
 
-        with GeoParser(log=self.log, db_path=f'{settings.RESOURCES_DIR}/geonames/geonames.sqlite3') as geo:
-            updated = False
+        with PaperGeoExtractor(db_path=f'{settings.RESOURCES_DIR}/{settings.GEONAMES_DB_REL_PATH}') as geo:
             for paper in Paper.objects.all():
-                locations, ignored_entities = geo.parse(paper.title, merge=True)
+                locations, ignored_entities = geo.extract_locations(paper)
+                locations = [x for x in locations if x[2] != PaperGeoExtractor.LOCATION_SKIPPED]
+                n_locations += len(locations)
 
-                first = True
-                for location, usage in locations:
-                    word = usage['word'].strip()
-                    if word in ('CT', 'MS'):
-                        # Ignore location CT and MS, which refers in almost all cases to
-                        # "computed tomography" and "MS" in medical context rather than Connecticut/Mississippi.
-                        continue
+                if len(locations) > 0 or len(ignored_entities) > 0:
+                    self.log(paper.title)
 
-                    country_data = CountryData.get(location.country_code)
-                    db_country, country_created = GeoCountry.objects.get_or_create(
-                        name=country_data['name'],
-                        alias=country_data['alias'],
-                        alpha_2=location.country_code,
-                        latitude=country_data['lat'],
-                        longitude=country_data['lon'],
-                    )
-
-                    if location.feature_label.startswith('A.PCL'):
-                        db_location = db_country
-                        created = country_created
-                    else:
-                        try:
-                            db_location = GeoLocation.objects.get(name=location.name)
-                            created = False
-                        except GeoLocation.DoesNotExist:
-                            db_location = GeoCity.objects.create(
-                                    name=location.name,
-                                    country=db_country,
-                                    latitude=location.latitude,
-                                    longitude=location.longitude,
-                            )
-                            created = True
-
-                    if db_location not in paper.locations.all():
-                        membership = GeoLocationMembership(
-                            paper=paper,
-                            location=db_location,
-                            state=VerificationState.AUTOMATICALLY_ACCEPTED,
-                        )
-                        membership.save()
-                        n_locations += 1
-                        updated = True
-                        added = True
-                    else:
-                        added = False
-
-                    if first and (len(ignored_entities) > 0 or added or created):
-                        first = False
-                        self.log(paper.title)
-
-                        for ent in ignored_entities:
-                            self.log("\t[{:7}] {:30}".format(colored('ignored', 'red'), ent))
-
-                    if created or added:
-                        status = 'created' if created else 'added'
+                    for location in locations:
+                        state = 'created' if location[2] == PaperGeoExtractor.LOCATION_CREATED else 'added'
                         self.log(
-                            "\t[{:16}] {:20} -> {}".format(colored(status, 'green'), word, db_location.name)
+                            "\t[{:16}] {:20} -> {}".format(colored(state, 'green'), location[1], location[0].name)
                         )
 
-                if updated:
-                    paper.save()
-                    updated = False
+                    for ent in ignored_entities:
+                        self.log("\t[{:7}] {:30}".format(colored('ignored', 'red'), ent))
 
-        self.log(f"Found {n_locations} locations")
+        self.log(f"Added {n_locations} locations")

@@ -4,18 +4,18 @@ import spacy
 
 from src.geo.geoname_db import GeonamesDB
 
+
+_SPACY_MODEL = 'en_core_web_lg'
+
 _COUNTRY_ALIASES = {
     "US": "United States",
     "U.S.A": "United States",
+    "U.S": "United States",
 }
 
-RED   = "\033[1;31m"
-RESET = "\033[0;0m"
-
 class GeoParser:
-    def __init__(self, db_path, log=print):
-        self.nlp = spacy.load('en_core_web_sm')
-        self.log=log
+    def __init__(self, db_path):
+        self.nlp = spacy.load(_SPACY_MODEL)
         self.geonames_db = GeonamesDB(db_path)
         self.geonames_db.connect()
 
