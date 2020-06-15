@@ -96,7 +96,7 @@ def search(request):
         try:
             location_ids = [int(pk) for pk in location_ids.split(',')] if location_ids else []
         except ValueError:
-            journal_ids = []
+            location_ids = []
 
         locations = GeoLocation.objects.filter(pk__in=location_ids).annotate(paper_count=Count('papers')).order_by(
             '-paper_count')
@@ -206,15 +206,8 @@ def search(request):
 
 
 def locations(request):
-    # Using a subquery to find the directly associated paper count
-    paper_counts_subquery = Subquery(GeoCountry.objects.filter(pk=OuterRef('pk')).
-                                     annotate(count=Count('papers')).values('count'),
-                                     output_field=IntegerField())
 
-    # Counting indirectly associated papers. Afterwards we annotate the subquery result and sum up the values.
-    countries = GeoCountry.objects.annotate(count_indirect=Count('cities__papers', distinct=True)) \
-        .annotate(count_direct=paper_counts_subquery) \
-        .annotate(count=F('count_indirect') + F('count_direct'))
+    countries = GeoCountry.objects.all()
 
     countries = [
         {
@@ -226,7 +219,7 @@ def locations(request):
         for country in countries
     ]
 
-    cities = GeoCity.objects.annotate(count=Count('papers'))
+    cities = GeoCity.objects.all()
 
     cities = [
         {

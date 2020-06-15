@@ -3,7 +3,9 @@ from typing import Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
-from django.db.models import Q
+from django.db.models import Q, Subquery, OuterRef, Value, Count
+from django.db.models.signals import m2m_changed, post_save, post_delete
+from django.dispatch import receiver
 
 
 class Topic(models.Model):
@@ -126,6 +128,8 @@ class GeoLocation(models.Model):
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
+    count = models.IntegerField(default=0)
+
     @property
     def displayname(self):
         return self.alias if self.alias else self.name
@@ -148,6 +152,7 @@ class GeoCity(GeoLocation):
 
 class GeoStopword(models.Model):
     word = models.CharField(max_length=50)
+
 
 class Paper(models.Model):
     SORTED_BY_TOPIC_SCORE = 1
@@ -191,7 +196,6 @@ class Paper(models.Model):
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
 
-
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
@@ -218,3 +222,41 @@ class CategoryMembership(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     score = models.FloatField(default=0.0)
+
+
+def locations_changed(instance, reverse, pk_set, action, **kwargs):
+    if action in ["post_add", "post_remove"]:
+        if reverse:
+            #  Given instance is either a city or a country which has added one or more papers
+            cities = GeoCity.objects.filter(pk=instance.pk)
+            countries = GeoCountry.objects.filter(Q(pk=instance.pk) | Q(cities=instance.pk)).distinct()
+        else:
+            #  Given instance is a Paper that has added one or more locations.
+            cities = GeoCity.objects.filter(pk__in=pk_set)
+            countries = GeoCountry.objects.filter(Q(pk__in=pk_set) | Q(cities__in=cities)).distinct()
+
+        count_for_country = Subquery(Paper.objects.annotate(country=OuterRef('pk'))
+                                     .filter(Q(locations=OuterRef('pk')) |
+                                             Q(locations__in=Subquery(
+                                                 GeoCity.objects.filter(country=OuterRef('country')).only('pk')))).
+                                     annotate(group=Value('Paper')).values('group')
+                                     .annotate(count=Count("pk", distinct=True)).values('count'),
+                                     output_field=models.IntegerField())
+
+        cities.update(count=Subquery(
+            Paper.objects.filter(locations=OuterRef('pk')).annotate(group=Value('Paper')).values('group').annotate(
+                count=Count('pk')).values('count'),
+            output_field=models.IntegerField()))
+        countries.update(count=count_for_country)
+
+    elif action in ["pre_clear", "post_clear"]:
+        raise NotImplementedError("Clearing the location membership relation is not supported yet.")
+
+
+def membership_changed(sender, instance, **kwargs):
+    locations_changed(instance=instance.location, reverse=True, action="post_add", pk_set={})
+
+
+m2m_changed.connect(locations_changed, sender=Paper.locations.through)
+post_save.connect(membership_changed, sender=GeoLocationMembership)
+post_delete.connect(membership_changed, sender=GeoLocationMembership)
