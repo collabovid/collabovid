@@ -35,18 +35,7 @@ class GeoParser:
         for entity in doc.ents:
             if entity.label_ == 'GPE':
                 term = self._resolve_alias(entity.text)
-                try:
-                    location = self.geonames_db.search_most_probable(term)
-                except GeonamesDB.RecordNotFound:
-                    location = None
-
-                if not location:
-                    alt_term = self._get_alternate_term(term)
-                    if term != alt_term:
-                        try:
-                            location = self.geonames_db.search_most_probable(alt_term)
-                        except GeonamesDB.RecordNotFound:
-                            location = None
+                location = self._get_geonames_location(term)
 
                 if location:
                     usage = {
@@ -62,6 +51,19 @@ class GeoParser:
             return self._merge_locations(query, locations), ignored_entities
         return locations, ignored_entities
 
+    def _get_geonames_location(self, term):
+        try:
+            return self.geonames_db.search_most_probable(term)
+        except GeonamesDB.RecordNotFound:
+            pass
+
+        alt_term = self._get_alternate_term(term)
+        if term != alt_term:
+            try:
+                return self.geonames_db.search_most_probable(alt_term)
+            except GeonamesDB.RecordNotFound:
+                pass
+        return None
 
     @staticmethod
     def _merge_locations(query, locations):
@@ -84,10 +86,10 @@ class GeoParser:
                 except StopIteration:
                     continue
 
-                if (
-                        suc_location.feature_label == "A.PCLI" and
-                        suc_location.country_code == location.country_code
-                ):
+                if (suc_location.country_code == location.country_code and
+                        (suc_location.feature_label == "A.PCLI" or
+                            (suc_location.feature_label == "A.ADM1" and
+                                suc_location.admin1_code == location.admin1_code))):
                     span_end = suc_usage['end']
                     usage['word'] = query[usage['start']:span_end]
                     usage['end'] = span_end
@@ -95,13 +97,15 @@ class GeoParser:
 
         return [x for x in locations if x not in merged_locations]
 
-    def _resolve_alias(self, text):
+    @staticmethod
+    def _resolve_alias(text):
         if text in _COUNTRY_ALIASES:
             return _COUNTRY_ALIASES[text]
         else:
             return text
 
-    def _get_alternate_term(self, text):
+    @staticmethod
+    def _get_alternate_term(text):
         ltext = text.lower()
 
         prefixes = ['the ']
