@@ -107,8 +107,8 @@ class PaperData(models.Model):
 
     @staticmethod
     def cleanup():
-        used_paper_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        deleted, _ = PaperData.objects.exclude(id__in=used_paper_ids).delete()
+        used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
+        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
         return deleted
 
 

@@ -31,6 +31,8 @@ class ImportDataTask(Runnable):
         local_dir = settings.DB_EXPORT_LOCAL_DIR
         local_filepath = f"{local_dir}/{self.filename}"
 
+        data_importer = DataImport(log=self.log)
+
         if not settings.DB_EXPORT_STORE_LOCALLY:
             if not os.path.exists(local_dir):
                 self.log(f"Create directory \"{local_dir}\"")
@@ -49,11 +51,11 @@ class ImportDataTask(Runnable):
                 s3_client.download_file(s3_key, local_filepath)
 
                 self.log(f"Import data from \"{local_filepath}\"")
-                DataImport.import_data(local_filepath, log=self.log)
+                data_importer.import_data(local_filepath)
             finally:
                 if os.path.exists(local_filepath):
                     self.log(f"Remove \"{local_filepath}\"")
                     os.remove(local_filepath)
         else:
             self.log(f"Import data from \"{local_filepath}\"")
-            DataImport.import_data(local_filepath, log=self.log)
+            data_importer.import_data(local_filepath)
