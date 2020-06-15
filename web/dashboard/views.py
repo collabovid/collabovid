@@ -3,6 +3,7 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 
 from collabovid_store.s3_utils import S3BucketClient
+from data.models import GeoLocationMembership, Paper
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -174,3 +175,15 @@ def delete_archive(request, archive_path):
             messages.add_message(request, messages.ERROR, 'Error: No filename specified')
         return redirect('data_import')
     return HttpResponseNotFound()
+
+
+@staff_member_required
+def location_sanitizing(request):
+    location_papers = Paper.objects.exclude(locations=None)
+    location_memberships = [
+        {"paper": paper, "locations": GeoLocationMembership.objects.filter(paper_id=paper.doi)}
+        for paper in location_papers
+    ]
+
+    return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
+                  {'location_papers': location_memberships, 'debug': settings.DEBUG})
