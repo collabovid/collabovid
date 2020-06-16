@@ -24,3 +24,5 @@ USE_TZ = True
 UPDATE_VECTORIZER = True
 
 GEONAMES_DB_REL_PATH = 'geonames/geonames.sqlite3'
+
+MODELS_BASE_DIR = os.getenv('MODELS_BASE_DIR', None)

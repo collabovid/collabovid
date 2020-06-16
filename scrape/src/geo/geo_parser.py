@@ -1,16 +1,16 @@
 import re
-
+import os
 import spacy
 
 from src.geo.geoname_db import GeonamesDB
-
+from django.conf import settings
 
 _SPACY_MODEL = 'en_core_web_lg'
 
 
 class GeoParser:
     def __init__(self, db_path, name_resolutions=None):
-        self.nlp = spacy.load(_SPACY_MODEL)
+        self.nlp = spacy.load(os.path.join(settings.MODELS_BASE_DIR, "en_core_web_lg"))
         self.geonames_db = GeonamesDB(db_path)
         self.geonames_db.connect()
         self.countries = {}
