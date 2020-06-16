@@ -30,4 +30,7 @@ if __name__ == '__main__':
         print("\tSyncing paper matrix")
         paper_matrix_store.sync()
 
+        print("\tSyncing resources")
+        resources_store.sync()
+
         sleep(sync_interval)
