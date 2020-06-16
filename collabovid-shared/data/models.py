@@ -137,6 +137,22 @@ class GeoLocation(models.Model):
     def __eq__(self, other):
         return isinstance(other, GeoLocation) and self.pk == other.pk
 
+    @staticmethod
+    def recompute_counts(cities, countries):
+        count_for_country = Subquery(Paper.objects.annotate(country=OuterRef('pk'))
+                                     .filter(Q(locations=OuterRef('pk')) |
+                                             Q(locations__in=Subquery(
+                                                 GeoCity.objects.filter(country=OuterRef('country')).only('pk')))).
+                                     annotate(group=Value('Paper')).values('group')
+                                     .annotate(count=Count("pk", distinct=True)).values('count'),
+                                     output_field=models.IntegerField())
+
+        cities.update(count=Subquery(
+            Paper.objects.filter(locations=OuterRef('pk')).annotate(group=Value('Paper')).values('group').annotate(
+                count=Count('pk')).values('count'),
+            output_field=models.IntegerField()))
+        countries.update(count=count_for_country)
+
 
 class GeoCountry(GeoLocation):
     alpha_2 = models.CharField(max_length=2)
@@ -235,28 +251,24 @@ def locations_changed(instance, reverse, pk_set, action, **kwargs):
             cities = GeoCity.objects.filter(pk__in=pk_set)
             countries = GeoCountry.objects.filter(Q(pk__in=pk_set) | Q(cities__in=cities)).distinct()
 
-        count_for_country = Subquery(Paper.objects.annotate(country=OuterRef('pk'))
-                                     .filter(Q(locations=OuterRef('pk')) |
-                                             Q(locations__in=Subquery(
-                                                 GeoCity.objects.filter(country=OuterRef('country')).only('pk')))).
-                                     annotate(group=Value('Paper')).values('group')
-                                     .annotate(count=Count("pk", distinct=True)).values('count'),
-                                     output_field=models.IntegerField())
-
-        cities.update(count=Subquery(
-            Paper.objects.filter(locations=OuterRef('pk')).annotate(group=Value('Paper')).values('group').annotate(
-                count=Count('pk')).values('count'),
-            output_field=models.IntegerField()))
-        countries.update(count=count_for_country)
+        GeoLocation.recompute_counts(cities, countries)
 
     elif action in ["pre_clear", "post_clear"]:
         raise NotImplementedError("Clearing the location membership relation is not supported yet.")
 
 
 def membership_changed(sender, instance, **kwargs):
-    locations_changed(instance=instance.location, reverse=True, action="post_add", pk_set={})
+    """
+    In certain cases we want to prevent the model from recomputing the count.
+    In that cases set prevent_recompute_count
+    """
+    if not hasattr(instance, 'prevent_recompute_count') or not instance.prevent_recompute_count:
+        locations_changed(sender=sender,
+                          instance=instance.location,
+                          reverse=True,
+                          action="post_add", pk_set={}, **kwargs)
 
 
-m2m_changed.connect(locations_changed, sender=Paper.locations.through)
-post_save.connect(membership_changed, sender=GeoLocationMembership)
-post_delete.connect(membership_changed, sender=GeoLocationMembership)
+m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
+post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")

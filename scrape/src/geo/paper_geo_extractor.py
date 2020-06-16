@@ -4,12 +4,16 @@ from src.geo.geo_parser import GeoParser
 
 
 class PaperGeoExtractor:
+    """
+    This class extracts geo locations for given papers. It is doing so
+    by using the GeoParser class to extract locations from the paper's title.
+    """
     LOCATION_CREATED = 0
     LOCATION_ADDED = 1
     LOCATION_SKIPPED = 2
 
     def __init__(self, db_path):
-        self.geo = GeoParser(db_path=db_path)
+        self.geo_parser = GeoParser(db_path=db_path)
 
     def __enter__(self):
         return self
@@ -18,19 +22,21 @@ class PaperGeoExtractor:
         self.close()
 
     def close(self):
-        self.geo.close()
+        self.geo_parser.close()
 
-    def extract_locations(self, paper):
-        locations, ignored_entities = self.geo.parse(paper.title, merge=True)
+    def extract_locations(self, paper, recompute_count=True):
+        locations, ignored_entities = self.geo_parser.parse(paper.title, merge=True)
         creation_states = []
 
         for location, usage in locations:
             word = usage['word'].strip()
 
             if GeoStopword.objects.filter(word=word.lower()).exists():
+                #  Word in the title is considered a stop word. Therefore, this location won't be added to the database
                 ignored_entities.append(word)
                 continue
 
+            # Add the country (possibly the location) or the country that contains the location
             country_data = CountryData.get(location.country_code)
             db_country, created = GeoCountry.objects.get_or_create(
                 name=country_data['name'],
@@ -51,12 +57,15 @@ class PaperGeoExtractor:
                 )
 
             if not paper.locations.filter(pk=db_location.pk).exists():
-                GeoLocationMembership.objects.create(
-                    paper=paper,
-                    location=db_location,
-                    word=word,
-                    state=VerificationState.AUTOMATICALLY_ACCEPTED,
-                )
+
+                membership = GeoLocationMembership()
+                membership.paper = paper
+                membership.location = db_location
+                membership.word = word
+                membership.state = VerificationState.AUTOMATICALLY_ACCEPTED
+                membership.prevent_recompute_count = not recompute_count
+                membership.save()
+
                 state = PaperGeoExtractor.LOCATION_CREATED if created else PaperGeoExtractor.LOCATION_ADDED
             else:
                 state = PaperGeoExtractor.LOCATION_SKIPPED

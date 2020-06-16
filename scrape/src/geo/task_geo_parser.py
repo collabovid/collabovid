@@ -27,7 +27,7 @@ class GeoParserTask(Runnable):
 
         with PaperGeoExtractor(db_path=f'{settings.RESOURCES_DIR}/{settings.GEONAMES_DB_REL_PATH}') as geo:
             for paper in Paper.objects.all():
-                locations, ignored_entities = geo.extract_locations(paper)
+                locations, ignored_entities = geo.extract_locations(paper, recompute_count=False)
                 locations = [x for x in locations if x[2] != PaperGeoExtractor.LOCATION_SKIPPED]
                 n_locations += len(locations)
 
@@ -42,5 +42,9 @@ class GeoParserTask(Runnable):
 
                     for ent in ignored_entities:
                         self.log("\t[{:7}] {:30}".format(colored('ignored', 'red'), ent))
+
+            self.log(f"Recomputing counts.")
+            GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
+            self.log(f"Recomputed counts")
 
         self.log(f"Added {n_locations} locations")
