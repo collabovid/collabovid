@@ -4,10 +4,12 @@
         <h6 class="card-subtitle mb-2">
         </h6>
         <div class="card-text mb-2 text-muted">
-            Paper count: {{ city.count }}
+            <div>Name: {{ city.name }}</div>
+            <div>Alias: {{ city.alias }}</div>
+            <div>Paper count: {{ city.count }}</div>
         </div>
-        <div class="mt-auto">
-            <a href="#" class="card-link" data-toggle="modal" data-target="#modal" data-id="{{ task.pk }}">Delete</a>
+        <div class="mt-auto text-right">
+            <a href="{% url "admin:data_geocity_change" city.pk %}" class="ml-2 card-link">Edit</a>
         </div>
     </div>
 </div>

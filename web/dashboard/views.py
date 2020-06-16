@@ -1,9 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
-from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity
+from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity, GeoNameResolution
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -104,14 +104,25 @@ def delete_all_finished(request):
         return redirect('tasks')
     return HttpResponseNotFound()
 
+
+@staff_member_required
+def show_location(request, id):
+    if request.method == 'GET':
+        country = get_object_or_404(GeoCountry, pk=id)
+
+        return render(request, 'dashboard/locations/country.html',
+                      {'country': country})
+
+
 @staff_member_required
 def locations(request):
     if request.method == 'GET':
         countries = GeoCountry.objects.all()
         cities = GeoCity.objects.all()
+        name_resolutions = GeoNameResolution.objects.all()
 
         return render(request, 'dashboard/locations/locations.html',
-                      {'countries': countries, 'cities': cities})
+                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions})
 
 
 # @staff_member_required

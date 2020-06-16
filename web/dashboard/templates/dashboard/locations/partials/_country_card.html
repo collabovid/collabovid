@@ -8,8 +8,9 @@
             <div>Alias: {{ country.alias }}</div>
             <div>Paper count: {{ country.count }}</div>
         </div>
-        <div class="mt-auto">
-            <a href="{% url "admin:data_geocountry_change" country.pk %}" class="card-link" >Edit</a>
+        <div class="mt-auto text-right">
+            <a href="{% url "admin:data_geocountry_change" country.pk %}" class="ml-2 card-link">Edit</a>
+            <a href="{% url "show-location" country.pk %}" class="ml-2 card-link">Show</a>
         </div>
     </div>
 </div>

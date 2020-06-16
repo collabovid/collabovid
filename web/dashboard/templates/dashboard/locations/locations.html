@@ -14,6 +14,12 @@
                aria-selected="false">Cities</a>
         </li>
 
+        <li class="nav-item">
+            <a class="nav-link" id="name-resolution-tab" data-toggle="tab" href="#name-resolution" role="tab"
+               aria-controls="name-resolution"
+               aria-selected="false">Name Resolution</a>
+        </li>
+
     </ul>
 
 
@@ -37,6 +43,39 @@
                             {% include 'dashboard/locations/partials/_city_card.html' with city=city %}
                         </div>
                     {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="name-resolution" role="tabpanel" aria-labelledby="name-resolution-tab">
+
+                <table class="table table-striped mt-3">
+                    <thead>
+                    <tr>
+                        <th class="text-left">Source Name</th>
+                        <th class="text-left">Target Name</th>
+                        <th class="text-left"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for name_resolution in name_resolutions %}
+                        <tr>
+                            <td class="text-left">{{ name_resolution.source_name }}</td>
+                            <td class="text-left">
+                                {% if name_resolution.target_name %}
+                                    <span class="text-success">Replace with: {{ name_resolution.target_name }}</span>
+                                {% else %}
+                                    <span class="text-danger">Remove</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <a href="{% url "admin:data_geonameresolution_change" name_resolution.pk %}">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="mt-3 text-right">
+                    <a href="{% url "admin:data_geonameresolution_add" %}" class="btn btn-success">Add</a>
                 </div>
             </div>
         </div>
