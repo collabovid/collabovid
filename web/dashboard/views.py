@@ -3,7 +3,7 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect
 
 from collabovid_store.s3_utils import S3BucketClient
-from data.models import GeoLocationMembership, Paper
+from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -103,6 +103,15 @@ def delete_all_finished(request):
             messages.add_message(request, messages.WARNING, 'No Tasks to delete.')
         return redirect('tasks')
     return HttpResponseNotFound()
+
+@staff_member_required
+def locations(request):
+    if request.method == 'GET':
+        countries = GeoCountry.objects.all()
+        cities = GeoCity.objects.all()
+
+        return render(request, 'dashboard/locations/locations.html',
+                      {'countries': countries, 'cities': cities})
 
 
 # @staff_member_required

@@ -13,5 +13,5 @@ urlpatterns = [
     #path('data-sanitizing', data_sanitizing, name='data-sanitizing'),
     path('data-import', data_import, name='data_import'),
     path('data-import/delete-archive/<path:archive_path>', delete_archive, name='delete_archive'),
-    path('sanitizing/location', location_sanitizing, name='location_sanitizing'),
+    path('locations', locations, name='locations'),
 ]

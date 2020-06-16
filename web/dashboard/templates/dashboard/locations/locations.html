@@ -1,0 +1,47 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active displa" id="countries-tab" data-toggle="tab" href="#countries" role="tab"
+               aria-controls="countries"
+               aria-selected="true">Countries</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="cities-tab" data-toggle="tab" href="#cities" role="tab" aria-controls="cities"
+               aria-selected="false">Cities</a>
+        </li>
+
+    </ul>
+
+
+    <div class="container">
+
+
+        <div class="tab-content" id="locationTabContent">
+            <div class="tab-pane fade show active" id="countries" role="tabpanel" aria-labelledby="countries-tab">
+                <div class="row">
+                    {% for country in countries %}
+                        <div class="col-lg-3 col-md-6 p-2">
+                            {% include 'dashboard/locations/partials/_country_card.html' with country=country %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="cities" role="tabpanel" aria-labelledby="cities-tab">
+                <div class="row">
+                    {% for city in cities %}
+                        <div class="col-lg-3 col-md-6 p-2">
+                            {% include 'dashboard/locations/partials/_city_card.html' with city=city %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
