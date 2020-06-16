@@ -115,13 +115,19 @@ class GeonamesDB:
     def aliases(self):
         return self.session.query(Alias)
 
-    def search(self, query, country=None, feature=None):
-        lquery = query.lower()
+    def search_country(self, country_code):
+        return self.locations.filter(
+            Location.country_code == country_code,
+            Location.feature_class == 'A',
+            Location.feature_code.like(f'PCL%'),
+        ).first()
 
+    def search(self, query, country_code=None, feature=None):
+        lquery = query.lower()
         q = Location.id.in_(self.session.query(Alias.location_id).filter(Alias.name == lquery))
 
-        if country:
-            q = and_(q, Location.country_code == country)
+        if country_code:
+            q = and_(q, Location.country_code == country_code)
 
         if feature:
             fclass, fcode = feature.split('.')
@@ -129,7 +135,7 @@ class GeonamesDB:
         return self.locations.filter(q)
 
     def search_most_probable(self, query, country=None, feature=None):
-        result = sorted(self.search(query, country=country, feature=feature), reverse=True)
+        result = sorted(self.search(query, country_code=country, feature=feature), reverse=True)
         if len(result) == 0:
             raise GeonamesDB.RecordNotFound(query)
         return result[0]

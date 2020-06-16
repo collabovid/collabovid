@@ -1,5 +1,4 @@
-from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, GeoStopword, VerificationState
-from src.geo.country_data import CountryData
+from data.models import GeoCity, GeoCountry, GeoLocationMembership, GeoNameResolution, VerificationState
 from src.geo.geo_parser import GeoParser
 
 
@@ -13,7 +12,8 @@ class PaperGeoExtractor:
     LOCATION_SKIPPED = 2
 
     def __init__(self, db_path):
-        self.geo_parser = GeoParser(db_path=db_path)
+        name_resolutions = {x.source_name: x.target_name for x in GeoNameResolution.objects.iterator()}
+        self.geo_parser = GeoParser(db_path=db_path, name_resolutions=name_resolutions)
 
     def __enter__(self):
         return self
@@ -28,23 +28,21 @@ class PaperGeoExtractor:
         locations, ignored_entities = self.geo_parser.parse(paper.title, merge=True)
         creation_states = []
 
-        for location, usage in locations:
+        for location, usage, country in locations:
             word = usage['word'].strip()
 
-            if GeoStopword.objects.filter(word=word.lower()).exists():
-                #  Word in the title is considered a stop word. Therefore, this location won't be added to the database
-                ignored_entities.append(word)
-                continue
-
             # Add the country (possibly the location) or the country that contains the location
-            country_data = CountryData.get(location.country_code)
-            db_country, created = GeoCountry.objects.get_or_create(
-                name=country_data['name'],
-                alias=country_data['alias'],
-                alpha_2=location.country_code,
-                latitude=country_data['lat'],
-                longitude=country_data['lon'],
-            )
+            try:
+                db_country = GeoCountry.objects.get(alpha_2=location.country_code)
+                created = False
+            except GeoCountry.DoesNotExist:
+                db_country = GeoCountry.objects.create(
+                    name=country.name,
+                    alpha_2=country.country_code,
+                    latitude=country.latitude,
+                    longitude=country.longitude,
+                )
+                created = True
 
             if location.feature_label.startswith('A.PCL'):
                 db_location = db_country

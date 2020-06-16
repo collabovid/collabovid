@@ -166,8 +166,9 @@ class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
 
 
-class GeoStopword(models.Model):
-    word = models.CharField(max_length=50)
+class GeoNameResolution(models.Model):
+    source_name = models.CharField(max_length=50)
+    target_name = models.CharField(max_length=50, null=True)
 
 
 class Paper(models.Model):

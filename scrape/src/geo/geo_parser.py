@@ -7,17 +7,17 @@ from src.geo.geoname_db import GeonamesDB
 
 _SPACY_MODEL = 'en_core_web_lg'
 
-_COUNTRY_ALIASES = {
-    "US": "United States",
-    "U.S.A": "United States",
-    "U.S": "United States",
-}
 
 class GeoParser:
-    def __init__(self, db_path):
+    def __init__(self, db_path, name_resolutions=None):
         self.nlp = spacy.load(_SPACY_MODEL)
         self.geonames_db = GeonamesDB(db_path)
         self.geonames_db.connect()
+        self.countries = {}
+        if name_resolutions:
+            self.name_resolutions = name_resolutions
+        else:
+            self.name_resolutions = {}
 
     def __enter__(self):
         return self
@@ -34,7 +34,14 @@ class GeoParser:
         ignored_entities = []
         for entity in doc.ents:
             if entity.label_ == 'GPE':
-                term = self._resolve_alias(entity.text)
+                text = entity.text.strip()
+                term = self._resolve_name(text)
+
+                if not term:
+                    # Stopwords are resolved to None
+                    ignored_entities.append(text)
+                    continue
+
                 location = self._get_geonames_location(term)
 
                 if location:
@@ -45,11 +52,21 @@ class GeoParser:
                     }
                     locations.append((location, usage))
                 else:
-                    ignored_entities.append(entity.text)
+                    ignored_entities.append(text)
 
         if merge:
-            return self._merge_locations(query, locations), ignored_entities
-        return locations, ignored_entities
+            locations = self._merge_locations(query, locations)
+
+        result = []
+        for location, usage in locations:
+            try:
+                country = self.countries[location.country_code]
+            except KeyError:
+                country = self.geonames_db.search_country(location.country_code)
+                self.countries[location.country_code] = country
+            result.append((location, usage, country))
+
+        return result, ignored_entities
 
     def _get_geonames_location(self, term):
         try:
@@ -65,14 +82,21 @@ class GeoParser:
                 pass
         return None
 
+    def _get_country_data(self, country_code):
+        try:
+            return self.geonames_db.search_country(country_code=country_code)
+        except GeonamesDB.RecordNotFound:
+            return None
+
     @staticmethod
     def _merge_locations(query, locations):
         """
-        Merge locations, following the pattern r"_Location_(( Province| City)?, ?)(_Country_)$"
+        Merge locations, following the pattern r"<Location>(( Province| City)?, ?)(<Country>|<State>)$"
         Examples:
             Braunschweig, Germany
             Wuhan Province, China
             Los Angeles City, USA
+            Boises, Idaho
         """
         location_suffix_pattern = r'(( Province| City)?, ?)(.*)$'
 
@@ -87,7 +111,7 @@ class GeoParser:
                     continue
 
                 if (suc_location.country_code == location.country_code and
-                        (suc_location.feature_label == "A.PCLI" or
+                        (suc_location.feature_label.startswith("A.PCL") or
                             (suc_location.feature_label == "A.ADM1" and
                                 suc_location.admin1_code == location.admin1_code))):
                     span_end = suc_usage['end']
@@ -97,11 +121,10 @@ class GeoParser:
 
         return [x for x in locations if x not in merged_locations]
 
-    @staticmethod
-    def _resolve_alias(text):
-        if text in _COUNTRY_ALIASES:
-            return _COUNTRY_ALIASES[text]
-        else:
+    def _resolve_name(self, text):
+        try:
+            return self.name_resolutions[text.lower()]
+        except KeyError:
             return text
 
     @staticmethod

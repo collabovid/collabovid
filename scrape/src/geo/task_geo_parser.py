@@ -1,8 +1,6 @@
 from django.conf import settings
 
-from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, GeoStopword, Paper, VerificationState
-from src.geo.geo_parser import GeoParser
-from src.geo.country_data import CountryData
+from data.models import GeoCity, GeoCountry, GeoLocation, Paper
 from src.geo.paper_geo_extractor import PaperGeoExtractor
 from tasks.definitions import register_task, Runnable
 
