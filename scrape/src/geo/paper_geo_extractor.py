@@ -1,3 +1,5 @@
+import pycountry
+
 from data.models import GeoCity, GeoCountry, GeoLocationMembership, GeoNameResolution, VerificationState
 from src.geo.geo_parser import GeoParser
 
@@ -38,6 +40,7 @@ class PaperGeoExtractor:
             except GeoCountry.DoesNotExist:
                 db_country = GeoCountry.objects.create(
                     name=country.name,
+                    alias=pycountry.countries.get(alpha_2=country.country_code).name,
                     alpha_2=country.country_code,
                     latitude=country.latitude,
                     longitude=country.longitude,

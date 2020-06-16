@@ -30,13 +30,19 @@
 
                     <div class="">
                         <p>
-                            Collabovid provides users with information about locations (countries, cities or regions)
-                            that an articles covers. On the map above you can select a specific country or location.
-                            Once
-                            selected, the associated papers will be shown below. Alternatively one can use the location
-                            filter option at the <a href="{% url "search" %}">search</a> page to filter for multiple
-                            locations at the same time. Locations are mapped to real-world data using the
+                            A lot of research concerning COVID-19/Sars-CoV-2 is related to a specific location, like
+                            articles about the outbreak in Italy, the influence on the air pollution in New York City or
+                            a case report on a super-spreader in Ningbo, China.
+
+                            On the world map above, you can find all these cities, regions and countries and the papers,
+                            related to them. A pretrained Natural Language Processing model from
+                            <a href="https://spacy.io">spaCy</a> is used to identify potential locations in article
+                            titles, which are mapped to real-world location data using the
                             <a href="http://www.geonames.org">GeoNames</a> database.
+
+                            Currently, our index contains {{ total_loc_related }} location-related articles, most of
+                            them from {{ top_3.0.0 }} ({{ top_3.0.1 }}), {{ top_3.1.0 }} ({{ top_3.1.1 }}) and
+                            {{ top_3.2.0 }} ({{ top_3.2.1 }}).
                         </p>
                     </div>
                 </div>
@@ -165,7 +171,8 @@
                 },
                 regionStyle: {
                     initial: {
-                        fill: '#b3b3b3'
+                        {#fill: '#b3b3b3'#}
+                        fill: '#868686'
                     },
                     selected: {
                         fill: '#ffc000'
@@ -176,7 +183,8 @@
                 series: {
                     regions: [{
                         values: country_counts,
-                        scale: ['#C8EEFF', '#0071A4'],
+                        scale: ['#ebffd3', '#7fbb4a'],
+                        {#scale: ['#dbdbdb', '#747474'],#}
                         normalizeFunction: 'polynomial'
                     }]
                 },

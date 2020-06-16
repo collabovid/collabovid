@@ -233,14 +233,19 @@ def locations(request):
         for city in cities
     ]
 
+    total_loc_related = Paper.objects.exclude(locations=None).count()
+    top_3_countries = GeoCountry.objects.order_by('-count')[:3]
+
     return render(
-        request,
-        "core/map.html",
-        {
-            "countries": json.dumps(countries),
-            "cities": json.dumps(cities),
-        }
-    )
+            request,
+            "core/map.html",
+            {
+                "countries": json.dumps(countries),
+                "cities": json.dumps(cities),
+                "total_loc_related": total_loc_related,
+                "top_3": [(x.alias, x.count) for x in top_3_countries]
+            }
+        )
 
 
 def authors_to_json(authors):
