@@ -9,3 +9,6 @@ spec:
         - name: models
           hostPath:
             path: /opt/models
+        - name: resources
+            hostPath:
+              path: /opt/resources

@@ -22,6 +22,8 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
+            - name: resources
+            mountPath: /resources
           envFrom:
             - secretRef:
                 name: daemon
@@ -32,3 +34,6 @@ spec:
         - name: models
           hostPath:
             path: /.docker/collabovid-data/models
+        - name: resources
+            hostPath:
+              path: /.docker/collabovid-data/resources

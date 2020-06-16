@@ -58,8 +58,8 @@ secret_map = {
 
 volume_map = {
     'scrape': [{
-        'host_path': settings.SCRAPE_DOWNLOADS_HOST_PATH,
-        'mount_path': '/scrape/downloads'
+        'host_path': settings.RESOURCES_HOST_PATH,
+        'mount_path': '/resources'
     }],
     'web': [],
     'search': [{

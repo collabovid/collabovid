@@ -1,6 +1,6 @@
 import os
 from os.path import join
-from collabovid_store.stores import PaperMatrixStore, ModelsStore
+from collabovid_store.stores import PaperMatrixStore, ModelsStore,ResourcesStore
 from collabovid_store.s3_utils import S3BucketClient
 import datetime
 from time import sleep
@@ -18,6 +18,7 @@ s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key, aws_secret_acce
 
 models_store = ModelsStore(s3_bucket_client, remote_root_path=join(aws_base_dir, 'models'))
 paper_matrix_store = PaperMatrixStore(s3_bucket_client, remote_root_path=join(aws_base_dir, 'models', 'paper_matrix'))
+resources_store = ResourcesStore(s3_bucket_client, remote_root_path=join(aws_base_dir, 'resources'))
 
 if __name__ == '__main__':
     while True:
