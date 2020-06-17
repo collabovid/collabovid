@@ -1,17 +1,14 @@
-import itertools
 import json
 import os
 import pathlib
-from datetime import datetime, timedelta
+from datetime import datetime
 from io import BytesIO
 from random import randrange
 from time import sleep
-from timeit import default_timer as timer
 from multiprocessing.pool import ThreadPool
-from typing import Any, List, Tuple
+from typing import List, Tuple
 
 import pysftp
-#from django.conf import settings
 
 ELSEVIER_SFTP_HOST = "coronacontent.np.elsst.com"
 ELSEVIER_SFTP_USERNAME = "public"
@@ -40,16 +37,17 @@ def sftp_download(args: Tuple[List[str], str]):
             sftp.get(rel_path, local_path)
 
 
-def sftp_content_download(filename):
-    """Download file content (as string) for all given filenames from Elsevier Covid-19 SFTP server."""
-    sleep(30)
+def sftp_content_download(filename, do_sleep=True, decode=True):
+    """Download file content (as string or bytes) for given filename from Elsevier Covid-19 SFTP server."""
+    if do_sleep:
+        sleep(30)
     with ElsevierSFTP() as sftp:
         flo = BytesIO()
         sftp.getfo(f'{filename}', flo)
         flo.seek(0)
-        content = flo.read().decode("utf-8")
+        content = flo.read()
         flo.close()
-        return content
+        return content.decode('utf-8') if decode else content
 
 
 def partition(lst, n):
@@ -61,20 +59,57 @@ def partition(lst, n):
     return [lst[round(division * i):round(division * (i + 1))] for i in range(n)]
 
 
+class DoiPiiMapping:
+    """Stores a mapping from DOIs to PIIs as Dict. Reads and saves the mapping in a persistent file."""
+    def __init__(self, path, log=print):
+        self._mapping = None
+        self.path = pathlib.Path(path)
+        self.log = log
+        if os.path.isfile(self.path):
+            with open(self.path, 'r') as f:
+                self._mapping = json.load(f)
+        else:
+            self.log(f"Mapping not found. Creating new one.")
+            self._mapping = {}
+
+    @staticmethod
+    def clean_pii(pii):
+        """
+        Remove all non-alphanum. characters from PII.
+        Needed because that's the way files are named on Elsevier's side
+        """
+        return ''.join([c for c in pii if c.isalnum()])
+
+    def add(self, doi, pii):
+        cleaned_pii = DoiPiiMapping.clean_pii(pii)
+        if doi not in self._mapping:
+            self._mapping[doi] = cleaned_pii
+
+    def get(self, doi):
+        return self._mapping[doi] if doi in self._mapping else None
+
+    def save(self):
+        with open(self.path, 'w') as f:
+            json.dump(self._mapping, f, indent=4)
+
+
 class ElsevierCache:
     __LAST_UPDATE_PATH = 'last_update_timestamp.txt'
     __METADATA_INDEX_FILE = '_index_metadata.txt'
+    __DOI_PII_MAPPING_FILE = 'doi_pii_mapping.txt'
 
     def __init__(self, path, log=print):
         self.log = log
         self.path = pathlib.Path(path)
         self._metadata = None
         self._metadata_index = None
+        self._doi_pii_mapping = DoiPiiMapping(self.path / self.__DOI_PII_MAPPING_FILE)
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self._doi_pii_mapping.save()
         return
 
     @staticmethod
@@ -174,6 +209,9 @@ class ElsevierCache:
                     content["last_updated"] = date
                     doi = content["coredata"]["prism:doi"].strip()
                     self._metadata[doi] = content
+
+                    pii = content["coredata"]["pii"]
+                    self._doi_pii_mapping.add(doi, pii)
             except FileNotFoundError:
                 self.log(f"File not exists: {self.path}/{filename}")
             except json.decoder.JSONDecodeError:
@@ -181,16 +219,24 @@ class ElsevierCache:
             except KeyError:
                 self.log(f"Found no DOI in JSON file {filename}")
 
+        self._doi_pii_mapping.save()
+
     def get_metadata(self):
         if not self._metadata:
             self._read_metadata()
         return self._metadata
 
-
-if __name__ == '__main__':
-    start = timer()
-    with ElsevierCache(path=f"cache/elsevier") as cache:
-        cache.refresh()
-        metadata = cache.get_metadata()
-    end = timer()
-    print(timedelta(seconds=end-start))
+    def get_pdf(self, doi):
+        """
+        Retrieves the PDF file for the given DOI from the Elsevier server.
+        Note: Requires that the Doi to Pii mapping was already built. So, _read_metadata() was already called.
+        """
+        pii = self._doi_pii_mapping.get(doi)
+        if not pii:
+            self.log(f"No PII found for DOI {doi}")
+            return None
+        try:
+            return sftp_content_download(f"pdf/{pii}.pdf", do_sleep=False, decode=False)
+        except FileNotFoundError:
+            self.log(f"PDF for doi {doi} (pii {pii}) does not exist on server.")
+            return None

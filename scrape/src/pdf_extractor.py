@@ -20,35 +20,10 @@ class PdfExtractError(Exception):
         return self.msg
 
 
-class PdfExtractor:
-    def __init__(self, pdf_url):
-        self._pdf_response = None
-        self._pdf_url = pdf_url
-
-    def _load_pdf_response(self):
-        if not self._pdf_response:
-            try:
-                self._pdf_response = requests.get(self._pdf_url)
-            except requests.exceptions.RequestException as ex:
-                raise PdfExtractError(f"Coud not download PDF file: {ex}")
-            if self._pdf_response.status_code != 200:
-                raise PdfExtractError(f"Invalid HTTP status code: {self._pdf_response.status_code}")
-            if self._pdf_response.headers['Content-Type'] != 'application/pdf':
-                raise PdfExtractError(f"HTTP content type is {self._pdf_response.headers['Content-Type']}. Expect "
-                                      f"application/pdf")
-
-    def extract_contents(self):
-        """
-        Extracts the content of the PDF file.
-        :return: The content of the PDF file as string, or None if impossible.
-        """
-        self._load_pdf_response()
-
-        if not self._pdf_response or self._pdf_response.status_code != 200:
-            print(f'No response for pdf url: {self._pdf_url}')
-            return None
-
-        content = parser.from_buffer(self._pdf_response.content)
+class PdfFromBytesExtractor:
+    @staticmethod
+    def content_from_bytes(pdf):
+        content = parser.from_buffer(pdf)
         if 'content' in content:
             text = content['content']
         else:
@@ -90,20 +65,10 @@ class PdfExtractor:
 
         return safe_text
 
-    def extract_image(self, page=1):
-        """
-        Extracts the preview image from the PDF.
-        :param page: Sets, which PDF page should appear on the preview. Interesting for Kaggle dataset,
-                     where the first page often/always (?) is a disclaimer.
-        :return: The preview image as ContentFile or None, if an error occurs.
-        """
-        self._load_pdf_response()
-
-        if not self._pdf_response or self._pdf_response.status_code != 200:
-            print(f'Problem with response in extracting image from {self._pdf_url}')
-            return None
+    @staticmethod
+    def image_from_bytes(pdf, page=1):
         try:
-            pages = convert_from_bytes(self._pdf_response.content, first_page=page, last_page=page)
+            pages = convert_from_bytes(pdf, first_page=page, last_page=page)
         except (PDFPageCountError, PDFSyntaxError):
             return None
 
@@ -116,3 +81,45 @@ class PdfExtractor:
 
         pillow_image = ContentFile(buffer.getvalue())
         return pillow_image
+
+
+class PdfFromUrlExtractor:
+    def __init__(self, pdf_url):
+        self._pdf_response = None
+        self._pdf_url = pdf_url
+
+    def _load_pdf_response(self):
+        if not self._pdf_response:
+            try:
+                self._pdf_response = requests.get(self._pdf_url)
+            except requests.exceptions.RequestException as ex:
+                raise PdfExtractError(f"Coud not download PDF file: {ex}")
+            if self._pdf_response.status_code != 200:
+                raise PdfExtractError(f"Invalid HTTP status code: {self._pdf_response.status_code}")
+            if self._pdf_response.headers['Content-Type'] != 'application/pdf':
+                raise PdfExtractError(f"HTTP content type is {self._pdf_response.headers['Content-Type']}. Expect "
+                                      f"application/pdf")
+
+    def extract_contents(self):
+        """
+        Extracts the content of the PDF file.
+        :return: The content of the PDF file as string, or None if impossible.
+        """
+        self._load_pdf_response()
+
+        if not self._pdf_response or self._pdf_response.status_code != 200:
+            print(f'No response for pdf url: {self._pdf_url}')
+            return None
+        return PdfFromBytesExtractor.content_from_bytes(self._pdf_response.content)
+
+    def extract_image(self, page=1):
+        """
+        Extracts the preview image from the PDF.
+        :return: The preview image as ContentFile or None, if an error occurs.
+        """
+        self._load_pdf_response()
+
+        if not self._pdf_response or self._pdf_response.status_code != 200:
+            print(f'Problem with response in extracting image from {self._pdf_url}')
+            return None
+        return PdfFromBytesExtractor.image_from_bytes(self._pdf_response.content, page=page)

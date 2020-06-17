@@ -21,4 +21,11 @@ spec:
                     name: scrape-latest
                 - secretRef:
                     name: shared-latest
+              volumeMounts:
+                - name: resources
+                  mountPath: /resources
           restartPolicy: Never
+          volumes:
+            - name: resources
+              hostPath:
+                path: /opt/resources

@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
+from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity, GeoNameResolution
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -18,19 +19,19 @@ import os
 @staff_member_required
 def tasks(request):
     tasks = Task.objects.all().order_by('-started_at')
-    return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks})
+    return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks, 'debug': settings.DEBUG})
 
 
 @staff_member_required
 def task_detail(request, id):
     task = Task.objects.get(pk=id)
-    return render(request, 'dashboard/tasks/task_detail.html', {'task': task})
+    return render(request, 'dashboard/tasks/task_detail.html', {'task': task, 'debug': settings.DEBUG})
 
 
 @staff_member_required
 def select_task(request):
     if request.method == 'GET':
-        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS})
+        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS, 'debug': settings.DEBUG})
 
     return HttpResponseNotFound()
 
@@ -42,7 +43,7 @@ def create_task(request, task_id):
     if service and task_definition:
         if request.method == 'GET':
             return render(request, 'dashboard/tasks/task_create.html',
-                          {'task_id': task_id, 'definition': task_definition})
+                          {'task_id': task_id, 'definition': task_definition, 'debug': settings.DEBUG})
         elif request.method == 'POST':
 
             task_launcher = get_task_launcher(service)
@@ -104,11 +105,31 @@ def delete_all_finished(request):
     return HttpResponseNotFound()
 
 
+@staff_member_required
+def show_location(request, id):
+    if request.method == 'GET':
+        country = get_object_or_404(GeoCountry, pk=id)
+
+        return render(request, 'dashboard/locations/country.html',
+                      {'country': country})
+
+
+@staff_member_required
+def locations(request):
+    if request.method == 'GET':
+        countries = GeoCountry.objects.all()
+        cities = GeoCity.objects.all()
+        name_resolutions = GeoNameResolution.objects.all()
+
+        return render(request, 'dashboard/locations/locations.html',
+                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions})
+
+
 # @staff_member_required
 # def data_sanitizing(request):
 #     if request.method == "GET":
 #         papers = Paper.objects.filter(paper_state=PaperState.UNKNOWN)[:100]
-#         return render(request, "dashboard/scrape/paper_table.html", {"papers": papers})
+#         return render(request, "dashboard/scrape/paper_table.html", {"papers": papers, 'debug': settings.DEBUG})
 #     elif request.method == "POST":
 #         doi = request.POST.get('doi', '')
 #         action = request.POST.get('action', '')
@@ -146,7 +167,7 @@ def data_import(request):
 
     sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
 
-    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives})
+    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives, 'debug': settings.DEBUG})
 
 
 @staff_member_required
@@ -174,3 +195,15 @@ def delete_archive(request, archive_path):
             messages.add_message(request, messages.ERROR, 'Error: No filename specified')
         return redirect('data_import')
     return HttpResponseNotFound()
+
+
+@staff_member_required
+def location_sanitizing(request):
+    location_papers = Paper.objects.exclude(locations=None)
+    location_memberships = [
+        {"paper": paper, "locations": GeoLocationMembership.objects.filter(paper_id=paper.doi)}
+        for paper in location_papers
+    ]
+
+    return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
+                  {'location_papers': location_memberships, 'debug': settings.DEBUG})

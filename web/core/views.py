@@ -1,12 +1,10 @@
-from json import JSONDecodeError
-
-from django.db.models import Q, Sum
-from django.shortcuts import render, get_object_or_404, reverse
-from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import Paper, Topic, Author, Category, Journal
+from django.shortcuts import render
+from django.http import HttpResponseNotFound, JsonResponse
+from django.core.paginator import EmptyPage, PageNotAnInteger
+from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation
 from statistics import PaperStatistics, CategoryStatistics
 
+from django.utils.timezone import datetime
 import requests
 
 from django.conf import settings
@@ -15,7 +13,7 @@ from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
 from django.db.models.functions import Concat, Greatest
-from django.db.models import Count
+from django.db.models import Count, Max
 
 import json
 
@@ -25,9 +23,14 @@ PAPER_PAGE_COUNT = 10
 def home(request):
     if request.method == "GET":
         statistics = PaperStatistics(Paper.objects.all())
-        most_recent_papers = Paper.objects.filter(~Q(preview_image=None)).order_by('-published_at')[:5]
+
+        latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
+
+        most_recent_papers = Paper.objects.filter(published_at=latest_date)
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_papers': most_recent_papers})
+                                                  'most_recent_papers': most_recent_papers.order_by('-created_at'),
+                                                  'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
+                                                  'most_recent_paper_date': latest_date})
 
 
 def paper(request, doi):
@@ -95,6 +98,16 @@ def search(request):
         if article_type not in ["all", "reviewed", 'preprints']:
             article_type = "all"
 
+        location_ids = request.GET.get("locations")
+
+        try:
+            location_ids = [int(pk) for pk in location_ids.split(',')] if location_ids else []
+        except ValueError:
+            location_ids = []
+
+        locations = GeoLocation.objects.filter(pk__in=location_ids).annotate(paper_count=Count('papers')).order_by(
+            '-paper_count')
+
         journal_ids = request.GET.get("journals", None)
 
         try:
@@ -102,13 +115,13 @@ def search(request):
         except ValueError:
             journal_ids = []
 
+        journals = Journal.objects.filter(pk__in=journal_ids).annotate(paper_count=Count('papers')).order_by(
+            '-paper_count')
+
         try:
             selected_categories = [int(pk) for pk in selected_categories.split(',')] if selected_categories else []
         except ValueError:
             selected_categories = []
-
-        journals = Journal.objects.filter(pk__in=journal_ids).annotate(paper_count=Count('papers')).order_by(
-            '-paper_count')
 
         author_ids = request.GET.get("authors", None)
         try:
@@ -123,9 +136,6 @@ def search(request):
 
         search_query = request.GET.get("search", "").strip()
 
-        if len(selected_categories) == 0:
-            selected_categories = [category.pk for category in categories]
-
         form = {
             "start_date": start_date,
             "end_date": end_date,
@@ -136,6 +146,7 @@ def search(request):
             "authors": json.dumps(authors_to_json(authors)),
             "authors-connection": authors_connection,
             "journals": json.dumps(journals_to_json(journals)),
+            "locations": json.dumps(locations_to_json(locations)),
             "article_type": article_type
         }
 
@@ -165,6 +176,7 @@ def search(request):
             authors_connection = "one"
 
         journals = request.POST.get("journals")
+        locations = request.POST.get("locations")
 
         search_query = request.POST.get("search", "").strip()
 
@@ -172,7 +184,7 @@ def search(request):
 
         search_request = SearchRequestHelper(start_date, end_date,
                                              search_query, authors, authors_connection, journals,
-                                             categories, article_type)
+                                             categories, locations, article_type)
 
         if search_request.error:
             return render(request, "core/partials/_search_result_error.html",
@@ -198,6 +210,54 @@ def search(request):
 
             return render(request, "core/partials/_search_results.html", {'papers': page_obj,
                                                                           'show_score': False, })
+
+
+def locations(request):
+    countries = GeoCountry.objects.all()
+
+    countries = [
+        {
+            'pk': country.pk,
+            'alpha2': country.alpha_2,
+            'count': country.count,
+            'displayname': country.displayname
+        }
+        for country in countries
+    ]
+
+    cities = GeoCity.objects.all()
+
+    cities = [
+        {
+            'pk': city.pk,
+            'name': city.name,
+            'longitude': city.longitude,
+            'latitude': city.latitude,
+            'count': city.count,
+            'displayname': city.displayname
+        }
+        for city in cities
+    ]
+
+    total_loc_related = Paper.objects.exclude(locations=None).count()
+    top_countries = GeoCountry.objects.order_by('-count')[:3]
+
+    return render(
+        request,
+        "core/map.html",
+        {
+            "countries": json.dumps(countries),
+            "cities": json.dumps(cities),
+            "total_loc_related": total_loc_related,
+            "top_countries": [
+                {
+                    "name": x.alias,
+                    "count": x.count
+                }
+
+                for x in top_countries]
+        }
+    )
 
 
 def authors_to_json(authors):
@@ -248,3 +308,29 @@ def list_journals(request):
         journals = journals.order_by('-paper_count')[:6]
 
     return JsonResponse({"journals": journals_to_json(journals)})
+
+
+def locations_to_json(locations):
+    return [
+        {
+            "pk": location.pk,
+            "value": location.displayname,
+            "count": location.paper_count
+        }
+        for location in locations.all()
+    ]
+
+
+def list_locations(request):
+    locations = GeoLocation.objects.all().annotate(paper_count=Count('papers'))
+
+    query = request.GET.get('query', '')
+
+    if query:
+        locations = locations.annotate(similarity_name=TrigramSimilarity('name', query)).annotate(
+            similarity_alias=TrigramSimilarity('alias', query)).annotate(
+            similarity=Greatest('similarity_name', 'similarity_alias')).order_by('-similarity')[:6]
+    else:
+        locations = locations.order_by('-paper_count')[:6]
+
+    return JsonResponse({"locations": locations_to_json(locations)})

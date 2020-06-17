@@ -161,3 +161,29 @@ class ModelsStore(SyncableStore):
 
     def update_remote(self, directory_path: str, keys: List[str], verbose=True):
         super().update_remote(directory_path=directory_path, keys=[f'{key}.zip' for key in keys])
+
+
+class ResourcesStore(SyncableStore):
+    def __init__(self, s3_bucket_client: S3BucketClient, remote_root_path='resources'):
+        super().__init__(remote_root_path=remote_root_path, s3_bucket_client=s3_bucket_client)
+
+    def sync(self):
+        directory = os.getenv('RESOURCES_BASE_DIR', '/resources')
+        self.sync_to_local_directory(directory)
+
+    def _post_file_download(self, directory, file_name):
+        file_path = join(directory, file_name)
+        # Extracting in models folder
+        with zipfile.ZipFile(file_path, 'r') as zip_ref:
+            zip_ref.extractall(join(directory, file_name.replace('.zip', '')))
+        os.remove(file_path)
+
+    def _pre_file_upload(self, directory, file_name):
+        resource_directory = join(directory, file_name.replace('.zip', ''))
+        shutil.make_archive(resource_directory, 'zip', resource_directory)
+
+    def _post_file_upload(self, directory, file_name):
+        os.remove(join(directory, file_name))
+
+    def update_remote(self, directory_path: str, keys: List[str], verbose=True):
+        super().update_remote(directory_path=directory_path, keys=[f'{key}.zip' for key in keys])

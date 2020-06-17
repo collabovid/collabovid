@@ -18,6 +18,9 @@ spec:
       containers:
         - name: web
           image: web
+          resources:
+            requests:
+              memory: 1000Mi
           ports:
             - containerPort: 80
           envFrom:

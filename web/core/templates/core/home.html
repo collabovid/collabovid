@@ -1,6 +1,8 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% load pipeline %}
+{% load humanize %}
+
 {% block content %}
 
     <div class="gradient-header">
@@ -18,7 +20,8 @@
                         You can search for any topic you want below.
                         Visit <a class="muted-white" href="{% url "search" %}">search</a> to review all articles or
                         browse a list of
-                        predefined <a class="muted-white" href="{% url "category-overview" %}">categories</a>. For additional
+                        predefined <a class="muted-white" href="{% url "category-overview" %}">categories</a>. For
+                        additional
                         help visit the
                         <a class="muted-white" href="{% url "about" %}">frequently asked questions</a>.
                     </p>
@@ -148,22 +151,30 @@
 
     <div>
         <div class="container py-5">
-            <div class="row">
-                <div class="col-12">
+            <div class="row align-items-end">
+                <div class="col-lg-7 col-12">
                     <h2 class="display-5 font-weight-light">Most Recent Papers</h2>
+                </div>
+
+                <div class="col-lg-5 d-none d-lg-flex text-center">
+                    <h6 class="font-weight-light">
+                        Categories for papers
+                        from {{ most_recent_paper_date }}
+                    </h6>
                 </div>
             </div>
 
-            <div class="row mt-3 align-items-center">
+            <div class="row display-flex">
 
-                <div class="col-lg-7 col-md-12">
+                <div class="col-lg-7 col-12 mt-3">
                     <div class="card w-100 shadow rounded bg-white">
                         <ul class="list-group">
-                            {% for paper in most_recent_papers %}
+                            {% for paper in most_recent_papers|slice:":5" %}
                                 <li class="list-group-item">
                                     {{ paper.title }}
                                     <div class="text-muted small mt-2">
                                         {{ paper.published_at }} &middot; {{ paper.host.name }}
+                                        &middot; Added {{ paper.created_at|naturaltime }}
                                         <a href="{{ paper.url }}" class="float-right">
                                             Read more
                                         </a>
@@ -175,19 +186,8 @@
                 </div>
 
 
-                <div class="col-lg-5 d-lg-block d-none">
-                    <div class="row">
-                        <div class="col-md-5 col-lg-5 col-sm-2 mx-auto stack stack-fanout">
-                            {% for paper in most_recent_papers reversed %}
-                                <div style="height: 240px; background: white">
-                                    {% if paper.preview_image %}
-                                        <img style="max-height: 200px" class="img-fluid"
-                                             src="{{ paper.preview_image.url }}">
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                <div class="col-lg-5 d-none d-lg-flex mt-3">
+                    <canvas id="categoryDistributionChart"></canvas>
                 </div>
 
             </div>
@@ -232,47 +232,11 @@
         $(document).ready(function () {
             let published_at_data = JSON.parse('{{ statistics.published_at_data|escapejs }}');
             let paper_host_data = JSON.parse('{{ statistics.paper_host_data|escapejs }}');
+            let recent_paper_categories = JSON.parse('{{ most_recent_paper_statistics.category_data|escapejs }}');
 
             $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
             $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
-
-
-            function elementInViewport(el) {
-                var top = el.offsetTop;
-                var left = el.offsetLeft;
-                var width = el.offsetWidth;
-                var height = el.offsetHeight;
-
-                console.log(top)
-
-                while (el.offsetParent) {
-                    el = el.offsetParent;
-                    top += el.offsetTop;
-                    left += el.offsetLeft;
-                }
-                return (
-                    top >= window.pageYOffset &&
-                    left >= window.pageXOffset &&
-                    (top + height) <= (window.pageYOffset + window.innerHeight) &&
-                    (left + width) <= (window.pageXOffset + window.innerWidth)
-                );
-            }
-
-            function checkAnimation() {
-                var $elem = $('.stack');
-
-                // If the animation has already been started
-                if ($elem.hasClass('active')) return;
-
-                if (elementInViewport($elem.get()[0])) {
-                    // Start the animation
-                    $elem.addClass('active');
-                }
-            }
-
-            $(window).scroll(function () {
-                checkAnimation();
-            });
+            $("#categoryDistributionChart").paperCategoryDistribution({plot_data: recent_paper_categories});
         });
 
     </script>

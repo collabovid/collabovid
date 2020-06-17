@@ -93,7 +93,7 @@ class CategoryStatistics:
 
                     published_at_plot_data['total'][index] = published_count['papers_added']
                 except ValueError:
-                    print("Not found ", published_count['published_at'])
+                    print("Not found ", published_count['year'], published_count['week'])
 
             self._published_at_plot_data = json.dumps(published_at_plot_data, cls=DjangoJSONEncoder)
 

@@ -3,6 +3,9 @@ from typing import Union
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
+from django.db.models import Q, Subquery, OuterRef, Value, Count
+from django.db.models.signals import m2m_changed, post_save, post_delete
+from django.dispatch import receiver
 
 
 class Topic(models.Model):
@@ -44,11 +47,14 @@ class DataSource(models.IntegerChoices):
             return True
 
     @staticmethod
-    def prioritize_first(first: Union[int, None], second: Union[int, None]):
-        if not second:
-            return True
-        if not first:
-            return False
+    def compare(first: Union[int, None], second: Union[int, None]):
+        if second is None and first is None:
+            return 0
+        elif second is None:
+            return 1
+        elif first is None:
+            return -1
+
         return DataSource(first).priority < DataSource(second).priority
 
 
@@ -67,12 +73,8 @@ class Journal(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for journal in list(Journal.objects.all()):
-            if journal.papers.count() == 0:
-                journal.delete()
-                n += 1
-        return n
+        deleted, _ = Journal.objects.filter(papers=None).delete()
+        return deleted
 
 
 class Author(models.Model):
@@ -85,12 +87,8 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        n = 0
-        for author in list(Author.objects.all()):
-            if author.publications.count() == 0:
-                author.delete()
-                n += 1
-        return n
+        deleted, _ = Author.objects.filter(publications=None).delete()
+        return deleted
 
 
 class Category(models.Model):
@@ -108,6 +106,69 @@ class PaperData(models.Model):
     Model to store large data which should not be loaded on each select on a regular Paper
     """
     content = models.TextField(null=True, default=None)
+
+    @staticmethod
+    def cleanup():
+        used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
+        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
+        return deleted
+
+
+class VerificationState(models.IntegerChoices):
+    REJECTED = 0, gettext_lazy('rejected')
+    AUTOMATICALLY_REJECTED = 1, gettext_lazy('rejected automatically')
+    UNKNOWN = 2, gettext_lazy('unknown')
+    AUTOMATICALLY_ACCEPTED = 3, gettext_lazy('added automatically')
+    ACCEPTED = 4, gettext_lazy('accepted')
+
+
+class GeoLocation(models.Model):
+    name = models.CharField(max_length=100, null=False)
+    alias = models.CharField(max_length=40, null=True)
+    latitude = models.FloatField(null=False)
+    longitude = models.FloatField(null=False)
+
+    count = models.IntegerField(default=0)
+
+    @property
+    def displayname(self):
+        return self.alias if self.alias else self.name
+
+    def __eq__(self, other):
+        return isinstance(other, GeoLocation) and self.pk == other.pk
+
+    @staticmethod
+    def recompute_counts(cities, countries):
+        count_for_country = Subquery(Paper.objects.annotate(country=OuterRef('pk'))
+                                     .filter(Q(locations=OuterRef('pk')) |
+                                             Q(locations__in=Subquery(
+                                                 GeoCity.objects.filter(country=OuterRef('country')).only('pk')))).
+                                     annotate(group=Value('Paper')).values('group')
+                                     .annotate(count=Count("pk", distinct=True)).values('count'),
+                                     output_field=models.IntegerField())
+
+        cities.update(count=Subquery(
+            Paper.objects.filter(locations=OuterRef('pk')).annotate(group=Value('Paper')).values('group').annotate(
+                count=Count('pk')).values('count'),
+            output_field=models.IntegerField()))
+        countries.update(count=count_for_country)
+
+
+class GeoCountry(GeoLocation):
+    alpha_2 = models.CharField(max_length=2)
+
+    @property
+    def papers(self):
+        return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
+
+
+class GeoCity(GeoLocation):
+    country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
+
+
+class GeoNameResolution(models.Model):
+    source_name = models.CharField(max_length=50)
+    target_name = models.CharField(max_length=50, null=True)
 
 
 class Paper(models.Model):
@@ -150,21 +211,65 @@ class Paper(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
 
+    locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
 
-    def add_preview_image(self, pillow_image):
+    def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
         self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None))
+                                                               'image/jpeg', pillow_image.tell, None),
+                                save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
 
 
+class GeoLocationMembership(models.Model):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
+    word = models.CharField(max_length=50)
+    state = models.IntegerField(choices=VerificationState.choices)
+
+
 class CategoryMembership(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     score = models.FloatField(default=0.0)
+
+
+def locations_changed(instance, reverse, pk_set, action, **kwargs):
+    if action in ["post_add", "post_remove"]:
+        if reverse:
+            #  Given instance is either a city or a country which has added one or more papers
+            cities = GeoCity.objects.filter(pk=instance.pk)
+            countries = GeoCountry.objects.filter(Q(pk=instance.pk) | Q(cities=instance.pk)).distinct()
+        else:
+            #  Given instance is a Paper that has added one or more locations.
+            cities = GeoCity.objects.filter(pk__in=pk_set)
+            countries = GeoCountry.objects.filter(Q(pk__in=pk_set) | Q(cities__in=cities)).distinct()
+
+        GeoLocation.recompute_counts(cities, countries)
+
+    elif action in ["pre_clear", "post_clear"]:
+        raise NotImplementedError("Clearing the location membership relation is not supported yet.")
+
+
+def membership_changed(sender, instance, **kwargs):
+    """
+    In certain cases we want to prevent the model from recomputing the count.
+    In that cases set prevent_recompute_count
+    """
+    if not hasattr(instance, 'prevent_recompute_count') or not instance.prevent_recompute_count:
+        locations_changed(sender=sender,
+                          instance=instance.location,
+                          reverse=True,
+                          action="post_add", pk_set={}, **kwargs)
+
+
+m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
+post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
