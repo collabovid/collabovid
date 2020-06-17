@@ -22,10 +22,10 @@ spec:
                 - secretRef:
                     name: shared-latest
               volumeMounts:
-                - name: scrape-downloads
-                  mountPath: /scrape/downloads
+                - name: resources
+                  mountPath: /resources
           restartPolicy: Never
           volumes:
-            - name: scrape-downloads
+            - name: resources
               hostPath:
-                path: /opt/scrape
+                path: /opt/resources

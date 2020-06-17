@@ -1,0 +1,86 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active displa" id="countries-tab" data-toggle="tab" href="#countries" role="tab"
+               aria-controls="countries"
+               aria-selected="true">Countries</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="cities-tab" data-toggle="tab" href="#cities" role="tab" aria-controls="cities"
+               aria-selected="false">Cities</a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link" id="name-resolution-tab" data-toggle="tab" href="#name-resolution" role="tab"
+               aria-controls="name-resolution"
+               aria-selected="false">Name Resolution</a>
+        </li>
+
+    </ul>
+
+
+    <div class="container">
+
+
+        <div class="tab-content" id="locationTabContent">
+            <div class="tab-pane fade show active" id="countries" role="tabpanel" aria-labelledby="countries-tab">
+                <div class="row">
+                    {% for country in countries %}
+                        <div class="col-lg-3 col-md-6 p-2">
+                            {% include 'dashboard/locations/partials/_country_card.html' with country=country %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="cities" role="tabpanel" aria-labelledby="cities-tab">
+                <div class="row">
+                    {% for city in cities %}
+                        <div class="col-lg-3 col-md-6 p-2">
+                            {% include 'dashboard/locations/partials/_city_card.html' with city=city %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="tab-pane fade" id="name-resolution" role="tabpanel" aria-labelledby="name-resolution-tab">
+
+                <table class="table table-striped mt-3">
+                    <thead>
+                    <tr>
+                        <th class="text-left">Source Name</th>
+                        <th class="text-left">Target Name</th>
+                        <th class="text-left"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for name_resolution in name_resolutions %}
+                        <tr>
+                            <td class="text-left">{{ name_resolution.source_name }}</td>
+                            <td class="text-left">
+                                {% if name_resolution.target_name %}
+                                    <span class="text-success">Replace with: {{ name_resolution.target_name }}</span>
+                                {% else %}
+                                    <span class="text-danger">Remove</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-right">
+                                <a href="{% url "admin:data_geonameresolution_change" name_resolution.pk %}">Edit</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="mt-3 text-right">
+                    <a href="{% url "admin:data_geonameresolution_add" %}" class="btn btn-success">Add</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

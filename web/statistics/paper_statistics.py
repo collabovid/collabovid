@@ -1,7 +1,7 @@
-from data.models import Paper, Category, Topic, Author, PaperHost
+from data.models import Topic
 
 from collections import defaultdict
-from django.db.models import Count, QuerySet
+from django.db.models import Count, QuerySet, F
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.utils.timezone import datetime, timedelta
@@ -39,9 +39,11 @@ class PaperStatistics:
     @property
     def paper_host_data(self):
         if not self._paper_host_data:
+
+            paper_hosts = self._papers.values('host').annotate(count=Count('*')).annotate(name=F('host__name'))
+
             self._paper_host_data = json.dumps(
-                {host.name: self._papers.filter(host=host).count() for host in PaperHost.objects.all() if
-                 self._papers.filter(host=host).count() > 0},
+                {host['name']: host['count'] for host in paper_hosts},
                 cls=DjangoJSONEncoder)
 
         return self._paper_host_data
@@ -49,12 +51,16 @@ class PaperStatistics:
     @property
     def category_data(self):
         if not self._category_data:
+
+            categories = self._papers.annotate(name=F('categories__name'), color=F('categories__color'))\
+                .values('name', 'color').annotate(count=Count('pk'))
+
             self._category_data = json.dumps({
-                category.name: {
-                    'count': self._papers.filter(categories=category).count(),
-                    'color': category.color
+                category['name']: {
+                    'count': category['count'],
+                    'color': category['color']
                 }
-                for category in Category.objects.all().order_by('-pk')
+                for category in categories
             }, cls=DjangoJSONEncoder)
 
         return self._category_data
@@ -76,10 +82,6 @@ class PaperStatistics:
     @property
     def paper_host_count(self):
         return self._papers.filter(host__isnull=False).values('host').distinct().count()
-
-    @property
-    def topic_count(self):
-        return self._papers.filter(topic__isnull=False).values('topic').distinct().count()
 
     @property
     def author_count(self):

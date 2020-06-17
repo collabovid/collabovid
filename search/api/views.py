@@ -14,6 +14,7 @@ def search(request):
 
         authors = request.GET.get("authors", None)
         journals = request.GET.get("journals", None)
+        locations = request.GET.get("locations", None)
 
         try:
             if journals:
@@ -24,6 +25,9 @@ def search(request):
 
             if categories:
                 categories = [int(pk) for pk in categories]
+
+            if locations:
+                locations = [int(pk) for pk in locations.split(',')]
         except ValueError:
             return HttpResponseBadRequest("Request is malformed")
 
@@ -46,7 +50,7 @@ def search(request):
         search_result = search_engine.search(search_query, start_date=start_date,
                                              end_date=end_date, score_min=score_min, author_ids=authors,
                                              author_and=(authors_connection == 'all'), journal_ids=journals,
-                                             category_ids=categories, article_type=article_type)
+                                             category_ids=categories, article_type=article_type, location_ids=locations)
 
         return JsonResponse(search_result)
 

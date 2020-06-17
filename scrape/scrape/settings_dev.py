@@ -9,3 +9,6 @@ DEBUG = True
 ALLOW_IMAGE_SCRAPING = False
 RESOURCES_DIR = os.path.join(os.path.dirname(BASE_DIR), 'resources')
 
+MODELS_BASE_DIR = os.path.join(BASE_DIR, '..', 'models')
+
+

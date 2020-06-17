@@ -34,7 +34,10 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input id="authors-input" name="authors" class="tagify--outside"
+                        <input id="authors-input"
+                               data-result-key="authors"
+                               data-url="{% url "get-authors" %}"
+                               name="authors" class="tagify--outside"
                                placeholder="Author name">
                         <div class="text-muted small">If no author is selected the value defaults to all.</div>
                     </div>
@@ -69,7 +72,11 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input id="journals-input" name="journals" class="tagify--outside"
+                        <input id="journals-input"
+                               data-url="{% url "get-journals" %}"
+                               data-result-key="journals"
+                               name="journals"
+                               class="tagify--outside"
                                placeholder="Journal name">
                         <div class="text-muted small">If no journal is selected the value defaults to all.</div>
                     </div>
@@ -158,6 +165,29 @@
                 </div>
 
 
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="locations-input">
+                            <strong>Locations</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input id="locations-input"
+                               data-url="{% url "get-locations" %}"
+                               data-result-key="locations"
+                               name="locations"
+                               class="tagify--outside"
+                               placeholder="Location name">
+                        <div class="text-muted small">Locations are countries or cities a paper is referring to. Not
+                            every paper has an associated location. If no location is selected the value defaults to
+                            all.
+                        </div>
+                    </div>
+                </div>
+
+
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
                         <button id="filter-form-submit" type="submit" class="btn btn-success" disabled><i
@@ -166,197 +196,56 @@
                         </button>
                     </div>
                 </div>
+
+
             </div>
 
         </form>
 
     </div>
 </div>
+
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function () {
 
-        var inputElm = document.getElementById('authors-input');
-        var initialValues = JSON.parse('{{ form.authors|escapejs }}');
+        let authorInitialValues = JSON.parse('{{ form.authors|escapejs }}');
 
-        var tagify = new Tagify(inputElm, {
-            originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
-            whitelist: initialValues,
-            enforceWhitelist: true,
-            skipInvalid: true,
-            delimiters: 'a^',
+        $("#authors-input").tagifyAjax({
+            initialValues: authorInitialValues,
+            tagifySettings: {}
         });
 
-        tagify.addTags(initialValues);
+        let journalInitialValues = JSON.parse('{{ form.journals|escapejs }}');
 
-        window.pendingAuthorRequest = null;
-
-        var getAuthors = (function getAuthors(text, on_result) {
-
-            if (window.pendingAuthorRequest) {
-                window.pendingAuthorRequest.abort();
-            }
-
-            window.pendingAuthorRequest = $.ajax({
-                url: "{% url "get-authors" %}",
-                type: 'GET',
-                data: "query=" + text,
-                success: function (data) {
-                    on_result(data);
-                },
-                error: function (request, error) {
-                    console.log("Request: " + JSON.stringify(request));
-                    console.log("Error: " + error);
+        $("#journals-input").tagifyAjax({
+            initialValues: journalInitialValues,
+            tagifySettings: {
+                dropdown: {
+                    enabled: 0,
+                    mapValueTo: data => data.value + " (" + data.count + ")"
                 }
-            });
-
-        });
-
-
-        // on character(s) added/removed (user is typing/deleting)
-        function onInput(e) {
-            tagify.settings.whitelist.length = 0; // reset current whitelist
-            tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
-
-            getAuthors(e.detail.value, function (result) {
-
-                $.each(result.authors, function () {
-                    tagify.settings.whitelist.push(this);
-                });
-
-                tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
-            });
-        }
-
-        tagify.on('input', onInput);
-
-    });
-</script>
-
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-
-        var inputElm = document.getElementById('journals-input');
-        var initialValues = JSON.parse('{{ form.journals|escapejs }}');
-
-        var tagify = new Tagify(inputElm, {
-            whitelist: initialValues,
-            enforceWhitelist: true,
-            skipInvalid: true,
-            delimiters: 'a^',
-            originalInputValueFormat: valuesArr => valuesArr.map(item => item.pk).join(','),
-            dropdown: {
-                enabled: 0,
-                mapValueTo: data => data.value + " (" + data.count + ")"
             }
         });
 
-        tagify.addTags(initialValues);
-
-        window.pendingAuthorRequest = null;
-
-        var getAuthors = (function getAuthors(text, on_result) {
-
-            if (window.pendingAuthorRequest) {
-                window.pendingAuthorRequest.abort();
-            }
-
-            window.pendingAuthorRequest = $.ajax({
-                url: "{% url "get-journals" %}",
-                type: 'GET',
-                data: "query=" + text,
-                success: function (data) {
-                    on_result(data);
-                },
-                error: function (request, error) {
-                    console.log("Request: " + JSON.stringify(request));
-                    console.log("Error: " + error);
+        let locationsInitialValues = JSON.parse('{{ form.locations|escapejs }}');
+        $("#locations-input").tagifyAjax({
+            initialValues: locationsInitialValues,
+            tagifySettings: {
+                dropdown: {
+                    enabled: 0,
+                    mapValueTo: data => data.value + " (" + data.count + ")"
                 }
-            });
-
+            }
         });
 
-
-        // on character(s) added/removed (user is typing/deleting)
-        function onInput(e) {
-            tagify.settings.whitelist.length = 0; // reset current whitelist
-            tagify.loading(true).dropdown.hide.call(tagify);// show the loader animation
-
-            getAuthors(e.detail.value, function (result) {
-
-                $.each(result.journals, function () {
-                    tagify.settings.whitelist.push(this);
-                });
-
-                tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
-            });
-        }
-
-        tagify.on('input', onInput);
-
-    });
-</script>
-
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        window.formAjaxAllowed = true;
-
-        let indicator = $("#{{ indicator_id }}");
-        let paper_container = $("#{{ result_container_id }}");
-        let form = $("#paper-search-form");
         let filter_form = $("#filter-form");
-        let pagination_container = $("#pagination-container");
+
+        $('#start-date').lightDatepicker();
+        $('#end-date').lightDatepicker();
 
         $("#filter-button-submit").click(function (e) {
             filter_form.submit();
         });
-
-        update_pagination_container = pagination_container.paginate({
-            searchQuery: search_query,
-        });
-
-        function search_query(data, page, scroll = false, on_success) {
-            paper_container.hide();
-            indicator.show();
-
-            data += "&page=" + page;
-
-            $.ajax({
-                url: form.attr("action"),
-                type: 'POST',
-                data: data,
-                success: function (data) {
-                    paper_container.html(data);
-
-                    indicator.hide();
-                    paper_container.fadeIn();
-
-                    update_pagination_container();
-
-                    if (scroll) {
-                        $('html, body').scrollTop(paper_container.offset().top - 50);
-                    }
-
-                    if (on_success) {
-                        on_success();
-                    }
-                },
-                error: function (request, error) {
-                    console.log("Request: " + JSON.stringify(request));
-                    console.log("Error: " + error);
-                }
-            });
-        }
-
-
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            format: 'yyyy-mm-dd'
-        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            format: 'yyyy-mm-dd'
-        }).parent().find('button').removeClass('btn-outline-secondary').addClass('btn-light');
 
         filter_form.find("input").change(function (e) {
             $("#filter-form-submit").prop("disabled", false)
@@ -365,56 +254,10 @@
         filter_form.submit(function (e) {
             e.preventDefault();
 
-            $("#filter-form-submit").prop("disabled", true)
-            form.submit();
+            $("#filter-form-submit").prop("disabled", true);
+            $("#paper-search-form").submit();
         });
 
 
-        form.submit(function (e) {
-            e.preventDefault();
-
-            if (!window.formAjaxAllowed) {
-                return;
-            }
-
-            window.formAjaxAllowed = false;
-            $('.nav-search-types label.nav-link').addClass('disabled');
-
-            pagination_container.hide();
-
-            let submission_data = $(".search-form input[data-no-url!=true]").serialize();
-            let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
-
-            if ($('.search-form input[name=categories]:checked').length !== $('.search-form input[name=categories]').length) {
-                submission_data += "&categories=";
-                submission_data += $('.search-form input[name=categories]:checked').map(function () {
-                    return this.value;
-                }).get().join(',');
-            }
-
-            let full_data = submission_data + "&" + no_url_submission_data;
-
-            search_query(full_data, 1, false, function () {
-                window.Pagination.last_request = full_data;
-
-                let shortened_data = submission_data.replace(/[^&]+=\.?(?:&|$)/g, '').replace(/&$/, '');
-
-                let url = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                if (shortened_data.length > 0) {
-                    url += "?" + shortened_data;
-                }
-
-                window.history.pushState({path: url}, '', url);
-
-
-                window.formAjaxAllowed = true;
-
-                $('.nav-search-types label.nav-link').removeClass('disabled');
-            });
-        });
-
-        {% if load_default %}
-            form.submit();
-        {% endif %}
     });
 </script>

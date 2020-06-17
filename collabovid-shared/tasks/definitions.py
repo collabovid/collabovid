@@ -1,5 +1,7 @@
 import datetime
 import inspect
+import re
+
 from tasks.models import Task
 from django.utils.timezone import datetime
 from django.conf import settings
@@ -89,7 +91,9 @@ class Runnable:
         """
         message = '[' + datetime.now().strftime("%d.%b %Y %H:%M:%S") + ']\t'
         message += " ".join([str(x) for x in list(args)])
-        self.__message_buffer.append(message)
+        uncolored_message = re.sub(r"\x1b\[(0|3[0-7])m", "", message)
+
+        self.__message_buffer.append(uncolored_message)
 
         if settings.DEBUG:
             print(message, flush=True)

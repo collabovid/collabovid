@@ -8,7 +8,7 @@ from search.paginator import ScoreSortPaginator
 class SearchRequestHelper:
 
     def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, categories,
-                 article_type,
+                 locations, article_type,
                  score_min=0.6):
         logger = logging.getLogger(__name__)
 
@@ -25,7 +25,8 @@ class SearchRequestHelper:
                 'authors_connection': authors_connection,
                 'categories': categories,
                 'article_type': article_type,
-                'journals': journals
+                'journals': journals,
+                'locations': locations
             })
             response.raise_for_status()
 

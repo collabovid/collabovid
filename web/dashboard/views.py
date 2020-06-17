@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.http import HttpResponseNotFound, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
+from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity, GeoNameResolution
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -104,6 +105,26 @@ def delete_all_finished(request):
     return HttpResponseNotFound()
 
 
+@staff_member_required
+def show_location(request, id):
+    if request.method == 'GET':
+        country = get_object_or_404(GeoCountry, pk=id)
+
+        return render(request, 'dashboard/locations/country.html',
+                      {'country': country})
+
+
+@staff_member_required
+def locations(request):
+    if request.method == 'GET':
+        countries = GeoCountry.objects.all()
+        cities = GeoCity.objects.all()
+        name_resolutions = GeoNameResolution.objects.all()
+
+        return render(request, 'dashboard/locations/locations.html',
+                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions})
+
+
 # @staff_member_required
 # def data_sanitizing(request):
 #     if request.method == "GET":
@@ -174,3 +195,15 @@ def delete_archive(request, archive_path):
             messages.add_message(request, messages.ERROR, 'Error: No filename specified')
         return redirect('data_import')
     return HttpResponseNotFound()
+
+
+@staff_member_required
+def location_sanitizing(request):
+    location_papers = Paper.objects.exclude(locations=None)
+    location_memberships = [
+        {"paper": paper, "locations": GeoLocationMembership.objects.filter(paper_id=paper.doi)}
+        for paper in location_papers
+    ]
+
+    return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
+                  {'location_papers': location_memberships, 'debug': settings.DEBUG})

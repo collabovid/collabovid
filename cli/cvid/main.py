@@ -16,6 +16,7 @@ from cvid.commands.configure_k8s import ConfigureKubernetes
 from cvid.commands.db_export import ExportCommand
 from cvid.commands.db_import import ImportCommand
 from cvid.commands.share_config import ShareConfigCommand
+from cvid.commands.resources import ResourcesCommand
 import json
 from os.path import join, dirname, realpath
 import os
@@ -45,7 +46,8 @@ def main():
                 CronJobsCommand(**args), CollectTasksCommand(**args), ReleaseCommand(**args), VersionCommand(**args),
                 ConfigureKubernetes(**args), RegisterCommand(**args),
                 ModelsCommand(**args), PaperMatricesCommand(**args), ShareConfigCommand(**args),
-                ModelsCommand(**args), PaperMatricesCommand(**args), ExportCommand(**args), ImportCommand(**args)]
+                ModelsCommand(**args), PaperMatricesCommand(**args), ExportCommand(**args), ImportCommand(**args),
+                ResourcesCommand(**args)]
 
     parser = argparse.ArgumentParser(prog='cvid')
     subparsers = parser.add_subparsers()
