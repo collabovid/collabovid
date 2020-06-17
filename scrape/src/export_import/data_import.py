@@ -14,6 +14,7 @@ from data.models import (
     GeoCity,
     GeoCountry,
     GeoLocationMembership,
+    GeoNameResolution,
     Journal,
     Paper,
     PaperData,
@@ -47,6 +48,7 @@ class ImportStatistics:
         self.papers_w_new_category = 0
         self.papers_w_new_location = 0
         self.added_papers = 0
+        self.geo_name_resolutions_created = 0
 
         self.authors_deleted = 0
         self.journals_deleted = 0
@@ -67,14 +69,15 @@ class ImportStatistics:
         s.append(f"\t{self.added_papers} papers")
         s.append(f"\t{self.countries_created} countries")
         s.append(f"\t{self.cities_created} cities")
+        s.append(f"\t{self.geo_name_resolutions_created} geo name resolutions")
         s.append(f"{self.papers_w_new_category} papers' categories were updated")
         s.append(f"{self.papers_w_new_location} papers' locations were updated")
 
         s.append(f"")
         s.append("Cleanup deleted")
-        s.append(f"\t{self.paperhosts_created} paperhosts")
-        s.append(f"\t{self.journals_created} journals")
-        s.append(f"\t{self.authors_created} authors")
+        s.append(f"\t{self.authors_deleted} authors")
+        s.append(f"\t{self.journals_deleted} journals")
+        s.append(f"\t{self.paperdata_deleted} paperdata")
         return '\n'.join(s)
 
     def start_timer(self):
@@ -198,6 +201,18 @@ class DataImport:
                 paperdata_to_create.append(db_paperdata)
         PaperData.objects.bulk_create(paperdata_to_create)
         self.statistics.paperdata_created = len(paperdata_to_create)
+
+    def _import_geo_name_resolutions(self, geo_name_resolutions):
+        """
+        Import geo name resolutions. Does not overwrite, if source already exists in DB.
+        """
+        resolutions_to_create = []
+        for resolution in geo_name_resolutions:
+            if not GeoNameResolution.objects.filter(source_name=resolution["source_name"]).exists():
+                resolutions_to_create.append(GeoNameResolution(source_name=resolution["source_name"],
+                                                               target_name=resolution["target_name"]))
+        GeoNameResolution.objects.bulk_create(resolutions_to_create)
+        self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
 
     def _compute_updatable_papers(self, papers):
         """
@@ -348,6 +363,7 @@ class DataImport:
             import_journals = "journals" in data
             import_ml_categories = "categories_ml" in data
             import_locations = "locations" in data
+            import_geo_name_resolutions = "geo_name_resolutions" in data
 
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
@@ -359,12 +375,15 @@ class DataImport:
                 data["locations"] = {int(k): v for k, v in data["locations"].items()}
 
             self._import_paperhosts(data["paperhosts"])
+
             if import_journals:
                 self._import_journals(data["journals"])
             if import_ml_categories:
                 self._import_categories(data["categories_ml"])
             if import_locations:
                 self._import_locations(data["locations"])
+            if import_geo_name_resolutions:
+                self._import_geo_name_resolutions(data["geo_name_resolutions"])
 
             paper_information = self._compute_updatable_papers(data["papers"])
 

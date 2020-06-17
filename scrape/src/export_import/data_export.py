@@ -9,7 +9,13 @@ from timeit import default_timer as timer
 import requests
 from django.conf import settings
 
-from data.models import CategoryMembership, GeoCity, GeoCountry, GeoLocationMembership
+from data.models import (
+    CategoryMembership,
+    GeoCity,
+    GeoCountry,
+    GeoLocationMembership,
+    GeoNameResolution
+)
 
 
 class DataExport:
@@ -22,6 +28,11 @@ class DataExport:
             return io.BytesIO(response.content)
 
     @staticmethod
+    def _export_geo_name_resolutions():
+        return [{"source_name": resolution.source_name, "target_name": resolution.target_name}
+                for resolution in GeoNameResolution.objects.all()]
+
+    @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
         """Exports database data in json format and preview images to a tar.gz archive.
         Returns the path to the newly created archive."""
@@ -32,6 +43,7 @@ class DataExport:
         journals = {}
         categories_ml = {}
         locations = {}
+        geo_name_resolutions = DataExport._export_geo_name_resolutions()
         papers = []
 
         if not os.path.exists(out_dir):
@@ -153,11 +165,12 @@ class DataExport:
                     "papers": papers,
                     "journals": journals,
                     "categories_ml": categories_ml,
-                    "locations": locations
+                    "locations": locations,
+                    "geo_name_resolutions": geo_name_resolutions
                 }
 
                 with open(json_path, "w") as file:
-                    json.dump(data, file)
+                    json.dump(data, file, indent=4)
 
                 tar.add(json_path, arcname="data.json")
         except Exception as ex:
@@ -180,6 +193,7 @@ class DataExport:
         log(f"\t{len(categories_ml)} ML categories")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
+        log(f"\t{len(geo_name_resolutions)} geo name resolutions")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
