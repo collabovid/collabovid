@@ -12,4 +12,4 @@ if int(os.getenv('ALLOW_IMAGE_SCRAPING', 0)) > 0:
 else:
     ALLOW_IMAGE_SCRAPING = False
 
-RESOURCES_DIR = os.getenv('RESOURCES_DIR', None)
+RESOURCES_DIR = os.getenv('RESOURCES_BASE_DIR', None)

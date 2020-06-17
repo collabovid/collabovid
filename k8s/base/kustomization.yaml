@@ -16,3 +16,4 @@ resources:
   - job-author-cleanup.yaml
   - job-pubmed-cleanup.yaml
   - job-litcovid-init.yaml
+  - job-locations-init.yaml

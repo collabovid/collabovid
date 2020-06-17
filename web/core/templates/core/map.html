@@ -41,8 +41,18 @@
                             <a href="http://www.geonames.org">GeoNames</a> database.
 
                             Currently, our index contains {{ total_loc_related }} location-related articles, most of
-                            them from {{ top_3.0.0 }} ({{ top_3.0.1 }}), {{ top_3.1.0 }} ({{ top_3.1.1 }}) and
-                            {{ top_3.2.0 }} ({{ top_3.2.1 }}).
+                            them from
+                        {% spaceless %}
+
+                            {% for country in top_countries %}
+                                {% if not forloop.first and not forloop.last %}
+                                    <span class="separator">, </span>
+                                {% elif forloop.last %}
+                                    <span class="separator"> and </span>
+                                {% endif %}
+                                <span class="country">{{ country.name }} ({{ country.count }})</span>
+                            {% endfor %}
+                        {% endspaceless %}.
                         </p>
                     </div>
                 </div>
@@ -172,7 +182,7 @@
                 regionStyle: {
                     initial: {
                         {#fill: '#b3b3b3'#}
-                        fill: '#868686'
+                        fill: '#bbbbbb'
                     },
                     selected: {
                         fill: '#ffc000'
@@ -183,7 +193,7 @@
                 series: {
                     regions: [{
                         values: country_counts,
-                        scale: ['#ebffd3', '#7fbb4a'],
+                        scale: ['#c4d7af', '#7fbb4a'],
                         {#scale: ['#dbdbdb', '#747474'],#}
                         normalizeFunction: 'polynomial'
                     }]

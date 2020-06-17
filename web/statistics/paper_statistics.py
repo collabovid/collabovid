@@ -1,4 +1,4 @@
-from data.models import Paper, Category, Topic, Author, PaperHost
+from data.models import Topic
 
 from collections import defaultdict
 from django.db.models import Count, QuerySet, F
@@ -53,7 +53,7 @@ class PaperStatistics:
         if not self._category_data:
 
             categories = self._papers.annotate(name=F('categories__name'), color=F('categories__color'))\
-                .values('name', 'color').annotate(count=Count('*'))
+                .values('name', 'color').annotate(count=Count('pk'))
 
             self._category_data = json.dumps({
                 category['name']: {

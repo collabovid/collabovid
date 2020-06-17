@@ -160,4 +160,4 @@ def get_default_search_engine():
 
     #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
     #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([SemanticSearch()])
+    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])

@@ -1,13 +1,7 @@
-from datetime import timedelta
-from json import JSONDecodeError
-
-from timeit import default_timer as timer
-
-from django.db.models import Q, Sum, F, Subquery, OuterRef, IntegerField
-from django.shortcuts import render, get_object_or_404, reverse
-from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from data.models import GeoCity, GeoCountry, Paper, Topic, Author, Category, Journal, GeoLocation
+from django.shortcuts import render
+from django.http import HttpResponseNotFound, JsonResponse
+from django.core.paginator import EmptyPage, PageNotAnInteger
+from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation
 from statistics import PaperStatistics, CategoryStatistics
 
 from django.utils.timezone import datetime
@@ -32,9 +26,9 @@ def home(request):
 
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
 
-        most_recent_papers = Paper.objects.filter(published_at=latest_date).order_by('-created_at')
+        most_recent_papers = Paper.objects.filter(published_at=latest_date)
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_papers': most_recent_papers,
+                                                  'most_recent_papers': most_recent_papers.order_by('-created_at'),
                                                   'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
                                                   'most_recent_paper_date': latest_date})
 
@@ -206,7 +200,6 @@ def search(request):
 
 
 def locations(request):
-
     countries = GeoCountry.objects.all()
 
     countries = [
@@ -234,18 +227,24 @@ def locations(request):
     ]
 
     total_loc_related = Paper.objects.exclude(locations=None).count()
-    top_3_countries = GeoCountry.objects.order_by('-count')[:3]
+    top_countries = GeoCountry.objects.order_by('-count')[:3]
 
     return render(
-            request,
-            "core/map.html",
-            {
-                "countries": json.dumps(countries),
-                "cities": json.dumps(cities),
-                "total_loc_related": total_loc_related,
-                "top_3": [(x.alias, x.count) for x in top_3_countries]
-            }
-        )
+        request,
+        "core/map.html",
+        {
+            "countries": json.dumps(countries),
+            "cities": json.dumps(cities),
+            "total_loc_related": total_loc_related,
+            "top_countries": [
+                {
+                    "name": x.alias,
+                    "count": x.count
+                }
+
+                for x in top_countries]
+        }
+    )
 
 
 def authors_to_json(authors):
@@ -307,6 +306,7 @@ def locations_to_json(locations):
         }
         for location in locations.all()
     ]
+
 
 def list_locations(request):
     locations = GeoLocation.objects.all().annotate(paper_count=Count('papers'))
