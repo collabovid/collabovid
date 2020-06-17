@@ -20,8 +20,7 @@ Several times a day, Collabovid searches for newly published research articles o
 Even though Django supports multiple database systems, some of our features rely on PostgreSQL. Therefore we recommend installing PostgreSQL on your system.
     
     # Neceassary Environment Variables
-    export DJANGO_SETTINGS_MODULE=covid19_publications.settings
-    export PYTHONPATH=$PYTHONPATH:$(pwd)
+    export DJANGO_SETTINGS_MODULE=web.settings
     export RDS_DB_NAME=db
     export RDS_USERNAME=xxx
     export RDS_PASSWORD=xxx
@@ -29,10 +28,10 @@ Even though Django supports multiple database systems, some of our features rely
     export RDS_PORT=xxxx
     
     # Migrate database scheme to current state
-    python3 manage.py migrate
+    python3 web/manage.py migrate
     
-    # Load database and PDF thumbnails
-    python3 manage.py loaddata lit-covid-categories
-    python3 manage.py loaddata initial_nameresolutions
+    # Load database
+    python3 web/manage.py loaddata lit-covid-categories
+    python3 web/manage.py loaddata initial_nameresolutions
  
     
