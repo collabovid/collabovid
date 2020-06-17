@@ -5,7 +5,7 @@ import re
 from tasks.models import Task
 from django.utils.timezone import datetime
 from django.conf import settings
-
+from tasks.colors import LogColor, Blue, Red, Green, Gray
 """
 Service tasks are tasks that are unique to the service you are running, i.e. they do not include tasks that
 are defined by other services
@@ -89,14 +89,19 @@ class Runnable:
         :param flush: Determines weather a flush should be forced now or after the time period.
         :return: None
         """
-        message = '[' + datetime.now().strftime("%d.%b %Y %H:%M:%S") + ']\t'
-        message += " ".join([str(x) for x in list(args)])
-        uncolored_message = re.sub(r"\x1b\[(0|3[0-7])m", "", message)
 
-        self.__message_buffer.append(uncolored_message)
+        datetime_prefix = '[' + datetime.now().strftime("%d.%b %Y %H:%M:%S") + ']\t'
+
+        log_message = datetime_prefix + " ".join(
+            [message.database_message if isinstance(message, LogColor) else str(message) for message in list(args)])
+
+        self.__message_buffer.append(log_message)
 
         if settings.DEBUG:
-            print(message, flush=True)
+            terminal_message = datetime_prefix + " ".join(
+                [message.terminal_message if isinstance(message, LogColor) else str(message) for message in list(args)])
+
+            print(terminal_message, flush=True)
 
         if flush or (
                 datetime.now() - self.__log_updated_at).total_seconds() > settings.TASK_LOGGING_DB_FLUSH_SECONDS:

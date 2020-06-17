@@ -29,37 +29,19 @@
     <div class="row">
         <div class="col-md-12" style="font-size: 11px;">
             <div id="overflow" class="overflow-auto" style="height: calc(100vh - 200px)">
-                <pre id="log-container" style="text-rendering: optimizeSpeed"></pre>
+                <div class="task-log" id="log">
+                    {{ task.log|safe|linebreaks }}
+                </div>
             </div>
         </div>
     </div>
-    <div id="log" style="display: none">{{ task.log }}</div>
 
 {% endblock %}
 
+{% block css %}
+    <link rel="stylesheet" href="{% static "dashboard/tasks/tasks.css" %}"/>
+{% endblock %}
+
 {% block script %}
-    <script>
-        function chunkSubstr(str, size) {
-            const numChunks = Math.ceil(str.length / size);
-            const chunks = new Array(numChunks);
 
-            for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
-                chunks[i] = str.substr(o, size)
-            }
-
-            return chunks
-        }
-
-        let container = $('#log-container');
-        var text = $('#log').html();
-        console.log(text);
-        var chunks = chunkSubstr(text, 20000);
-        for (let chunk in chunks) {
-            container.append(chunks[chunk]);
-        }
-
-        var objDiv = document.getElementById("overflow");
-        objDiv.scrollTop = objDiv.scrollHeight;
-
-    </script>
 {% endblock %}

@@ -1,0 +1,14 @@
+div.task-log
+{
+    font-family: monospace;
+    font-size: 11px;
+}
+div.task-log span.green
+{
+    color: #3ba163;
+}
+
+div.task-log span.red
+{
+    color: #d33033;
+}
