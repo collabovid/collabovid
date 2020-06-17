@@ -1,7 +1,8 @@
 from time import sleep
 
-from data.models import Paper
-from src.pdf_extractor import PdfExtractError, PdfExtractor
+from data.models import DataSource, Paper
+from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
+from src.updater.elsevier_update import ElsevierDatapoint
 from tasks.definitions import register_task, Runnable
 
 
@@ -21,18 +22,21 @@ class PdfImageDownloadTask(Runnable):
 
     def run(self):
         self.log("Download PDF preview images")
-        papers = Paper.objects.all()
-
-        for paper in papers:
-            if not paper.preview_image and paper.pdf_url:
+        for paper in Paper.objects.filter(preview_image__in=['', None]):
+            if paper.data_source_value == DataSource.ELSEVIER:
                 self.log(f"Download PDF preview image for {paper.doi}")
-                try:
-                    sleep(3)
-                    pdf_extractor = PdfExtractor(paper.pdf_url)
-                    image = pdf_extractor.extract_image()
+                ElsevierDatapoint.update_pdf_data(paper, extract_image=True, extract_content=False)
+                paper.save()
+            else:
+                if paper.pdf_url:
+                    self.log(f"Download PDF preview image for {paper.doi}")
+                    try:
+                        sleep(3)
+                        pdf_extractor = PdfFromUrlExtractor(paper.pdf_url)
+                        image = pdf_extractor.extract_image()
 
-                    if image:
-                        paper.add_preview_image(image)
-                        paper.save()
-                except PdfExtractError as ex:
-                    self.log(f"Error: {paper.doi}, {ex}")
+                        if image:
+                            paper.add_preview_image(image)
+                            paper.save()
+                    except PdfExtractError as ex:
+                        self.log(f"Error: {paper.doi}, {ex}")

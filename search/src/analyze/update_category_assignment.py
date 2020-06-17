@@ -35,11 +35,26 @@ class UpdateCategoryAssignment(Runnable):
         self.log("Categorizing", papers.count(), "papers")
 
         for paper, result in classifier.prediction_iterator(papers):
+
+            found_matching_category = False
+
             for category, score in result.items():
                 if score > self._category_threshold:
+                    found_matching_category = True
                     paper.categories.add(Category.objects.get(model_identifier=category), through_defaults={
-                        'score': (score-self._category_threshold) * 2
+                        'score': (score - self._category_threshold) * 2
                     })
                     paper.save()
+
+            if not found_matching_category:
+                best_matching_category, score = max(result.items(), key=lambda x: x[1])
+
+                self.log("Found paper", paper.doi, "with no good matching category. Assigned it to",
+                         best_matching_category, "where it has score", score)
+
+                paper.categories.add(Category.objects.get(model_identifier=best_matching_category), through_defaults={
+                    'score': 0
+                })
+                paper.save()
 
         self.log("Finished updating category assignment")

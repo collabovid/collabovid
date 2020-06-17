@@ -1,0 +1,253 @@
+{% extends "core/base.html" %}
+{% load pipeline %}
+{% load static %}
+
+
+
+{% block content %}
+    <div class="gradient-header pb-0 overflow-hidden">
+        <div class="row">
+            <div class="col-12">
+                <div id="world-map" style="width: auto; height: 400px"></div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+
+    <form id="paper-search-form" method="post" action="{% url "search" %}">
+        {% csrf_token %}
+        <input type="hidden" name="tab" value="top">
+        <input id="locations-input" type="hidden" name="locations" value="">
+
+    </form>
+
+    <div class="container mt-5">
+        <div id="map-help-container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="display-4 font-weight-light">Research Map</h1>
+
+                    <div class="">
+                        <p>
+                            A lot of research concerning COVID-19/Sars-CoV-2 is related to a specific location, like
+                            articles about the outbreak in Italy, the influence on the air pollution in New York City or
+                            a case report on a super-spreader in Ningbo, China.
+
+                            On the world map above, you can find all these cities, regions and countries and the papers,
+                            related to them. A pretrained Natural Language Processing model from
+                            <a href="https://spacy.io">spaCy</a> is used to identify potential locations in article
+                            titles, which are mapped to real-world location data using the
+                            <a href="http://www.geonames.org">GeoNames</a> database.
+
+                            Currently, our index contains {{ total_loc_related }} location-related articles, most of
+                            them from
+                        {% spaceless %}
+
+                            {% for country in top_countries %}
+                                {% if not forloop.first and not forloop.last %}
+                                    <span class="separator">, </span>
+                                {% elif forloop.last %}
+                                    <span class="separator"> and </span>
+                                {% endif %}
+                                <span class="country">{{ country.name }} ({{ country.count }})</span>
+                            {% endfor %}
+                        {% endspaceless %}.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="paper-display-container" style="display: none;">
+            <h4 id="paper-result-title" style="display: none;">Papers that are associated with <span
+                    class="location"></span></h4>
+            <div id="paper-container"></div>
+
+            <div id="paper-loading-indicator"
+                 class="text-muted text-center fa-5x my-5"
+                 style="display: none;">
+                <i class="fas fa-circle-notch fa-spin"></i>
+            </div>
+
+            <nav class="mt-5" id="pagination-container"></nav>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {% javascript 'search' %}
+    {% javascript 'map' %}
+
+    <script>
+        $(document).ready(function () {
+            let countries = JSON.parse("{{ countries|escapejs }}");
+            let cities = JSON.parse("{{ cities|escapejs }}");
+
+            let map_help_container = $("#map-help-container");
+            let paper_display_container = $("#paper-display-container");
+
+            let form = $("#paper-search-form");
+            let indicator = $("#paper-loading-indicator");
+            let paper_container = $("#paper-container");
+            let pagination_container = $("#pagination-container");
+            let paper_result_title = $("#paper-result-title");
+
+            let locations_input = $("#locations-input");
+
+
+            let searchEngine = form.collabovidSearch({
+                indicator: indicator,
+                paper_container: paper_container,
+                pagination_container: pagination_container
+            });
+
+            form.submit(function (e) {
+                e.preventDefault();
+                let mapObject = $('#world-map .jvectormap-container').data('mapObject');
+
+                let selected_countries = mapObject.getSelectedRegions();
+                let selected_cities = mapObject.getSelectedMarkers();
+
+                let selected_locations = [];
+
+                // Collect all selected countries
+                $.each(selected_countries, function (index, country_code) {
+                    selected_locations = selected_locations.concat(countries.filter(obj => {
+                        return obj.alpha2 === country_code
+                    }));
+                });
+
+                // Collect all selected markers
+                $.each(selected_cities, function (index, city_index) {
+                    selected_locations.push(cities[city_index])
+                });
+
+                searchEngine.searchQuery(function () {
+                    // Join pk values to a comma separated list and add them to the input, i.e. to the form
+                    locations_input.val(
+                        Array.prototype.map.call(selected_locations, function (item) {
+                            return item.pk;
+                        }).join(",")
+                    );
+                    return form.serialize();
+                }, 1, false, function () {
+                    paper_result_title.hide();
+                    map_help_container.hide();
+                    paper_display_container.show();
+                }, function () {
+
+                    let locations_title = Array.prototype.map.call(selected_locations, function (item) {
+                        return item.displayname;
+                    }).join(",");
+
+                    paper_result_title.find('.location').html(locations_title);
+                    paper_result_title.show();
+                });
+            });
+
+
+            let city_count = [];
+            let city_markers = [];
+            $.each(cities, function (index, city) {
+                city_count.push(city.count);
+                city_markers.push({latLng: [city.latitude, city.longitude], name: city.displayname});
+            });
+
+            let country_counts = {};
+            let country_names = {};
+            $.each(countries, function (index, country) {
+                country_counts[country.alpha2] = country.count;
+                country_names[country.alpha2] = country.displayname;
+            });
+
+            console.log(city_markers);
+            console.log(country_names);
+
+            $('#world-map').vectorMap({
+                map: 'world_merc',
+                scaleColors: ['#C8EEFF', '#0071A4'],
+                normalizeFunction: 'polynomial',
+                hoverOpacity: 0.7,
+                hoverColor: false,
+                zoomButtons: false,
+                markerStyle: {
+                    initial: {
+                        fill: '#ff5e5e',
+                        stroke: '#383f47',
+                    },
+                    selected: {
+                        fill: '#ffc000'
+                    }
+                },
+                regionStyle: {
+                    initial: {
+                        {#fill: '#b3b3b3'#}
+                        fill: '#bbbbbb'
+                    },
+                    selected: {
+                        fill: '#ffc000'
+                    }
+                },
+                backgroundColor: 'transparent',
+                markers: city_markers,
+                series: {
+                    regions: [{
+                        values: country_counts,
+                        scale: ['#c4d7af', '#7fbb4a'],
+                        {#scale: ['#dbdbdb', '#747474'],#}
+                        normalizeFunction: 'polynomial'
+                    }]
+                },
+                onRegionTipShow: function (e, el, code) {
+                    if (country_counts[code] !== undefined) {
+                        el.html(country_names[code] + " (" + country_counts[code] + ")");
+                    }
+                },
+                onMarkerTipShow: function (e, el, code) {
+                    let count = 0;
+                    if (city_count[code] !== undefined) count = city_count[code];
+
+                    el.html(el.html() + ' (' + count + ')');
+                },
+                onRegionClick: function (event, code) {
+                    event.preventDefault();
+
+                    if (!searchEngine.searchPossible()) return;
+
+                    let mapObject = $('#world-map .jvectormap-container').data('mapObject');
+                    mapObject.clearSelectedMarkers();
+                    if (country_names[code] === undefined || mapObject.getSelectedRegions().includes(code)) {
+                        mapObject.clearSelectedRegions();
+                        map_help_container.fadeIn();
+                        paper_display_container.hide();
+                    } else {
+                        mapObject.clearSelectedRegions();
+                        mapObject.setSelectedRegions([code]);
+                        form.submit();
+                    }
+                },
+                onMarkerClick: function (event, code) {
+                    event.preventDefault();
+
+                    if (!searchEngine.searchPossible()) return;
+
+                    let mapObject = $('#world-map .jvectormap-container').data('mapObject');
+                    mapObject.clearSelectedRegions();
+                    if (mapObject.getSelectedMarkers().includes(code)) {
+                        mapObject.clearSelectedMarkers();
+                    } else {
+                        mapObject.clearSelectedMarkers();
+                        mapObject.setSelectedMarkers([code]);
+
+                        form.submit();
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+    {% stylesheet 'map' %}
+    {% stylesheet 'search' %}
+{% endblock %}

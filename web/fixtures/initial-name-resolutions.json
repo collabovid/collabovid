@@ -1,0 +1,138 @@
+[
+  {
+    "model": "data.geonameresolution",
+    "pk": 1,
+    "fields": {
+      "source_name": "mt",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 2,
+    "fields": {
+      "source_name": "ct",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 3,
+    "fields": {
+      "source_name": "ms",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 4,
+    "fields": {
+      "source_name": "awake",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 5,
+    "fields": {
+      "source_name": "multi",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 6,
+    "fields": {
+      "source_name": "las",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 7,
+    "fields": {
+      "source_name": "mobile",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 8,
+    "fields": {
+      "source_name": "ksa",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 9,
+    "fields": {
+      "source_name": "cross",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 10,
+    "fields": {
+      "source_name": "stan",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 11,
+    "fields": {
+      "source_name": "st",
+      "target_name": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 12,
+    "fields": {
+      "source_name": "us",
+      "target_name": "united states"
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 13,
+    "fields": {
+      "source_name": "u.s.a",
+      "target_name": "united states"
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 14,
+    "fields": {
+      "source_name": "u.s",
+      "target_name": "united states"
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 15,
+    "fields": {
+      "source_name": "al-jouf",
+      "target_name": "al jouf"
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 16,
+    "fields": {
+      "source_name": "south-africa",
+      "target_name": "south africa"
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 17,
+    "fields": {
+      "source_name": "cape town",
+      "target_name": "capetown"
+    }
+  }
+]

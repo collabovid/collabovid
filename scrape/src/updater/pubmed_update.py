@@ -30,7 +30,7 @@ class PubMedDatapoint(ArticleDataPoint):
 
     @property
     def paperhost_name(self):
-        return "PubMed"  # TODO!
+        return "PubMed"
 
     @property
     def pubmed_id(self):
@@ -69,7 +69,7 @@ class PubMedDatapoint(ArticleDataPoint):
         return self.pubmed_article.journal
 
     @staticmethod
-    def _update_pdf_data(db_article, extract_image=True, extract_content=True):
+    def update_pdf_data(db_article, extract_image=True, extract_content=True):
         return
 
 

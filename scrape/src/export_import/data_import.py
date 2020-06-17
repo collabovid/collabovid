@@ -4,163 +4,395 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from timeit import default_timer as timer
 
+from django.db import transaction
+
 from data.models import (
     Author,
     Category,
+    CategoryMembership,
     DataSource,
+    GeoCity,
+    GeoCountry,
+    GeoLocationMembership,
+    GeoNameResolution,
     Journal,
     Paper,
     PaperData,
-    PaperHost,
+    PaperHost
 )
-from django.db import transaction
 from django.utils.timezone import make_aware
 from PIL import Image
 
 
+class ImportMappings:
+    """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
+    def __init__(self):
+        self.journal_mapping = {}
+        self.paperhost_mapping = {}
+        self.category_mapping = {}
+        self.location_mapping = {}
+        self.paperdata_mapping = {}  # maps doi to PaperData
+        self.doi_to_author_mapping = {}  # maps doi to list of db_authors for later insertion into m2m through table
+        self.db_author_mapping = {}  # maps tuple (first name, last name) to dict:
+                                     # {"db_author": db_author, "created": True / False}
+
+
+class ImportStatistics:
+    def __init__(self):
+        self.journals_created = 0
+        self.paperhosts_created = 0
+        self.categories_created = 0
+        self.countries_created = 0
+        self.cities_created = 0
+        self.authors_created = 0
+        self.papers_w_new_category = 0
+        self.papers_w_new_location = 0
+        self.added_papers = 0
+        self.geo_name_resolutions_created = 0
+
+        self.authors_deleted = 0
+        self.journals_deleted = 0
+        self.paperdata_deleted = 0
+
+        self.start = None
+        self.end = None
+
+    def __str__(self):
+        s = []
+
+        s.append(f"Finished import in {timedelta(seconds=self.end - self.start)}")
+        s.append("Imported")
+        s.append(f"\t{self.paperhosts_created} paperhosts")
+        s.append(f"\t{self.journals_created} journals")
+        s.append(f"\t{self.authors_created} authors")
+        s.append(f"\t{self.categories_created} ML categories")
+        s.append(f"\t{self.added_papers} papers")
+        s.append(f"\t{self.countries_created} countries")
+        s.append(f"\t{self.cities_created} cities")
+        s.append(f"\t{self.geo_name_resolutions_created} geo name resolutions")
+        s.append(f"{self.papers_w_new_category} papers' categories were updated")
+        s.append(f"{self.papers_w_new_location} papers' locations were updated")
+
+        s.append(f"")
+        s.append("Cleanup deleted")
+        s.append(f"\t{self.authors_deleted} authors")
+        s.append(f"\t{self.journals_deleted} journals")
+        s.append(f"\t{self.paperdata_deleted} paperdata")
+        return '\n'.join(s)
+
+    def start_timer(self):
+        self.start = timer()
+
+    def stop_timer(self):
+        self.end = timer()
+
+
 class DataImport:
-    @staticmethod
-    def import_data(filepath, log=print):
+    def __init__(self, log=print):
+        self._mappings = ImportMappings()
+        self.log = log
+        self.statistics = ImportStatistics()
+
+    def _cleanup_models(self):
+        self.statistics.authors_deleted = Author.cleanup()
+        self.statistics.journals_deleted = Journal.cleanup()
+        self.statistics.paperdata_deleted = PaperData.cleanup()
+
+    def _import_journals(self, journals):
+        """
+        Import journals and build mapping of journal id (pk from export) to (possibly created)
+        database journal object.
+        """
+        journal_name_max_len = Journal.max_length("name")
+        journals_to_create = []
+        for id, journal in journals.items():
+            try:
+                db_journal = Journal.objects.get(name=journal["name"][:journal_name_max_len])
+            except Journal.DoesNotExist:
+                db_journal = Journal(name=journal["name"][:journal_name_max_len])
+                journals_to_create.append(db_journal)
+            self._mappings.journal_mapping[id] = db_journal
+        Journal.objects.bulk_create(journals_to_create)
+        self.statistics.journals_created = len(journals_to_create)
+
+    def _import_paperhosts(self, paperhosts):
+        """
+        Import paperhosts and build mapping of paperhost id (pk from export) to (possibly created)
+        database paperhost object.
+        """
+        paperhosts_to_create = []
+        for id, paperhost in paperhosts.items():
+            try:
+                db_paperhost = PaperHost.objects.get(name=paperhost["name"])
+            except PaperHost.DoesNotExist:
+                db_paperhost = PaperHost(name=paperhost["name"])
+                paperhosts_to_create.append(db_paperhost)
+            self._mappings.paperhost_mapping[id] = db_paperhost
+        PaperHost.objects.bulk_create(paperhosts_to_create)
+        self.statistics.paperhosts_created = len(paperhosts_to_create)
+
+    def _import_categories(self, categories):
+        """
+        Import categories and build mapping of category id (model identifier from export) to (possibly created)
+        database category object.
+        """
+        categories_to_create = []
+        for identifier, category in categories.items():
+            try:
+                db_category = Category.objects.get(model_identifier=identifier)
+            except Category.DoesNotExist:
+                db_category = Category(model_identifier=identifier, name=category["name"],
+                                       description=category["description"], color=category["color"])
+                categories_to_create.append(db_category)
+            self._mappings.category_mapping[identifier] = db_category
+        Category.objects.bulk_create(categories_to_create)
+        self.statistics.categories_created = len(categories_to_create)
+
+    def _import_locations(self, locations):
+        """
+        Import locations and build mapping of location id (pk from export) to (possibly created)
+        database location object.
+        """
+
+        # Create countries first, because cities reference a country in foreign key
+        # Note: Bulk-Create is not possible with inheritance of models. So we create them one by one
+        # but in one transaction (for the speed).
+        with transaction.atomic():
+            countries = {id: location for id, location in locations.items()
+                         if location["type"] == "country"}
+            cities = {id: location for id, location in locations.items()
+                      if location["type"] == "city"}
+
+            for id, country in countries.items():
+                try:
+                    db_country = GeoCountry.objects.get(name=country["name"])
+                except GeoCountry.DoesNotExist:
+                    db_country = GeoCountry(name=country["name"], alias=country["alias"],
+                                            latitude=country["latitude"], longitude=country["longitude"],
+                                            alpha_2=country["alpha_2"])
+                    self.statistics.countries_created += 1
+                    db_country.save()
+
+                self._mappings.location_mapping[id] = db_country
+
+            for id, city in cities.items():
+                try:
+                    db_city = GeoCity.objects.get(name=city["name"])
+                except GeoCity.DoesNotExist:
+                    db_city = GeoCity(name=city["name"], alias=city["alias"],
+                                      latitude=city["latitude"], longitude=city["longitude"],
+                                      country=self._mappings.location_mapping[city["country_id"]])
+                    self.statistics.cities_created += 1
+                    db_city.save()
+                self._mappings.location_mapping[id] = db_city
+
+    def _import_paperdata(self, papers, paper_informations):
+        """
+        Import paperdata and build mapping of paper doi to (possibly created)
+        database paperdata object.
+        """
+        paperdata_to_create = []
+        for i, (paper, paper_info) in enumerate(zip(papers, paper_informations)):
+            if not (paper_info["db_paper"] and paper_info["will_update"]):
+                continue
+            if paper["content"] and paper["content"] != "None":
+                db_paperdata = PaperData(content=paper["content"])
+                self._mappings.paperdata_mapping[paper["doi"]] = db_paperdata
+                paperdata_to_create.append(db_paperdata)
+        PaperData.objects.bulk_create(paperdata_to_create)
+        self.statistics.paperdata_created = len(paperdata_to_create)
+
+    def _import_geo_name_resolutions(self, geo_name_resolutions):
+        """
+        Import geo name resolutions. Does not overwrite, if source already exists in DB.
+        """
+        resolutions_to_create = []
+        for resolution in geo_name_resolutions:
+            if not GeoNameResolution.objects.filter(source_name=resolution["source_name"]).exists():
+                resolutions_to_create.append(GeoNameResolution(source_name=resolution["source_name"],
+                                                               target_name=resolution["target_name"]))
+        GeoNameResolution.objects.bulk_create(resolutions_to_create)
+        self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
+
+    def _compute_updatable_papers(self, papers):
+        """
+        Computes which of the papers from the import will be touched for (re-)creation and creates model instances
+        (without saving), if necessary.
+        Returns a list of dicts of size len(papers) of format {db_paper, will_update}.
+        db_paper=None indicates an error (possibly with the publication date), so the paper won't be created/updated.
+        """
+        paper_informations = []
+        for i, paper in enumerate(papers):
+            if not paper["published_at"]:
+                self.log(f"Not importing {paper['doi']} because the date is missing.")
+                paper_informations.append({"db_paper": None, "will_update": False})
+                continue
+            try:
+                db_paper = Paper.objects.get(doi=paper["doi"])
+                if DataSource.compare(db_paper.data_source_value, paper["datasource_id"]) >= 0:
+                    paper_informations.append({"db_paper": db_paper, "will_update": False})
+                    continue
+                else:
+                    # delete db_paper and recreate -> easier to handle using bulk create
+                    db_paper.delete()
+                    db_paper = Paper(doi=paper["doi"])
+            except Paper.DoesNotExist:
+                db_paper = Paper(doi=paper["doi"])
+            paper_informations.append({"db_paper": db_paper, "will_update": True})
+        return paper_informations
+
+    def _import_papers(self, papers, paper_informations, authors,
+                       import_locations, import_ml_categories, import_journals, tar):
+        """
+        Import papers and its associated authors. Also its relations with locations, categories and journals,
+        depending on the bool parameters.
+        The mapping of all things (except authors) must have been built before using this.
+        """
+        paper_title_max_len = Paper.max_length("title")
+        author_firstname_max_len = Author.max_length("first_name")
+        author_lastname_max_len = Author.max_length("last_name")
+
+        papers_to_add = []
+        category_memberships_to_create = []
+        location_memberships_to_create = []
+
+        for i, (paper, paper_info) in enumerate(zip(papers, paper_informations)):
+            db_paper = paper_info["db_paper"]
+            if not db_paper:
+                continue
+
+            if paper_info["will_update"]:
+                db_paper.title = paper["title"][:paper_title_max_len]
+                db_paper.abstract = paper["abstract"]
+                db_paper.data_source_value = paper["datasource_id"]
+                db_paper.version = paper["version"]
+                db_paper.covid_related = paper["covid_related"]
+                db_paper.url = paper["url"]
+                db_paper.pdf_url = paper["pdf_url"]
+                db_paper.is_preprint = paper["is_preprint"]
+                db_paper.published_at = paper["published_at"]
+
+                db_paper.last_scrape = make_aware(
+                    datetime.strptime(paper["last_scrape"], "%Y-%m-%d %H:%M:%S")
+                ) if paper["last_scrape"] else None
+
+                db_paper.host = self._mappings.paperhost_mapping[paper["paperhost_id"]] if paper[
+                    "paperhost_id"] else None
+                db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None
+                db_paper.journal = (
+                    self._mappings.journal_mapping[paper["journal_id"]] if import_journals and paper[
+                        "journal_id"] else None
+                )
+                db_paper.data = self._mappings.paperdata_mapping[
+                    db_paper.doi] if db_paper.doi in self._mappings.paperdata_mapping else None
+
+                img_path = paper["image"]
+                if img_path:
+                    with tar.extractfile(img_path) as img_file:
+                        image = Image.open(img_file)
+                        buffer = BytesIO()
+                        image.save(buffer, format="JPEG")
+                        db_paper.add_preview_image(buffer, save=False)
+
+                papers_to_add.append(db_paper)
+                self.statistics.added_papers += 1
+
+                self._mappings.doi_to_author_mapping[db_paper.doi] = []  # maps doi to a list of its db_authors
+                for author_id in paper["author_ids"]:
+                    author = authors[author_id]
+                    author_tuple = (author["firstname"][:author_firstname_max_len],
+                                    author["lastname"][:author_lastname_max_len])
+                    try:
+                        db_author = Author.objects.get(first_name=author["firstname"][:author_firstname_max_len],
+                                                       last_name=author["lastname"][:author_lastname_max_len])
+                        self._mappings.db_author_mapping[author_tuple] = {"db_author": db_author, "created": False}
+                    except Author.DoesNotExist:
+                        if author_tuple in self._mappings.db_author_mapping:
+                            # author was already requested earlier
+                            db_author = self._mappings.db_author_mapping[author_tuple]["db_author"]
+                        else:
+                            db_author = Author(first_name=author["firstname"][:author_firstname_max_len],
+                                               last_name=author["lastname"][:author_lastname_max_len])
+                            self._mappings.db_author_mapping[author_tuple] = {"db_author": db_author, "created": True}
+                            self.statistics.authors_created += 1
+                    self._mappings.doi_to_author_mapping[db_paper.doi].append(db_author)
+
+            if import_ml_categories and not db_paper.categories.exists():
+                # Set paper categories if they were not set (even on existing papers)
+                if paper["category_memberships"]:
+                    self.statistics.papers_w_new_category += 1
+                for category in paper["category_memberships"]:
+                    membership = CategoryMembership(paper=db_paper,
+                                                    category=self._mappings.category_mapping[category["identifier"]],
+                                                    score=category["score"])
+                    category_memberships_to_create.append(membership)
+
+            if import_locations and not db_paper.locations.exists():
+                # Set paper locations if they were not set (even on existing papers)
+                if paper["locations"]:
+                    self.statistics.papers_w_new_location += 1
+                for location in paper["locations"]:
+                    membership = GeoLocationMembership(paper=db_paper,
+                                                       location=self._mappings.location_mapping[location["id"]],
+                                                       state=location["state"])
+                    location_memberships_to_create.append(membership)
+
+        Paper.objects.bulk_create(papers_to_add)
+        Author.objects.bulk_create([author["db_author"] for author in self._mappings.db_author_mapping.values()
+                                    if author["created"]])
+        CategoryMembership.objects.bulk_create(category_memberships_to_create)
+        GeoLocationMembership.objects.bulk_create(location_memberships_to_create)
+
+        ThroughModel = Paper.authors.through
+        ThroughModel.objects.bulk_create(
+            [ThroughModel(paper_id=doi, author_id=author.pk) for doi, authors in
+             self._mappings.doi_to_author_mapping.items()
+             for author in authors]
+        )
+
+    def import_data(self, filepath):
         """Imports database data from .tar.gz archive to database."""
-        start = timer()
+        self.statistics.start_timer()
+        self._mappings = ImportMappings()
 
         with tarfile.open(filepath) as tar:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
 
-            journals = "journals" in data
-
-            # Backward compatibility: only import the new ML-categories, not the old medrxiv ones.
-            categories_ml = "categories_ml" in data
+            # Backward compatibility: only import the things that have been exported.
+            import_journals = "journals" in data
+            import_ml_categories = "categories_ml" in data
+            import_locations = "locations" in data
+            import_geo_name_resolutions = "geo_name_resolutions" in data
 
             # JSON dict keys are always strings, cast back to integers
             data["authors"] = {int(k): v for k, v in data["authors"].items()}
             data["paperhosts"] = {int(k): v for k, v in data["paperhosts"].items()}
 
-            if journals:
+            if import_journals:
                 data["journals"] = {int(k): v for k, v in data["journals"].items()}
+            if import_locations:
+                data["locations"] = {int(k): v for k, v in data["locations"].items()}
 
-            paperhost_mapping = {}
-            paperhosts_created = 0
-            for id, paperhost in data["paperhosts"].items():
-                db_paperhost, created = PaperHost.objects.get_or_create(
-                    name=paperhost["name"]
-                )
-                paperhost_mapping[id] = db_paperhost
-                if created:
-                    paperhosts_created += 1
+            self._import_paperhosts(data["paperhosts"])
 
-            journal_mapping = {}
-            journals_created = 0
-            if journals:
-                for id, journal in data["journals"].items():
-                    db_journal, created = Journal.objects.get_or_create(
-                        name=journal["name"][:Journal.max_length("name")]
-                    )
-                    journal_mapping[id] = db_journal
-                    if created:
-                        journals_created += 1
+            if import_journals:
+                self._import_journals(data["journals"])
+            if import_ml_categories:
+                self._import_categories(data["categories_ml"])
+            if import_locations:
+                self._import_locations(data["locations"])
+            if import_geo_name_resolutions:
+                self._import_geo_name_resolutions(data["geo_name_resolutions"])
 
-            category_mapping = {}
-            categories_created = 0
+            paper_information = self._compute_updatable_papers(data["papers"])
 
-            if categories_ml:
-                for identifier, category in data["categories_ml"].items():
-                    try:
-                        db_category = Category.objects.get(model_identifier=identifier)
-                    except Category.DoesNotExist:
-                        db_category = Category(model_identifier=identifier, name=category["name"],
-                                               description=category["description"], color=category["color"])
-                        db_category.save()
-                        categories_created += 1
-                    category_mapping[identifier] = db_category
+            self._import_paperdata(data["papers"], paper_information)
+            self._import_papers(data["papers"], paper_information, data["authors"], import_locations,
+                                import_ml_categories, import_journals, tar)
 
-            papers_created = 0
-            authors_created = 0
-            papers_w_new_category = 0
-            for i, paper in enumerate(data["papers"]):
-                update = True
-                try:
-                    db_paper = Paper.objects.get(doi=paper["doi"])
-                    if DataSource.prioritize_first(db_paper.data_source_value, paper["datasource_id"]):
-                        update = False
-                except Paper.DoesNotExist:
-                    db_paper = Paper(doi=paper["doi"])
+        self.log("Starting cleanup")
+        self._cleanup_models()
 
-                if not paper["published_at"]:
-                    print(
-                        f"Not importing {paper['doi']} because the date is missing."
-                    )
-                    continue
-                if update:
-                    with transaction.atomic():
-                        db_paper.title = paper["title"][:Paper.max_length("title")]
-                        db_paper.abstract = paper["abstract"]
-                        db_paper.data_source_value = paper["datasource_id"]
-                        db_paper.version = paper["version"]
-                        db_paper.covid_related = paper["covid_related"]
-                        db_paper.url = paper["url"]
-                        db_paper.pdf_url = paper["pdf_url"]
-                        db_paper.is_preprint = paper["is_preprint"]
-                        db_paper.published_at = paper["published_at"]
-
-                        db_paper.last_scrape = make_aware(
-                            datetime.strptime(paper["last_scrape"], "%Y-%m-%d %H:%M:%S")
-                        ) if paper["last_scrape"] else None
-
-                        db_paper.data = PaperData.objects.create(content=paper["content"]) if paper["content"] else None
-                        db_paper.host = paperhost_mapping[paper["paperhost_id"]] if paper["paperhost_id"] else None
-                        db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None
-                        db_paper.journal = (
-                            journal_mapping[paper["journal_id"]] if journals and paper["journal_id"] else None
-                        )
-
-                        db_paper.save()
-
-                        db_paper.authors.clear()
-                        for author_id in paper["author_ids"]:
-                            author = data["authors"][author_id]
-                            db_author, created = Author.objects.get_or_create(
-                                first_name=author["firstname"][
-                                    : Author.max_length("first_name")
-                                ],
-                                last_name=author["lastname"][
-                                    : Author.max_length("last_name")
-                                ],
-                            )
-                            if created:
-                                authors_created += 1
-                            db_paper.authors.add(db_author)
-
-                        db_paper.preview_image.delete()
-                        img_path = paper["image"]
-                        if img_path:
-                            with tar.extractfile(img_path) as img_file:
-                                image = Image.open(img_file)
-                                buffer = BytesIO()
-                                image.save(buffer, format="JPEG")
-                                db_paper.add_preview_image(buffer)
-                        db_paper.save()
-                        papers_created += 1
-
-                if categories_ml and not db_paper.categories.exists():
-                    # Set paper categories if they were not set (even on existing papers)
-                    if paper["category_memberships"]:
-                        papers_w_new_category += 1
-                    for category in paper["category_memberships"]:
-                        db_paper.categories.add(category_mapping[category["identifier"]],
-                                                through_defaults={"score": category["score"]})
-                    db_paper.save()
-
-        Author.cleanup()
-        Journal.cleanup()
-        end = timer()
-
-        log(f"Finished import in {timedelta(seconds=end - start)}")
-        log("Imported")
-        log(f"\t{paperhosts_created} paperhosts")
-        log(f"\t{journals_created} journals")
-        log(f"\t{authors_created} authors")
-        log(f"\t{categories_created} ML categories")
-        log(f"\t{papers_created} papers")
-        log(f"{papers_w_new_category} papers' categories were updated")
+        self.statistics.stop_timer()
+        self.log(self.statistics)

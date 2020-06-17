@@ -1,0 +1,16 @@
+<div class="card h-100">
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">{{ country.displayname }}</h5>
+        <h6 class="card-subtitle mb-2">
+        </h6>
+        <div class="card-text mb-2 text-muted">
+            <div>Name: {{ country.name }}</div>
+            <div>Alias: {{ country.alias }}</div>
+            <div>Paper count: {{ country.count }}</div>
+        </div>
+        <div class="mt-auto text-right">
+            <a href="{% url "admin:data_geocountry_change" country.pk %}" class="ml-2 card-link">Edit</a>
+            <a href="{% url "show-location" country.pk %}" class="ml-2 card-link">Show</a>
+        </div>
+    </div>
+</div>

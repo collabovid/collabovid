@@ -1,0 +1,28 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ country.alias }} (<i>{{ country.name }}</i>)</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a class="btn btn-sm btn-outline-primary" href="{% url "admin:data_geocountry_change" country.pk %}">
+                Edit
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            {% for city in country.cities.all %}
+                <div class="col-lg-3 col-md-6 p-2">
+                    {% include 'dashboard/locations/partials/_city_card.html' with city=city %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+{% endblock %}

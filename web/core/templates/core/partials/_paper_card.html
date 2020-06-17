@@ -1,109 +1,123 @@
 {% load static %}
 {% load score_helper %}
 {% load paper_card_extras %}
-{% if html %}
-    <div class="card p-4 rounded shadow">
+<div class="card p-4 rounded shadow">
 
 
-        <div class="row d-flex flex-wrap">
-            {% if paper.preview_image %}
-                <div class="col-lg-2 d-none d-lg-block">
-                    <div class="row align-items-center h-100">
-                        <div class="col-12">
-                            {% if paper.preview_image %}
-                                <img src="{{ paper.preview_image.url }}" style="max-height: 175px"
-                                     class="img-fluid mx-auto my-auto d-block">
-                            {% else %}
-                                <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
-                                     class="img-fluid mx-auto my-auto d-block">
-                            {% endif %}
-                        </div>
+    <div class="row d-flex flex-wrap">
+        {% if paper.preview_image %}
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="row align-items-center h-100">
+                    <div class="col-12">
+                        {% if paper.preview_image %}
+                            <img src="{{ paper.preview_image.url }}" style="max-height: 175px"
+                                 class="img-fluid mx-auto my-auto d-block">
+                        {% else %}
+                            <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
+                                 class="img-fluid mx-auto my-auto d-block">
+                        {% endif %}
                     </div>
                 </div>
-            {% endif %}
+            </div>
+        {% endif %}
 
-            <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
+        <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
-                <div class="paper-card-badge">
-                    {% if paper.is_preprint %}
-                        <span class="badge badge-pill badge-secondary small">Preprint</span>
-                        {#                    {% else %}#}
-                        {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
-                    {% endif %}
+            <div class="paper-card-badge">
+                {% if paper.is_preprint %}
+                    <span class="badge badge-pill badge-secondary small">Preprint</span>
+                    {#                    {% else %}#}
+                    {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
+                {% endif %}
 
-                    {% if show_score %}
-                        <span class="badge badge-pill"
-                              style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
-                    {% endif %}
+                {% if show_score %}
+                    <span class="badge badge-pill"
+                          style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
+                {% endif %}
 
-                </div>
+            </div>
 
-                <div class="card-block">
+            <div class="card-block">
 
-                    <h5 class="card-title font-weight-normal">
-                        {{ paper.title }}
-                        {{ request.user|edit_object_link:paper }}
-                    </h5>
+                <h5 class="card-title font-weight-normal">
+                    {{ paper.title }}
+                    {{ request.user|edit_object_link:paper }}
+                </h5>
 
-                    <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
-                        <div class="mb-1">
-                            {% if paper.doi|first not in 'arXiv:' %}
-                                <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
+                    <div class="mb-1">
+                        {% if paper.doi|first not in 'arXiv:' %}
+                            <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                        {% else %}
+                            {{ paper.doi }}
+                        {% endif %}
+                        from
+                        <a href="{{ paper.url }}">{{ paper.host.name }}</a>
+                        {% if paper.journal %}
+                            in
+                            {% if paper.journal.url %}
+                                <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
                             {% else %}
-                                {{ paper.doi }}
+                                {{ paper.journal.displayname.title }}
                             {% endif %}
-                            from
-                            <a href="{{ paper.url }}">{{ paper.host.name }}</a>
-                            {% if paper.journal %}
-                                in
-                                {% if paper.journal.url %}
-                                    <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
-                                {% else %}
-                                    {{ paper.journal.displayname.title }}
-                                {% endif %}
-                                {{ request.user|edit_object_link:paper.journal }}
-                            {% endif %}
-                        </div>
-                        <i class="fas fa-clock"></i> {{ paper.published_at }}
-                        &nbsp;|&nbsp;
-                        <i class="fas fa-users"></i>
-                        {% for author in paper.authors.all %}
-                            {% if not forloop.first %}
-                                <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                            {{ request.user|edit_object_link:paper.journal }}
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-clock"></i> {{ paper.published_at }}
+                    &nbsp;|&nbsp;
+                    <i class="fas fa-users"></i>
+                    {% for author in paper.authors.all %}
+                        {% if not forloop.first %}
+                            <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
                                     &middot;
                                 </span>
-                            {% endif %}
-                            <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                        {% endif %}
+                        <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
                                 {{ author.first_name }} {{ author.last_name }}
                                 {{ request.user|edit_object_link:author }}
                             </span>
-                        {% endfor %}
+                    {% endfor %}
 
-                        {% if paper.authors.count > 5 %}
-                            {% with paper.authors.count|add:"-5" as remaining_authors %}
-                                <br class="remove-on-show-authors">
-                                <a class="d-inline show-authors" href="#">
-                                    show {{ remaining_authors }}
-                                    remaining author{% if remaining_authors > 1 %}s{% endif %}
-                                </a>
-                            {% endwith %}
-                        {% endif %}
-                        <br>
-                    </h6>
+                    {% if paper.authors.count > 5 %}
+                        {% with paper.authors.count|add:"-5" as remaining_authors %}
+                            <br class="remove-on-show-authors">
+                            <a class="d-inline show-authors" href="#">
+                                show {{ remaining_authors }}
+                                remaining author{% if remaining_authors > 1 %}s{% endif %}
+                            </a>
+                        {% endwith %}
+                    {% endif %}
+                    <br>
+                </h6>
 
-                    {% with paper|abstract_preview_size as preview_size %}
+                {% with paper|abstract_preview_size as preview_size %}
+                    {% with paper|abstract_preview_size_mobile as mobile_preview_size %}
 
                         <div class="abstract-container card-text text-justify">
-                            <span style="font-size: 0.8em">
-                                {% if not extended and paper.abstract|length >= preview_size %}
-                                    <span class="short">{{ paper|preview_slice }}</span><span
-                                        class="dots">...</span><span
-                                        class="long"
-                                        style="display: none;">{{ paper|full_text_slice }}</span>
-                                {% else %}
-                                    <span class="short">{{ paper.abstract }}</span>
-                                {% endif %}
-                            </span>
+
+                            <!-- Mobile version of the abstract with less preview size. -->
+                            <span class="d-md-none d-inline" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= mobile_preview_size %}
+                                        <span class="short">{{ paper|preview_slice:True }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice:True }}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract }}</span>
+                                    {% endif %}
+                                </span>
+
+                            <!-- Desktop version of the abstract with more preview size. -->
+                            <span class="d-md-inline d-none" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= preview_size %}
+                                        <span class="short">{{ paper|preview_slice }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice }}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract }}</span>
+                                    {% endif %}
+                                </span>
 
                             <div class="mt-1 text-muted">
 
@@ -116,22 +130,31 @@
                                                 {{ category.name }}
                                             </span>
                                         {% endfor %}
+                                        {% for location in paper.locations.all %}
+                                            <span class="badge badge-pill text-light"
+                                                  style="background-color:#9E9E9E;">
+                                                <i class="fa fa-map-marker"></i>
+                                                {{ location.displayname }}
+                                            </span>
+                                        {% endfor %}
                                     </div>
+
 
                                     <div class="col-8 text-right small">
 
-                                        {% if paper.abstract|length >= preview_size %}
-                                            <span class="abstract-controls">
-                                                <a href="#" class="toggle-description show"
-                                                   style="{% if extended %} display: none; {% endif %}">
-                                                    Expand the abstract
-                                                </a>
+                                        {% if paper.abstract|length >= mobile_preview_size %}
+                                            <span class="abstract-controls
+                                                {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
+                                                    <a href="#" class="toggle-description show"
+                                                       style="{% if extended %} display: none; {% endif %}">
+                                                        Expand the abstract
+                                                    </a>
 
-                                                <a href="#" class="toggle-description hide"
-                                                   style="{% if not extended %} display: none; {% endif %}">
-                                                    Hide the full abstract
-                                                </a>
-                                            </span>
+                                                    <a href="#" class="toggle-description hide"
+                                                       style="{% if not extended %} display: none; {% endif %}">
+                                                        Hide the full abstract
+                                                    </a>
+                                                </span>
                                         {% endif %}
 
                                         {% if paper.abstract|length >= preview_size and paper.pdf_url %}
@@ -151,41 +174,12 @@
                         </div>
 
                     {% endwith %}
+                {% endwith %}
 
-                </div>
+
             </div>
-
-
         </div>
+
+
     </div>
-
-    <script>
-        $(".score-helper .help").popover();
-    </script>
-{% elif script %}
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $(document).on('click', '.toggle-description', function (e) {
-                e.preventDefault();
-                if ($(this).hasClass('hide')) {
-                    $(this).closest('.abstract-container').find('.long').hide();
-                    $(this).closest('.abstract-container').find('.dots').show();
-                    $(this).parent().find('.toggle-description.show').show();
-                    $(this).hide();
-                } else {
-                    $(this).closest('.abstract-container').find('.dots').hide();
-                    $(this).closest('.abstract-container').find('.long').fadeIn();
-                    $(this).parent().find('.toggle-description.hide').show();
-                    $(this).hide();
-                }
-            });
-
-            $(document).on('click', '.show-authors', function (e) {
-                e.preventDefault();
-                $(this).parent().find('.author.d-none').removeClass('d-none');
-                $(this).parent().find('.remove-on-show-authors').remove();
-                $(this).remove();
-            });
-        })
-    </script>
-{% endif %}
+</div>

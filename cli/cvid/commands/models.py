@@ -24,7 +24,7 @@ class ModelsCommand(S3SyncCommand):
 
     @property
     def name_choices(self):
-        return ['lda', 'sentence_transformer', 'litcovid_longformer_base']
+        return ['lda', 'sentence_transformer', 'litcovid_longformer_base', 'en_core_web_lg']
 
     def help(self):
         return "Upload/download models"
