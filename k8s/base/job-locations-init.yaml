@@ -9,7 +9,7 @@ spec:
         - name: web
           image: web
           command: ["bash","-c"]
-          args: ["export PYTHONPATH=/app:$PYTHONPATH && python manage.py loaddata initial_nameresolutions"]
+          args: ["export PYTHONPATH=/app:$PYTHONPATH && python manage.py loaddata initial-name-resolutions"]
           envFrom:
             - secretRef:
                 name: web
