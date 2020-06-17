@@ -1,6 +1,5 @@
 from tasks.definitions import Runnable, register_task
-from . import get_analyzer
-from src.analyze.analyzer import PaperAnalyzer
+from . import get_vectorizer, get_used_vectorizers
 
 
 @register_task
@@ -10,25 +9,21 @@ class SetupVectorizer(Runnable):
     def task_name():
         return "setup-vectorizer"
 
-    def __init__(self, analyzer: PaperAnalyzer = None, force_recompute: bool = False, *args, **kwargs):
+    def __init__(self, vectorizer: str = None, force_recompute: bool = False, *args, **kwargs):
         super(SetupVectorizer, self).__init__(*args, **kwargs)
-        self.analyzer = analyzer
+        self._vectorizer = vectorizer
         self._force_recompute = force_recompute
 
     def run(self):
-
         self.log("Preprocessing started")
-
-        if self._force_recompute:
-            self.log("Forcing recompute on the analyzers")
-
-        if self.analyzer:
-            self.log("Preprocess of given analyzer")
-            self.analyzer.preprocess(force_recompute=self._force_recompute)
+        vectorizer_names = []
+        if self._vectorizer:
+            vectorizer_names.append(self._vectorizer)
         else:
-            self.log("Preprocess of analyzer")
+            vectorizer_names = get_used_vectorizers()
 
-            analyzer = get_analyzer()
-            analyzer.preprocess(force_recompute=self._force_recompute)
+        for vectorizer in vectorizer_names:
+            print(f'Preprocessing {vectorizer}')
+            get_vectorizer(vectorizer).preprocess(force_recompute=self._force_recompute)
 
         self.log("Preprocessing finished")

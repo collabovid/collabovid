@@ -3,12 +3,12 @@ from sentence_transformers import SentenceTransformer
 import os
 
 from src.analyze.similarity import CosineSimilarity
-from . import TextVectorizer
+from . import PaperVectorizer
 from django.conf import settings
 from .exceptions import CouldNotLoadModel
 
 
-class TitleSentenceVectorizer(TextVectorizer):
+class TitleSentenceVectorizer(PaperVectorizer):
     """
     Utilizing the model from sentence-transformer (https://github.com/UKPLab/sentence-transformers)
     to vectorize sentences, i.e. titles of papers.
@@ -17,6 +17,8 @@ class TitleSentenceVectorizer(TextVectorizer):
     def __init__(self, matrix_file_name, *args, **kwargs):
         super(TitleSentenceVectorizer, self).__init__(matrix_file_name=matrix_file_name,
                                                       similarity_computer=CosineSimilarity(), *args, **kwargs)
+
+    def _load_models(self):
         sentence_transformer_path = os.path.join(settings.MODELS_BASE_DIR, settings.SENTENCE_TRANSFORMER_MODEL_NAME)
         if not os.path.exists(sentence_transformer_path):
             raise CouldNotLoadModel("Could not load model from {}".format(sentence_transformer_path))

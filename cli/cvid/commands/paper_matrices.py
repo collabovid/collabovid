@@ -13,7 +13,7 @@ class PaperMatricesCommand(S3SyncCommand):
         paper_matrix_store = PaperMatrixStore(s3_bucket_client)
         if args.command == 'upload':
             self.print_info('Uploading Paper Matrices')
-            paper_matrix_store.update_remote(directory, args.paper_matrices)
+            paper_matrix_store.update_remote(directory, args.names)
         elif args.command == 'download':
             self.print_info("Downloading Paper Matrices")
             paper_matrix_store.sync_to_local_directory(directory, keys=[f'{key}.pkl' for key in args.names], force=args.force)
@@ -24,7 +24,7 @@ class PaperMatricesCommand(S3SyncCommand):
 
     @property
     def name_choices(self):
-        return ['lda', 'title_sentence_vectorizer']
+        return ['title_sentence_vectorizer', 'transformer_paper']
 
     def help(self):
         return "Upload/download paper matrices to s3"

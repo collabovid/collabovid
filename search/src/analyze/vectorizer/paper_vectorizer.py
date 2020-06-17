@@ -4,18 +4,46 @@ from collabovid_store.auto_update_reference import AutoUpdateReference
 from .exceptions import *
 from data.models import Paper
 import numpy as np
+from collabovid_store.stores import PaperMatrixStore, refresh_local_timestamps
+from collabovid_store.s3_utils import S3BucketClient
+import os
 
 
-class TextVectorizer:
+def load_paper_matrix(x):
+    return joblib.load(x)
+
+
+class PaperVectorizer:
 
     def __init__(self, matrix_file_name, similarity_computer, *args, **kwargs):
         self.matrix_file_name = matrix_file_name
         self._similarity_computer = similarity_computer
         self._paper_matrix_reference = AutoUpdateReference(base_path=settings.PAPER_MATRIX_BASE_DIR,
-                                                           key=matrix_file_name, load_function=lambda x: joblib.load(x))
+                                                           key=matrix_file_name, load_function=load_paper_matrix)
+        self._is_initializing = False
+        self._is_initialized = False
 
     def vectorize_query(self, query: str):
+        """
+        Vectorizes a given query string into a numpy vector of the vectorizer's embedding length
+        :param query: a arbitrary query string
+        :return:
+        """
         raise NotImplementedError()
+
+    def initialize_models(self):
+        if not self._is_initializing:
+            self._is_initializing = True
+            self._load_models()
+            self._is_initialized = True
+            self._is_initializing = False
+
+    @property
+    def models_initialized(self):
+        return self._is_initialized
+
+    def _load_models(self):
+        pass
 
     def _compute_paper_matrix_contents(self, papers):
         raise NotImplementedError()
@@ -25,12 +53,27 @@ class TextVectorizer:
         return self._compute_similarity_scores(embedding)
 
     def similar_to_paper(self, doi: str):
-        matrix = self._paper_matrix['matrix']
-        matrix_index = self._paper_matrix['id_map']['doi']
-        return self._compute_similarity_scores(matrix[matrix_index])
+        matrix = self.paper_matrix['matrix']
+        matrix_index = self.paper_matrix['id_map']['doi']
+        dois, scores = self._compute_similarity_scores(matrix[matrix_index])
+        del scores[matrix_index]
+        dois = dois[:matrix_index] + dois[matrix_index + 1:]
+        return dois, scores
+
+    def preprocess(self, force_recompute=False):
+        paper_matrix = self.compute_paper_matrix(force_recompute=force_recompute)
+
+        # Write out matrix
+        joblib.dump(paper_matrix, os.path.join(settings.PAPER_MATRIX_BASE_DIR, self.matrix_file_name))
+        refresh_local_timestamps(settings.PAPER_MATRIX_BASE_DIR, [self.matrix_file_name])
+        if settings.PUSH_PAPER_MATRIX:
+            self._update_remote_paper_matrix()
+            print("Paper matrix exported completed")
+        else:
+            print("No recomputing of matrix necessary")
 
     @property
-    def _paper_matrix(self):
+    def paper_matrix(self):
         matrix = self._paper_matrix_reference.reference
         if matrix is None:
             raise CouldNotLoadPaperMatrix(
@@ -38,12 +81,24 @@ class TextVectorizer:
         return matrix
 
     def _compute_similarity_scores(self, embedding_vec):
-        matrix = self._paper_matrix['matrix']
+        matrix = self.paper_matrix['matrix']
         similarity_scores = self._similarity_computer.similarities(matrix, embedding_vec)
-        return self._paper_matrix['index_arr'], similarity_scores
+        return self.paper_matrix['index_arr'], similarity_scores
+
+    def _update_remote_paper_matrix(self):
+        aws_access_key = settings.AWS_ACCESS_KEY_ID
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+        bucket = settings.AWS_STORAGE_BUCKET_NAME
+        endpoint_url = settings.AWS_S3_ENDPOINT_URL
+        s3_bucket_client = S3BucketClient(aws_access_key=aws_access_key,
+                                          aws_secret_access_key=aws_secret_access_key,
+                                          endpoint_url=endpoint_url, bucket=bucket)
+        paper_matrix_store = PaperMatrixStore(s3_bucket_client)
+        paper_matrix_store.update_remote(settings.PAPER_MATRIX_BASE_DIR,
+                                         [self.matrix_file_name.replace('.pkl', '')])
 
     def compute_paper_matrix(self, force_recompute=False):
-        old_paper_matrix = self._paper_matrix
+        old_paper_matrix = self.paper_matrix
         # initialize the id_map with saved values if possible
         if old_paper_matrix and not force_recompute:
             id_map = old_paper_matrix['id_map']

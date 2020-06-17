@@ -32,11 +32,13 @@ def home(request):
 
 def paper(request, doi):
     current_paper = get_object_or_404(Paper, doi=doi)
-    similar_request = SimilarPaperRequestHelper(doi)
-
+    similar_request = SimilarPaperRequestHelper(doi, number_papers=10)
+    similar_paper = []
+    if not similar_request.error:
+        similar_paper = similar_request.paginator.page(1)
     return render(request, "core/paper.html", {
         "paper": current_paper,
-        "similar_papers": similar_request.paginator.page(1),
+        "similar_papers": similar_paper,
         "error": similar_request.error
     })
 

@@ -76,12 +76,13 @@ class SearchRequestHelper:
 
 class SimilarPaperRequestHelper:
 
-    def __init__(self, doi):
+    def __init__(self, doi, number_papers):
         logger = logging.getLogger(__name__)
 
         self._response = None
         self._error = False
         self._papers = None
+        self._number_papers = number_papers
         try:
             response = requests.get(settings.SEARCH_SERVICE_URL + '/similar', params={
                 'doi': doi,
@@ -104,7 +105,7 @@ class SimilarPaperRequestHelper:
     def paginator(self):
         paper_score_items = [(result['doi'], result['score']) for result in self._response['similar']]
         paper_score_items = sorted(paper_score_items, key=lambda x: x[1], reverse=True)
-        paginator = ScoreSortPaginator(paper_score_items, 10)
+        paginator = ScoreSortPaginator(paper_score_items, self._number_papers)
         return paginator
 
     @property
