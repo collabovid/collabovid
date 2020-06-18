@@ -107,6 +107,25 @@ class ArticleDataPoint(object):
     journal: Optional[str] = None
     update_timestamp: Optional[datetime] = None
 
+    def to_dict(self):
+        return {
+            'doi': self.doi,
+            'title': self.title,
+            'abstract': self.abstract,
+            'authors': [f"{x[0]}; {x[1]}" for x in self.authors],
+            'datasource': self.datasource,
+            'paperhost_name': self.paperhost_name,
+            'paperhost_url': self.paperhost_url,
+            'pubmed_id': self.pubmed_id,
+            'published_at': self.published_at,
+            'url': self.url,
+            'pdf_url': self.pdf_url,
+            'version': self.version,
+            'is_preprint': self.is_preprint,
+            'journal': self.journal,
+            'update_timestamp': self.update_timestamp,
+        }
+
     def get_hash(self):
         """
         Return a hash, built from all intance variables.
