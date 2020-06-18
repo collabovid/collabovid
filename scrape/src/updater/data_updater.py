@@ -49,6 +49,46 @@ class ArticleModifiedError(UpdateException):
     pass
 
 
+class UpdateStatistics:
+    def __init__(self):
+        self.n_errors = 0
+        self.n_skipped = 0
+        self.n_already_tracked = 0
+        self.n_created = 0
+        self.n_updated = 0
+        self.n_conflicts = 0
+
+        self.authors_deleted = 0
+        self.journals_deleted = 0
+
+        self.start_time = None
+        self.end_time = None
+
+    def start(self):
+        self.start_time = timer()
+
+    def stop(self):
+        self.end_time = timer()
+
+    def __str__(self):
+        s = []
+
+        elapsed_time = timedelta(seconds=self.end_time - self.start_time)
+        s.append(f"Time (total): {elapsed_time}")
+        total_handled = self.n_created + self.n_updated + self.n_errors
+        if total_handled > 0:
+            s.append(f"Time (per Record): {elapsed_time / total_handled}")
+        s.append(f"Created: {self.n_created}")
+        s.append(f"Updated: {self.n_updated}")
+        s.append(f"Skipped: {self.n_skipped}")
+        s.append(f"Errors: {self.n_errors}")
+        s.append(f"Tracked by other source: {self.n_already_tracked}")
+        s.append(f"Deleted Authors: {self.authors_deleted}")
+        s.append(f"Deleted Journals: {self.journals_deleted}")
+
+        return '\n'.join(s)
+
+
 @dataclass
 class ArticleDataPoint(object):
     doi: Optional[str] = None
@@ -66,13 +106,6 @@ class ArticleDataPoint(object):
     is_preprint: Optional[bool] = None
     journal: Optional[str] = None
     update_timestamp: Optional[datetime] = None
-
-    def __init__(self, doi=None, title=None, abstract=None, is_preprint=None):
-        """ Constructor for convenience for often occuring use case"""
-        self.doi = doi
-        self.title = title
-        self.abstract = abstract
-        self.is_preprint = is_preprint
 
     def get_hash(self):
         """
@@ -122,12 +155,7 @@ class ArticleDataPoint(object):
 class DataUpdater(object):
     def __init__(self, log=print):
         self.log = log
-
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_created = 0
-        self.n_updated = 0
+        self.statistics = UpdateStatistics()
 
     @property
     def data_source(self):
@@ -147,38 +175,37 @@ class DataUpdater(object):
             db_article, created, updated = self.update_db(datapoint, update_existing=update_existing,
                                                           pdf_content=pdf_content, pdf_image=pdf_image)
             self.log(f"Updated/Created {datapoint.doi}")
-            self.n_created += int(created)
-            self.n_updated += int(updated)
+            self.statistics.n_created += int(created)
+            self.statistics.n_updated += int(updated)
             return db_article, created
         except MissingDataError as ex:
             id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
             self.log(f"Error: {id}: {ex.msg}")
-            self.n_errors += 1
+            self.statistics.n_errors += 1
         except SkipArticle as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_skipped += 1
+            self.statistics.n_skipped += 1
         except NotCovidRelatedError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_skipped += 1
+            self.statistics.n_skipped += 1
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_already_tracked += 1
+            self.statistics.n_already_tracked += 1
+        except ArticleModifiedError as ex:
+            self.log(f"Conflict: {datapoint.doi}: {ex.msg}")
+            self.statistics.n_conflicts += 1
         except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
             self.log(f"Error: {datapoint.doi}: {ex}")
-            self.n_errors += 1
+            self.statistics.n_errors += 1
         return None, None
 
     def get_new_data(self, pdf_content=True, pdf_image=True, progress=None):
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_created = 0
-        self.n_updated = 0
+        self.statistics = UpdateStatistics()
+        self.statistics.start()
 
         total = self._count()
         self.log(f"Check {total} publications")
 
-        start = timer()
         iterator = progress(self._get_all_articles(), length=total) if progress else self._get_all_articles()
 
         for data_point in iterator:
@@ -186,29 +213,15 @@ class DataUpdater(object):
                                           update_existing=False)
 
         self.log("Delete orphaned authors and journals")
-        authors_deleted = Author.cleanup()
-        journals_deleted = Journal.cleanup()
+        self.statistics.authors_deleted = Author.cleanup()
+        self.statistics.journals_deleted = Journal.cleanup()
 
-        end = timer()
-        elapsed_time = timedelta(seconds=end - start)
-        self.log(f"Time (total): {elapsed_time}")
-        total_handled = self.n_created + self.n_updated + self.n_errors
-        if total_handled > 0:
-            self.log(f"Time (per Record): {elapsed_time / total_handled}")
-        self.log(f"Created: {self.n_created}")
-        self.log(f"Updated: {self.n_updated}")
-        self.log(f"Skipped: {self.n_skipped}")
-        self.log(f"Errors: {self.n_errors}")
-        self.log(f"Tracked by other source: {self.n_already_tracked}")
-        self.log(f"Deleted Authors: {authors_deleted}")
-        self.log(f"Deleted Journals: {journals_deleted}")
+        self.statistics.stop()
+        self.log(self.statistics)
 
     def update_existing_data(self, count=None, pdf_content=True, pdf_image=True, progress=None):
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_created = 0
-        self.n_updated = 0
+        self.statistics = UpdateStatistics()
+        self.statistics.start()
 
         total = self._count()
 
@@ -216,8 +229,6 @@ class DataUpdater(object):
             count = total
 
         self.log(f"Update {count} existing articles")
-
-        start = timer()
 
         filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
@@ -233,21 +244,11 @@ class DataUpdater(object):
                                               pdf_image=pdf_image)
 
         self.log("Delete orphaned authors and journals")
-        authors_deleted = Author.cleanup()
-        journals_deleted = Journal.cleanup()
+        self.statistics.authors_deleted = Author.cleanup()
+        self.statistics.journals_deleted = Journal.cleanup()
 
-        end = timer()
-        elapsed_time = timedelta(seconds=end - start)
-        self.log(f"Time (total): {elapsed_time}")
-        total_handled = self.n_created + self.n_updated + self.n_errors
-        if total_handled > 0:
-            self.log(f"Time (per Record): {elapsed_time / total_handled}")
-        self.log(f"Updated: {self.n_updated}")
-        self.log(f"Skipped: {self.n_skipped}")
-        self.log(f"Errors: {self.n_errors}")
-        self.log(f"Tracked by other source: {self.n_already_tracked}")
-        self.log(f"Deleted Authors: {authors_deleted}")
-        self.log(f"Deleted Journals: {journals_deleted}")
+        self.statistics.stop()
+        self.log(self.statistics)
 
     @staticmethod
     def update_pdf_data(db_article, extract_image=True, extract_content=True):
