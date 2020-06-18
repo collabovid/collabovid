@@ -11,5 +11,4 @@ git+https://github.com/iacopy/pymed.git@fork-fixes#egg=pymed==0.8-fork-fixes-22-
 pysftp==0.2.9
 sqlalchemy==1.3.17
 spacy==2.2.4
-termcolor==1.1.0
 pycountry==19.8.18
