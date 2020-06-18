@@ -213,6 +213,9 @@ class Paper(models.Model):
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
 
+    scrape_hash = models.BinaryField(max_length=128)
+    modified = models.BooleanField(default=False)
+
     @property
     def percentage_topic_score(self):
         return round(self.topic_score * 100)
@@ -226,6 +229,12 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+    def scrape_update(self):
+        pass
+
+    def update(self):
+        pass
 
 
 class GeoLocationMembership(models.Model):

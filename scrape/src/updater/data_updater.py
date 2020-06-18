@@ -1,6 +1,9 @@
-from datetime import timedelta
+import hashlib
+from dataclasses import dataclass, field
+from datetime import date, datetime, timedelta
 from time import sleep
 from timeit import default_timer as timer
+from typing import List, Optional, Tuple
 
 from data.models import Author, DataSource, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
@@ -42,72 +45,204 @@ class NotCovidRelatedError(UpdateException):
     pass
 
 
+class ArticleModifiedError(UpdateException):
+    pass
+
+
+@dataclass
 class ArticleDataPoint(object):
-    def __init__(self):
-        self._pdf_extractor = None
+    doi: Optional[str] = None
+    title: Optional[str] = None
+    abstract: Optional[str] = None
+    authors: List[Tuple[str, str]] = field(default_factory=list)
+    datasource: Optional[str] = None
+    paperhost_name: Optional[str] = None
+    paperhost_url: Optional[str] = None
+    pubmed_id: Optional[str] = None
+    published_at: Optional[date] = None
+    url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    version: Optional[str] = None
+    is_preprint: Optional[bool] = None
+    journal: Optional[str] = None
+    update_timestamp: Optional[datetime] = None
 
-    def _setup_pdf_extractor(self):
-        if not self._pdf_extractor:
-            self._pdf_extractor = PdfFromUrlExtractor(self.pdf_url)
+    def get_hash(self):
+        """
+        Return a hash, built from all intance variables.
+        """
+        hash = hashlib.md5()
 
-    @property
-    def doi(self):
-        raise NotImplementedError
+        def update_if_not_none(value: str):
+            if value is not None:
+                hash.update(value.encode('utf-8'))
 
-    @property
-    def title(self):
-        raise NotImplementedError
+        update_if_not_none(self.doi)
+        update_if_not_none(self.title)
+        update_if_not_none(self.abstract)
+        for lastname, firstname in self.authors:
+            update_if_not_none(lastname)
+            update_if_not_none(firstname)
+        update_if_not_none(self.datasource)
+        update_if_not_none(self.paperhost_name)
+        update_if_not_none(self.paperhost_url)
+        update_if_not_none(self.pubmed_id)
+        update_if_not_none(self.published_at.strftime("%Y%m%d") if self.published_at else None)
+        update_if_not_none(self.url)
+        update_if_not_none(self.pdf_url)
+        update_if_not_none(self.version)
+        update_if_not_none(str(self.is_preprint))
+        update_if_not_none(self.journal)
+        update_if_not_none(self.update_timestamp.strftime("%Y%m%d%H%M%S") if self.update_timestamp else None)
 
-    @property
-    def abstract(self):
-        return ''
+        return hash.digest()
 
-    def extract_authors(self):
-        return []
+    def check_integrity_constraints(self):
+        if not self.doi:
+            raise MissingDataError("Couldn't extract doi")
+        if not self.title:
+            raise MissingDataError("Couldn't extract title")
+        if len(self.title) > Paper.max_length("title"):
+            raise DataError(f"Title exceeds maximum length: {self.title}")
+        if not self.paperhost_name:
+            raise MissingDataError("Couldn't extract paperhost")
+        if not self.abstract:
+            raise MissingDataError("Couldn't extract abstract")
+        if not self.published_at:
+            raise MissingDataError("Couldn't extract date")
+
+
+class DataUpdater(object):
+    def __init__(self, log=print):
+        self.log = log
+
+        self.n_errors = 0
+        self.n_skipped = 0
+        self.n_already_tracked = 0
+        self.n_created = 0
+        self.n_updated
 
     @property
     def data_source(self):
         raise NotImplementedError
 
-    @property
-    def paperhost_name(self):
+    def _get_all_articles(self):
         raise NotImplementedError
 
-    @property
-    def paperhost_url(self):
+    def _get_article(self, doi):
         raise NotImplementedError
 
-    @property
-    def pubmed_id(self):
-        return None
-
-    @property
-    def published_at(self):
-        return None
-
-    @property
-    def url(self):
-        return None
-
-    @property
-    def pdf_url(self):
-        return None
-
-    @property
-    def version(self):
+    def _count(self):
         raise NotImplementedError
 
-    @property
-    def is_preprint(self):
-        raise NotImplementedError
+    def get_or_create_db_article(self, datapoint, pdf_content, pdf_image, update_existing):
+        try:
+            db_article, created, updated = self.update_db(datapoint, update_existing=update_existing, pdf_content=pdf_content,
+                                                      pdf_image=pdf_image)
+            self.log(f"Updated/Created {datapoint.doi}")
+            self.n_created += int(created)
+            self.n_updated += int(updated)
+            return db_article, created
+        except MissingDataError as ex:
+            id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
+            self.log(f"Error: {id}: {ex.msg}")
+            self.n_errors += 1
+        except SkipArticle as ex:
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.n_skipped += 1
+        except NotCovidRelatedError as ex:
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.n_skipped += 1
+        except DifferentDataSourceError as ex:
+            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
+            self.n_already_tracked += 1
+        except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
+            self.log(f"Error: {datapoint.doi}: {ex}")
+            self.n_errors += 1
+        return None, None
 
-    @property
-    def journal(self):
-        return None
+    def get_new_data(self, pdf_content=True, pdf_image=True, progress=None):
+        self.n_errors = 0
+        self.n_skipped = 0
+        self.n_already_tracked = 0
+        self.n_created = 0
+        self.n_updated = 0
 
-    @property
-    def update_timestamp(self):
-        return None
+        total = self._count()
+        self.log(f"Check {total} publications")
+
+        start = timer()
+        iterator = progress(self._get_all_articles(), length=total) if progress else self._get_all_articles()
+
+        for data_point in iterator:
+            self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image,
+                                          update_existing=False)
+
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
+
+        end = timer()
+        elapsed_time = timedelta(seconds=end - start)
+        self.log(f"Time (total): {elapsed_time}")
+        total_handled = self.n_created + self.n_updated + self.n_errors
+        if total_handled > 0:
+            self.log(f"Time (per Record): {elapsed_time / total_handled}")
+        self.log(f"Created: {self.n_created}")
+        self.log(f"Updated: {self.n_updated}")
+        self.log(f"Skipped: {self.n_skipped}")
+        self.log(f"Errors: {self.n_errors}")
+        self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")
+
+    def update_existing_data(self, count=None, pdf_content=True, pdf_image=True, progress=None):
+        self.n_errors = 0
+        self.n_skipped = 0
+        self.n_already_tracked = 0
+        self.n_created = 0
+        self.n_updated = 0
+
+        total = self._count()
+
+        if count is None:
+            count = total
+
+        self.log(f"Update {count} existing articles")
+
+        start = timer()
+
+        filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
+            F('last_scrape').asc(nulls_first=True))[:count]
+        for article in filtered_articles:
+            data_point = self._get_article(doi=article.doi)
+
+        iterator = progress(filtered_articles) if progress else filtered_articles
+
+        for article in iterator:
+            data_point = self._get_article(doi=article.doi)
+            if data_point:
+                if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+                    continue
+                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
+                                              pdf_image=pdf_image)
+
+        self.log("Delete orphaned authors and journals")
+        authors_deleted = Author.cleanup()
+        journals_deleted = Journal.cleanup()
+
+        end = timer()
+        elapsed_time = timedelta(seconds=end - start)
+        self.log(f"Time (total): {elapsed_time}")
+        total_handled = self.n_created + self.n_updated + self.n_errors
+        if total_handled > 0:
+            self.log(f"Time (per Record): {elapsed_time / total_handled}")
+        self.log(f"Updated: {self.n_updated}")
+        self.log(f"Skipped: {self.n_skipped}")
+        self.log(f"Errors: {self.n_errors}")
+        self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Deleted Authors: {authors_deleted}")
+        self.log(f"Deleted Journals: {journals_deleted}")
 
     @staticmethod
     def update_pdf_data(db_article, extract_image=True, extract_content=True):
@@ -133,59 +268,50 @@ class ArticleDataPoint(object):
                     db_content = PaperData.objects.create(content=content)
                     db_article.data = db_content
 
-    def update_db(self, update_existing, pdf_content, pdf_image):
-        doi = self.doi
-        title = self.title
-        paperhost_name = self.paperhost_name
-        abstract = self.abstract
-        published_at = self.published_at
-
-        if not doi:
-            raise MissingDataError("Couldn't extract doi")
-        if not title:
-            raise MissingDataError("Couldn't extract title")
-        if len(title) > Paper.max_length("title"):
-            raise DataError(f"Title exceeds maximum length: {title}")
-        if not paperhost_name:
-            raise MissingDataError("Couldn't extract paperhost")
-        if not abstract:
-            raise MissingDataError("Couldn't extract abstract")
-        if not published_at:
-            raise MissingDataError("Couldn't extract date")
+    def update_db(self, data, update_existing, pdf_content, pdf_image):
+        data.check_integrity_constraints()
 
         with transaction.atomic():
             try:
-                db_article = Paper.objects.get(doi=doi)
+                db_article = Paper.objects.get(doi=data.doi)
                 if DataSource.compare(db_article.data_source_value, self.data_source) > 0:
                     raise DifferentDataSourceError(
                         f"Article already tracked by {DataSource(db_article.data_source_value).name}")
                 elif not update_existing and DataSource.compare(db_article.data_source_value, self.data_source) == 0:
                     raise SkipArticle("Article already in database")
                 created = False
+                data_hash = data.get_hash()
+                if db_article.scrape_hash == data_hash:
+                    return db_article, created, False
+
+                if db_article.modified:
+                    raise ArticleModifiedError(
+                        "Some fields are changed manually, but scrape recognized external updates"
+                    )
             except Paper.DoesNotExist:
-                db_article = Paper(doi=doi)
+                db_article = Paper(doi=data.doi)
                 created = True
 
-            db_article.title = title
-            db_article.abstract = abstract
+            db_article.title = data.title
+            db_article.abstract = data.abstract
             db_article.data_source_value = self.data_source
-            db_article.published_at = published_at
+            db_article.published_at = data.published_at
 
             db_article.covid_related = covid_related(db_article=db_article)
             if self.data_source.check_covid_related and not db_article.covid_related:
                 raise NotCovidRelatedError("Article not covid related.")
 
-            db_article.host, _ = PaperHost.objects.get_or_create(name=paperhost_name)
-            if self.paperhost_url:
-                db_article.host.url = self.paperhost_url
+            db_article.host, _ = PaperHost.objects.get_or_create(name=data.paperhost_name)
+            if data.paperhost_url:
+                db_article.host.url = data.paperhost_url
 
-            db_article.url = self.url
-            db_article.pdf_url = self.pdf_url
-            db_article.is_preprint = self.is_preprint
-            db_article.pubmed_id = self.pubmed_id
+            db_article.url = data.url
+            db_article.pdf_url = data.pdf_url
+            db_article.is_preprint = data.is_preprint
+            db_article.pubmed_id = data.pubmed_id
             db_article.save()
 
-            authors = self.extract_authors()
+            authors = data.extract_authors()
 
             if len(authors) == 0:
                 raise MissingDataError("Found no authors")
@@ -207,143 +333,17 @@ class ArticleDataPoint(object):
                 except DjangoDataError as ex:
                     raise DataError(f"Author {author[1]} {author[0]}: {ex}")
 
-            if self.journal:
+            if data.journal:
                 db_article.journal, _ = Journal.objects.get_or_create(
-                    name=self.journal[:Journal.max_length("name")]
+                    name=data.journal[:Journal.max_length("name")]
                 )
 
             if pdf_content or pdf_image:
-                self.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
-            db_article.version = self.version
+                data.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
+            db_article.version = data.version
 
             db_article.last_scrape = timezone.now()
 
             db_article.categories.clear()
             db_article.save()
-        return db_article, created
-
-
-class DataUpdater(object):
-    def __init__(self, log=print):
-        self.log = log
-
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_success = 0
-
-    @property
-    def data_source(self):
-        raise NotImplementedError
-
-    def _get_data_points(self):
-        raise NotImplementedError
-
-    def _get_data_point(self, doi):
-        raise NotImplementedError
-
-    def _count(self):
-        raise NotImplementedError
-
-    def get_or_create_db_article(self, datapoint, pdf_content, pdf_image, update_existing):
-        try:
-            db_article, created = datapoint.update_db(update_existing=update_existing, pdf_content=pdf_content,
-                                                      pdf_image=pdf_image)
-            self.log(f"Updated/Created {datapoint.doi}")
-            self.n_success += 1
-            return db_article, created
-        except MissingDataError as ex:
-            id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
-            self.log(f"Error: {id}: {ex.msg}")
-            self.n_errors += 1
-        except SkipArticle as ex:
-            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_skipped += 1
-        except NotCovidRelatedError as ex:
-            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_skipped += 1
-        except DifferentDataSourceError as ex:
-            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
-            self.n_already_tracked += 1
-        except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
-            self.log(f"Error: {datapoint.doi}: {ex}")
-            self.n_errors += 1
-        return None, None
-
-    def get_new_data(self, pdf_content=True, pdf_image=True, progress=None):
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_success = 0
-
-        total = self._count()
-        self.log(f"Check {total} publications")
-
-        start = timer()
-        iterator = progress(self._get_data_points(), length=total) if progress else self._get_data_points()
-
-        for data_point in iterator:
-            self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image,
-                                          update_existing=False)
-
-        self.log("Delete orphaned authors and journals")
-        authors_deleted = Author.cleanup()
-        journals_deleted = Journal.cleanup()
-
-        end = timer()
-        elapsed_time = timedelta(seconds=end - start)
-        self.log(f"Time (total): {elapsed_time}")
-        total_handled = self.n_success + self.n_errors
-        if total_handled > 0:
-            self.log(f"Time (per Record): {elapsed_time / total_handled}")
-        self.log(f"Created: {self.n_success}")
-        self.log(f"Skipped: {self.n_skipped}")
-        self.log(f"Errors: {self.n_errors}")
-        self.log(f"Tracked by other source: {self.n_already_tracked}")
-        self.log(f"Deleted Authors: {authors_deleted}")
-        self.log(f"Deleted Journals: {journals_deleted}")
-
-    def update_existing_data(self, count=None, pdf_content=True, pdf_image=True, progress=None):
-        self.n_errors = 0
-        self.n_skipped = 0
-        self.n_already_tracked = 0
-        self.n_success = 0
-
-        total = self._count()
-
-        if count is None:
-            count = total
-
-        self.log(f"Update {count} existing articles")
-
-        start = timer()
-
-        filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
-            F('last_scrape').asc(nulls_first=True))[:count]
-
-        iterator = progress(filtered_articles) if progress else filtered_articles
-
-        for article in iterator:
-            data_point = self._get_data_point(doi=article.doi)
-            if data_point:
-                if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
-                    continue
-                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
-                                              pdf_image=pdf_image)
-
-        self.log("Delete orphaned authors and journals")
-        authors_deleted = Author.cleanup()
-        journals_deleted = Journal.cleanup()
-
-        end = timer()
-        elapsed_time = timedelta(seconds=end - start)
-        self.log(f"Time (total): {elapsed_time}")
-        total_handled = self.n_success + self.n_errors
-        if total_handled > 0:
-            self.log(f"Time (per Record): {elapsed_time / total_handled}")
-        self.log(f"Updated: {self.n_success}")
-        self.log(f"Skipped: {self.n_skipped}")
-        self.log(f"Errors: {self.n_errors}")
-        self.log(f"Tracked by other source: {self.n_already_tracked}")
-        self.log(f"Deleted Authors: {authors_deleted}")
-        self.log(f"Deleted Journals: {journals_deleted}")
+        return db_article, created, True

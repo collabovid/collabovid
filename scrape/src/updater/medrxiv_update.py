@@ -139,14 +139,14 @@ class MedrxivUpdater(DataUpdater):
         self._get_article_json()
         return len(self._article_json)
 
-    def _get_data_points(self):
+    def _get_all_articles(self):
         self._get_article_json()
 
         for article in self._article_json:
             yield MedrxivDataPoint(article)
 
 
-    def _get_data_point(self, doi):
+    def _get_article(self, doi):
         self._get_article_json()
         try:
             return MedrxivDataPoint(next(x for x in self._article_json if x['rel_doi'] == doi))

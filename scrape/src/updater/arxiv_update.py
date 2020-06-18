@@ -129,12 +129,12 @@ class ArxivUpdater(DataUpdater):
         self._load_query_result()
         return len(self._query_result)
 
-    def _get_data_points(self):
+    def _get_all_articles(self):
         self._load_query_result()
         for article in self._query_result:
             yield ArxivDataPoint(raw_article_dict=article)
 
-    def _get_data_point(self, doi):
+    def _get_article(self, doi):
         self._load_query_result()
         try:
             return ArxivDataPoint(next(x for x in self._query_result if _get_arxiv_id_from_url(x['id']) == doi))

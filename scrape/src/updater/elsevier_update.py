@@ -139,12 +139,12 @@ class ElsevierUpdater(DataUpdater):
         self._load_metadata()
         return len(self._metadata)
 
-    def _get_data_points(self):
+    def _get_all_articles(self):
         self._load_metadata()
         for doi, article_info in self._metadata.items():
             yield ElsevierDatapoint(article_info)
 
-    def _get_data_point(self, doi):
+    def _get_article(self, doi):
         self._load_metadata()
         try:
             return ElsevierDatapoint(self._metadata[doi])
