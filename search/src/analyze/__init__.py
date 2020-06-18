@@ -5,7 +5,7 @@ from src.analyze.vectorizer import get_vectorizer
 from threading import Thread
 
 SEARCH_VECTORIZER = 'title-sentence'
-SIMILAR_VECTORIZER = 'transformer-paper'
+SIMILAR_VECTORIZER = 'transformer-paper-oubiobert-512'
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 semantic_paper_search = None

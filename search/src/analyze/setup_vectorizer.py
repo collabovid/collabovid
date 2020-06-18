@@ -25,12 +25,12 @@ class SetupVectorizer(Runnable):
     def run(self):
         self.log("Preprocessing started")
         vectorizer_names = []
-        if self._vectorizer is not None and self._vectorizer.strip() != "":
+        if self._vectorizer:
             vectorizer_names.append(self._vectorizer)
         else:
             vectorizer_names = get_used_vectorizers()
 
-        for vectorizer_name in vectorizer_names:
+        for vectorizer_name in self.progress(vectorizer_names):
             print(f'Preprocessing {vectorizer_name}')
             vectorizer = get_vectorizer(vectorizer_name)
 

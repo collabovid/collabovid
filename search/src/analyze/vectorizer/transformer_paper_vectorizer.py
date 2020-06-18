@@ -10,12 +10,8 @@ from django.conf import settings
 from .exceptions import CouldNotLoadModel
 from tqdm import tqdm
 
-TRANSFORMER_MODEL_NAME = 'transformer_paper_oubiobert_512'
-TRANSFORMER_MODEL_TYPE = 'bert'
-
-
 class TransformerPaperVectorizer(PaperVectorizer):
-    def __init__(self, matrix_file_name, device='cpu', max_token_length=512, batch_size=8, *args, **kwargs):
+    def __init__(self, matrix_file_name, device='cpu', transformer_model_name='transformer_paper_oubiobert_512', transformer_model_type='bert', max_token_length=512, batch_size=8, *args, **kwargs):
         super(TransformerPaperVectorizer, self).__init__(matrix_file_name=matrix_file_name,
                                                          similarity_computer=EuclideanSimilarity(), *args, **kwargs)
 
@@ -25,11 +21,14 @@ class TransformerPaperVectorizer(PaperVectorizer):
         self._batch_size = batch_size
         self._model = None
 
+        self._transformer_model_name = transformer_model_name
+        self._transformer_model_type = transformer_model_type
+
     def _load_models(self):
-        model_path = os.path.join(settings.MODELS_BASE_DIR, TRANSFORMER_MODEL_NAME)
+        model_path = os.path.join(settings.MODELS_BASE_DIR, self._transformer_model_name)
         if not os.path.exists(model_path):
             raise CouldNotLoadModel("Could not load model from {}".format(model_path))
-        self._model = PaperEmbeddingModel(model_path=model_path, model_type=TRANSFORMER_MODEL_TYPE)
+        self._model = PaperEmbeddingModel(model_path=model_path, model_type=self._transformer_model_type)
         self._tokenizer = AutoTokenizer.from_pretrained(model_path)
         self._model.to(self._device)
         self._model.eval()
