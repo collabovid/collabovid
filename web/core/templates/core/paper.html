@@ -79,10 +79,10 @@
                             </div>
                         {% endif %}
                         <h6 class="card-title text-muted mt-2"><i class="fas fa-tag"></i> Categories</h6>
-                        <div class="small text-left">
+                        <div class="text-left">
                             {% for category in paper.categories.all %}
                                 <span class="badge badge-pill text-light"
-                                      style="background-color: {{ category.color }}; font-size: 14px">
+                                      style="background-color: {{ category.color }};">
                                    {{ category.name }}
                             </span>
                             {% endfor %}
