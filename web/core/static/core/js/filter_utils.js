@@ -70,8 +70,8 @@
                     on_result(data);
                 },
                 error: function (request, error) {
-                    console.log("Request: " + JSON.stringify(request));
-                    console.log("Error: " + error);
+                    //console.log("Request: " + JSON.stringify(request));
+                    //console.log("Error: " + error);
                 }
             });
 

@@ -76,10 +76,12 @@
             <div class="col-4 text-right">
 
                 <button class="btn btn-light mt-2 filter-toggle"
+                        id="filter-toggle"
                         data-toggle="collapse"
                         data-target="#filter-container"
                         aria-expanded="false"
                         aria-controls="filter-container">Filters
+                    <span style="display: none;" class="badge badge-pill badge-danger"></span>
                 </button>
 
             </div>
@@ -120,6 +122,8 @@
             let indicator = $("#paper-loading-indicator");
             let paper_container = $("#paper-container");
             let pagination_container = $("#pagination-container");
+            let filter_toggle_badge = $("#filter-toggle span.badge");
+            let filter_form = $("#filter-form");
 
 
             let searchEngine = form.collabovidSearch({
@@ -170,6 +174,18 @@
 
                 searchEngine.searchQuery(full_data, 1, false, function () {
                     $('.nav-search-types label.nav-link').addClass('disabled');
+
+                    let active_filter_count = filter_form.find("input[data-count-filter=true][type=text]").filter(function () {
+                            return $(this).val().length !== 0
+                        }).length +
+                        filter_form.find("input[data-count-filter=true][type=radio]:checked").length
+                        + filter_form.find("input[data-count-filter=true][type=checkbox]:checked").length;
+
+                    if (active_filter_count > 0) {
+                        filter_toggle_badge.html(active_filter_count).show();
+                    } else {
+                        filter_toggle_badge.hide();
+                    }
                 }, function () {
                     $('.nav-search-types label.nav-link').removeClass('disabled');
                     searchEngine.pushToUrl(submission_data);
