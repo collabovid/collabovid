@@ -162,7 +162,7 @@
                                                 </span>
                                         {% endif %}
 
-                                        {% if paper.abstract|length >= preview_size and paper.pdf_url %}
+                                        {% if paper.abstract|length >= preview_size%}
                                             |
                                         {% endif %}
 
@@ -170,7 +170,10 @@
                                             <a href="{{ paper.pdf_url }}">
                                                 Read the full text
                                             </a>
+                                            |
                                         {% endif %}
+
+                                        <a href="{% url "paper" paper.doi %}">Show Similar</a>
                                     </div>
 
                                 </div>

@@ -1,0 +1,121 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="gradient-header">
+        <div class="container mt-4">
+            <div class="row">
+                {% if paper.preview_image %}
+                    <div class="col-md-2 hidden-xs hidden-sm">
+                        <div class="card p-1" style="height: 200px">
+                            <img src="{{ paper.preview_image.url }}" style="max-height: 200px"
+                                 class="img-fluid mx-auto d-block">
+                        </div>
+                    </div>
+                {% endif %}
+                <div class=" {% if paper.preview_image %}col-md-10 {% else %} col-md-12 {% endif %}">
+                    <h3 class="text-white">{{ paper.title }}</h3>
+                    <div class="mb-1 muted-white">
+                        {% if paper.doi|first not in 'arXiv:' %}
+                            <a class="muted-white" href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                        {% else %}
+                            {{ paper.doi }}
+                        {% endif %}
+                    </div>
+                    <div class="mt-3">
+                        <a class="btn btn-outline-light" href="{{ paper.pdf_url }}">
+                            <i class="fa fa-file"></i> PDF
+                        </a>
+                        <a class="btn btn-outline-light ml-3" href="{{ paper.url }}">
+                            <i class="fa fa-external-link-alt"></i>
+                            {{ paper.host.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+    <div class="container mt-4">
+        <div class="row mt-3">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted mb-2">
+                            <i class="fas fa-file-alt"></i> Abstract
+                        </h5>
+                        <p class="card-text mb-2" style="font-size: 15px">
+                            {{ paper.abstract }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="text-muted">
+                            <i class="fas fa-clock"></i> Published
+                        </h6>
+                        <div class="card-text text-muted mb-2">
+                            {{ paper.published_at }}
+                        </div>
+                        <h6 class="text-muted mt-2">
+                            <i class="fas fa-users"></i> Authors
+                        </h6>
+                        <div class="text-muted author mb-2">
+                            {% for author in paper.authors.all %}
+                                <a href="/search?authors={{ author.id }}">{{ author.first_name }} {{ author.last_name }}</a>{% if not forloop.last %},{% endif %}
+                            {% endfor %}
+                        </div>
+                        {% if paper.journal %}
+                            <h6 class="text-muted mt-2">
+                                <i class="fas fa-book"></i> Journal
+                            </h6>
+                            <div class="card-text text-muted mb-2">
+                                {% if paper.journal.url %}
+                                    <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
+                                {% else %}
+                                    {{ paper.journal.displayname.title }} (<a href="/search?journals={{ paper.journal.id }}">{{ paper.journal.papers.count }} paper{{ paper.journal.papers.count|pluralize:",s" }}</a>)
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <h6 class="card-title text-muted mt-2"><i class="fas fa-tag"></i> Categories</h6>
+                        <div class="small text-left">
+                            {% for category in paper.categories.all %}
+                                <span class="badge badge-pill text-light"
+                                      style="background-color: {{ category.color }}; font-size: 14px">
+                                   {{ category.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="paper-container" class="container mt-4">
+        <div class="col-lg-6 col-md-6 col-sm-12 col-12 mt-5" style="margin-bottom: -20px">
+            <h3 class="text-muted text-center d-md-none d-sm-block d-block mb-2">Similar Paper</h3>
+            <h3 class="text-muted d-md-inline-block">Similar Paper</h3>
+        </div>
+        {% if error %}
+            <div class="my-5 text-center text-danger font-weight-bold">We encountered an unexpected error.</div>
+        {% else %}
+            {% for current_paper in similar_papers %}
+                <div class="my-5">
+                    {% include 'core/partials/_paper_card.html' with html=True paper=current_paper %}
+                </div>
+            {% empty %}
+                <div class="my-5 text-center font-weight-bold">No similar papers found</div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
+
+{% block css %}
+{% endblock %}

@@ -73,7 +73,10 @@ body {
     overflow: visible;
     display: block;
     position: relative;
-    padding-bottom: 100px;
+}
+
+.footer {
+    margin-top: 50px;
 }
 
 .muted-white {

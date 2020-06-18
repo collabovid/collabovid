@@ -161,11 +161,11 @@
             "description": "No description provided.",
             "parameters": [
                 {
-                    "name": "analyzer",
+                    "name": "vectorizer",
                     "required": false,
-                    "type": "PaperAnalyzer",
+                    "type": "str",
                     "default": null,
-                    "is_primitive": false
+                    "is_primitive": true
                 },
                 {
                     "name": "force_recompute",
