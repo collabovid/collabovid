@@ -64,6 +64,18 @@
                         {% endif %}
                     </div>
                     <i class="fas fa-clock"></i> {{ paper.published_at }}
+
+                    {% if paper.locations %}
+                        {% if paper.countries %}
+                            &nbsp;|&nbsp;
+                            {% include "core/partials/paper_card/_locations.html" with locations=paper.countries %}
+                        {% endif %}
+                        {% if paper.cities %}
+                            &nbsp;|&nbsp;
+                            {% include "core/partials/paper_card/_locations.html" with locations=paper.cities %}
+                        {% endif %}
+                    {% endif %}
+
                     &nbsp;|&nbsp;
                     <i class="fas fa-users"></i>
                     {% for author in paper.authors.all %}
@@ -128,13 +140,6 @@
                                             <span class="badge badge-pill text-light"
                                                   style="background-color: {{ category.color }};">
                                                 {{ category.name }}
-                                            </span>
-                                        {% endfor %}
-                                        {% for location in paper.locations.all %}
-                                            <span class="badge badge-pill text-light"
-                                                  style="background-color:#9E9E9E;">
-                                                <i class="fa fa-map-marker"></i>
-                                                {{ location.displayname }}
                                             </span>
                                         {% endfor %}
                                     </div>

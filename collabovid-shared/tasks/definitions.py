@@ -102,7 +102,6 @@ class Runnable:
 
         if not length:
             if isinstance(iterator, QuerySet):
-                print("query set")
                 length = iterator.count()
             else:
                 length = len(iterator)
