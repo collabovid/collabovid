@@ -13,6 +13,8 @@ from .doi_search import DoiSearch
 from .title_search import TitleSearch
 from .author_search import AuthorSearch
 
+from django.conf import settings
+
 
 class SearchEngine:
     ARTICLE_TYPE_ALL = 3
@@ -128,7 +130,8 @@ class SearchEngine:
             for search_component in self.search_pipeline:
                 paper_results, query = search_component.find(query, papers, score_min)
 
-                print(search_component.__class__, query)
+                if settings.DEBUG:
+                    print(search_component.__class__, query)
 
                 found_sufficient_papers = False
 
@@ -144,7 +147,8 @@ class SearchEngine:
                 if not query or (found_sufficient_papers and search_component.exclusive):
                     #  In case an exclusive search found a result, we abort further search
                     #  In case query cleaning resulted in an empty query, we abort further search
-                    print("breaking", query, found_sufficient_papers, search_component.exclusive)
+                    if settings.DEBUG:
+                        print("breaking", query, found_sufficient_papers, search_component.exclusive)
                     break
 
             for doi, score in paper_score_table.items():
