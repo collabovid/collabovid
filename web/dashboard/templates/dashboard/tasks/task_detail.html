@@ -3,7 +3,7 @@
 {% load tz %}
 {% block content %}
 
-    <div class="d-flex flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <div class="d-flex flex-wrap flex-md-nowrap align-items-center pb-2">
         <h1 class="h2">{{ task.name }}</h1>
         <div class="ml-3" style="font-size: 15px">
             {% if task.status == 0 %}
@@ -24,6 +24,18 @@
         {% if task.status != 0 %}
             <div class="ml-3"><i class="fa fa-hourglass-end mt-2"></i> {{ task.ended_at }}</div>
         {% endif %}
+    </div>
+
+    <div class="row mb-3 border-bottom pb-2">
+        <div class="col-12">
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: {{ task.progress }}%"
+                     aria-valuenow="{{ task.progress }}"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">

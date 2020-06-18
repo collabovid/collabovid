@@ -2,10 +2,14 @@ import datetime
 import inspect
 import re
 
+from django.db.models import QuerySet
+
 from tasks.models import Task
 from django.utils.timezone import datetime
 from django.conf import settings
-from tasks.colors import LogColor, Blue, Red, Green, Gray
+from tasks.colors import LogColor
+from math import ceil
+
 """
 Service tasks are tasks that are unique to the service you are running, i.e. they do not include tasks that
 are defined by other services
@@ -37,6 +41,7 @@ class PrimitivesHelper:
     def convert(data_type, data: str):
         return PrimitivesHelper.PRIMITIVES[PrimitivesHelper.PRIMITIVES_STRINGS.index(data_type)](data)
 
+
 # noinspection PyPep8Naming
 def register_task(cls):
     """
@@ -58,7 +63,8 @@ def register_task(cls):
                 'name': param.name,
                 'required': param.default == inspect.Parameter.empty,
                 'type':
-                    str(param.annotation.__name__) if not PrimitivesHelper.is_primitive(param.annotation) else  # class name
+                    str(param.annotation.__name__) if not PrimitivesHelper.is_primitive(
+                        param.annotation) else  # class name
                     None if param.annotation == inspect.Parameter.empty else  # No annotation
                     PrimitivesHelper.to_string(param.annotation),  # Annotation is a primitive
                 'default': None if param.default == inspect.Parameter.empty else param.default,
@@ -80,6 +86,60 @@ class Runnable:
 
         self.__message_buffer = []
         self.__log_updated_at = datetime.now()
+
+    def _progress_iterator(self, iterator, length=None, proportion: float = 1.0, step_size: int = 1):
+        """
+        Yields the given iterator while updating the task progress automatically.
+        :param iterator: The iterator or QuerySet or an int that should be set as the progress
+        :param length: The length of the iterator. If nothing is provided len() will be used which might be inefficient.
+        :param proportion: The proportion of progress this iterator should cover.
+        :param step_size: The step size (in percent) in which the task progress should be updated. For large iterator
+                this value should be lowered while for small iterators a large step size is sufficient. Min value is 1.
+        :return: Yields the iterators objects.
+        """
+
+        assert 0 <= proportion <= 1 <= step_size
+
+        if not length:
+            if isinstance(iterator, QuerySet):
+                print("query set")
+                length = iterator.count()
+            else:
+                length = len(iterator)
+
+        progress_to_cover = int(round(100 * proportion))
+        iterations_per_percent = int(ceil(length / progress_to_cover))
+        buffered_progress = 0
+
+        for i, obj in enumerate(iterator, 1):
+            if i % iterations_per_percent == 0:
+                #  Progress increased by 1
+                buffered_progress += 1
+                if buffered_progress == step_size:
+                    #  Progress update in database, never increase progress to > 100
+                    self._task.progress = min(self._task.progress + buffered_progress, 100)
+                    self._task.save()
+                    buffered_progress = 0
+
+            yield obj
+
+    def progress(self, progress_or_iterator, length=None, proportion: float = 1.0, step_size: int = 1):
+        """
+        Yields the given iterator while updating the task progress automatically or applies the given progress.
+        :param progress_or_iterator: The progress, iterator or QuerySet or an int that should be set as the progress.
+        :param length: The length of the iterator. If nothing is provided len() will be used which might be inefficient.
+        :param proportion: The proportion of progress this iterator should cover.
+        :param step_size: The step size (in percent) in which the task progress should be updated. For large iterator
+                this value should be lowered while for small iterators a large step size is sufficient. Min value is 1.
+        :return: Yields the iterators objects.
+        """
+        if isinstance(progress_or_iterator, int):
+            self._task.progress = min(progress_or_iterator, 100)
+            self._task.save()
+            return None
+        else:
+            return self._progress_iterator(progress_or_iterator, length=length, proportion=proportion,
+                                           step_size=step_size)
 
     def log(self, *args, flush=False) -> None:
         """

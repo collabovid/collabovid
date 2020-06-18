@@ -12,3 +12,19 @@ div.task-log span.red
 {
     color: #d33033;
 }
+
+div.task-log span.grey
+{
+    color: #545256;
+}
+
+div.task-log span.yellow
+{
+    color: #989649;
+}
+
+
+div.task-log span.blue
+{
+    color: #4f5bae;
+}

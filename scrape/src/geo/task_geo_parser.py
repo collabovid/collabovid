@@ -4,7 +4,7 @@ from data.models import GeoCity, GeoCountry, GeoLocation, Paper
 from src.geo.paper_geo_extractor import PaperGeoExtractor
 from tasks.definitions import register_task, Runnable
 
-from tasks.colors import Green, Red, Gray
+from tasks.colors import Green, Red, Grey
 
 
 @register_task
@@ -41,7 +41,7 @@ class GeoParserTask(Runnable):
                     for ent in ignored_entities:
                         self.log("\t[", Red('ignored'), "]\t{}".format(ent))
 
-            self.log(Gray("Recomputing counts."))
+            self.log(Grey("Recomputing counts."))
             GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
             self.log(Green("Recomputed counts"))
 

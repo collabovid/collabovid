@@ -1,8 +1,4 @@
 from django.db import models
-from django.conf import settings
-import os
-from django.db.models.signals import post_delete
-from django.dispatch.dispatcher import receiver
 
 class Task(models.Model):
     STATUS_PENDING = 0
@@ -23,6 +19,8 @@ class Task(models.Model):
     started_by = models.CharField(max_length=200)
 
     log = models.TextField(default="")
+
+    progress = models.IntegerField(default=0)
 
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(null=True, default=None)

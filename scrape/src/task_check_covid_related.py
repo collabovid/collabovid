@@ -2,6 +2,7 @@ from data.models import Paper
 from src.static_functions import covid_related
 from tasks.definitions import register_task, Runnable
 
+
 @register_task
 class CheckCovidRelatedTask(Runnable):
     @staticmethod
@@ -13,7 +14,6 @@ class CheckCovidRelatedTask(Runnable):
 
     def run(self):
         self.log("Check which papers are related to COVID-19")
-        papers = Paper.objects.all()
-        for paper in papers:
+        for paper in self.progress(Paper.objects.all()):
             paper.covid_related = covid_related(paper)
             paper.save()

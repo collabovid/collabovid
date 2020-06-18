@@ -22,7 +22,7 @@ class PdfImageDownloadTask(Runnable):
 
     def run(self):
         self.log("Download PDF preview images")
-        for paper in Paper.objects.filter(preview_image__in=['', None]):
+        for paper in self.progress(Paper.objects.filter(preview_image__in=['', None])):
             if paper.data_source_value == DataSource.ELSEVIER:
                 self.log(f"Download PDF preview image for {paper.doi}")
                 ElsevierDatapoint.update_pdf_data(paper, extract_image=True, extract_content=False)

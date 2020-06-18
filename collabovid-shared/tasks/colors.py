@@ -44,7 +44,13 @@ class Blue(LogColor):
         return 'blue'
 
 
-class Gray(LogColor):
+class Grey(LogColor):
     @property
     def color(self):
-        return 'blue'
+        return 'grey'
+
+
+class Yellow(LogColor):
+    @property
+    def color(self):
+        return 'yellow'

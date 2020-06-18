@@ -34,7 +34,7 @@ class ExportDataTask(Runnable):
         out_dir = settings.DB_EXPORT_LOCAL_DIR
 
         filename = DataExport.export_data(
-            Paper.objects.all(), out_dir=out_dir, log=self.log, export_images=self.export_images
+            self.progress(Paper.objects.all()), out_dir=out_dir, log=self.log, export_images=self.export_images
         )
         filepath = f"{out_dir}/{filename}"
 
