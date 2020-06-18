@@ -23,4 +23,4 @@ class EmbeddingSemanticPaperSearch:
         except CouldNotLoadPaperMatrix as e:
             print(e)
             return False
-        return self._vectorizer.models_initialized
+        return self._vectorizer.models_initialized()

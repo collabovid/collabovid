@@ -24,6 +24,9 @@ class TitleSentenceVectorizer(PaperVectorizer):
             raise CouldNotLoadModel("Could not load model from {}".format(sentence_transformer_path))
         self.model = SentenceTransformer(sentence_transformer_path, device='cpu')
 
+    def _unload_models(self):
+        self.model = None
+
     def vectorize_query(self, query: str):
         return self.model.encode([query])[0]
 

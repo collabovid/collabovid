@@ -38,11 +38,20 @@ class PaperVectorizer:
             self._is_initialized = True
             self._is_initializing = False
 
-    @property
+    def cleanup_models(self):
+        self._is_initialized = False
+        self._unload_models()
+
+    def initializing_models(self):
+        return self._is_initializing
+
     def models_initialized(self):
         return self._is_initialized
 
     def _load_models(self):
+        pass
+
+    def _unload_models(self):
         pass
 
     def _compute_paper_matrix_contents(self, papers):
@@ -99,23 +108,43 @@ class PaperVectorizer:
 
     def compute_paper_matrix(self, force_recompute=False):
         old_paper_matrix = self.paper_matrix
-        # initialize the id_map with saved values if possible
+
+        if old_paper_matrix:
+            print("Current paper matrix has size ", len(old_paper_matrix['index_arr']), "with",
+                  Paper.objects.all().count(), "in database")
+
+        # all papers
+        papers = Paper.objects.all()
+
+        id_map = {}
         if old_paper_matrix and not force_recompute:
-            id_map = old_paper_matrix['id_map']
-        else:
-            id_map = {}
+            # delete papers from matrix that are not any more in the db
+            dois = {paper.doi for paper in papers}
+            indices_to_delete = []
+            for idx, doi in enumerate(old_paper_matrix['index_arr']):
+                if doi not in dois:
+                    indices_to_delete.append(idx)
+
+            print(f'Deleting {len(indices_to_delete)} Papers from matrix')
+
+            # delete from matrix
+            for key in old_paper_matrix.keys():
+                if key not in ['index_arr', 'id_map']:
+                    old_paper_matrix[key] = np.delete(old_paper_matrix[key], indices_to_delete, axis=0)
+
+            # delete from index array
+            for idx in reversed(indices_to_delete):
+                del old_paper_matrix['index_arr'][idx]
+
+            # initialize the id_map with saved values if possible
+            for idx, doi in enumerate(old_paper_matrix['index_arr']):
+                id_map[doi] = idx
+
+            old_paper_matrix['id_map'] = id_map
 
         # determines if a paper needs an update
         def needs_update(paper):
             return force_recompute
-
-        if old_paper_matrix:
-            print("Current paper matrix has size ", old_paper_matrix['matrix'].shape, "with",
-                  Paper.objects.all().count(),
-                  "in database")
-
-        # all papers
-        papers = Paper.objects.all()
 
         # papers that need to be recomputed
         filtered_papers = []

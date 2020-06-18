@@ -4,24 +4,12 @@ from transformers import (
 )
 import torch.nn.functional
 from src.analyze.models.longformer import LongformerForSequenceClassification
+from src.analyze.models.utils import batch_iterator
 import torch
 
 # the 8 litcovid categories
 categories = ['general', 'mechanism', 'transmission', 'diagnosis', 'treatment', 'prevention', 'case-report',
               'forecasting']
-
-
-def _batch_iterator(iterable, batch_size=1):
-    """
-    yields batches from the given iterator
-    :param iterable: The iterable that should be batched
-    :param batch_size: The batch size
-    :return:
-    """
-    from itertools import chain, islice
-    iterator = iter(iterable)
-    for first in iterator:
-        yield list(chain([first], islice(iterator, batch_size - 1)))
 
 
 class LitcovidMultiLabelClassifier():
@@ -64,8 +52,7 @@ class LitcovidMultiLabelClassifier():
         :param batch_size: The batch size that should be used when evaluating the underlying model
         :return:
         """
-        batch_iterator = _batch_iterator(paper_iterator, batch_size=batch_size)
-        for papers in batch_iterator:
+        for papers in batch_iterator(paper_iterator, batch_size=batch_size):
             input = [(paper.title, paper.abstract) for paper in papers]
             tokens = self._tokenize(input)
             with torch.no_grad():

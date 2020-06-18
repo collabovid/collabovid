@@ -9,6 +9,7 @@ import requests
 
 from django.conf import settings
 from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
+from django.shortcuts import get_object_or_404
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V

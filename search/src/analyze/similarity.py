@@ -22,4 +22,4 @@ class CosineSimilarity(SimilarityComputer):
 class EuclideanSimilarity(SimilarityComputer):
     def similarities(self, vectors, vec):
         scores = 1 - dist.cdist(vectors, np.array([vec]), metric='euclidean')
-        return scores
+        return scores[:,0]

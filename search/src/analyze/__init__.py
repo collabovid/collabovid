@@ -13,7 +13,8 @@ similar_paper_finder = None
 
 
 def get_used_vectorizers():
-    return list({SEARCH_VECTORIZER, SIMILAR_VECTORIZER})
+    names = list({SEARCH_VECTORIZER, SIMILAR_VECTORIZER})
+    return names
 
 
 def get_semantic_paper_search():

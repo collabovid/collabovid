@@ -1,24 +1,28 @@
 import os
 import torch
 from transformers import AutoTokenizer
+import numpy as np
 from src.analyze.similarity import EuclideanSimilarity
+from src.analyze.models.utils import batch_iterator
 from src.analyze.models.paper_embedding_model import PaperEmbeddingModel
 from . import PaperVectorizer
 from django.conf import settings
 from .exceptions import CouldNotLoadModel
+from tqdm import tqdm
 
-TRANSFORMER_MODEL_NAME = 'biobert'
+TRANSFORMER_MODEL_NAME = 'transformer_paper_oubiobert_512'
 TRANSFORMER_MODEL_TYPE = 'bert'
 
 
 class TransformerPaperVectorizer(PaperVectorizer):
-    def __init__(self, matrix_file_name, device='cpu', max_token_length=32, *args, **kwargs):
+    def __init__(self, matrix_file_name, device='cpu', max_token_length=512, batch_size=8, *args, **kwargs):
         super(TransformerPaperVectorizer, self).__init__(matrix_file_name=matrix_file_name,
                                                          similarity_computer=EuclideanSimilarity(), *args, **kwargs)
 
         self._device = device
         self._max_token_length = max_token_length
         self._title_importance = 0.5
+        self._batch_size = batch_size
         self._model = None
 
     def _load_models(self):
@@ -30,19 +34,33 @@ class TransformerPaperVectorizer(PaperVectorizer):
         self._model.to(self._device)
         self._model.eval()
 
+    def _unload_models(self):
+        self._model = None
+        self._tokenizer = None
+
     def vectorize_query(self, query: str):
-        tokens = self._tokenize([query])
+        tokens = self._tokenize([query.lower()])
         with torch.no_grad():
             embedding = self._model(tokens)[0].detach().cpu().numpy()
         return embedding
 
     def _compute_paper_matrix_contents(self, papers):
-        titles = [paper.title for paper in papers]
-        abstracts = [paper.abstract for paper in papers]
-        title_embeddings, abstract_embeddings = [self._model(self._tokenize(x)) for x in [titles, abstracts]]
+        title_matrix = None
+        abstract_matrix = None
+        for paper_batch in tqdm(batch_iterator(papers, batch_size=self._batch_size)):
+            title_tokens = self._tokenize([paper.title.lower() for paper in paper_batch])
+            abstract_tokens = self._tokenize([paper.abstract.lower() for paper in paper_batch])
+            with torch.no_grad():
+                title_embeddings, abstract_embeddings = [self._model(tokens).detach().cpu().numpy() for tokens in
+                                                         [title_tokens, abstract_tokens]]
+
+            title_matrix = np.concatenate((title_matrix, title_embeddings),
+                                          axis=0) if title_matrix is not None else title_embeddings
+            abstract_matrix = np.concatenate((abstract_matrix, abstract_embeddings),
+                                             axis=0) if abstract_matrix is not None else abstract_embeddings
         return {
-            'title': title_embeddings,
-            'abstract': abstract_embeddings
+            'title': title_matrix,
+            'abstract': abstract_matrix
         }
 
     def similar_to_paper(self, doi: str):
@@ -53,8 +71,7 @@ class TransformerPaperVectorizer(PaperVectorizer):
         title_similarity_scores = self._similarity_computer.similarities(title_matrix, abstract_matrix[matrix_index])
         abstract_similarity_scores = self._similarity_computer.similarities(abstract_matrix, title_matrix[matrix_index])
 
-        combined_scores = self._title_importance * title_similarity_scores + (
-                1 - self._title_importance) * abstract_similarity_scores
+        combined_scores = 0.5 * title_similarity_scores + 0.5 * abstract_similarity_scores
 
         scores = combined_scores.tolist()
         del scores[matrix_index]
