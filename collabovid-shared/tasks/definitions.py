@@ -106,8 +106,11 @@ class Runnable:
             else:
                 length = len(iterator)
 
+        if length < 1:
+            return
+
         progress_to_cover = int(round(100 * proportion))
-        iterations_per_percent = int(ceil(length / progress_to_cover))
+        iterations_per_percent = int(ceil(progress_to_cover/length))
         buffered_progress = 0
 
         for i, obj in enumerate(iterator, 1):
