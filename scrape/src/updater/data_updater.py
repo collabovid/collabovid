@@ -1,11 +1,12 @@
 import hashlib
+from base64 import b64encode
 from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from time import sleep
 from timeit import default_timer as timer
 from typing import List, Optional, Tuple
 
-from data.models import Author, DataSource, Journal, Paper, PaperData, PaperHost
+from data.models import Author, DataSource, Journal, Paper, PaperData, PaperHost, IgnoredPaper, ScrapeError
 from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
@@ -47,6 +48,25 @@ class NotCovidRelatedError(UpdateException):
 
 class ArticleModifiedError(UpdateException):
     pass
+
+
+def save_scrape_error(ex, datapoint):
+    hash = datapoint.hash
+    json_data = datapoint.to_dict()
+    comment = ex.msg[:ScrapeError.max_length('comment')]
+    try:
+        paper = Paper.objects.get(doi=datapoint.doi)
+    except Paper.DoesNotExist:
+        paper = None
+
+    if isinstance(ex, MissingDataError):
+        type = ScrapeError.Type.MISSING_DATA
+    elif isinstance(ex, ArticleModifiedError):
+        type = ScrapeError.Type.PAPER_CONFLICT
+    else:
+        type = ScrapeError.Type.DATA_ERROR
+
+    ScrapeError.objects.create(paper=paper, type=type, datapoint=json_data, hash=hash, comment=comment)
 
 
 class UpdateStatistics:
@@ -107,6 +127,8 @@ class ArticleDataPoint(object):
     journal: Optional[str] = None
     update_timestamp: Optional[datetime] = None
 
+    _hash: Optional[str] = None
+
     def to_dict(self):
         return {
             'doi': self.doi,
@@ -126,35 +148,38 @@ class ArticleDataPoint(object):
             'update_timestamp': self.update_timestamp,
         }
 
-    def get_hash(self):
+    @property
+    def hash(self):
         """
-        Return a hash, built from all intance variables.
+        Return a hash, built from all instance variables.
         """
-        hash = hashlib.md5()
+        if not self._hash:
+            md5 = hashlib.md5()
 
-        def update_if_not_none(value: str):
-            if value is not None:
-                hash.update(value.encode('utf-8'))
+            def update_if_not_none(value: str):
+                if value is not None:
+                    md5.update(value.encode('utf-8'))
 
-        update_if_not_none(self.doi)
-        update_if_not_none(self.title)
-        update_if_not_none(self.abstract)
-        for lastname, firstname in self.authors:
-            update_if_not_none(lastname)
-            update_if_not_none(firstname)
-        update_if_not_none(self.datasource)
-        update_if_not_none(self.paperhost_name)
-        update_if_not_none(self.paperhost_url)
-        update_if_not_none(self.pubmed_id)
-        update_if_not_none(self.published_at.strftime("%Y%m%d") if self.published_at else None)
-        update_if_not_none(self.url)
-        update_if_not_none(self.pdf_url)
-        update_if_not_none(self.version)
-        update_if_not_none(str(self.is_preprint))
-        update_if_not_none(self.journal)
-        update_if_not_none(self.update_timestamp.strftime("%Y%m%d%H%M%S") if self.update_timestamp else None)
+            update_if_not_none(self.doi)
+            update_if_not_none(self.title)
+            update_if_not_none(self.abstract)
+            for lastname, firstname in self.authors:
+                update_if_not_none(lastname)
+                update_if_not_none(firstname)
+            update_if_not_none(self.datasource.label)
+            update_if_not_none(self.paperhost_name)
+            update_if_not_none(self.paperhost_url)
+            update_if_not_none(self.pubmed_id)
+            update_if_not_none(self.published_at.strftime("%Y%m%d") if self.published_at else None)
+            update_if_not_none(self.url)
+            update_if_not_none(self.pdf_url)
+            update_if_not_none(self.version)
+            update_if_not_none(str(self.is_preprint))
+            update_if_not_none(self.journal)
+            update_if_not_none(self.update_timestamp.strftime("%Y%m%d%H%M%S") if self.update_timestamp else None)
 
-        return hash.digest()
+            self._hash = b64encode(md5.digest()).decode('utf-8')[:22]
+        return self._hash
 
     def check_integrity_constraints(self):
         if not self.doi:
@@ -169,6 +194,17 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract abstract")
         if not self.published_at:
             raise MissingDataError("Couldn't extract date")
+
+    def is_on_ignorelist(self):
+        if self.doi:
+            return IgnoredPaper.objects.filter(identifier=self.doi).exists()
+        elif self.title:
+            return IgnoredPaper.objects.filter(identifier=self.title).exists()
+        else:
+            return False
+
+    def is_on_errorlist(self):
+        return ScrapeError.objects.filter(hash=self.hash).exists()
 
 
 class DataUpdater(object):
@@ -197,10 +233,15 @@ class DataUpdater(object):
             self.statistics.n_created += int(created)
             self.statistics.n_updated += int(updated)
             return db_article, created
-        except MissingDataError as ex:
+        except (MissingDataError, ArticleModifiedError,
+                IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
             id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
-            self.log(f"Error: {id}: {ex.msg}")
+            if isinstance(ex, UpdateException):
+                self.log(f"Error: {id}: {ex.msg}")
+            else:
+                self.log(f"Error: {id}")
             self.statistics.n_errors += 1
+            save_scrape_error(ex, datapoint)
         except SkipArticle as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.statistics.n_skipped += 1
@@ -295,6 +336,11 @@ class DataUpdater(object):
                     db_article.data = db_content
 
     def update_db(self, datapoint, update_existing, pdf_content, pdf_image):
+        if datapoint.is_on_ignorelist():
+            raise SkipArticle("Article on ignore list")
+        if datapoint.is_on_errorlist():
+            raise SkipArticle("Article on error list")
+
         datapoint.check_integrity_constraints()
 
         with transaction.atomic():
@@ -306,14 +352,14 @@ class DataUpdater(object):
                 elif not update_existing and DataSource.compare(db_article.data_source_value, self.data_source) == 0:
                     raise SkipArticle("Article already in database")
                 created = False
-                # data_hash = data.get_hash()
-                # if db_article.scrape_hash == data_hash:
-                #     return db_article, created, False
-                #
-                # if db_article.modified:
-                #     raise ArticleModifiedError(
-                #         "Some fields are changed manually, but scrape recognized external updates"
-                #     )
+                data_hash = datapoint.hash
+                if db_article.scrape_hash and db_article.scrape_hash == data_hash:
+                    return db_article, created, False
+
+                if db_article.modified:
+                    raise ArticleModifiedError(
+                        "Some fields are changed manually, but scrape recognized external updates"
+                    )
             except Paper.DoesNotExist:
                 db_article = Paper(doi=datapoint.doi)
                 created = True
@@ -369,7 +415,7 @@ class DataUpdater(object):
             db_article.version = datapoint.version
 
             db_article.last_scrape = timezone.now()
-
+            db_article.scrape_hash = datapoint.hash
             db_article.categories.clear()
             db_article.save()
         return db_article, created, True

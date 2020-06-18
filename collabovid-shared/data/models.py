@@ -1,12 +1,12 @@
 from typing import Union
 
+from django.contrib.postgres.fields import JSONField
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
-
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
@@ -213,8 +213,8 @@ class Paper(models.Model):
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
 
-    #scrape_hash = models.BinaryField(max_length=128)
-    #modified = models.BooleanField(default=False)
+    scrape_hash = models.CharField(max_length=22, null=True, default=None)
+    modified = models.BooleanField(default=False)
 
     @property
     def percentage_topic_score(self):
@@ -235,6 +235,29 @@ class Paper(models.Model):
 
     def update(self):
         pass
+
+
+class ScrapeError(models.Model):
+    class Type(models.IntegerChoices):
+        MISSING_DATA = 0, gettext_lazy('missing data')
+        PAPER_CONFLICT = 1, gettext_lazy('paper conflict')
+        DATA_ERROR = 2, gettext_lazy('data error')
+
+    paper = models.ForeignKey(Paper, null=True, on_delete=models.CASCADE)
+    type = models.IntegerField(choices=Type.choices)
+    datapoint = JSONField(encoder=DjangoJSONEncoder)
+    hash = models.CharField(max_length=22, null=False, db_index=True)
+    comment = models.CharField(max_length=50, default=None, null=True)
+
+    @staticmethod
+    def max_length(field: str):
+        return ScrapeError._meta.get_field(field).max_length
+
+
+class IgnoredPaper(models.Model):
+    identifier = models.CharField(max_length=100, unique=True,
+                          db_index=True)  # contains either doi (normally) or title (if no doi present)
+    comment = models.CharField(max_length=50, default=None, null=True)
 
 
 class GeoLocationMembership(models.Model):
