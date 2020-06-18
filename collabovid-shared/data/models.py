@@ -213,8 +213,8 @@ class Paper(models.Model):
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
 
-    scrape_hash = models.BinaryField(max_length=128)
-    modified = models.BooleanField(default=False)
+    #scrape_hash = models.BinaryField(max_length=128)
+    #modified = models.BooleanField(default=False)
 
     @property
     def percentage_topic_score(self):

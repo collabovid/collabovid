@@ -67,6 +67,13 @@ class ArticleDataPoint(object):
     journal: Optional[str] = None
     update_timestamp: Optional[datetime] = None
 
+    def __init__(self, doi=None, title=None, abstract=None, is_preprint=None):
+        """ Constructor for convenience for often occuring use case"""
+        self.doi = doi
+        self.title = title
+        self.abstract = abstract
+        self.is_preprint = is_preprint
+
     def get_hash(self):
         """
         Return a hash, built from all intance variables.
@@ -120,7 +127,7 @@ class DataUpdater(object):
         self.n_skipped = 0
         self.n_already_tracked = 0
         self.n_created = 0
-        self.n_updated
+        self.n_updated = 0
 
     @property
     def data_source(self):
@@ -137,8 +144,8 @@ class DataUpdater(object):
 
     def get_or_create_db_article(self, datapoint, pdf_content, pdf_image, update_existing):
         try:
-            db_article, created, updated = self.update_db(datapoint, update_existing=update_existing, pdf_content=pdf_content,
-                                                      pdf_image=pdf_image)
+            db_article, created, updated = self.update_db(datapoint, update_existing=update_existing,
+                                                          pdf_content=pdf_content, pdf_image=pdf_image)
             self.log(f"Updated/Created {datapoint.doi}")
             self.n_created += int(created)
             self.n_updated += int(updated)
@@ -214,8 +221,6 @@ class DataUpdater(object):
 
         filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
-        for article in filtered_articles:
-            data_point = self._get_article(doi=article.doi)
 
         iterator = progress(filtered_articles) if progress else filtered_articles
 
@@ -246,6 +251,7 @@ class DataUpdater(object):
 
     @staticmethod
     def update_pdf_data(db_article, extract_image=True, extract_content=True):
+        """ Extract PDF data using the stored PDF url """
         if not extract_image and not extract_content:
             return
         if not db_article.pdf_url:
@@ -268,50 +274,50 @@ class DataUpdater(object):
                     db_content = PaperData.objects.create(content=content)
                     db_article.data = db_content
 
-    def update_db(self, data, update_existing, pdf_content, pdf_image):
-        data.check_integrity_constraints()
+    def update_db(self, datapoint, update_existing, pdf_content, pdf_image):
+        datapoint.check_integrity_constraints()
 
         with transaction.atomic():
             try:
-                db_article = Paper.objects.get(doi=data.doi)
+                db_article = Paper.objects.get(doi=datapoint.doi)
                 if DataSource.compare(db_article.data_source_value, self.data_source) > 0:
                     raise DifferentDataSourceError(
                         f"Article already tracked by {DataSource(db_article.data_source_value).name}")
                 elif not update_existing and DataSource.compare(db_article.data_source_value, self.data_source) == 0:
                     raise SkipArticle("Article already in database")
                 created = False
-                data_hash = data.get_hash()
-                if db_article.scrape_hash == data_hash:
-                    return db_article, created, False
-
-                if db_article.modified:
-                    raise ArticleModifiedError(
-                        "Some fields are changed manually, but scrape recognized external updates"
-                    )
+                # data_hash = data.get_hash()
+                # if db_article.scrape_hash == data_hash:
+                #     return db_article, created, False
+                #
+                # if db_article.modified:
+                #     raise ArticleModifiedError(
+                #         "Some fields are changed manually, but scrape recognized external updates"
+                #     )
             except Paper.DoesNotExist:
-                db_article = Paper(doi=data.doi)
+                db_article = Paper(doi=datapoint.doi)
                 created = True
 
-            db_article.title = data.title
-            db_article.abstract = data.abstract
+            db_article.title = datapoint.title
+            db_article.abstract = datapoint.abstract
             db_article.data_source_value = self.data_source
-            db_article.published_at = data.published_at
+            db_article.published_at = datapoint.published_at
 
             db_article.covid_related = covid_related(db_article=db_article)
             if self.data_source.check_covid_related and not db_article.covid_related:
                 raise NotCovidRelatedError("Article not covid related.")
 
-            db_article.host, _ = PaperHost.objects.get_or_create(name=data.paperhost_name)
-            if data.paperhost_url:
-                db_article.host.url = data.paperhost_url
+            db_article.host, _ = PaperHost.objects.get_or_create(name=datapoint.paperhost_name)
+            if datapoint.paperhost_url:
+                db_article.host.url = datapoint.paperhost_url
 
-            db_article.url = data.url
-            db_article.pdf_url = data.pdf_url
-            db_article.is_preprint = data.is_preprint
-            db_article.pubmed_id = data.pubmed_id
+            db_article.url = datapoint.url
+            db_article.pdf_url = datapoint.pdf_url
+            db_article.is_preprint = datapoint.is_preprint
+            db_article.pubmed_id = datapoint.pubmed_id
             db_article.save()
 
-            authors = data.extract_authors()
+            authors = datapoint.authors
 
             if len(authors) == 0:
                 raise MissingDataError("Found no authors")
@@ -333,14 +339,14 @@ class DataUpdater(object):
                 except DjangoDataError as ex:
                     raise DataError(f"Author {author[1]} {author[0]}: {ex}")
 
-            if data.journal:
+            if datapoint.journal:
                 db_article.journal, _ = Journal.objects.get_or_create(
-                    name=data.journal[:Journal.max_length("name")]
+                    name=datapoint.journal[:Journal.max_length("name")]
                 )
 
             if pdf_content or pdf_image:
-                data.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
-            db_article.version = data.version
+                self.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
+            db_article.version = datapoint.version
 
             db_article.last_scrape = timezone.now()
 
