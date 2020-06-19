@@ -15,4 +15,6 @@ urlpatterns = [
     path('data-import/delete-archive/<path:archive_path>', delete_archive, name='delete_archive'),
     path('locations', locations, name='locations'),
     path('locations/<int:id>', show_location, name='show-location'),
+    path('scrape-errors', scrape_errors, name='scrape-errors'),
+    #path('scrape-errors/<int:id>', modify_error, name='modify-error')
 ]
