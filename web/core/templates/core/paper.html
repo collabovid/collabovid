@@ -53,14 +53,23 @@
             <div class="col-md-1 d-lg-none d-block">&nbsp;</div>
             <div class="col-lg-4 col-md-12">
                 <div class="card">
+
+                    <div class="position-absolute paper-detail-card-top-badge">
+                        {% if paper.is_preprint %}
+                            <span class="badge badge-pill badge-secondary small">Preprint</span>
+                            {#                    {% else %}#}
+                            {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
+                        {% endif %}
+                    </div>
+
                     <div class="card-body">
-                        <h6 class="text-muted">
+                        <h6 class="text-muted mb-1">
                             <i class="fas fa-clock"></i> Published
                         </h6>
                         <div class="card-text text-muted mb-2">
                             {{ paper.published_at }}
                         </div>
-                        <h6 class="text-muted mt-2">
+                        <h6 class="text-muted mt-2 mb-1">
                             <i class="fas fa-users"></i> Authors
                         </h6>
                         <div class="text-muted author mb-2">
@@ -70,20 +79,50 @@
                             {% endfor %}
                         </div>
                         {% if paper.journal %}
-                            <h6 class="text-muted mt-2">
+                            <h6 class="text-muted mt-2 mb-1">
                                 <i class="fas fa-book"></i> Journal
                             </h6>
                             <div class="card-text text-muted mb-2">
                                 {% if paper.journal.url %}
                                     <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
                                 {% else %}
-                                    {{ paper.journal.displayname.title }} (
-                                    <a href="/search?journals={{ paper.journal.id }}">{{ paper.journal.papers.count }}
-                                        paper{{ paper.journal.papers.count|pluralize:",s" }}</a>)
+                                    {{ paper.journal.displayname.title }}
+                                    (<a href="/search?journals={{ paper.journal.id }}">{{ paper.journal.papers.count }}
+                                    paper{{ paper.journal.papers.count|pluralize:",s" }}</a>)
                                 {% endif %}
                             </div>
                         {% endif %}
-                        <h6 class="card-title text-muted mt-2"><i class="fas fa-tag"></i> Categories</h6>
+                        {% if paper.locations %}
+                            {% if paper.countries.count > 0 %}
+                                <h6 class="text-muted mt-2 mb-1">
+                                    <i class="fas fa-globe-americas"></i> Associated Countries
+                                </h6>
+                                <div class="card-text text-muted mb-2">
+                                    {% spaceless %}
+                                        {% for country in paper.countries.all %}
+                                            <a href="{% url "search" %}?locations={{ country.pk }}">{{ country.displayname }}</a>
+                                            {% if not forloop.last %}<span>, </span>{% endif %}
+                                        {% endfor %}
+                                    {% endspaceless %}
+                                </div>
+                            {% endif %}
+                            {% if paper.cities.count > 0 %}
+                                <h6 class="text-muted mt-2 mb-1">
+                                    <i class="fas fa-map-marker-alt"></i> Associated Cities
+                                </h6>
+                                <div class="card-text text-muted mb-2">
+                                    {% spaceless %}
+                                        {% for city in paper.cities.all %}
+                                            <a href="{% url "search" %}?locations={{ city.pk }}">{{ city.displayname }}
+                                                ({{ city.country.displayname }})</a>
+                                            {% if not forloop.last %}<span>, </span>{% endif %}
+                                        {% endfor %}
+                                    {% endspaceless %}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <h6 class="card-title text-muted mt-2 pb-0 mb-1"><i class="fas fa-tag"></i> Categories</h6>
                         <div class="text-left">
                             {% for category in paper.categories.all %}
                                 <span class="badge badge-pill text-light"

@@ -419,3 +419,9 @@ label.nav-link {
 #world-map .jvectormap-container, #world-map .jvectormap-container svg {
     overflow: visible;
 }
+
+.paper-detail-card-top-badge
+{
+    right: 1em;
+    top: 0.5em;
+}

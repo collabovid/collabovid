@@ -128,7 +128,6 @@ class Runnable:
                 #  Progress update in database, never increase progress to > 100
                 self._task.progress = min(old_progress + int(round(progress_in_loop)), 100)
                 self._task.save()
-                print("Updated progress to", self._task.progress, "in it", i)
                 update_amounts += 1
 
             yield obj
