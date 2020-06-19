@@ -1,3 +1,5 @@
+from datetime import date
+
 from pymed import PubMed
 
 from data.models import DataSource
@@ -31,7 +33,9 @@ class PubmedUpdater(DataUpdater):
                                    is_preprint=False)
         article.paperhost_name = "PubMed"
         article.datasource = DataSource.PUBMED
-        article.published_at = pubmed_article.publication_date
+        publication_date = pubmed_article.publication_date
+        if isinstance(publication_date, date):
+            article.published_at = pubmed_article.publication_date
         article.pubmed_id = pubmed_article.pubmed_id
 
         if article.pubmed_id:

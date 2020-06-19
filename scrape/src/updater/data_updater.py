@@ -53,7 +53,7 @@ class ArticleModifiedError(UpdateException):
 def save_scrape_error(ex, datapoint):
     hash = datapoint.hash
     json_data = datapoint.to_dict()
-    comment = ex.msg[:ScrapeError.max_length('comment')]
+    comment = str(ex)[:ScrapeError.max_length('comment')]
     try:
         paper = Paper.objects.get(doi=datapoint.doi)
     except Paper.DoesNotExist:
@@ -115,7 +115,7 @@ class ArticleDataPoint(object):
     title: Optional[str] = None
     abstract: Optional[str] = None
     authors: List[Tuple[str, str]] = field(default_factory=list)
-    datasource: Optional[str] = None
+    datasource: Optional[DataSource] = None
     paperhost_name: Optional[str] = None
     paperhost_url: Optional[str] = None
     pubmed_id: Optional[str] = None
@@ -236,12 +236,12 @@ class DataUpdater(object):
         except (MissingDataError, ArticleModifiedError,
                 IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
             id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
+            save_scrape_error(ex, datapoint)
             if isinstance(ex, UpdateException):
                 self.log(f"Error: {id}: {ex.msg}")
             else:
                 self.log(f"Error: {id}")
             self.statistics.n_errors += 1
-            save_scrape_error(ex, datapoint)
         except SkipArticle as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.statistics.n_skipped += 1
