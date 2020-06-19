@@ -98,7 +98,7 @@ class Runnable:
         :return: Yields the iterators objects.
         """
 
-        assert 0 <= proportion <= 1 <= step_size
+        assert 0 < proportion <= 1 <= step_size
 
         if not length:
             if isinstance(iterator, QuerySet):
@@ -110,18 +110,26 @@ class Runnable:
             return
 
         progress_to_cover = int(round(100 * proportion))
-        iterations_per_percent = int(ceil(progress_to_cover/length))
-        buffered_progress = 0
+        progress_per_iteration = progress_to_cover / length
+
+        # Holds the complete progress that was made during the loop
+        progress_in_loop = 0
+
+        # When having odd lengths we are more accurate when adding the rounded progress to the progress we started with
+        old_progress = self._task.progress
+
+        # Needed to determine when to update the database entry
+        update_amounts = 1
 
         for i, obj in enumerate(iterator, 1):
-            if i % iterations_per_percent == 0:
-                #  Progress increased by 1
-                buffered_progress += 1
-                if buffered_progress == step_size:
-                    #  Progress update in database, never increase progress to > 100
-                    self._task.progress = min(self._task.progress + buffered_progress, 100)
-                    self._task.save()
-                    buffered_progress = 0
+            progress_in_loop += progress_per_iteration
+
+            if progress_in_loop >= step_size * update_amounts:
+                #  Progress update in database, never increase progress to > 100
+                self._task.progress = min(old_progress + int(round(progress_in_loop)), 100)
+                self._task.save()
+                print("Updated progress to", self._task.progress, "in it", i)
+                update_amounts += 1
 
             yield obj
 
