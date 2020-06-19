@@ -231,11 +231,24 @@ class Paper(models.Model):
 
     @property
     def countries(self):
-        return GeoCountry.objects.filter(pk__in=self.locations.all())
+        return GeoCountry.objects.filter(Q(pk__in=self.locations.all()) | Q(pk__in=self.cities.values('country')))
 
     @property
     def cities(self):
         return GeoCity.objects.filter(pk__in=self.locations.all())
+
+    @property
+    def ordered_locations(self):
+        result = []
+        cities = list(self.cities.all())
+        for country in self.countries.all():
+            country_cities = [city for city in cities if city.country == country]
+            if country_cities:
+                result.append(country)
+                result += country_cities
+            else:
+                result.insert(0, country)
+        return result
 
     @property
     def percentage_topic_score(self):
