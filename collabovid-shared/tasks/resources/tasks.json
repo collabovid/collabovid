@@ -164,7 +164,7 @@
                     "name": "vectorizer",
                     "required": false,
                     "type": "str",
-                    "default": null,
+                    "default": "",
                     "is_primitive": true
                 },
                 {

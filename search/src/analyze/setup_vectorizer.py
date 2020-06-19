@@ -17,7 +17,7 @@ class SetupVectorizer(Runnable):
     def task_name():
         return "setup-vectorizer"
 
-    def __init__(self, vectorizer: str = None, force_recompute: bool = False, *args, **kwargs):
+    def __init__(self, vectorizer: str = '', force_recompute: bool = False, *args, **kwargs):
         super(SetupVectorizer, self).__init__(*args, **kwargs)
         self._vectorizer = vectorizer
         self._force_recompute = force_recompute
