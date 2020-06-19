@@ -3,13 +3,14 @@ from django.db.models import Q, QuerySet
 
 from data.models import Paper, Author
 from .search import Search, PaperResult
-from typing import List
 
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
-from django.db.models.functions import Greatest
 from django.db.models import Max
+
+from nltk.corpus import words
+
+ENGLISH_WORDS = set(words.words())
 
 
 class AuthorSearch(Search):
@@ -40,7 +41,7 @@ class AuthorSearch(Search):
 
                     max_similarity = authors.aggregate(Max('similarity'))['similarity__max']
 
-                    if max_similarity < 0.85:
+                    if max_similarity < 0.85 or word in ENGLISH_WORDS:
                         new_query.append(word)
 
                     result_papers = result_papers.union(papers.filter(authors__in=authors))
@@ -53,8 +54,10 @@ class AuthorSearch(Search):
                     if authors:
                         max_similarity = authors.aggregate(Max('similarity'))['similarity__max']
 
-                    if max_similarity < 0.85:
-                        # Word is not similar to any first or last name
+                    print(word, word in ENGLISH_WORDS)
+
+                    if max_similarity < 0.85 or word in ENGLISH_WORDS:
+                        # Word is not similar to any first or last name or an common english word
                         new_query.append(word)
 
             result_papers = result_papers.all()

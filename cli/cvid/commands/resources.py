@@ -24,7 +24,7 @@ class ResourcesCommand(S3SyncCommand):
 
     @property
     def name_choices(self):
-        return ['geonames']
+        return ['geonames', 'nltk_data']
 
     def help(self):
         return "Upload/download resources"
