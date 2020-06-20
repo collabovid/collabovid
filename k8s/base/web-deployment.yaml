@@ -20,7 +20,7 @@ spec:
           image: web
           resources:
             requests:
-              memory: 1000Mi
+              memory: 500Mi
           ports:
             - containerPort: 80
           envFrom:

@@ -4,7 +4,7 @@ from data.models import GeoCity, GeoCountry, GeoLocation, Paper
 from src.geo.paper_geo_extractor import PaperGeoExtractor
 from tasks.definitions import register_task, Runnable
 
-from termcolor import colored
+from tasks.colors import Green, Red, Grey
 
 
 @register_task
@@ -35,14 +35,14 @@ class GeoParserTask(Runnable):
                     for location in locations:
                         state = 'created' if location[2] == PaperGeoExtractor.LOCATION_CREATED else 'added'
                         self.log(
-                            "\t[{:16}] {:20} -> {}".format(colored(state, 'green'), location[1], location[0].name)
+                            "\t[", Green(state), "]\t{} -> {}".format(location[1], location[0].name)
                         )
 
                     for ent in ignored_entities:
-                        self.log("\t[{:7}] {:30}".format(colored('ignored', 'red'), ent))
+                        self.log("\t[", Red('ignored'), "]\t{}".format(ent))
 
-            self.log(f"Recomputing counts.")
+            self.log(Grey("Recomputing counts."))
             GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
-            self.log(f"Recomputed counts")
+            self.log(Green("Recomputed counts"))
 
         self.log(f"Added {n_locations} locations")

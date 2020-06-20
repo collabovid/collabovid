@@ -34,9 +34,11 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input id="authors-input"
+                        <input type="text"
+                                id="authors-input"
                                data-result-key="authors"
                                data-url="{% url "get-authors" %}"
+                               data-count-filter="true"
                                name="authors" class="tagify--outside"
                                placeholder="Author name">
                         <div class="text-muted small">If no author is selected the value defaults to all.</div>
@@ -72,9 +74,11 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input id="journals-input"
+                        <input type="text"
+                               id="journals-input"
                                data-url="{% url "get-journals" %}"
                                data-result-key="journals"
+                               data-count-filter="true"
                                name="journals"
                                class="tagify--outside"
                                placeholder="Journal name">
@@ -91,7 +95,7 @@
                     <div class="col-12 text-dark pt-1">
                         {% for category in form.categories.all %}
                             <label class="mb-0 d-lg-block">
-                                <input data-url-manually="true" data-no-url="true" class="mr-1" type="checkbox"
+                                <input data-url-manually="true" data-no-url="true" data-count-filter="true" class="mr-1" type="checkbox"
                                        {% if category.pk in form.selected_categories %}checked="checked"{% endif %}
                                        name="categories"
                                        value="{{ category.pk }}">
@@ -111,20 +115,20 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input autocomplete="off" name="published_at_start" id="start-date"
+                        <input type="text" autocomplete="off" data-count-filter="true" name="published_at_start" id="start-date"
                                value="{{ form.start_date }}"/>
                     </div>
                 </div>
                 <div class="row mt-3">
                     <div class="col-12">
-                        <label for="start-date">
+                        <label for="end-date">
                             <strong>Published Before</strong>
                         </label>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input autocomplete="off" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
+                        <input type="text" autocomplete="off" data-count-filter="true" name="published_at_end" id="end-date" value="{{ form.end_date }}"/>
                     </div>
                 </div>
 
@@ -144,13 +148,13 @@
                                        value="all"/> All
                             </label>
                             <label class="btn btn-light">
-                                <input type="radio" data-no-url="false" name="article-type"
+                                <input type="radio" data-count-filter="true" data-no-url="false" name="article-type"
                                        {% if form.article_type == 'reviewed' %}checked="checked"{% endif %}
                                        value="reviewed"/>
                                 Reviewed
                             </label>
                             <label class="btn btn-light">
-                                <input type="radio" data-no-url="false" name="article-type"
+                                <input type="radio" data-count-filter="true" data-no-url="false" name="article-type"
                                        {% if form.article_type == 'preprints' %}checked="checked"{% endif %}
                                        value="preprints"/>
                                 Preprints
@@ -174,9 +178,11 @@
                 </div>
                 <div class="row">
                     <div class="col-12">
-                        <input id="locations-input"
+                        <input type="text"
+                               id="locations-input"
                                data-url="{% url "get-locations" %}"
                                data-result-key="locations"
+                               data-count-filter="true"
                                name="locations"
                                class="tagify--outside"
                                placeholder="Location name">

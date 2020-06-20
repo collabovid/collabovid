@@ -25,7 +25,7 @@ class PubmedUpdateTask(Runnable):
             pdf_image = self.update_pdf_image
 
         updater = PubmedUpdater(log=self.log)
-        updater.update_existing_data(count=self.count, pdf_image=pdf_image)
+        updater.update_existing_data(count=self.count, pdf_image=pdf_image, progress=self.progress)
 
 
 @register_task
@@ -45,6 +45,6 @@ class PubmedNewArticlesTask(Runnable):
             pdf_image = True
 
         updater = PubmedUpdater(log=self.log)
-        updater.get_new_data(pdf_content=True, pdf_image=pdf_image)
+        updater.get_new_data(pdf_content=True, pdf_image=pdf_image, progress=self.progress)
 
         # Cord19FulltextUpdater.update(papers=Paper.objects.filter(data_source_value=DataSource.PUBMED))

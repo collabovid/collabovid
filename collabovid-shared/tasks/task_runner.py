@@ -5,18 +5,23 @@ from threading import Thread
 
 
 class TaskRunner:
+    """
+    Pyhon interface for executing tasks. The methods allow for asynchronous or synchronous execution
+    and handle (almost) any exception that might occur.
+    """
 
     @staticmethod
     def create_database_task(cls, *args, **kwargs):
         task = Task(name=cls.task_name(),
                     started_at=timezone.now(),
                     status=Task.STATUS_PENDING,
-                    started_by=kwargs['started_by'])
+                    started_by=kwargs['started_by'],
+                    progress=0)
         task.save()
         return task
 
     @staticmethod
-    def execute_task(task, cls, *args, **kwargs):
+    def execute_task(task: Task, cls, *args, **kwargs):
         runnable = cls(*args, **dict(kwargs, task=task))
 
         try:
@@ -32,6 +37,7 @@ class TaskRunner:
         else:
             runnable.log("Finished", cls.task_name(), "without exceptions")
             task.status = Task.STATUS_FINISHED
+            task.progress = 100
 
         task.ended_at = timezone.now()
         runnable.flush()
@@ -47,7 +53,6 @@ class TaskRunner:
     @staticmethod
     def run_task_async(cls, *args, **kwargs):
         task = TaskRunner.create_database_task(cls, *args, **kwargs)
-
         thread = Thread(target=TaskRunner.execute_task, args=args, kwargs=dict(kwargs, cls=cls, task=task))
         thread.start()
 

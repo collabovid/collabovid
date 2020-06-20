@@ -26,19 +26,28 @@ class ScrapeTask(Runnable):
                             started_by=self._task.started_by)
         self.log("Finished getting new medRxiv/bioRxiv articles...")
 
+        self.progress(10)
+
         self.log("Get new arXiv articles...")
         TaskRunner.run_task(ArxivNewArticlesTask,
                             started_by=self._task.started_by)
+
+        self.progress(20)
+
         self.log("Finished getting new arXiv articles...")
 
         self.log("Get new Elsevier articles...")
         TaskRunner.run_task(ElsevierNewArticlesTask,
                             started_by=self._task.started_by)
 
+        self.progress(40)
+
         self.log("Get new Pubmed articles...")
         TaskRunner.run_task(PubmedNewArticlesTask,
                             started_by=self._task.started_by)
         self.log("Finished getting new Pubmed articles...")
+
+        self.progress(60)
 
         if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")
@@ -51,6 +60,7 @@ class ScrapeTask(Runnable):
             }
 
             task_launcher.launch_task(name="setup-vectorizer", config=task_config, block=True)
+            self.progress(90)
             task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
 
             self.log("Finished updating category assigment")

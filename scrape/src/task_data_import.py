@@ -5,7 +5,7 @@ from django.conf import settings
 from tasks.definitions import register_task, Runnable
 
 from src.export_import.data_import import DataImport
-
+from tasks.colors import *
 
 @register_task
 class ImportDataTask(Runnable):
@@ -31,7 +31,7 @@ class ImportDataTask(Runnable):
         local_dir = settings.DB_EXPORT_LOCAL_DIR
         local_filepath = f"{local_dir}/{self.filename}"
 
-        data_importer = DataImport(log=self.log)
+        data_importer = DataImport(log=self.log, progress=self.progress)
 
         if not settings.DB_EXPORT_STORE_LOCALLY:
             if not os.path.exists(local_dir):

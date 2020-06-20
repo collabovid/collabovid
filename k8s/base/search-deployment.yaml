@@ -50,6 +50,8 @@ spec:
           volumeMounts:
             - name: models
               mountPath: /models
+            - name: resources
+              mountPath: /resources
           startupProbe:
             httpGet:
               path: /status
@@ -68,3 +70,6 @@ spec:
         - name: models
           hostPath:
             path: /models
+        - name: resources
+          hostPath:
+            path: /opt/resources

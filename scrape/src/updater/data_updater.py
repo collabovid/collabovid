@@ -157,7 +157,8 @@ class ArticleDataPoint(object):
             try:
                 db_article = Paper.objects.get(doi=doi)
                 if DataSource.compare(db_article.data_source_value, self.data_source) > 0:
-                    raise DifferentDataSourceError(f"Article already tracked by {DataSource(db_article.data_source_value).name}")
+                    raise DifferentDataSourceError(
+                        f"Article already tracked by {DataSource(db_article.data_source_value).name}")
                 elif not update_existing and DataSource.compare(db_article.data_source_value, self.data_source) == 0:
                     raise SkipArticle("Article already in database")
                 created = False
@@ -269,7 +270,7 @@ class DataUpdater(object):
             self.n_errors += 1
         return None, None
 
-    def get_new_data(self, pdf_content=True, pdf_image=True):
+    def get_new_data(self, pdf_content=True, pdf_image=True, progress=None):
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -279,11 +280,11 @@ class DataUpdater(object):
         self.log(f"Check {total} publications")
 
         start = timer()
+        iterator = progress(self._get_data_points(), length=total) if progress else self._get_data_points()
 
-        for i, data_point in enumerate(self._get_data_points()):
-            if i % 100 == 0:
-                self.log(f"Progress: {i}/{total}")
-            self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image, update_existing=False)
+        for data_point in iterator:
+            self.get_or_create_db_article(data_point, pdf_content=pdf_content, pdf_image=pdf_image,
+                                          update_existing=False)
 
         self.log("Delete orphaned authors and journals")
         authors_deleted = Author.cleanup()
@@ -302,7 +303,7 @@ class DataUpdater(object):
         self.log(f"Deleted Authors: {authors_deleted}")
         self.log(f"Deleted Journals: {journals_deleted}")
 
-    def update_existing_data(self, count=None, pdf_content=True, pdf_image=True):
+    def update_existing_data(self, count=None, pdf_content=True, pdf_image=True, progress=None):
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
@@ -319,12 +320,16 @@ class DataUpdater(object):
 
         filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True))[:count]
-        for article in filtered_articles:
+
+        iterator = progress(filtered_articles) if progress else filtered_articles
+
+        for article in iterator:
             data_point = self._get_data_point(doi=article.doi)
             if data_point:
                 if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
                     continue
-                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content, pdf_image=pdf_image)
+                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
+                                              pdf_image=pdf_image)
 
         self.log("Delete orphaned authors and journals")
         authors_deleted = Author.cleanup()

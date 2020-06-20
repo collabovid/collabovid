@@ -22,7 +22,7 @@ from data.models import (
 )
 from django.utils.timezone import make_aware
 from PIL import Image
-
+from tasks.colors import Red
 
 class ImportMappings:
     """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
@@ -88,9 +88,10 @@ class ImportStatistics:
 
 
 class DataImport:
-    def __init__(self, log=print):
+    def __init__(self, log=print, progress=None):
         self._mappings = ImportMappings()
         self.log = log
+        self.progress = progress if progress else lambda *args, **kwargs: args[0]
         self.statistics = ImportStatistics()
 
     def _cleanup_models(self):
@@ -184,6 +185,9 @@ class DataImport:
                                       country=self._mappings.location_mapping[city["country_id"]])
                     self.statistics.cities_created += 1
                     db_city.save()
+                except GeoCity.MultipleObjectsReturned:
+                    self.log(Red(city["name"] + " is saved multiple times"))
+
                 self._mappings.location_mapping[id] = db_city
 
     def _import_paperdata(self, papers, paper_informations):
@@ -375,20 +379,26 @@ class DataImport:
                 data["locations"] = {int(k): v for k, v in data["locations"].items()}
 
             self._import_paperhosts(data["paperhosts"])
+            print("progress 10")
+            self.progress(10)
 
             if import_journals:
                 self._import_journals(data["journals"])
+                self.progress(15)
             if import_ml_categories:
                 self._import_categories(data["categories_ml"])
+                self.progress(20)
             if import_locations:
                 self._import_locations(data["locations"])
+                self.progress(25)
             if import_geo_name_resolutions:
                 self._import_geo_name_resolutions(data["geo_name_resolutions"])
+                self.progress(30)
 
             paper_information = self._compute_updatable_papers(data["papers"])
 
-            self._import_paperdata(data["papers"], paper_information)
-            self._import_papers(data["papers"], paper_information, data["authors"], import_locations,
+            self._import_paperdata(self.progress(data["papers"], proportion=0.3), paper_information)
+            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"], import_locations,
                                 import_ml_categories, import_journals, tar)
 
         self.log("Starting cleanup")

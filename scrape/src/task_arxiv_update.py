@@ -22,7 +22,7 @@ class ArxivUpdateTask(Runnable):
             pdf_image = self.update_pdf_image
 
         updater = ArxivUpdater(log=self.log)
-        updater.update_existing_data(count=self.count, pdf_image=pdf_image)
+        updater.update_existing_data(count=self.count, pdf_image=pdf_image, progress=self.progress)
 
 
 @register_task
@@ -42,4 +42,4 @@ class ArxivNewArticlesTask(Runnable):
             pdf_image = True
 
         updater = ArxivUpdater(log=self.log)
-        updater.get_new_data(pdf_content=True, pdf_image=pdf_image)
+        updater.get_new_data(pdf_content=True, pdf_image=pdf_image, progress=self.progress)

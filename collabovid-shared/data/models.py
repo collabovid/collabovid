@@ -131,6 +131,14 @@ class GeoLocation(models.Model):
     count = models.IntegerField(default=0)
 
     @property
+    def is_city(self):
+        return False
+
+    @property
+    def is_country(self):
+        return False
+
+    @property
     def displayname(self):
         return self.alias if self.alias else self.name
 
@@ -161,9 +169,17 @@ class GeoCountry(GeoLocation):
     def papers(self):
         return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
 
+    @property
+    def is_country(self):
+        return True
+
 
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
+
+    @property
+    def is_city(self):
+        return True
 
 
 class GeoNameResolution(models.Model):
@@ -212,6 +228,27 @@ class Paper(models.Model):
     last_scrape = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+
+    @property
+    def countries(self):
+        return GeoCountry.objects.filter(Q(pk__in=self.locations.all()) | Q(pk__in=self.cities.values('country')))
+
+    @property
+    def cities(self):
+        return GeoCity.objects.filter(pk__in=self.locations.all())
+
+    @property
+    def ordered_locations(self):
+        result = []
+        cities = list(self.cities.all())
+        for country in self.countries.all():
+            country_cities = [city for city in cities if city.country == country]
+            if country_cities:
+                result.append(country)
+                result += country_cities
+            else:
+                result.insert(0, country)
+        return result
 
     @property
     def percentage_topic_score(self):

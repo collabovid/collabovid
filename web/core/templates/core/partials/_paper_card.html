@@ -40,27 +40,32 @@
             <div class="card-block">
 
                 <h5 class="card-title font-weight-normal">
-                    {{ paper.title }}
+                    <a href="{% url "paper" paper.pk %}" class="text-dark text-decoration-none">{{ paper.title }}</a>
                     {{ request.user|edit_object_link:paper }}
                 </h5>
 
                 <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
                     <div class="mb-1">
                         {% if paper.doi|first not in 'arXiv:' %}
-                            <a href="https://doi.org/{{ paper.doi }}">{{ paper.doi }}</a>
+                            <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>
                         {% else %}
                             {{ paper.doi }}
                         {% endif %}
                         from
-                        <a href="{{ paper.url }}">{{ paper.host.name }}</a>
+                        <a href="{{ paper.url }}" target="_blank">{{ paper.host.name }}</a>
                         {% if paper.journal %}
                             in
                             {% if paper.journal.url %}
-                                <a href="{{ paper.journal.url }}">{{ paper.journal.displayname }}</a>
+                                <a href="{{ paper.journal.url }}" target="_blank">{{ paper.journal.displayname }}</a>
                             {% else %}
                                 {{ paper.journal.displayname.title }}
                             {% endif %}
                             {{ request.user|edit_object_link:paper.journal }}
+                        {% endif %}
+                    </div>
+                    <div class="mb-1">
+                        {% if paper.locations %}
+                            {% include "core/partials/paper_card/_locations_badge.html" with locations=paper.ordered_locations %}
                         {% endif %}
                     </div>
                     <i class="fas fa-clock"></i> {{ paper.published_at }}
@@ -123,24 +128,19 @@
 
                                 <div class="row">
 
-                                    <div class="col-4 text-left small">
+                                    <div class="col-12 col-sm-4 small text-left">
                                         {% for category in paper.categories.all %}
-                                            <span class="badge badge-pill text-light"
-                                                  style="background-color: {{ category.color }};">
-                                                {{ category.name }}
-                                            </span>
-                                        {% endfor %}
-                                        {% for location in paper.locations.all %}
-                                            <span class="badge badge-pill text-light"
-                                                  style="background-color:#9E9E9E;">
-                                                <i class="fa fa-map-marker"></i>
-                                                {{ location.displayname }}
-                                            </span>
+                                            <a href="{% url "search"  %}?categories={{ category.pk }}">
+                                                <span class="badge badge-pill text-light"
+                                                      style="background-color: {{ category.color }};">
+                                                    {{ category.name }}
+                                                </span>
+                                            </a>
                                         {% endfor %}
                                     </div>
 
 
-                                    <div class="col-8 text-right small">
+                                    <div class="col-12 col-sm-8 text-sm-right small">
 
                                         {% if paper.abstract|length >= mobile_preview_size %}
                                             <span class="abstract-controls
@@ -157,15 +157,18 @@
                                                 </span>
                                         {% endif %}
 
-                                        {% if paper.abstract|length >= preview_size and paper.pdf_url %}
+                                        {% if paper.abstract|length >= preview_size %}
                                             |
                                         {% endif %}
 
                                         {% if paper.pdf_url %}
-                                            <a href="{{ paper.pdf_url }}">
+                                            <a href="{{ paper.pdf_url }}" target="_blank">
                                                 Read the full text
                                             </a>
+                                            |
                                         {% endif %}
+
+                                        <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
                                     </div>
 
                                 </div>

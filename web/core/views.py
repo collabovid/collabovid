@@ -8,7 +8,8 @@ from django.utils.timezone import datetime
 import requests
 
 from django.conf import settings
-from search.request_helper import SearchRequestHelper
+from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
+from django.shortcuts import get_object_or_404
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
@@ -31,6 +32,19 @@ def home(request):
                                                   'most_recent_papers': most_recent_papers.order_by('-created_at'),
                                                   'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
                                                   'most_recent_paper_date': latest_date})
+
+
+def paper(request, doi):
+    current_paper = get_object_or_404(Paper, doi=doi)
+    similar_request = SimilarPaperRequestHelper(doi, number_papers=10)
+    similar_paper = []
+    if not similar_request.error:
+        similar_paper = similar_request.paginator.page(1)
+    return render(request, "core/paper.html", {
+        "paper": current_paper,
+        "similar_papers": similar_paper,
+        "error": similar_request.error
+    })
 
 
 def about(request):

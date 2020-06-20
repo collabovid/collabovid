@@ -73,7 +73,10 @@ body {
     overflow: visible;
     display: block;
     position: relative;
-    padding-bottom: 100px;
+}
+
+.footer {
+    margin-top: 50px;
 }
 
 .muted-white {
@@ -415,4 +418,10 @@ label.nav-link {
 
 #world-map .jvectormap-container, #world-map .jvectormap-container svg {
     overflow: visible;
+}
+
+.paper-detail-card-top-badge
+{
+    right: 1em;
+    top: 0.5em;
 }

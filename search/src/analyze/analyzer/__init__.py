@@ -1,3 +1,2 @@
-from .paper_analyzer import PaperAnalyzer
-from .basic_paper_analyzer import BasicPaperAnalyzer
-from .combined_paper_analyzer import CombinedPaperAnalyzer
+from .semantic_paper_search import EmbeddingSemanticPaperSearch
+from .similar_paper_finder import EmbeddingSimilarPaperFinder
