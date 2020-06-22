@@ -50,6 +50,16 @@ class ArticleModifiedError(UpdateException):
     pass
 
 
+def datapoint_from_paper(paper):
+    authors = [(a.last_name, a.first_name) for a in paper.authors.all()]
+    journal = paper.journal.name if paper.journal else None
+    return ArticleDataPoint(doi=paper.doi, title=paper.title, abstract=paper.abstract, authors=authors,
+                            paperhost_name=paper.host.name, paperhost_url=paper.host.url, journal=journal,
+                            datasource=DataSource(paper.data_source_value), pubmed_id=paper.pubmed_id,
+                            published_at=paper.published_at, url=paper.url, pdf_url=paper.pdf_url,
+                            version=paper.version, is_preprint=paper.is_preprint)
+
+
 def save_scrape_error(ex, datapoint):
     hash = datapoint.hash
     json_data = datapoint.to_dict()
@@ -139,7 +149,7 @@ class ArticleDataPoint(object):
             'paperhost_name': self.paperhost_name,
             'paperhost_url': self.paperhost_url,
             'pubmed_id': self.pubmed_id,
-            'published_at': self.published_at,
+            'published_at': self.published_at.strftime('%Y-%m-%d') if self.published_at else None,
             'url': self.url,
             'pdf_url': self.pdf_url,
             'version': self.version,
@@ -156,7 +166,7 @@ class ArticleDataPoint(object):
         if not self._hash:
             md5 = hashlib.md5()
 
-            def update_if_not_none(value: str):
+            def update_if_not_none(value: Optional[str]):
                 if value is not None:
                     md5.update(value.encode('utf-8'))
 
@@ -170,7 +180,7 @@ class ArticleDataPoint(object):
             update_if_not_none(self.paperhost_name)
             update_if_not_none(self.paperhost_url)
             update_if_not_none(self.pubmed_id)
-            update_if_not_none(self.published_at.strftime("%Y%m%d") if self.published_at else None)
+            update_if_not_none(self.published_at.strftime('%Y-%m-%d') if self.published_at else None)
             update_if_not_none(self.url)
             update_if_not_none(self.pdf_url)
             update_if_not_none(self.version)

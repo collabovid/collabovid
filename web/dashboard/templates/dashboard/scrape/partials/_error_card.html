@@ -1,5 +1,6 @@
 {% load static %}
 {% load pipeline %}
+{% load dashboard_utils %}
 {% stylesheet 'error_card' %}
 
 <div class="card h-100">
@@ -14,8 +15,8 @@
             <table>
             <colgroup>
                <col span="1" style="width: 15%;">
-               <col span="1" style="width: {% if error.paper %}42%{% else %}85%{% endif %};">
-               <col span="1" style="width: {% if error.paper %}43%{% else %}0%{% endif %};">
+               <col span="1" style="width: {% if ref_paper %}42%{% else %}85%{% endif %};">
+               <col span="1" style="width: {% if ref_paper %}43%{% else %}0%{% endif %};">
             </colgroup>
                 <tr>
                     <th>URL:</th>
@@ -24,8 +25,8 @@
                         {{ error.datapoint.url }}
                     </a></td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.url != error.datapoint.url %}
-                        {{ error.paper.url }}
+                    {% if ref_paper and ref_paper.url != error.datapoint.url %}
+                        {{ ref_paper.url }}
                     {% endif %}
                     </td>
                 </tr>
@@ -33,8 +34,8 @@
                     <th>DOI:</th>
                     <td>{{ error.datapoint.doi }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.doi != error.datapoint.doi %}
-                        {{ error.paper.doi }}
+                    {% if ref_paper and ref_paper.doi != error.datapoint.doi %}
+                        {{ ref_paper.doi }}
                     {% endif %}
                     </td>
                 </tr>
@@ -42,8 +43,8 @@
                     <th>Title:</th>
                     <td>{{ error.datapoint.title }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.title != error.datapoint.title %}
-                        {{ error.paper.title }}
+                    {% if ref_paper and ref_paper.title != error.datapoint.title %}
+                        {{ ref_paper.title }}
                     {% endif %}
                     </td>
                 </tr>
@@ -51,8 +52,8 @@
                     <th>Publication Date:</th>
                     <td>{{ error.datapoint.published_at }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.published_at != error.datapoint.published_at %}
-                        {{ error.paper.published_at }}
+                    {% if ref_paper and ref_paper.published_at != error.datapoint.published_at %}
+                        {{ ref_paper.published_at }}
                     {% endif %}
                     </td>
                 </tr>
@@ -66,16 +67,25 @@
                             {% endif %}
                         {% endfor %}
                     </td>
-                    <td>
-                        {{ error.paper.authors.all }}
+                    <td class="col-differences">
+                        {% if ref_paper and ref_paper.authors|sort|join:" // " != error.datapoint.authors|sort|join:" // " %}
+                            {{ ref_paper.authors|sort|join:" // " }} <br>
+                            {{ error.datapoint.authors|sort|join:" // " }} <br>
+                            {% for author in error.datapoint.authors %}
+                                {{ author }}
+                                {% if not forloop.last %}
+                                    ,
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
                     </td>
                 </tr>
                 <tr>
                     <th>Abstract: </th>
                     <td>{{ error.datapoint.abstract }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.abstract != error.datapoint.abstract %}
-                        {{ error.paper.abstract }}
+                    {% if ref_paper and ref_paper.abstract != error.datapoint.abstract %}
+                        {{ ref_paper.abstract }}
                     {% endif %}
                     </td>
                 </tr>
@@ -89,8 +99,8 @@
                     {% endif %}
                     </td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.pdf_url != error.datapoint.pdf_url %}
-                        {{ error.paper.pdf_url }}
+                    {% if ref_paper and ref_paper.pdf_url != error.datapoint.pdf_url %}
+                        {{ ref_paper.pdf_url }}
                     {% endif %}
                     </td>
                 </tr>
@@ -98,8 +108,8 @@
                     <th>Version:</th>
                     <td>{{ error.datapoint.version }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.version != error.datapoint.version %}
-                        {{ error.paper.version }}
+                    {% if ref_paper and ref_paper.version != error.datapoint.version %}
+                        {{ ref_paper.version }}
                     {% endif %}
                     </td>
                 </tr>
@@ -117,8 +127,8 @@
                     <th>Pubmed ID:</th>
                     <td>{{ error.datapoint.pubmedid }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.pubmed_id != error.datapoint.pubmed_id %}
-                        {{ error.paper.pubmed_id }}
+                    {% if ref_paper and ref_paper.pubmed_id != error.datapoint.pubmed_id %}
+                        {{ ref_paper.pubmed_id }}
                     {% endif %}
                     </td>
                 </tr>
@@ -130,8 +140,8 @@
                     <th>Journal:</th>
                     <td>{{ error.datapoint.journal }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.journal != error.datapoint.journal %}
-                        {{ error.paper.journal }}
+                    {% if ref_paper and ref_paper.journal != error.datapoint.journal %}
+                        {{ ref_paper.journal }}
                     {% endif %}
                     </td>
                 </tr>
@@ -139,8 +149,8 @@
                     <th>Update timestamp:</th>
                     <td>{{ error.datapoint.update_timestamp }}</td>
                     <td class="col-differences">
-                    {% if error.paper and error.paper.update_timestamp != error.datapoint.update_timestamp %}
-                        {{ error.paper.update_timestamp }}
+                    {% if ref_paper and ref_paper.update_timestamp != error.datapoint.update_timestamp %}
+                        {{ ref_paper.update_timestamp }}
                     {% endif %}
                     </td>
                 </tr>

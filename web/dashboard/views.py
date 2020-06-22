@@ -9,8 +9,8 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from datetime import timedelta
 from django.utils import timezone
+from src.updater.data_updater import datapoint_from_paper
 from tasks.launcher.task_launcher import get_task_launcher
-
 from tasks.load import AVAILABLE_TASKS, get_task_by_id
 
 import os
@@ -202,8 +202,11 @@ def scrape_errors(request):
     errors = {label: [error for error in ScrapeError.objects.filter(type=value)][:10]
               for value, label in ScrapeError.Type.choices}
 
+    referenced_papers = {error.paper.doi: datapoint_from_paper(error.paper).to_dict() for error in ScrapeError.objects.all()
+                         if error.paper}
     return render(request, 'dashboard/scrape/scrape_errors_overview.html',
-                  {'errors': errors, 'debug': settings.DEBUG})
+                  {'errors': errors, 'referenced_papers': referenced_papers,
+                   'debug': settings.DEBUG})
 
 
 @staff_member_required

@@ -42,7 +42,7 @@ class PubmedUpdater(DataUpdater):
             article.url = f"https://www.ncbi.nlm.nih.gov/pubmed/{article.pubmed_id}"
 
         try:
-            article.jounal = pubmed_article.journal
+            article.journal = pubmed_article.journal
         except AttributeError:
             # Journal field is missing sometimes (e.g. pubmed ID 32479040). This is a book without DOI and won't get
             # added anyway.

@@ -1,6 +1,8 @@
 {% extends "dashboard/base.html" %}
 {% load static %}
 {% load pipeline %}
+{% load dashboard_utils %}
+
 {% block content %}
 
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -23,7 +25,11 @@
                 <div class="row">
                     {% for error in errors %}
                         <div class="col-12 p-2">
-                            {% include 'dashboard/scrape/partials/_error_card.html' with error=error %}
+                            {% if error.paper %}
+                                {% include 'dashboard/scrape/partials/_error_card.html' with error=error ref_paper=referenced_papers|get_item:error.paper.doi %}
+                            {% else %}
+                                {% include 'dashboard/scrape/partials/_error_card.html' with error=error%}
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>
