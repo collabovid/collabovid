@@ -199,7 +199,7 @@ def delete_archive(request, archive_path):
 
 @staff_member_required
 def scrape_errors(request):
-    errors = {label: [error for error in ScrapeError.objects.filter(type=value)]
+    errors = {label: [error for error in ScrapeError.objects.filter(type=value)][:10]
               for value, label in ScrapeError.Type.choices}
 
     return render(request, 'dashboard/scrape/scrape_errors_overview.html',

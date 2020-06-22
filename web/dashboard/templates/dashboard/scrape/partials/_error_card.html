@@ -1,0 +1,150 @@
+{% load static %}
+{% load pipeline %}
+{% stylesheet 'error_card' %}
+
+<div class="card h-100">
+    <div class="card-body d-flex flex-column">
+        <h5 class="card-title">
+            <it class="fa fa-bolt fa-fw error-title-icon"></it>
+            {{ error.comment }}
+        </h5>
+        <h6 class="card-subtitle mb-2">
+        </h6>
+        <div class="card-text mb-2 text-muted">
+            <table>
+            <colgroup>
+               <col span="1" style="width: 15%;">
+               <col span="1" style="width: {% if error.paper %}42%{% else %}85%{% endif %};">
+               <col span="1" style="width: {% if error.paper %}43%{% else %}0%{% endif %};">
+            </colgroup>
+                <tr>
+                    <th>URL:</th>
+                    <td><a target="_blank" rel="noopener noreferrer"
+                           href="{{ error.datapoint.url }}">
+                        {{ error.datapoint.url }}
+                    </a></td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.url != error.datapoint.url %}
+                        {{ error.paper.url }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>DOI:</th>
+                    <td>{{ error.datapoint.doi }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.doi != error.datapoint.doi %}
+                        {{ error.paper.doi }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Title:</th>
+                    <td>{{ error.datapoint.title }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.title != error.datapoint.title %}
+                        {{ error.paper.title }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Publication Date:</th>
+                    <td>{{ error.datapoint.published_at }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.published_at != error.datapoint.published_at %}
+                        {{ error.paper.published_at }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Authors:</th>
+                    <td>
+                        {% for author in error.datapoint.authors %}
+                            {{ author }}
+                            {% if not forloop.last %}
+                                ,
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {{ error.paper.authors.all }}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Abstract: </th>
+                    <td>{{ error.datapoint.abstract }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.abstract != error.datapoint.abstract %}
+                        {{ error.paper.abstract }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>PDF URL:</th>
+                    <td>
+                    {% if error.datapoint.pdf_url %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ error.datapoint.pdf_url }}">{{ error.datapoint.pdf_url }}</a>
+                    {% else %}
+                    None
+                    {% endif %}
+                    </td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.pdf_url != error.datapoint.pdf_url %}
+                        {{ error.paper.pdf_url }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Version:</th>
+                    <td>{{ error.datapoint.version }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.version != error.datapoint.version %}
+                        {{ error.paper.version }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Datasource:</th>
+                    <td>{{ error.datapoint.datasource }}</td>
+                    <td class="col-differences">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Paperhost:</th>
+                    <td>{{ error.datapoint.paperhost_name }}{# ({{ error.datapoint.paperhost_url }}) #}</td>
+                </tr>
+                <tr>
+                    <th>Pubmed ID:</th>
+                    <td>{{ error.datapoint.pubmedid }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.pubmed_id != error.datapoint.pubmed_id %}
+                        {{ error.paper.pubmed_id }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Is preprint:</th>
+                    <td>{{ error.datapoint.is_preprint }}</td>
+                </tr>
+                <tr>
+                    <th>Journal:</th>
+                    <td>{{ error.datapoint.journal }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.journal != error.datapoint.journal %}
+                        {{ error.paper.journal }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Update timestamp:</th>
+                    <td>{{ error.datapoint.update_timestamp }}</td>
+                    <td class="col-differences">
+                    {% if error.paper and error.paper.update_timestamp != error.datapoint.update_timestamp %}
+                        {{ error.paper.update_timestamp }}
+                    {% endif %}
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

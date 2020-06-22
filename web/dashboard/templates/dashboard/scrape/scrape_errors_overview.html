@@ -6,7 +6,7 @@
     <ul class="nav nav-tabs" id="myTab" role="tablist">
         {% for error_type in errors %}
             <li class="nav-item">
-                <a class="nav-link active display" id="{{ forloop.counter0 }}-tab" data-toggle="tab" href="#error-list-{{ forloop.counter0 }}" role="tab"
+                <a class="nav-link {% if forloop.first %}active display{% endif %}" id="{{ forloop.counter0 }}-tab" data-toggle="tab" href="#error-list-{{ forloop.counter0 }}" role="tab"
                    aria-controls="error-list-{{ forloop.counter0 }}"
                    aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">{{ error_type }}</a>
             </li>
@@ -22,12 +22,9 @@
             <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="error-list-{{ forloop.counter0 }}" role="tabpanel" aria-labelledby="{{ forloop.counter0 }}-tab">
                 <div class="row">
                     {% for error in errors %}
-                        <p>
-                        {{ error.hash }} abc
-                        </p>
-{#                        <div class="col-lg-3 col-md-6 p-2">#}
-{#                            {% include 'dashboard/locations/partials/_country_card.html' with country=country %}#}
-{#                        </div>#}
+                        <div class="col-12 p-2">
+                            {% include 'dashboard/scrape/partials/_error_card.html' with error=error %}
+                        </div>
                     {% endfor %}
                 </div>
             </div>
