@@ -100,8 +100,10 @@
 
                         <div class="abstract-container card-text text-justify">
 
-                            <!-- Mobile version of the abstract with less preview size. -->
-                            <span class="d-md-none d-inline" style="font-size: 0.8em">
+                            {% if not hide_abstract %}
+
+                                <!-- Mobile version of the abstract with less preview size. -->
+                                <span class="d-md-none d-inline" style="font-size: 0.8em">
                                     {% if not extended and paper.abstract|length >= mobile_preview_size %}
                                         <span class="short">{{ paper|preview_slice:True }}</span><span
                                             class="dots">...</span><span
@@ -112,8 +114,8 @@
                                     {% endif %}
                                 </span>
 
-                            <!-- Desktop version of the abstract with more preview size. -->
-                            <span class="d-md-inline d-none" style="font-size: 0.8em">
+                                <!-- Desktop version of the abstract with more preview size. -->
+                                <span class="d-md-inline d-none" style="font-size: 0.8em">
                                     {% if not extended and paper.abstract|length >= preview_size %}
                                         <span class="short">{{ paper|preview_slice }}</span><span
                                             class="dots">...</span><span
@@ -123,6 +125,7 @@
                                         <span class="short">{{ paper.abstract }}</span>
                                     {% endif %}
                                 </span>
+                            {% endif %}
 
                             <div class="mt-1 text-muted">
 
@@ -130,7 +133,7 @@
 
                                     <div class="col-12 col-sm-4 small text-left">
                                         {% for category in paper.categories.all %}
-                                            <a href="{% url "search"  %}?categories={{ category.pk }}">
+                                            <a href="{% url "search" %}?categories={{ category.pk }}">
                                                 <span class="badge badge-pill text-light"
                                                       style="background-color: {{ category.color }};">
                                                     {{ category.name }}
@@ -141,9 +144,9 @@
 
 
                                     <div class="col-12 col-sm-8 text-sm-right small">
-
-                                        {% if paper.abstract|length >= mobile_preview_size %}
-                                            <span class="abstract-controls
+                                        {% if not hide_abstract %}
+                                            {% if paper.abstract|length >= mobile_preview_size %}
+                                                <span class="abstract-controls
                                                 {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
                                                     <a href="#" class="toggle-description show"
                                                        style="{% if extended %} display: none; {% endif %}">
@@ -155,10 +158,11 @@
                                                         Hide the full abstract
                                                     </a>
                                                 </span>
-                                        {% endif %}
+                                            {% endif %}
 
-                                        {% if paper.abstract|length >= preview_size %}
-                                            |
+                                            {% if paper.abstract|length >= preview_size %}
+                                                |
+                                            {% endif %}
                                         {% endif %}
 
                                         {% if paper.pdf_url %}

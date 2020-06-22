@@ -46,6 +46,14 @@ PIPELINE = {
             ),
             'output_filename': 'map.js'
         },
+        'embedding-visualization': {
+            'source_filenames': (
+                'js/three.js',
+                'js/OrbitControls.js',
+                'core/js/embedding_visualization.js',
+            ),
+            'output_filename': 'embedding_visualization.js'
+        }
     },
     'STYLESHEETS': {
         'base': {

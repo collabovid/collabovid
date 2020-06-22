@@ -1,0 +1,83 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+
+{% block content %}
+    <div class="gradient-header pb-0">
+        <div class="row">
+            <div class="col-12">
+                <div style="height: 500px;">
+                    <div id="canvas-container">
+                        <canvas id="visualization-container"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+    <div class="container mt-5">
+        <div id="selected-card-container"></div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.0.1/math.min.js"></script>
+    {% javascript 'embedding-visualization' %}
+    <script>
+        var canvas = document.getElementById('visualization-container');
+        var selectedCardContainer = document.getElementById('selected-card-container');
+        var visualization = new EmbeddingVisualization()
+
+        function onSelected(paper) {
+            var indices = visualization.computeNeighbors(paper, 10)
+            var dois = [paper.doi];
+            indices.forEach((i) => {
+                dois.push(visualization.papers[i].doi)
+            })
+            visualization.markWithColor(indices)
+            console.log(dois);
+
+            $.get('/paper-cards/', {
+                'dois': JSON.stringify(dois)
+            }, function (data) {
+                selectedCardContainer.innerHTML = data
+            })
+        }
+
+        visualization.renderEmbeddings(canvas, onSelected, {
+                'imageUrl': '/static/img/atlas.jpg',
+                'fileUrl': '/static/embeddings_3d.json'
+            }
+        )
+
+    </script>
+{% endblock %}
+
+{% block css %}
+    <style>
+        #visualization-container {
+            height: 100%;
+            width: 100%;
+            outline: none !important;
+            border: none !important;
+        }
+
+        #visualization-container:focus {
+            border: none !important;
+        }
+
+        #canvas-container {
+            top: 0;
+            position: absolute;
+            width: 100%;
+        }
+
+        .gradient-header {
+            overflow: hidden;
+            padding-top: 0;
+        }
+
+        #selected-card-container {
+        }
+    </style>
+{% endblock %}

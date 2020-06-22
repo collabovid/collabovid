@@ -3,6 +3,7 @@ from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation
 from statistics import PaperStatistics, CategoryStatistics
+from django.template.loader import render_to_string
 
 from django.utils.timezone import datetime
 import requests
@@ -45,6 +46,25 @@ def paper(request, doi):
         "similar_papers": similar_paper,
         "error": similar_request.error
     })
+
+
+def embedding_visualization(request):
+    return render(request, "core/embedding_visualization.html")
+
+
+def paper_cards(request):
+    dois = request.GET.get('dois', None)
+    if not dois:
+        return HttpResponseNotFound()
+    dois = json.loads(dois)
+    papers = Paper.objects.filter(pk__in=dois)
+    papers = sorted(papers, key=lambda x: dois.index(x.doi))
+    return render(template_name="core/partials/_search_results.html", request=request,
+                  context={'papers': papers, 'show_score': False})
+
+
+def embeddings(request):
+    return JsonResponse({"embeddings": locations_to_json(locations)})
 
 
 def about(request):
