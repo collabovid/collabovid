@@ -3,14 +3,14 @@ from django.conf import settings
 import logging
 from data.models import Paper
 from django.core.paginator import Paginator
+
+from search.forms import SearchForm
 from search.paginator import ScoreSortPaginator
 
 
 class SearchRequestHelper:
 
-    def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, categories,
-                 locations, article_type,
-                 score_min=0.6):
+    def __init__(self, form: SearchForm, score_min=0.6):
         logger = logging.getLogger(__name__)
 
         self._response = None
@@ -18,16 +18,8 @@ class SearchRequestHelper:
 
         try:
             response = requests.get(settings.SEARCH_SERVICE_URL, params={
-                'start_date': start_date,
-                'end_date': end_date,
-                'search': search_query,
-                'score_min': score_min,
-                'authors': authors,
-                'authors_connection': authors_connection,
-                'categories': categories,
-                'article_type': article_type,
-                'journals': journals,
-                'locations': locations
+                'form': form.to_json(),
+                'score_min': score_min
             })
             response.raise_for_status()
 

@@ -1,21 +1,14 @@
 {% load static %}
-{% load score_helper %}
 {% load paper_card_extras %}
 <div class="card p-4 rounded shadow">
-
 
     <div class="row d-flex flex-wrap">
         {% if paper.preview_image %}
             <div class="col-lg-2 d-none d-lg-block">
                 <div class="row align-items-center h-100">
                     <div class="col-12">
-                        {% if paper.preview_image %}
-                            <img src="{{ paper.preview_image.url }}" style="max-height: 175px"
-                                 class="img-fluid mx-auto my-auto d-block">
-                        {% else %}
-                            <img src="{% static "core/img/paper-not-found.png" %}" style="max-height: 75px"
-                                 class="img-fluid mx-auto my-auto d-block">
-                        {% endif %}
+                        <img src="{{ paper.preview_image.url }}" style="max-height: 175px"
+                             class="img-fluid mx-auto my-auto d-block">
                     </div>
                 </div>
             </div>
@@ -26,15 +19,7 @@
             <div class="paper-card-badge">
                 {% if paper.is_preprint %}
                     <span class="badge badge-pill badge-secondary small">Preprint</span>
-                    {#                    {% else %}#}
-                    {#                        <span class="badge badge-pill badge-success small">Reviewed Article</span>#}
                 {% endif %}
-
-                {% if show_score %}
-                    <span class="badge badge-pill"
-                          style="background: {{ score|score_badge_color }};color:white;">{{ score|score_text }}</span>
-                {% endif %}
-
             </div>
 
             <div class="card-block">
@@ -65,7 +50,7 @@
                     </div>
                     <div class="mb-1">
                         {% if paper.locations %}
-                            {% include "core/partials/paper_card/_locations_badge.html" with locations=paper.ordered_locations %}
+                            {% include "search/partials/paper_card/_locations_badge.html" with locations=paper.ordered_locations %}
                         {% endif %}
                     </div>
                     <i class="fas fa-clock"></i> {{ paper.published_at }}
@@ -129,14 +114,7 @@
                                 <div class="row">
 
                                     <div class="col-12 col-sm-4 small text-left">
-                                        {% for category in paper.categories.all %}
-                                            <a href="{% url "search"  %}?categories={{ category.pk }}">
-                                                <span class="badge badge-pill text-light"
-                                                      style="background-color: {{ category.color }};">
-                                                    {{ category.name }}
-                                                </span>
-                                            </a>
-                                        {% endfor %}
+                                        {% include "search/partials/paper_card/_categories.html" %}
                                     </div>
 
 
@@ -178,11 +156,7 @@
 
                     {% endwith %}
                 {% endwith %}
-
-
             </div>
         </div>
-
-
     </div>
 </div>

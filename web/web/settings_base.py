@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'tasks',
     'data',
     'dashboard.apps.DashboardConfig',
+    'search.apps.SearchConfig',
     'django.contrib.postgres',
     'pipeline'
 ]

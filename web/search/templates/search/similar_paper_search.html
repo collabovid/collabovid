@@ -1,0 +1,17 @@
+{% extends "core/search.html" %}
+
+{% block search_head %}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="card-title">
+                According to {{ similar_papers.count }} papers
+            </h4>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        {% for paper in similar_papers.all %}
+            <li class="list-group-item">{{ paper.title }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,4 +1,4 @@
-{% extends "core/search_base.html" %}
+{% extends "search/search_base.html" %}
 {% load static %}
 {% block content %}
     <div id="paper-cover" class="paper-cover"></div>
@@ -11,32 +11,34 @@
 
                     <form id="paper-search-form" class="search-form" method="post" action="{% url "search" %}">
                         <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-
+                        {{ form.cleaned_data.tab }}
                         <input class="d-none" id="top-tab-input" data-no-url="true" type="radio" name="tab" value="top"
-                               {% if form.tab == 'top' %}checked="checked"{% endif %}/>
+                               {% if form.cleaned_data.tab == 'top' %}checked="checked"{% endif %}/>
                         <input class="d-none" id="newest-tab-input" type="radio" name="tab" value="newest"
-                               {% if form.tab == 'newest' %}checked="checked"{% endif %}/>
+                               {% if form.cleaned_data.tab == 'newest' %}checked="checked"{% endif %}/>
                         <input class="d-none" id="statistics-tab-input" type="radio" name="tab" value="statistics"
-                               {% if form.tab == 'statistics' %}checked="checked"{% endif %}/>
+                               {% if form.cleaned_data.tab == 'statistics' %}checked="checked"{% endif %}/>
 
-                        <!-- For desktop search -->
+                        {% block search_head %}
+                            <!-- For desktop search -->
 
-                        <div class="input-group input-group-lg mb-3">
-                            <div class="input-group-prepend border-right-0">
-                                <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
-                                    <i class="fas fa-search"></i>
+                            <div class="input-group input-group-lg mb-3">
+                                <div class="input-group-prepend border-right-0">
+                                    <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+
+                                <input type="text" value="{{ form.cleaned_data.query }}" name="query"
+                                       class="border-left-0 form-control"
+                                       placeholder="Find papers by their title or content">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="submit">Search</button>
                                 </div>
                             </div>
 
-                            <input type="text" value="{{ form.search }}" name="search"
-                                   class="border-left-0 form-control"
-                                   placeholder="Find papers by their title or content">
-                            <div class="input-group-append">
-                                <button class="btn btn-success" type="submit">Search</button>
-                            </div>
-                        </div>
-
-                        <!-- End desktop search -->
+                            <!-- End desktop search -->
+                        {% endblock %}
 
                     </form>
 
@@ -51,7 +53,7 @@
             <div class="col-8">
                 <ul class="nav nav-search-types nav-justified">
                     <li class="nav-item">
-                        <label class="nav-link {% if form.tab == "top" %}active{% endif %}"
+                        <label class="nav-link {% if form.cleaned_data.tab == "top" %}active{% endif %}"
                                for="top-tab-input">
                             Top
                         </label>
@@ -59,14 +61,14 @@
 
                     <li class="nav-item">
                         <label for="newest-tab-input"
-                               class="nav-link {% if form.tab == "newest" %}active{% endif %}">
+                               class="nav-link {% if form.cleaned_data.tab == "newest" %}active{% endif %}">
                             Newest
                         </label>
 
                     </li>
 
                     <li class="nav-item">
-                        <label class="nav-link {% if form.tab == "statistics" %}active{% endif %}"
+                        <label class="nav-link {% if form.cleaned_data.tab == "statistics" %}active{% endif %}"
                                for="statistics-tab-input">
                             Statistics
                         </label>
@@ -74,7 +76,6 @@
                 </ul>
             </div>
             <div class="col-4 text-right">
-
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
                         data-toggle="collapse"
@@ -83,7 +84,6 @@
                         aria-controls="filter-container">Filters
                     <span style="display: none;" class="badge badge-pill badge-danger"></span>
                 </button>
-
             </div>
         </div>
     </div>
@@ -104,7 +104,7 @@
             </div>
 
             <div>
-                {% include "core/partials/_filter_box.html" with form=form load_default=True categories=categories %}
+                {% include "search/partials/_filter_box.html" with form=form load_default=True categories=categories %}
             </div>
 
         </div>

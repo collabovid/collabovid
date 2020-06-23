@@ -1,0 +1,12 @@
+{{ papers.length }}
+
+<ul class="list-group">
+    {% for paper in papers %}
+
+        <li class="list-group-item">
+            {{ paper.title }}
+            <span class="small">{% include "core/partials/paper_card/_categories.html" %}</span>
+        </li>
+
+    {% endfor %}
+</ul>

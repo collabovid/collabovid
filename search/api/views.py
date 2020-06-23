@@ -2,6 +2,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseServerError, Htt
 from src.search.search_engine import get_default_search_engine, SearchEngine
 from src.analyze import get_semantic_paper_search, get_similar_paper_finder
 import time
+import json
 
 
 def wait_until(condition, interval=0.1, timeout=10):
@@ -17,35 +18,23 @@ def search(request):
         if not wait_until(semantic_paper_search.is_ready):
             return HttpResponseBadRequest("Semantic Paper Search is not initialized yet")
 
-        categories = request.GET.getlist('categories', None)
-        start_date = request.GET.get("start_date", "")
-        end_date = request.GET.get("end_date", "")
         score_min = float(request.GET.get("score_min", "0"))
 
-        authors = request.GET.get("authors", None)
-        journals = request.GET.get("journals", None)
-        locations = request.GET.get("locations", None)
+        form = json.loads(request.GET.get('form'))
 
-        try:
-            if journals:
-                journals = [int(pk) for pk in journals.split(',')]
+        print(form)
+        categories = form['categories']
+        start_date = form['published_at_start']
+        end_date = form['published_at_end']
 
-            if authors:
-                authors = [int(pk) for pk in authors.split(',')]
+        authors = form["authors"]
+        journals = form["journals"]
+        locations = form["locations"]
+        search_query = form["query"].strip()
 
-            if categories:
-                categories = [int(pk) for pk in categories]
+        authors_connection = form["authors_connection"]
 
-            if locations:
-                locations = [int(pk) for pk in locations.split(',')]
-        except ValueError:
-            return HttpResponseBadRequest("Request is malformed")
-
-        search_query = request.GET.get("search", "").strip()
-
-        authors_connection = request.GET.get("authors_connection", "one")
-
-        article_type_string = request.GET.get("article_type")
+        article_type_string = form["article_type"]
 
         article_type = SearchEngine.ARTICLE_TYPE_ALL
 

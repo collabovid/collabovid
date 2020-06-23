@@ -1,0 +1,154 @@
+{% extends "core/base_explore.html" %}
+{% load static %}
+{% load pipeline %}
+
+{% block content %}
+
+    <div class="gradient-header pb-0"></div>
+
+    <div class="position-relative" style="height: calc(100vh - 72px); width: 100%;">
+
+        <!-- For desktop search -->
+
+        <div class="explore-input-container container">
+
+            <div class="vertical-top">
+                <div id="paper-container">
+                    <h3 class="title"></h3>
+                    <div class="text-muted abstract"></div>
+                </div>
+            </div>
+
+            <div class="vertical-center">
+                <div id="paper-loading-indicator"
+                     class="text-white text-center fa-5x"
+                     style="display: none;margin-top: -15px">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+
+
+                <form id="paper-search-form" class="search-form" method="post" action="{% url "explore" %}">
+                    <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <div class="input-group input-group-lg">
+                        <div class="input-group-prepend border-right-0">
+                            <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
+                                <i class="fas fa-search"></i>
+                            </div>
+                        </div>
+
+                        <input type="text" value="{{ form.search }}" name="search"
+                               class="border-left-0 form-control"
+                               placeholder="Please enter a topic you are interested in, e.g. effects on pregnant women">
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="bottom-container text-right" id="form-submit-container">
+                <button id="next-button" class="btn btn-lg btn-success">Next</button>
+            </div>
+
+            <div class="bottom-container" id="paper-buttons-container" style="display: none;">
+
+                <div class="row align-items-baseline">
+
+                    <div class="col-3">
+                        <button id="back-button" class="btn btn-lg btn-secondary">Back</button>
+                    </div>
+
+                    <div class="col-6 text-center text-muted large">
+                        Similar to
+                    </div>
+
+                    <div class="col-3 text-right">
+                        <span id="yes-no-container">
+                            <button class="btn btn-lg btn-danger">No</button>
+                            <button class="btn btn-lg btn-success">Yes</button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    <script>
+        let form = $("#paper-search-form");
+        let indicator = $("#paper-loading-indicator");
+        let next_button = $("#next-button");
+        let container = $("#paper-container");
+
+        let back_button = $("#back-button");
+
+        next_button.click(function (e) {
+            form.submit();
+        });
+
+        let paper_data = null;
+        let current_paper_index = -1;
+
+        function show_paper() {
+            if (current_paper_index === 0)
+                back_button.attr('disabled', true);
+            else
+                back_button.attr('disabled', false);
+
+            container.find('.title').html(paper_data.papers[current_paper_index].title);
+            container.find('.abstract').html(paper_data.papers[current_paper_index].abstract);
+            container.hide().fadeIn();
+            $("#paper-buttons-container").show();
+        }
+
+        function show_next_paper() {
+            current_paper_index++;
+            show_paper();
+        }
+
+        back_button.click(function () {
+            current_paper_index--;
+            show_paper();
+        });
+
+        $("#yes-no-container button").click(function () {
+            show_next_paper();
+        });
+
+        form.submit(function (e) {
+            e.preventDefault();
+
+            form.hide();
+            indicator.show();
+            $("#form-submit-container").hide();
+
+            $.ajax({
+                url: form.attr("action"),
+                type: 'POST',
+                data: form.serialize(),
+                success: function (data) {
+                    paper_data = data;
+                    show_next_paper();
+                    indicator.hide();
+                },
+                error: function (request, error) {
+                    console.log("Request: " + JSON.stringify(request));
+                    console.log("Error: " + error);
+                }
+            });
+
+        });
+
+        $(document).on('click', '.list-group-item', function () {
+            $(this).toggleClass('active');
+        });
+    </script>
+
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'core/css/explore.css' %}"/>
+{% endblock %}
