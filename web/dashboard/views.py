@@ -199,6 +199,9 @@ def delete_archive(request, archive_path):
 
 @staff_member_required
 def scrape_errors(request):
+    if request.method == 'POST':
+        # handle 'ignore article' case
+        return HttpResponse("Posted to scrape errors!")
     errors = {label: [error for error in ScrapeError.objects.filter(type=value)][:10]
               for value, label in ScrapeError.Type.choices}
 

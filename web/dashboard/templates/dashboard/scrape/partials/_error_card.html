@@ -9,8 +9,6 @@
             <it class="fa fa-bolt fa-fw error-title-icon"></it>
             {{ error.comment }}
         </h5>
-        <h6 class="card-subtitle mb-2">
-        </h6>
         <div class="card-text mb-2 text-muted">
             <table>
             <colgroup>
@@ -155,6 +153,14 @@
                     </td>
                 </tr>
             </table>
+
+            <div>
+                <button type="submit" class="btn btn-outline-primary">Edit</button>
+            </div>
+            <div>
+                <button class="btn btn-outline-danger" type="submit"
+                        onclick="confirmDeleteModal({{ error.pk }})">Ignore Article</button>
+            </div>
         </div>
     </div>
 </div>
