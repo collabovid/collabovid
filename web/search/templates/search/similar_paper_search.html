@@ -1,10 +1,13 @@
-{% extends "core/search.html" %}
+{% extends "search/search.html" %}
 
 {% block search_head %}
+
+    <input type="hidden" name="similar_papers" value="{{ form.cleaned_data.similar_papers|join:"," }}">
+    <input type="hidden" name="different_papers" value="{{ form.cleaned_data.different_papers|join:"," }}">
     <div class="row">
         <div class="col-12">
             <h4 class="card-title">
-                According to {{ similar_papers.count }} papers
+                Searching for papers that are similar to {{ similar_papers.count }} papers
             </h4>
         </div>
     </div>
@@ -12,6 +15,22 @@
     <ul class="list-group">
         {% for paper in similar_papers.all %}
             <li class="list-group-item">{{ paper.title }}</li>
+        {% endfor %}
+    </ul>
+
+    <div class="row">
+        <div class="col-12">
+            <h4 class="card-title">
+                and different from
+            </h4>
+        </div>
+    </div>
+
+    <ul class="list-group">
+        {% for paper in different_papers.all %}
+            <li class="list-group-item">
+                {{ paper.title }}
+            </li>
         {% endfor %}
     </ul>
 {% endblock %}

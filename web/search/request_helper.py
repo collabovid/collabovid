@@ -17,7 +17,7 @@ class SearchRequestHelper:
         self._error = False
 
         try:
-            response = requests.get(settings.SEARCH_SERVICE_URL, params={
+            response = requests.get(form.url, params={
                 'form': form.to_json(),
                 'score_min': score_min
             })

@@ -12,6 +12,45 @@ def wait_until(condition, interval=0.1, timeout=10):
     return condition()
 
 
+def search_similar(request):
+    if request.method == "GET":
+        score_min = float(request.GET.get("score_min", "0"))
+        form = json.loads(request.GET.get('form'))
+
+        filtered, filtered_papers = SearchEngine.filter_papers(form)
+
+        print(form)
+
+        result = dict()
+
+        for doi in filtered_papers.values_list('doi', flat=True):
+            result[doi] = 0
+
+        paper_finder = get_similar_paper_finder()
+        if not wait_until(paper_finder.is_ready):
+            return HttpResponseBadRequest("Similar Paper finder is not initialized yet")
+
+        if form['similar_papers']:
+            similar_factor = 1/len(form['similar_papers'])
+            for paper_doi in form['similar_papers']:
+                similar_paper = paper_finder.similar(paper_doi)
+                for doi, score in similar_paper:
+                    if doi in result:
+                        result[doi] += score * similar_factor
+
+        if form['different_papers']:
+            different_factor = 1 / len(form['different_papers'])
+            for paper_doi in form['different_papers']:
+                similar_paper = paper_finder.similar(paper_doi)
+                for doi, score in similar_paper:
+                    if doi in result:
+                        result[doi] -= score * different_factor
+
+        #result = {key: val for key, val in result.items() if val > score_min}
+
+        return JsonResponse(result)
+
+
 def search(request):
     if request.method == "GET":
         semantic_paper_search = get_semantic_paper_search()
@@ -21,34 +60,9 @@ def search(request):
         score_min = float(request.GET.get("score_min", "0"))
 
         form = json.loads(request.GET.get('form'))
-
-        print(form)
-        categories = form['categories']
-        start_date = form['published_at_start']
-        end_date = form['published_at_end']
-
-        authors = form["authors"]
-        journals = form["journals"]
-        locations = form["locations"]
-        search_query = form["query"].strip()
-
-        authors_connection = form["authors_connection"]
-
-        article_type_string = form["article_type"]
-
-        article_type = SearchEngine.ARTICLE_TYPE_ALL
-
-        if article_type_string == 'reviewed':
-            article_type = SearchEngine.ARTICLE_TYPE_PEER_REVIEWED
-        elif article_type_string == 'preprints':
-            article_type = SearchEngine.ARTICLE_TYPE_PREPRINTS
-
         search_engine = get_default_search_engine()
 
-        search_result = search_engine.search(search_query, start_date=start_date,
-                                             end_date=end_date, score_min=score_min, author_ids=authors,
-                                             author_and=(authors_connection == 'all'), journal_ids=journals,
-                                             category_ids=categories, article_type=article_type, location_ids=locations)
+        search_result = search_engine.search(form, score_min=score_min)
 
         return JsonResponse(search_result)
 

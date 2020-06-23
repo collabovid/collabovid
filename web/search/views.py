@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, reverse
 from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation
@@ -8,124 +8,99 @@ from search.request_helper import SearchRequestHelper
 
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Value as V
-from django.db.models.functions import Concat, Greatest
-from django.db.models import Count, Max
+from django.db.models.functions import Greatest
 
-import json
-
-from search.forms import SearchForm
+from search.forms import SearchForm, SimilarSearchForm
 from search.tagify.tagify_searchable import *
+
 PAPER_PAGE_COUNT = 10
+
 
 def exploratory_search(request):
     if request.method == "GET":
+        form = SimilarSearchForm(request.GET)
 
-        similar_paper_ids = request.GET.get('similarities', '')
-        print(similar_paper_ids)
+        if form.is_valid():
+            similar_papers = Paper.objects.filter(pk__in=form.cleaned_data['similar_papers'])
+            different_papers = Paper.objects.filter(pk__in=form.cleaned_data['different_papers'])
 
-        try:
-            similar_paper_ids = [str(pk) for pk in similar_paper_ids.split(',')] if similar_paper_ids else []
-        except ValueError:
-            similar_paper_ids = []
+            return render(request, "search/similar_paper_search.html", {'form': form,
+                                                                        'search_url': reverse('exploratory-search'),
+                                                                        'similar_papers': similar_papers,
+                                                                        'different_papers': different_papers})
+    elif request.method == "POST":
+        form = SimilarSearchForm(request.POST)
+        return render_search_result(request, form)
 
-        print(similar_paper_ids)
-
-        similar_papers = Paper.objects.filter(pk__in=similar_paper_ids)
-
-        print(similar_papers)
-        form = {
-            "start_date": None,
-            "end_date": None,
-            "categories": Category.objects.all().order_by("pk"),
-            'selected_categories': [],
-            "tab": 'top',
-            "authors": json.dumps([]),
-            "authors-connection": 'all',
-            "journals": json.dumps([]),
-            "locations": json.dumps([]),
-            "article_type": 'all'
-        }
-
-        return render(request, "core/similar_paper_search.html", {'form': form, 'similar_papers': similar_papers})
 
 def explore(request):
     if request.method == "GET":
-        return render(request, "core/explore.html")
+        return render(request, "search/explore.html")
     elif request.method == 'POST':
-        return JsonResponse({'papers': [
-            {
-                'title': paper.title,
-                'abstract': paper.abstract
-            }
-            for paper in Paper.objects.all()[:5]]})
+
+        form = SearchForm(request.POST)
+
+        if form.is_valid():
+            search_response_helper = SearchRequestHelper(form, score_min=0.1)
+            papers = search_response_helper.paginator_ordered_by(Paper.SORTED_BY_SCORE, page_count=PAPER_PAGE_COUNT).page(
+                1)[:5]
+
+            print(len(papers))
+
+            return JsonResponse({'papers': [
+                {
+                    'pk': paper.pk,
+                    'title': paper.title,
+                    'abstract': paper.abstract
+                }
+             for paper in papers]})
 
     return HttpResponseNotFound()
+
 
 def search(request):
     if request.method == "GET":
 
         form = SearchForm(request.GET)
-
         if form.is_valid():
-            pass
-
-        categories = Category.objects.all().order_by("pk")
-
-
-        #authors = Author.objects.filter(pk__in=author_ids).annotate(name=Concat('first_name', V(' '), 'last_name'))
-
-        #search_query = request.GET.get("search", "").strip()
-
-        #form = {
-        #    "start_date": start_date,
-        #    "end_date": end_date,
-        #    "search": search_query,
-        #    "categories": categories,
-        #    'selected_categories': selected_categories,
-        #    "tab": tab,
-        #    "authors": json.dumps(authors_to_json(authors)),
-        #    "authors-connection": authors_connection,
-        #    "journals": json.dumps(journals_to_json(journals)),
-        #    "locations": json.dumps(locations_to_json(locations)),
-        #    "article_type": article_type
-        #}
-
-        return render(request, "search/search.html", {'form': form})
-
+            return render(request, "search/search.html", {'form': form})
     elif request.method == "POST":
-
         form = SearchForm(request.POST)
+        return render_search_result(request, form)
 
-        if not form.is_valid():
-            return render(request, "search/ajax/_search_result_error.html",
-                          {'message': 'Your request is invalid.' + str(form.errors)})
+    return HttpResponseNotFound()
 
-        search_request = SearchRequestHelper(form)
 
-        if search_request.error:
-            return render(request, "search/ajax/_search_result_error.html",
-                          {'message': 'We encountered an unexpected error. Please try again.'})
+def render_search_result(request, form):
+    if not form.is_valid():
+        return render(request, "search/ajax/_search_result_error.html",
+                      {'message': 'Your request is invalid.' + str(form.errors)})
 
-        if form.cleaned_data['tab'] == "statistics":
-            statistics = PaperStatistics(search_request.papers)
-            return render(request, "search/ajax/_statistics.html", {'statistics': statistics})
+    search_response_helper = SearchRequestHelper(form)
+
+    if search_response_helper.error:
+        return render(request, "search/ajax/_search_result_error.html",
+                      {'message': 'We encountered an unexpected error. Please try again.'})
+
+    if form.cleaned_data['tab'] == "statistics":
+        statistics = PaperStatistics(search_response_helper.papers)
+        return render(request, "search/ajax/_statistics.html", {'statistics': statistics})
+    else:
+        if form.cleaned_data['tab']:
+            sorted_by = Paper.SORTED_BY_SCORE
         else:
-            if form.cleaned_data['tab']:
-                sorted_by = Paper.SORTED_BY_SCORE
-            else:
-                sorted_by = Paper.SORTED_BY_NEWEST
+            sorted_by = Paper.SORTED_BY_NEWEST
 
-            paginator = search_request.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
-            try:
-                page_number = request.POST.get('page')
-                page_obj = paginator.get_page(page_number)
-            except PageNotAnInteger:
-                page_obj = paginator.page(1)
-            except EmptyPage:
-                page_obj = None
+        paginator = search_response_helper.paginator_ordered_by(sorted_by, page_count=PAPER_PAGE_COUNT)
+        try:
+            page_number = request.POST.get('page')
+            page_obj = paginator.get_page(page_number)
+        except PageNotAnInteger:
+            page_obj = paginator.page(1)
+        except EmptyPage:
+            page_obj = None
 
-            return render(request, "search/ajax/_search_results.html", {'papers': page_obj,
-                                                                          'show_score': False, })
+        return render(request, "search/ajax/_search_results.html", {'papers': page_obj})
 
 
 def authors_to_json(authors):

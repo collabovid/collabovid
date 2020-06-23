@@ -7,5 +7,5 @@ urlpatterns = [
     path('journals', list_journals, name='get-journals'),
     path('locations', list_locations, name='get-locations'),
     path('explore/', explore, name='explore'),
-    path('exploratory-search/', exploratory_search, name='exploratroy-search'),
+    path('exploratory-search/', exploratory_search, name='exploratory-search'),
 ]

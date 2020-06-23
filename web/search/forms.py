@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.serializers.json import DjangoJSONEncoder
 
 from search.tagify.tagify_searchable import *
-
+from django.conf import settings
 
 class MinLengthValidator(validators.MinLengthValidator):
     message = 'Ensure this value has at least %(limit_value)d elements (it has %(show_value)d).'
@@ -42,6 +42,7 @@ class CommaSeparatedCharField(forms.Field):
         self.validate(value)
         self.run_validators(value)
         return value
+
 
 class CommaSeparatedIntegerField(forms.Field):
     default_error_messages = {
@@ -122,19 +123,45 @@ class SearchForm(forms.Form):
             else:
                 self.data[key] = data.get(key)
 
+    def to_dict(self):
+        return {'published_at_start': self.cleaned_data['published_at_start'],
+                'published_at_end': self.cleaned_data['published_at_end'],
+                'query': self.cleaned_data['query'],
+                'authors': self.cleaned_data['authors'],
+                'authors_connection': self.cleaned_data['authors_connection'],
+                'categories': self.cleaned_data['categories'],
+                'article_type': self.cleaned_data['article_type'],
+                'journals': self.cleaned_data['journals'],
+                'locations': self.cleaned_data['locations']}
+
     def to_json(self):
         """
         The json format is used to transfer the filled-out form object to search
         :return:
         """
-        form_dict = {'published_at_start': self.cleaned_data['published_at_start'],
-                     'published_at_end': self.cleaned_data['published_at_end'],
-                     'query': self.cleaned_data['query'],
-                     'authors': self.cleaned_data['authors'],
-                     'authors_connection': self.cleaned_data['authors_connection'],
-                     'categories': self.cleaned_data['categories'],
-                     'article_type': self.cleaned_data['article_type'],
-                     'journals': self.cleaned_data['journals'],
-                     'locations': self.cleaned_data['locations']}
 
-        return json.dumps(form_dict, cls=DjangoJSONEncoder)
+        return json.dumps(self.to_dict(), cls=DjangoJSONEncoder)
+
+    @property
+    def url(self):
+        return settings.SEARCH_SERVICE_URL + "/search"
+
+
+class SimilarSearchForm(SearchForm):
+
+    similar_papers = CommaSeparatedCharField(required=False)
+    different_papers = CommaSeparatedCharField(required=False)
+
+    def to_dict(self):
+
+        form_dict = super(SimilarSearchForm, self).to_dict()
+
+        form_dict['similar_papers'] = self.cleaned_data['similar_papers']
+        form_dict['different_papers'] = self.cleaned_data['different_papers']
+
+        return form_dict
+
+    @property
+    def url(self):
+        return settings.SEARCH_SERVICE_URL + "/search/similar"
+

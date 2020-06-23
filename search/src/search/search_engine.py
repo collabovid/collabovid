@@ -21,19 +21,36 @@ class SearchEngine:
     ARTICLE_TYPE_PREPRINTS = 2
     ARTICLE_TYPE_PEER_REVIEWED = 1
 
-
     def __init__(self, search_pipeline: List[Search]):
         self.search_pipeline = search_pipeline
 
     @staticmethod
-    def filter_papers(start_date=None, end_date=None, topics=None, author_ids=None, author_and=False, journal_ids=None,
-                      category_ids=None, location_ids=None, article_type=ARTICLE_TYPE_ALL):
+    def filter_papers(form):
+        category_ids = form['categories']
+        start_date = form['published_at_start']
+        end_date = form['published_at_end']
+
+        author_ids = form["authors"]
+        author_and = (form["authors_connection"] == 'all')
+
+        journal_ids = form["journals"]
+        location_ids = form["locations"]
+
+        article_type_string = form["article_type"]
+
+        article_type = SearchEngine.ARTICLE_TYPE_ALL
+
+        if article_type_string == 'reviewed':
+            article_type = SearchEngine.ARTICLE_TYPE_PEER_REVIEWED
+        elif article_type_string == 'preprints':
+            article_type = SearchEngine.ARTICLE_TYPE_PREPRINTS
+
         papers = Paper.objects.all()
 
         filtered = False
 
         if article_type != SearchEngine.ARTICLE_TYPE_ALL:
-            papers = papers.filter(is_preprint=(article_type==SearchEngine.ARTICLE_TYPE_PREPRINTS))
+            papers = papers.filter(is_preprint=(article_type == SearchEngine.ARTICLE_TYPE_PREPRINTS))
 
         if category_ids and len(category_ids) > 0:
             papers = papers.filter(categories__pk__in=category_ids)
@@ -69,34 +86,15 @@ class SearchEngine:
             papers = papers.filter(published_at__lte=end_date)
             filtered = True
 
-        if topics:
-            papers = papers.filter(topic__in=topics)
-            filtered = True
-
         return filtered, papers.distinct()
 
-    def search(self, query: str,
-               start_date=None,
-               end_date=None,
-               topics=None,
-               author_ids=None,
-               author_and=False,
-               journal_ids=None,
-               category_ids=None,
-               location_ids=None,
-               article_type=ARTICLE_TYPE_ALL,
-               score_min=0.6):
+    def search(self, form, score_min=0.6):
         paper_score_table = defaultdict(int)
 
-        filtered, papers = SearchEngine.filter_papers(start_date,
-                                                      end_date,
-                                                      topics,
-                                                      author_ids,
-                                                      author_and,
-                                                      journal_ids,
-                                                      category_ids,
-                                                      location_ids,
-                                                      article_type)
+        query = form["query"].strip()
+        category_ids = form['categories']
+
+        filtered, papers = SearchEngine.filter_papers(form)
 
         combined_factor = 0
 
@@ -116,7 +114,7 @@ class SearchEngine:
                 try:
                     category = Category.objects.get(pk=category_ids[0])
 
-                    memberships = CategoryMembership.objects.filter(paper__in=papers, category=category).\
+                    memberships = CategoryMembership.objects.filter(paper__in=papers, category=category). \
                         annotate(doi=F('paper__doi'))
 
                     for membership in memberships:

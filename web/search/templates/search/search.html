@@ -9,9 +9,8 @@
             <div class="row mt-5">
                 <div class="col-12">
 
-                    <form id="paper-search-form" class="search-form" method="post" action="{% url "search" %}">
+                    <form id="paper-search-form" class="search-form" method="post" action="{% if search_url %}{{ search_url }}{% else %}{% url "search" %}{% endif %}">
                         <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                        {{ form.cleaned_data.tab }}
                         <input class="d-none" id="top-tab-input" data-no-url="true" type="radio" name="tab" value="top"
                                {% if form.cleaned_data.tab == 'top' %}checked="checked"{% endif %}/>
                         <input class="d-none" id="newest-tab-input" type="radio" name="tab" value="newest"

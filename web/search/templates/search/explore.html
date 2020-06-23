@@ -1,4 +1,4 @@
-{% extends "core/base_explore.html" %}
+{% extends "search/base_explore.html" %}
 {% load static %}
 {% load pipeline %}
 
@@ -37,7 +37,7 @@
                             </div>
                         </div>
 
-                        <input type="text" value="{{ form.search }}" name="search"
+                        <input type="text" value="" name="query"
                                class="border-left-0 form-control"
                                placeholder="Please enter a topic you are interested in, e.g. effects on pregnant women">
                     </div>
@@ -58,13 +58,13 @@
                     </div>
 
                     <div class="col-6 text-center text-muted large">
-                        Similar to
+                        <button id="to-the-papers" class="btn btn-outline-info">Show me the papers</button>
                     </div>
 
                     <div class="col-3 text-right">
                         <span id="yes-no-container">
-                            <button class="btn btn-lg btn-danger">No</button>
-                            <button class="btn btn-lg btn-success">Yes</button>
+                            <button class="btn btn-lg btn-danger" data-similar="false">No</button>
+                            <button class="btn btn-lg btn-success" data-similar="true">Yes</button>
                         </span>
                     </div>
                 </div>
@@ -84,6 +84,10 @@
         let container = $("#paper-container");
 
         let back_button = $("#back-button");
+        let to_the_papers = $("#to-the-papers");
+
+
+        let similar_papers = {};
 
         next_button.click(function (e) {
             form.submit();
@@ -92,16 +96,48 @@
         let paper_data = null;
         let current_paper_index = -1;
 
+        to_the_papers.click(function (e) {
+            e.preventDefault();
+
+            let url = window.location.protocol + "//" + window.location.host + "{% url 'exploratory-search' %}" + "?";
+
+
+            let similar = [];
+            let different = [];
+
+            $.each(similar_papers, function (doi, is_similar) {
+                if (is_similar) similar.push(doi);
+                else different.push(doi);
+            });
+
+            console.log(similar);
+            console.log(different);
+            console.log(similar_papers);
+
+            let url_params = [];
+
+            if(similar.length > 0) url_params.push('similar_papers=' + similar.join(','));
+            if(different.length > 0) url_params.push('different_papers=' + different.join(','));
+
+            url += url_params.join('&');
+            window.location = url;
+        });
+
         function show_paper() {
             if (current_paper_index === 0)
                 back_button.attr('disabled', true);
             else
                 back_button.attr('disabled', false);
 
-            container.find('.title').html(paper_data.papers[current_paper_index].title);
-            container.find('.abstract').html(paper_data.papers[current_paper_index].abstract);
-            container.hide().fadeIn();
-            $("#paper-buttons-container").show();
+            if (current_paper_index < paper_data.papers.length) {
+                container.find('.title').html(paper_data.papers[current_paper_index].title);
+                container.find('.abstract').html(paper_data.papers[current_paper_index].abstract);
+                container.hide().fadeIn();
+                $("#paper-buttons-container").show();
+            } else {
+                container.hide();
+                $("#paper-buttons-container").hide();
+            }
         }
 
         function show_next_paper() {
@@ -115,6 +151,9 @@
         });
 
         $("#yes-no-container button").click(function () {
+            let is_similar = $(this).data('similar');
+            similar_papers[paper_data.papers[current_paper_index].pk] = is_similar;
+
             show_next_paper();
         });
 
