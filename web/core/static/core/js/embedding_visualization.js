@@ -1,14 +1,25 @@
+var colors = {
+    "General": 0x424242,
+    "Mechanism": 0x488f31,
+    "Transmission": 0xbc5090,
+    "Diagnosis": 0xc0af4a,
+    "Treatment": 0xffa49c,
+    "Prevention": 0x6d4c41,
+    "Case Report": 0x009692,
+    "Epidemic Forecasting": 0xde425b
+}
+
+
 function addPoints(points, object, atlas) {
     var geometry = new THREE.Geometry();
     for (var i = 0; i < points.length; i++) {
         var point = points[i];
 
         // Create x, y, z coords for this subimage
-        var scale = object.height * 5
         var coords = {
-            x: point.point[0] * scale,
-            y: point.point[1] * scale,
-            z: point.point[2] * scale
+            x: point.point[0],
+            y: point.point[1],
+            z: point.point[2] + 1
         };
 
         geometry.vertices.push(
@@ -33,6 +44,15 @@ function addPoints(points, object, atlas) {
                 coords.z
             )
         );
+        var maxScore = 0;
+        var color = 0xffffff
+        point.categories.forEach(function (item) {
+            if (item.score > maxScore) {
+                maxScore = item.score
+                color = colors[item.name]
+            }
+        })
+
         var faces = [
             [0, 1, 2], [0, 2, 3],
         ];
@@ -44,6 +64,7 @@ function addPoints(points, object, atlas) {
                 geometry.vertices.length - (nVertices - indices[1]),
                 geometry.vertices.length - (nVertices - indices[2])
             );
+            face.color = new THREE.Color(color);
             geometry.faces.push(face);
         }
 
@@ -74,16 +95,17 @@ function addPoints(points, object, atlas) {
 var EmbeddingVisualization = function () {
 
     this.renderEmbeddings = function (canvas, onSelected, options) {
-        var fieldOfView = 75;
+        var fieldOfView = 45;
         var scope = this;
         var aspectRatio = canvas.offsetWidth / canvas.offsetHeight;
         var nearPlane = 0.1;
-        var farPlane = 100000;
+        var farPlane = 1000;
 
         var camera = new THREE.PerspectiveCamera(
             fieldOfView, aspectRatio, nearPlane, farPlane
         );
-        camera.position.z = 3000;
+        camera.position.z = 3.5;
+        camera.position.x = 0;
 
         var renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true});
         renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
@@ -91,7 +113,7 @@ var EmbeddingVisualization = function () {
         var scene = new THREE.Scene();
         scene.background = null;
 
-        var object = {width: 48, height: 64, depth: 0.1, color: 0x5475a1}
+        var object = {width: 0.005, height: 0.005, depth: 0.005, color: 0x5475a1}
         var atlas = {cols: 10, rows: 10};
         atlas.width = object.width * atlas.cols
         atlas.height = object.height * atlas.rows
@@ -112,7 +134,7 @@ var EmbeddingVisualization = function () {
 
 
             var mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(0, 0, 0)
+            mesh.position.set(-0.518, -0.547 / 2, -0.558)
             scene.add(mesh);
 
 
@@ -239,24 +261,5 @@ var EmbeddingVisualization = function () {
         this.geometry.colorsNeedUpdate = true
         this.geometry.elementsNeedUpdate = true
         this.renderer.render(this.scene, this.camera);
-    }
-
-    this.markNeighbors = function (dois) {
-        for (var i = 0; i < this.papers.length; i++) {
-            var paper = this.papers[i];
-            if (dois.includes(paper.doi)) {
-                var faceStartIndex = i * 2
-                {
-                    for (var idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
-                        if (!scope.selectedFaces.includes(this.geometry.faces[idx])) {
-                            this.geometry.faces[idx].color = new THREE.Color(0x9da832);
-                        }
-                    }
-                }
-            }
-        }
-        this.geometry.colorsNeedUpdate = true
-        this.geometry.elementsNeedUpdate = true
-        renderer.render(scene, camera);
     }
 }

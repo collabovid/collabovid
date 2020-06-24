@@ -195,6 +195,19 @@
                     "is_primitive": false
                 }
             ]
+        },
+        "reduce-embedding-dimensionality": {
+            "name": "Reduce Embedding Dimensionality",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-oubiobert-512",
+                    "is_primitive": true
+                }
+            ]
         }
     }
 }

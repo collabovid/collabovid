@@ -11,6 +11,12 @@
                         <canvas id="visualization-container"></canvas>
                     </div>
                 </div>
+                <div class="legend">
+                    <ul>
+                        <li>Treatment</li>
+                        <li>Prevention</li>
+                    </ul>
+                </div>
             </div>
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
@@ -35,7 +41,6 @@
                 dois.push(visualization.papers[i].doi)
             })
             visualization.markWithColor(indices)
-            console.log(dois);
 
             $.get('/paper-cards/', {
                 'dois': JSON.stringify(dois)
@@ -46,7 +51,7 @@
 
         visualization.renderEmbeddings(canvas, onSelected, {
                 'imageUrl': '/static/img/atlas.jpg',
-                'fileUrl': '/static/embeddings_3d.json'
+                'fileUrl': '/static/embeddings_3d_scaled.json'
             }
         )
 
@@ -70,6 +75,14 @@
             top: 0;
             position: absolute;
             width: 100%;
+        }
+
+        .legend {
+            position: absolute;
+            right: 0;
+            margin-right: 50px;
+            top: 100px;
+            color: white;
         }
 
         .gradient-header {
