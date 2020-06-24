@@ -146,18 +146,27 @@ class GeonamesDB:
         Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
         core_session = Session()
 
-        def _int_or_none(x):
+        timezones, buffer_tz, buffer_loc, buffer_alias = [], [], [], []
+
+        def int_or_none(x):
             return int(x) if x else None
 
-        def _float_or_none(x):
+        def float_or_none(x):
             return float(x) if x else None
+
+        def insert_data():
+            nonlocal buffer_loc, buffer_tz, buffer_alias
+            engine.execute(TimeZone.__table__.insert(), buffer_tz)
+            engine.execute(Location.__table__.insert(), buffer_loc)
+            engine.execute(Alias.__table__.insert(), buffer_alias)
+            buffer_tz, buffer_loc, buffer_alias = [], [], []
 
         if not self.session:
             self.connect()
         with open(path, 'r') as tsv_file:
             reader = csv.reader(tsv_file, delimiter='\t')
-            timezones, buffer_tz, buffer_loc, buffer_alias = [], [], [], []
             time = timer()
+
             for idx, row in enumerate(reader):
                 if idx % 100000 == 0:
                     print(f"{idx}, {timedelta(seconds=timer() - time)}")
@@ -177,7 +186,7 @@ class GeonamesDB:
                 else:
                     tz_id = None
 
-                pk = _int_or_none(row[0])
+                pk = int_or_none(row[0])
                 name = row[1].strip()
                 ascii_name = row[2].strip()
 
@@ -186,8 +195,8 @@ class GeonamesDB:
                     'name': name,
                     'ascii_name': ascii_name,
                     # ignore row 3, contains aliases
-                    'latitude': _float_or_none(row[4]),
-                    'longitude': _float_or_none(row[5]),
+                    'latitude': float_or_none(row[4]),
+                    'longitude': float_or_none(row[5]),
                     'feature_class': row[6],
                     'feature_code': row[7],
                     'country_code': row[8],
@@ -196,9 +205,9 @@ class GeonamesDB:
                     'admin2_code': row[11],
                     'admin3_code': row[12],
                     'admin4_code': row[13],
-                    'population': _int_or_none(row[14]),
-                    'elevation': _int_or_none(row[15]),
-                    'dem': _int_or_none(row[16]),
+                    'population': int_or_none(row[14]),
+                    'elevation': int_or_none(row[15]),
+                    'dem': int_or_none(row[16]),
                     'timezone_id': tz_id,
                     'modification_date': datetime.strptime(row[18], "%Y-%m-%d") if row[18] else None,
                 })
@@ -207,8 +216,8 @@ class GeonamesDB:
                 buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases]
 
                 if len(buffer_loc) % 100000 == 0:
-                    engine.execute(TimeZone.__table__.insert(), buffer_tz)
-                    engine.execute(Location.__table__.insert(), buffer_loc)
-                    engine.execute(Alias.__table__.insert(), buffer_alias)
-                    buffer_tz, buffer_loc, buffer_alias = [], [], []
+                    insert_data()
+
+            if len(buffer_loc) > 0:
+                insert_data()
             core_session.close()
