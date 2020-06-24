@@ -19,16 +19,12 @@
                 </div>
             </div>
 
-            <div class="vertical-center">
-                <div id="paper-loading-indicator"
-                     class="text-white text-center fa-5x"
-                     style="display: none;margin-top: -15px">
-                    <i class="fas fa-circle-notch fa-spin"></i>
-                </div>
 
-
+            <div class="vertical-top">
                 <form id="paper-search-form" class="search-form" method="post" action="{% url "explore" %}">
                     <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                    <h1 class="text-center display-4 mb-5">Explore</h1>
 
                     <div class="input-group input-group-lg">
                         <div class="input-group-prepend border-right-0">
@@ -42,11 +38,19 @@
                                placeholder="Please enter a topic you are interested in, e.g. effects on pregnant women">
                     </div>
                 </form>
+            </div>
+
+            <div class="vertical-center">
+                <div id="paper-loading-indicator"
+                     class="text-muted text-center fa-5x"
+                     style="display: none;margin-top: -30px">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
 
             </div>
 
             <div class="bottom-container text-right" id="form-submit-container">
-                <button id="next-button" class="btn btn-lg btn-success">Next</button>
+                <button id="next-button" class="btn btn-lg btn-success">Show me suggestions</button>
             </div>
 
             <div class="bottom-container" id="paper-buttons-container" style="display: none;">
