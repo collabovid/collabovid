@@ -10,89 +10,83 @@ var colors = {
 }
 
 
-function addPoints(points, object, atlas) {
-    var geometry = new THREE.Geometry();
-    for (var i = 0; i < points.length; i++) {
-        var point = points[i];
-
-        // Create x, y, z coords for this subimage
-        var coords = {
-            x: point.point[0],
-            y: point.point[1],
-            z: point.point[2] + 1
-        };
-
-        geometry.vertices.push(
-            new THREE.Vector3(
-                coords.x,
-                coords.y,
-                coords.z
-            ),
-            new THREE.Vector3(
-                coords.x + object.width,
-                coords.y,
-                coords.z
-            ),
-            new THREE.Vector3(
-                coords.x + object.width,
-                coords.y + object.height,
-                coords.z
-            ),
-            new THREE.Vector3(
-                coords.x,
-                coords.y + object.height,
-                coords.z
-            )
-        );
-        var maxScore = 0;
-        var color = 0xffffff
-        point.categories.forEach(function (item) {
-            if (item.score > maxScore) {
-                maxScore = item.score
-                color = colors[item.name]
-            }
-        })
-
-        var faces = [
-            [0, 1, 2], [0, 2, 3],
-        ];
-        var nVertices = 4
-        for (var j = 0; j < faces.length; j++) {
-            var indices = faces[j];
-            var face = new THREE.Face3(
-                geometry.vertices.length - (nVertices - indices[0]),
-                geometry.vertices.length - (nVertices - indices[1]),
-                geometry.vertices.length - (nVertices - indices[2])
-            );
-            face.color = new THREE.Color(color);
-            geometry.faces.push(face);
-        }
-
-        var idx = i % (atlas.rows * atlas.cols);
-        var xOffset = (idx % atlas.rows) * (object.width / atlas.width);
-        var yOffset = Math.floor(idx / atlas.cols) * (object.height / atlas.height);
-
-        var xDistance = object.width / atlas.width
-        var yDistance = object.height / atlas.height
-
-        geometry.faceVertexUvs[0].push([
-            new THREE.Vector2(xOffset, yOffset),
-            new THREE.Vector2(xOffset + xDistance, yOffset),
-            new THREE.Vector2(xOffset + xDistance, yOffset + yDistance)
-        ]);
-
-        geometry.faceVertexUvs[0].push([
-            new THREE.Vector2(xOffset, yOffset),
-            new THREE.Vector2(xOffset + xDistance, yOffset + yDistance),
-            new THREE.Vector2(xOffset, yOffset + yDistance)
-        ]);
-
-    }
-    return geometry;
-}
-
-
 var EmbeddingVisualization = function () {
+
+    this.addPoints = function (points, object, atlas) {
+        var geometry = new THREE.Geometry();
+        for (var i = 0; i < points.length; i++) {
+            var point = points[i];
+
+            // Create x, y, z coords for this subimage
+            var coords = {
+                x: point.point[0],
+                y: point.point[1],
+                z: point.point[2] + 1
+            };
+
+            geometry.vertices.push(
+                new THREE.Vector3(
+                    coords.x,
+                    coords.y,
+                    coords.z
+                ),
+                new THREE.Vector3(
+                    coords.x + object.width,
+                    coords.y,
+                    coords.z
+                ),
+                new THREE.Vector3(
+                    coords.x + object.width,
+                    coords.y + object.height,
+                    coords.z
+                ),
+                new THREE.Vector3(
+                    coords.x,
+                    coords.y + object.height,
+                    coords.z
+                )
+            );
+
+            var color = this.getColorForPaper(point)
+
+            var faces = [
+                [0, 1, 2], [0, 2, 3],
+            ];
+            var nVertices = 4
+            for (var j = 0; j < faces.length; j++) {
+                var indices = faces[j];
+                var face = new THREE.Face3(
+                    geometry.vertices.length - (nVertices - indices[0]),
+                    geometry.vertices.length - (nVertices - indices[1]),
+                    geometry.vertices.length - (nVertices - indices[2])
+                );
+                face.color = new THREE.Color(color);
+                face.materialIndex = 0;
+                geometry.faces.push(face);
+            }
+
+            var idx = i % (atlas.rows * atlas.cols);
+            var xOffset = (idx % atlas.rows) * (object.width / atlas.width);
+            var yOffset = Math.floor(idx / atlas.cols) * (object.height / atlas.height);
+
+            var xDistance = object.width / atlas.width
+            var yDistance = object.height / atlas.height
+
+            geometry.faceVertexUvs[0].push([
+                new THREE.Vector2(xOffset, yOffset),
+                new THREE.Vector2(xOffset + xDistance, yOffset),
+                new THREE.Vector2(xOffset + xDistance, yOffset + yDistance)
+            ]);
+
+            geometry.faceVertexUvs[0].push([
+                new THREE.Vector2(xOffset, yOffset),
+                new THREE.Vector2(xOffset + xDistance, yOffset + yDistance),
+                new THREE.Vector2(xOffset, yOffset + yDistance)
+            ]);
+
+        }
+        return geometry;
+    }
 
     this.renderEmbeddings = function (canvas, onSelected, options) {
         var fieldOfView = 45;
@@ -122,15 +116,31 @@ var EmbeddingVisualization = function () {
         loader.load(options.fileUrl, function (data) {
             var paper = JSON.parse(data);
             scope.papers = paper;
-            var geometry = addPoints(paper, object, atlas);
+            var geometry = scope.addPoints(paper, object, atlas);
 
             var loader = new THREE.TextureLoader();
             var url = options.imageUrl;
 
-            var material = new THREE.MeshBasicMaterial({
+
+            var opacMaterial = new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0.1,
                 map: loader.load(url),
                 vertexColors: THREE.VertexColors
             });
+            var halfOpacMaterial = new THREE.MeshBasicMaterial({
+                transparent: true,
+                opacity: 0.5,
+                map: loader.load(url),
+                vertexColors: THREE.VertexColors
+            });
+            var solidMaterial = new THREE.MeshBasicMaterial({
+                transparent: false,
+                map: loader.load(url),
+                vertexColors: THREE.VertexColors
+            });
+
+            var material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial])
 
 
             var mesh = new THREE.Mesh(geometry, material);
@@ -175,9 +185,7 @@ var EmbeddingVisualization = function () {
             var raycaster = new THREE.Raycaster();
             var mouse = new THREE.Vector2();
 
-            scope.selectedFaces = [];
-
-            function onMouseMove(event) {
+            function onClick(event) {
                 var rect = canvas.getBoundingClientRect(),
                     x = event.clientX - rect.left,
                     y = event.clientY - rect.top;
@@ -189,11 +197,6 @@ var EmbeddingVisualization = function () {
                 raycaster.setFromCamera(mouse, camera);
                 var intersects = raycaster.intersectObjects(scene.children);
                 if (intersects.length > 0) {
-                    scope.selectedFaces.forEach(function (face) {
-                        face.color = new THREE.Color(0xffffff);
-                    })
-                    scope.selectedFaces = [];
-
                     var faceIndex = intersects[0].faceIndex;
                     var pointIndex = Math.floor(faceIndex / facesPerPoint);
                     var faceStartIndex = pointIndex * facesPerPoint
@@ -201,20 +204,38 @@ var EmbeddingVisualization = function () {
 
                     for (var idx = faceStartIndex; idx < faceStartIndex + facesPerPoint; idx++) {
                         geometry.faces[idx].color = new THREE.Color(0xDF1544);
-                        scope.selectedFaces.push(geometry.faces[idx])
                     }
-                    onSelected(paper[pointIndex])
+                    onSelected(pointIndex, paper[pointIndex])
 
                     geometry.colorsNeedUpdate = true
                     geometry.elementsNeedUpdate = true
                     renderer.render(scene, camera);
+                } else {
+                    scope.deselectAll();
                 }
             }
 
-            window.addEventListener('mousedown', onMouseMove, false);
+            const delta = 6;
+            let startX;
+            let startY;
+
+            window.addEventListener('mousedown', function (event) {
+                startX = event.pageX;
+                startY = event.pageY;
+            });
+
+            window.addEventListener('mouseup', function (event) {
+                const diffX = Math.abs(event.pageX - startX);
+                const diffY = Math.abs(event.pageY - startY);
+
+                if (diffX < delta && diffY < delta) {
+                    onClick(event);
+                }
+            });
             scope.geometry = geometry;
             scope.renderer = renderer;
             scope.scene = scene;
+            scope.material = material
             scope.camera = camera;
         })
     }
@@ -249,6 +270,57 @@ var EmbeddingVisualization = function () {
         }
         return min_indices
     }
+
+    this.getColorForPaper = function (paper) {
+        var maxScore = 0;
+        var color = 0xffffff
+        paper.categories.forEach(function (item) {
+            if (item.score > maxScore) {
+                maxScore = item.score
+                color = colors[item.name]
+            }
+        })
+        return color;
+    }
+
+    this.deselectAll = function () {
+        for (var i = 0; i < this.papers.length; i++) {
+            var color = this.getColorForPaper(this.papers[i])
+            var materialIndex = 0;
+            var faceStartIndex = i * 2
+            for (var idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
+                this.geometry.faces[idx].color = new THREE.Color(color);
+                this.geometry.faces[idx].materialIndex = materialIndex
+            }
+        }
+        this.geometry.colorsNeedUpdate = true
+        this.geometry.elementsNeedUpdate = true
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    this.selectPaper = function (paperIndex, neighborIndices) {
+        for (var i = 0; i < this.papers.length; i++) {
+            var color = 0xffffff;
+            var materialIndex = 2;
+            if (neighborIndices.includes(i)) {
+                color = this.getColorForPaper(this.papers[i])
+                materialIndex = 1;
+            }
+            if (paperIndex === i) {
+                color = this.getColorForPaper(this.papers[i])
+                materialIndex = 0
+            }
+            var faceStartIndex = i * 2
+            for (var idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
+                this.geometry.faces[idx].color = new THREE.Color(color);
+                this.geometry.faces[idx].materialIndex = materialIndex
+            }
+        }
+        this.geometry.colorsNeedUpdate = true
+        this.geometry.elementsNeedUpdate = true
+        this.renderer.render(this.scene, this.camera);
+    }
+
 
     this.markWithColor = function (paperIndices) {
         for (var i = 0; i < paperIndices.length; i++) {

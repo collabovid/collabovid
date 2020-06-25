@@ -34,13 +34,13 @@
         var selectedCardContainer = document.getElementById('selected-card-container');
         var visualization = new EmbeddingVisualization()
 
-        function onSelected(paper) {
+        function onSelected(idx, paper) {
             var indices = visualization.computeNeighbors(paper, 10)
             var dois = [paper.doi];
             indices.forEach((i) => {
                 dois.push(visualization.papers[i].doi)
             })
-            visualization.markWithColor(indices)
+            visualization.selectPaper(idx, indices);
 
             $.get('/paper-cards/', {
                 'dois': JSON.stringify(dois)
