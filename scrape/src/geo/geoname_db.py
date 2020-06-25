@@ -1,9 +1,10 @@
 import csv
+import re
 from datetime import datetime, timedelta
 from functools import total_ordering
 from timeit import default_timer as timer
 
-from sqlalchemy import and_, Column, create_engine, Date, Float, ForeignKey, func, Integer, or_, String
+from sqlalchemy import and_, Column, create_engine, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
@@ -23,7 +24,7 @@ class TimeZone(Base):
 class Location(Base):
     __tablename__ = 'location'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, index=True)
     ascii_name = Column(String, nullable=False, index=True)
     latitude = Column(Float)
@@ -42,6 +43,7 @@ class Location(Base):
     timezone_id = Column(Integer, ForeignKey('timezone.id'))
     modification_date = Column(Date)
 
+    country_id = Column(Integer, ForeignKey('country.id'))
     aliases = relationship('Alias', backref='location', order_by='Alias.id')
 
     @property
@@ -59,9 +61,17 @@ class Location(Base):
         )
 
     def __lt__(self, other):
-        if self.feature_value != other.feature_value:
-            return self.feature_value < other.feature_value
-        return self.population < other.population
+        if self.population != other.population:
+            return self.population < other.population
+        return self.feature_value < other.feature_value
+
+
+class Country(Base):
+    __tablename__ = 'country'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String, unique=True, nullable=False, index=True)
+    location_id = Column(Integer, ForeignKey('location.id'))
 
 
 class Alias(Base):
@@ -147,6 +157,7 @@ class GeonamesDB:
         core_session = Session()
 
         timezones, buffer_tz, buffer_loc, buffer_alias = [], [], [], []
+        country_mapping = {}
 
         def int_or_none(x):
             return int(x) if x else None
@@ -163,9 +174,23 @@ class GeonamesDB:
 
         if not self.session:
             self.connect()
+
         with open(path, 'r') as tsv_file:
             reader = csv.reader(tsv_file, delimiter='\t')
             time = timer()
+
+            for idx, row in enumerate(reader):
+
+                if row[6] == 'A' and re.match(r'^(PCL[^H]*)$', row[7]):
+                    country_code = row[8]
+                    if country_code in country_mapping:
+                        raise Exception(f"Duplicate country code: {country_code}")
+                    country_mapping[country_code] = row[0]
+
+            engine.execute(
+                Country.__table__.insert(), [{'code': code, 'location_id': id} for code, id in country_mapping.items()]
+            )
+            tsv_file.seek(0)
 
             for idx, row in enumerate(reader):
                 if idx % 100000 == 0:
@@ -174,6 +199,14 @@ class GeonamesDB:
 
                 if row[6] not in ('A', 'P'):
                     continue
+
+                country_code = row[8]
+                if country_code:
+                    if country_code not in country_mapping:
+                        continue
+                    country_id = country_mapping[country_code]
+                else:
+                    country_id = None
 
                 tz_name = row[17].strip()
                 if tz_name:
@@ -199,7 +232,7 @@ class GeonamesDB:
                     'longitude': float_or_none(row[5]),
                     'feature_class': row[6],
                     'feature_code': row[7],
-                    'country_code': row[8],
+                    'country_code': country_code,
                     'cc2': row[9],
                     'admin1_code': row[10],
                     'admin2_code': row[11],
@@ -210,9 +243,11 @@ class GeonamesDB:
                     'dem': int_or_none(row[16]),
                     'timezone_id': tz_id,
                     'modification_date': datetime.strptime(row[18], "%Y-%m-%d") if row[18] else None,
+                    'country_id': country_id,
                 })
 
-                aliases = {name.lower(), ascii_name.lower(), *[alias.strip().lower() for alias in row[3].split(",")]}
+                aliases = {name.lower(), ascii_name.lower(), *[alias.strip().lower()
+                                                               for alias in row[3].split(",") if alias]}
                 buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases]
 
                 if len(buffer_loc) % 100000 == 0:
