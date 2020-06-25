@@ -1,5 +1,6 @@
 from typing import Union
 
+import pycountry
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
@@ -123,12 +124,44 @@ class VerificationState(models.IntegerChoices):
 
 
 class GeoLocation(models.Model):
+    geonames_id = models.IntegerField(unique=True, primary_key=False)
     name = models.CharField(max_length=100, null=False)
     alias = models.CharField(max_length=40, null=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
     count = models.IntegerField(default=0)
+
+    @staticmethod
+    def get_or_create_from_geonames_object(geonames_object):
+        try:
+            db_country = GeoCountry.objects.get(alpha_2=geonames_object.country_code)
+            created = False
+        except GeoCountry.DoesNotExist:
+            db_country = GeoCountry.objects.create(
+                geonames_id=geonames_object.country.id,
+                name=geonames_object.country.name,
+                alias=pycountry.countries.get(alpha_2=geonames_object.country.country_code).name,
+                alpha_2=geonames_object.country.country_code,
+                latitude=geonames_object.country.latitude,
+                longitude=geonames_object.country.longitude,
+            )
+            created = True
+
+        if geonames_object.feature_label.startswith('A.PCL'):
+            return db_country, created
+        else:
+            try:
+                return GeoCity.objects.get(geonames_id=geonames_object.id), False
+            except GeoCity.DoesNotExist:
+                db_location = GeoCity.objects.create(
+                    geonames_id=geonames_object.id,
+                    name=geonames_object.name,
+                    country=db_country,
+                    latitude=geonames_object.latitude,
+                    longitude=geonames_object.longitude,
+                )
+                return db_location, created
 
     @property
     def is_city(self):
@@ -142,8 +175,9 @@ class GeoLocation(models.Model):
     def displayname(self):
         return self.alias if self.alias else self.name
 
-    def __eq__(self, other):
-        return isinstance(other, GeoLocation) and self.pk == other.pk
+    #
+    # def __eq__(self, other):
+    #     return isinstance(other, GeoLocation) and self.pk == other.pk
 
     @staticmethod
     def recompute_counts(cities, countries):
@@ -163,7 +197,7 @@ class GeoLocation(models.Model):
 
 
 class GeoCountry(GeoLocation):
-    alpha_2 = models.CharField(max_length=2)
+    alpha_2 = models.CharField(max_length=2, unique=True)
 
     @property
     def papers(self):
@@ -183,8 +217,8 @@ class GeoCity(GeoLocation):
 
 
 class GeoNameResolution(models.Model):
-    source_name = models.CharField(max_length=50)
-    target_name = models.CharField(max_length=50, null=True)
+    source_name = models.CharField(unique=True, max_length=50)
+    target_geonames_id = models.IntegerField(null=True, default=None)
 
 
 class Paper(models.Model):
@@ -228,6 +262,7 @@ class Paper(models.Model):
     last_scrape = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+    location_modified = models.BooleanField(default=False)
 
     @property
     def countries(self):

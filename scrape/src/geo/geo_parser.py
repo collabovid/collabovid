@@ -2,7 +2,7 @@ import re
 import os
 import spacy
 
-from src.geo.geoname_db import GeonamesDB
+from src.geo.geoname_db import GeonamesDB, Location
 from django.conf import settings
 
 _SPACY_MODEL = 'en_core_web_lg'
@@ -35,14 +35,16 @@ class GeoParser:
         for entity in doc.ents:
             if entity.label_ == 'GPE':
                 text = entity.text.strip()
-                term = self._resolve_name(text)
-
-                if not term:
-                    # Stopwords are resolved to None
-                    ignored_entities.append(text)
-                    continue
-
-                location = self._get_geonames_location(term)
+                if text.lower() in self.name_resolutions:
+                    name_resolution =  self.name_resolutions[text.lower()]
+                    if not name_resolution:
+                        # Stopwords are resolved to None
+                        ignored_entities.append(text)
+                        continue
+                    else:
+                        location = self.geonames_db.locations.filter(Location.id == name_resolution).first()
+                else:
+                    location = self._get_geonames_location(text)
 
                 if location:
                     usage = {
@@ -57,16 +59,7 @@ class GeoParser:
         if merge:
             locations = self._merge_locations(query, locations)
 
-        result = []
-        for location, usage in locations:
-            try:
-                country = self.countries[location.country_code]
-            except KeyError:
-                country = self.geonames_db.search_country(location.country_code)
-                self.countries[location.country_code] = country
-            result.append((location, usage, country))
-
-        return result, ignored_entities
+        return locations, ignored_entities
 
     def _get_geonames_location(self, term):
         try:
@@ -120,12 +113,6 @@ class GeoParser:
                     merged_locations.append((suc_location, suc_usage))
 
         return [x for x in locations if x not in merged_locations]
-
-    def _resolve_name(self, text):
-        try:
-            return self.name_resolutions[text.lower()]
-        except KeyError:
-            return text
 
     @staticmethod
     def _get_alternate_term(text):
