@@ -42,8 +42,9 @@ class Location(Base):
     dem = Column(Integer)
     timezone_id = Column(Integer, ForeignKey('timezone.id'))
     modification_date = Column(Date)
+    country_id = Column(Integer, ForeignKey('location.id'))
 
-    country_id = Column(Integer, ForeignKey('country.id'))
+    country = relationship('Location', remote_side=[id])
     aliases = relationship('Alias', backref='location', order_by='Alias.id')
 
     @property
@@ -64,14 +65,6 @@ class Location(Base):
         if self.population != other.population:
             return self.population < other.population
         return self.feature_value < other.feature_value
-
-
-class Country(Base):
-    __tablename__ = 'country'
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    code = Column(String, unique=True, nullable=False, index=True)
-    location_id = Column(Integer, ForeignKey('location.id'))
 
 
 class Alias(Base):
@@ -180,16 +173,12 @@ class GeonamesDB:
             time = timer()
 
             for idx, row in enumerate(reader):
-
                 if row[6] == 'A' and re.match(r'^(PCL[^H]*)$', row[7]):
                     country_code = row[8]
                     if country_code in country_mapping:
                         raise Exception(f"Duplicate country code: {country_code}")
                     country_mapping[country_code] = row[0]
 
-            engine.execute(
-                Country.__table__.insert(), [{'code': code, 'location_id': id} for code, id in country_mapping.items()]
-            )
             tsv_file.seek(0)
 
             for idx, row in enumerate(reader):
@@ -247,8 +236,8 @@ class GeonamesDB:
                 })
 
                 aliases = {name.lower(), ascii_name.lower(), *[alias.strip().lower()
-                                                               for alias in row[3].split(",") if alias]}
-                buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases]
+                                                               for alias in row[3].split(",")]}
+                buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases if alias]
 
                 if len(buffer_loc) % 100000 == 0:
                     insert_data()
