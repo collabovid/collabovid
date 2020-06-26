@@ -10,6 +10,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='geolocation',
+            name='geonames_id',
+            field=models.IntegerField(default=None, unique=True),
+            preserve_default=False,
+        ),
         migrations.RemoveField(
             model_name='geonameresolution',
             name='target_name',

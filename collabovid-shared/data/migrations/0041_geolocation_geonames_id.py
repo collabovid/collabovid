@@ -3,6 +3,16 @@
 from django.db import migrations, models
 
 
+def delete_geolocations(apps, schema_editor):
+    GeoLocation = apps.get_model('data', 'GeoLocation')
+    GeoLocationMembership = apps.get_model('data', 'GeoLocationMembership')
+    GeoNameResolution = apps.get_model('data', 'GeoNameResolution')
+
+    GeoLocationMembership.objects.all().delete()
+    GeoLocation.objects.all().delete()
+    GeoNameResolution.objects.all().delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -10,10 +20,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='geolocation',
-            name='geonames_id',
-            field=models.IntegerField(default=None, unique=True),
-            preserve_default=False,
-        ),
+        migrations.RunPython(delete_geolocations),
     ]
