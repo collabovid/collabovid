@@ -29,7 +29,7 @@ class DataExport:
 
     @staticmethod
     def _export_geo_name_resolutions():
-        return [{"source_name": resolution.source_name, "target_name": resolution.target_name}
+        return [{"source_name": resolution.source_name, "target_geonames_id": resolution.target_geonames_id}
                 for resolution in GeoNameResolution.objects.all()]
 
     @staticmethod
@@ -79,8 +79,9 @@ class DataExport:
                                                                         "color": category.color}
                     for location in paper.locations.all():
                         if location.pk not in locations:
-                            location_info = {"name": location.name, "alias": location.alias,
-                                             "latitude": location.latitude, "longitude": location.longitude}
+                            location_info = {"geonames_id": location.geonames_id, "name": location.name,
+                                             "alias": location.alias, "latitude": location.latitude,
+                                             "longitude": location.longitude}
                             try:
                                 # Try whether the location is a country
                                 country = location.geocountry
@@ -97,7 +98,8 @@ class DataExport:
                                     #  from anywhere else (from no paper directly).
                                     citys_country = city.country
                                     if citys_country.pk not in locations:
-                                        locations[citys_country.pk] = {"name": citys_country.name,
+                                        locations[citys_country.pk] = {"geonames_id": citys_country.geonames_id,
+                                                                       "name": citys_country.name,
                                                                        "alias": citys_country.alias,
                                                                        "latitude": citys_country.latitude,
                                                                        "longitude": citys_country.longitude,
@@ -137,9 +139,12 @@ class DataExport:
                                                   "score": CategoryMembership.objects.get(
                                                       category__model_identifier=c.model_identifier, paper=paper).score}
                                                  for c in paper.categories.all()],
-                        "locations": [{"id": l.pk, "state": GeoLocationMembership.objects.get(paper=paper,
-                                                                                              location__id=l.pk).state}
-                                      for l in paper.locations.all()]
+                        "locations": [{"id": loc.pk, "state": GeoLocationMembership.objects.get(paper=paper,
+                                                                                              location__id=loc.pk).state,
+                                       "word": GeoLocationMembership.objects.get(paper=paper,
+                                                                                 location__id=loc.pk).word}
+                                      for loc in paper.locations.all()],
+                        "location_modified": paper.location_modified,
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:

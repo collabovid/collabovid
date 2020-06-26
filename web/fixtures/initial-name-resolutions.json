@@ -129,9 +129,41 @@
   },
   {
     "model": "data.geonameresolution",
-    "pk": 16,
+    "pk": 17,
     "fields": {
       "source_name": "smart city",
+      "target_geonames_id": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 18,
+    "fields": {
+      "source_name": "ards",
+      "target_geonames_id": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 19,
+    "fields": {
+      "source_name": "munich",
+      "target_geonames_id": 2867714
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 20,
+    "fields": {
+      "source_name": "munich, germany",
+      "target_geonames_id": 2867714
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 21,
+    "fields": {
+      "source_name": "ent",
       "target_geonames_id": null
     }
   }

@@ -24,6 +24,7 @@ from django.utils.timezone import make_aware
 from PIL import Image
 from tasks.colors import Red
 
+
 class ImportMappings:
     """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
     def __init__(self):
@@ -166,11 +167,11 @@ class DataImport:
 
             for id, country in countries.items():
                 try:
-                    db_country = GeoCountry.objects.get(name=country["name"])
+                    db_country = GeoCountry.objects.get(geonames_id=country["geonames_id"])
                 except GeoCountry.DoesNotExist:
-                    db_country = GeoCountry(name=country["name"], alias=country["alias"],
-                                            latitude=country["latitude"], longitude=country["longitude"],
-                                            alpha_2=country["alpha_2"])
+                    db_country = GeoCountry(geonames_id=country["geonames_id"], name=country["name"],
+                                            alias=country["alias"], latitude=country["latitude"],
+                                            longitude=country["longitude"], alpha_2=country["alpha_2"])
                     self.statistics.countries_created += 1
                     db_country.save()
 
@@ -178,9 +179,9 @@ class DataImport:
 
             for id, city in cities.items():
                 try:
-                    db_city = GeoCity.objects.get(name=city["name"])
+                    db_city = GeoCity.objects.get(geonames_id=city["geonames_id"])
                 except GeoCity.DoesNotExist:
-                    db_city = GeoCity(name=city["name"], alias=city["alias"],
+                    db_city = GeoCity(geonames_id=city["geonames_id"], name=city["name"], alias=city["alias"],
                                       latitude=city["latitude"], longitude=city["longitude"],
                                       country=self._mappings.location_mapping[city["country_id"]])
                     self.statistics.cities_created += 1
@@ -214,7 +215,7 @@ class DataImport:
         for resolution in geo_name_resolutions:
             if not GeoNameResolution.objects.filter(source_name=resolution["source_name"]).exists():
                 resolutions_to_create.append(GeoNameResolution(source_name=resolution["source_name"],
-                                                               target_name=resolution["target_name"]))
+                                                               target_geonames_id=resolution["target_geonames_id"]))
         GeoNameResolution.objects.bulk_create(resolutions_to_create)
         self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
 
@@ -335,6 +336,7 @@ class DataImport:
                 # Set paper locations if they were not set (even on existing papers)
                 if paper["locations"]:
                     self.statistics.papers_w_new_location += 1
+                    db_paper.location_modified = paper["location_modified"]
                 for location in paper["locations"]:
                     membership = GeoLocationMembership(paper=db_paper,
                                                        location=self._mappings.location_mapping[location["id"]],
