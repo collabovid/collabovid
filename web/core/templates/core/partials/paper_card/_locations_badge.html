@@ -4,6 +4,9 @@
             <span class="badge badge-pill {% if location.is_country %}badge-info{% else %}badge-secondary{% endif %} {% if not forloop.first %}ml-1{% endif %}">
                 {{ location.displayname }}
             </span>
+            {% if user.is_authenticated and user.is_staff %}
+                <a href="{% url "edit_location" location.pk %}?paper={{ paper.doi }}">[Edit]</a>
+            {% endif %}
         </a>
     {% endfor %}
 {% endspaceless %}

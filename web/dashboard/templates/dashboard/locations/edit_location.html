@@ -26,6 +26,21 @@
                     <button class="btn btn-outline-primary" type="submit">Change Geonames ID</button>
                 </form>
             </div>
+
+            {% if membership %}
+                <h5 class="h5">Selected Paper:</h5>
+                <div class="row">
+                    <span><strong>DOI:</strong> {{ membership.paper.doi }}</span>
+                    <span><strong>Title:</strong> {{ membership.paper.title }}</span>
+                    <span><strong>Word:</strong> {{ membership.word }}</span>
+                    <form action="{% url "delete_location_membership" %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" id="paper" name="paper" value="{{ membership.paper.doi }}">
+                        <input type="hidden" id="location" name="location" value="{{ location.pk }}">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            {% endif %}
     </div>
 {% endblock %}
 

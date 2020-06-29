@@ -296,8 +296,13 @@ class Paper(models.Model):
 class GeoLocationMembership(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
-    word = models.CharField(max_length=50)
+    word = models.CharField(max_length=50, null=True, default=None)
     state = models.IntegerField(choices=VerificationState.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'location'], name='Paper and Location')
+        ]
 
 
 class CategoryMembership(models.Model):
