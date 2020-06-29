@@ -9,7 +9,7 @@
             <div>Paper count: {{ city.count }}</div>
         </div>
         <div class="mt-auto text-right">
-            <a href="{% url "admin:data_geocity_change" city.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <a href="{% url "edit_location" city.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
             <form action="{% url "delete_location" city.pk %}" method="post" class="d-inline">
                     {% csrf_token %}
                     <button class="btn btn-sm btn-outline-danger" type="submit">Delete & Ignore</button>

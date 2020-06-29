@@ -2,7 +2,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from data.models import GeoLocation, GeoLocationMembership, GeoNameResolution
-from geolocations.geoname_db import GeonamesDB, Location
+from geolocations.geoname_db import GeonamesDB, GeonamesDBError, Location
 
 
 class LocationModifier:
@@ -27,9 +27,11 @@ class LocationModifier:
         try:
             new_location = GeoLocation.objects.get(geonames_id=new_geonames_id)
         except GeoLocation.DoesNotExist:
-            with GeonamesDB(f'{settings.RESOURCES_DIR}/{settings.GEONAMES_DB_PATH}') as geonames_db:
+            with GeonamesDB(f'{settings.GEONAMES_DB_PATH}') as geonames_db:
                 geonames_object = geonames_db.locations.filter(Location.id == new_geonames_id).first()
-            new_location = GeoLocation.get_or_create_from_geonames_object(geonames_object)
+            if not geonames_object:
+                raise GeonamesDBError(f"No Geonames object with ID {new_geonames_id}")
+            new_location, _ = GeoLocation.get_or_create_from_geonames_object(geonames_object)
 
         for membership in GeoLocationMembership.objects.filter(location=location):
             membership.location = new_location
@@ -39,3 +41,4 @@ class LocationModifier:
             except IntegrityError:
                 pass
         location.delete()
+        return new_location

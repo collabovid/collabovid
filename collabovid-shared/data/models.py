@@ -126,7 +126,7 @@ class VerificationState(models.IntegerChoices):
 class GeoLocation(models.Model):
     geonames_id = models.IntegerField(unique=True, primary_key=False)
     name = models.CharField(max_length=100, null=False)
-    alias = models.CharField(max_length=40, null=True)
+    alias = models.CharField(max_length=40, null=True, blank=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
@@ -165,11 +165,12 @@ class GeoLocation(models.Model):
 
     @property
     def is_city(self):
-        return False
+        return hasattr(self, 'geocity')
+
 
     @property
     def is_country(self):
-        return False
+        return hasattr(self, 'geocountry')
 
     @property
     def displayname(self):
@@ -203,17 +204,9 @@ class GeoCountry(GeoLocation):
     def papers(self):
         return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
 
-    @property
-    def is_country(self):
-        return True
-
 
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
-
-    @property
-    def is_city(self):
-        return True
 
 
 class GeoNameResolution(models.Model):

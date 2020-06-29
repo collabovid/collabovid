@@ -82,31 +82,26 @@ class DataExport:
                             location_info = {"geonames_id": location.geonames_id, "name": location.name,
                                              "alias": location.alias, "latitude": location.latitude,
                                              "longitude": location.longitude}
-                            try:
-                                # Try whether the location is a country
+                            if location.is_country:
                                 country = location.geocountry
                                 location_info["type"] = "country"
                                 location_info["alpha_2"] = country.alpha_2
-                            except GeoCountry.DoesNotExist:
-                                # Location has to be a city
-                                try:
-                                    city = location.geocity
-                                    location_info["type"] = "city"
-                                    location_info["country_id"] = city.country.pk
-                                    #  We need to export the city's country here as well, if it is not already
-                                    #  in the list. Can happen that this country is not added (because not referenced
-                                    #  from anywhere else (from no paper directly).
-                                    citys_country = city.country
-                                    if citys_country.pk not in locations:
-                                        locations[citys_country.pk] = {"geonames_id": citys_country.geonames_id,
-                                                                       "name": citys_country.name,
-                                                                       "alias": citys_country.alias,
-                                                                       "latitude": citys_country.latitude,
-                                                                       "longitude": citys_country.longitude,
-                                                                       "type": "country",
-                                                                       "alpha_2": citys_country.alpha_2}
-                                except GeoCity.DoesNotExist:
-                                    raise Exception(f"Location {location.name} is neither city nor country!")
+                            else:
+                                city = location.geocity
+                                location_info["type"] = "city"
+                                location_info["country_id"] = city.country.pk
+                                #  We need to export the city's country here as well, if it is not already
+                                #  in the list. Can happen that this country is not added (because not referenced
+                                #  from anywhere else (from no paper directly).
+                                citys_country = city.country
+                                if citys_country.pk not in locations:
+                                    locations[citys_country.pk] = {"geonames_id": citys_country.geonames_id,
+                                                                   "name": citys_country.name,
+                                                                   "alias": citys_country.alias,
+                                                                   "latitude": citys_country.latitude,
+                                                                   "longitude": citys_country.longitude,
+                                                                   "type": "country",
+                                                                   "alpha_2": citys_country.alpha_2}
                             locations[location.pk] = location_info
 
                     paper_data = {

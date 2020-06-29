@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
 from data.models import GeoCity, GeoLocation, GeoCountry, GeoLocationMembership, GeoNameResolution, Paper
+from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -111,7 +112,6 @@ def show_location(request, id):
     if request.method == 'GET':
         country = get_object_or_404(GeoCountry, pk=id)
 
-
         return render(request, 'dashboard/locations/country.html',
                       {'country': country})
 
@@ -124,9 +124,27 @@ def delete_location(request, location_id):
                 location = GeoLocation.objects.get(pk=location_id)
                 LocationModifier.delete_and_ignore_location(location)
                 messages.add_message(request, messages.SUCCESS, f'Successfully deleted location {location.name}')
-            except GeoCity.DoesNotExist:
-                messages.add_message(request, messages.ERROR, f'No location {location.name}')
+            except GeoLocation.DoesNotExist:
+                messages.add_message(request, messages.ERROR, f'No location with id{location_id}')
     return redirect('locations')
+
+
+@staff_member_required
+def edit_location(request, location_id):
+    location = GeoLocation.objects.get(pk=location_id)
+    if request.method == 'GET':
+        return render(request, 'dashboard/locations/edit_location.html', {'location': location})
+    elif request.method == 'POST':
+        new_geonames_id = request.POST.get("geonames_id", None)
+        if not new_geonames_id:
+            messages.add_message(request, messages.ERROR, f'New Geonames ID not specified')
+        location = GeoLocation.objects.get(pk=location_id)
+        try:
+            new_location = LocationModifier.change_location(location, new_geonames_id)
+            messages.add_message(request, messages.SUCCESS, f"Successfully changed location from {location.name} to {new_location.name}")
+        except GeonamesDBError as ex:
+            messages.add_message(request, messages.ERROR, ex)
+        return redirect('locations')
 
 
 @staff_member_required

@@ -11,6 +11,14 @@ from sqlalchemy.orm import relationship, sessionmaker
 Base = declarative_base()
 
 
+class GeonamesDBError(Exception):
+    def __init__(self, msg=None):
+        self.msg = msg
+
+    def __repr__(self):
+        return self.msg
+
+
 class TimeZone(Base):
     __tablename__ = 'timezone'
 
