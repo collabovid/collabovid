@@ -13,6 +13,7 @@ from data.models import (
     DataSource,
     GeoCity,
     GeoCountry,
+    GeoLocation,
     GeoLocationMembership,
     GeoNameResolution,
     Journal,
@@ -355,6 +356,8 @@ class DataImport:
              self._mappings.doi_to_author_mapping.items()
              for author in authors]
         )
+        # recompute counts because post save signals are not triggered on bulk create
+        GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
 
     def import_data(self, filepath):
         """Imports database data from .tar.gz archive to database."""
