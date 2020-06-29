@@ -57,6 +57,8 @@ class SearchRequestHelper:
                 if 'abstract' in infos:
                     paper.abstract = infos['abstract']
 
+                paper.is_similar = infos['similar']
+
             paginator = FakePaginator(total_count=self.response['count'],
                                       page=self.response['page'],
                                       per_page=self.response['per_page'],

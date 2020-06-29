@@ -27,6 +27,7 @@
                 <h5 class="card-title font-weight-normal">
                     <a href="{% url "paper" paper.pk %}" class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
                     {{ request.user|edit_object_link:paper }}
+                    {% if paper.is_similar  %}<i class="small fas fa-circle text-info"></i>{% endif %}
                 </h5>
 
                 <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">

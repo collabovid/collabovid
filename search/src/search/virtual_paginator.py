@@ -4,6 +4,7 @@ from data.models import Paper
 from math import ceil
 
 from src.search.elasticsearch import Elasticsearch
+from src.search.semantic_search import SemanticSearch
 
 
 class VirtualPaginator:
@@ -46,6 +47,11 @@ class VirtualPaginator:
 
         paginator = self.build_paginator()
         paginator['page'] = self._form['page']
-        paginator['results'] = Elasticsearch().highlights(self._form['query'], ids=dois_for_page)
+
+        results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
+        Elasticsearch().highlights(results, self._form['query'], ids=dois_for_page)
+        SemanticSearch().compute_similars(results, self._form['query'], score_min=0.6)
+
+        paginator['results'] = sorted(results.values(), key=lambda x: x['order'])
 
         return paginator
