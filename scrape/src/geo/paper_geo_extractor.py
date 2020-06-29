@@ -1,6 +1,6 @@
 import pycountry
 
-from data.models import GeoCity, GeoCountry, GeoLocation, GeoLocationMembership, GeoNameResolution, VerificationState
+from data.models import GeoLocation, GeoLocationMembership, GeoNameResolution, VerificationState
 from src.geo.geo_parser import GeoParser
 
 

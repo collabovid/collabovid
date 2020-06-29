@@ -2,7 +2,7 @@ import re
 import os
 import spacy
 
-from src.geo.geoname_db import GeonamesDB, Location
+from geolocations.geoname_db import GeonamesDB, Location
 from django.conf import settings
 
 _SPACY_MODEL = 'en_core_web_lg'

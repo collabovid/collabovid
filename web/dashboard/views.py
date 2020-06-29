@@ -3,7 +3,7 @@ from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
-from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity, GeoNameResolution
+from data.models import GeoCity, GeoLocation, GeoCountry, GeoLocationMembership, GeoNameResolution, Paper
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,6 +12,7 @@ from django.utils import timezone
 from tasks.launcher.task_launcher import get_task_launcher
 
 from tasks.load import AVAILABLE_TASKS, get_task_by_id
+from geolocations.location_modifier import LocationModifier
 
 import os
 
@@ -110,8 +111,22 @@ def show_location(request, id):
     if request.method == 'GET':
         country = get_object_or_404(GeoCountry, pk=id)
 
+
         return render(request, 'dashboard/locations/country.html',
                       {'country': country})
+
+
+@staff_member_required
+def delete_location(request, location_id):
+    if request.method == 'POST':
+        if location_id:
+            try:
+                location = GeoLocation.objects.get(pk=location_id)
+                LocationModifier.delete_and_ignore_location(location)
+                messages.add_message(request, messages.SUCCESS, f'Successfully deleted location {location.name}')
+            except GeoCity.DoesNotExist:
+                messages.add_message(request, messages.ERROR, f'No location {location.name}')
+    return redirect('locations')
 
 
 @staff_member_required

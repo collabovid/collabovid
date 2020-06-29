@@ -9,8 +9,12 @@
             <div>Paper count: {{ country.count }}</div>
         </div>
         <div class="mt-auto text-right">
-            <a href="{% url "admin:data_geocountry_change" country.pk %}" class="ml-2 card-link">Edit</a>
-            <a href="{% url "show-location" country.pk %}" class="ml-2 card-link">Show</a>
+            <a href="{% url "admin:data_geocountry_change" country.pk %}" class="btn btn-sm btn-outline-primary">Edit</a>
+            <a href="{% url "show-location" country.pk %}" class="btn btn-sm btn-outline-primary">Show</a>
+            <form action="{% url "delete_location" country.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete & Ignore</button>
+            </form>
         </div>
     </div>
 </div>
