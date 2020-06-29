@@ -1,5 +1,4 @@
 from typing import List, Tuple
-from django.db.models import QuerySet
 
 
 class PaperResult:
@@ -12,7 +11,7 @@ class Search:
     def __init__(self, *args, **kwargs):
         pass
 
-    def find(self, query: str, papers: QuerySet, score_min) -> Tuple[List[PaperResult], str]:
+    def find(self, paper_score_table: dict, query: str, ids: List[str], score_min) -> Tuple[List[PaperResult], str]:
         raise NotImplementedError()
 
     @property

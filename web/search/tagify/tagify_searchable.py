@@ -53,14 +53,13 @@ class AuthorSearchable(TagifySearchable):
     @staticmethod
     def from_ids(ids):
         if ids:
-            return AuthorSearchable(
-                Author.objects.filter(pk__in=ids).annotate(name=Concat('first_name', Value(' '), 'last_name')))
+            return AuthorSearchable(Author.objects.filter(pk__in=ids))
         else:
             return AuthorSearchable(Author.objects.none())
 
     @property
     def dict(self):
-        return [{"value": author.name,
+        return [{"value": author.full_name,
                  "pk": author.pk} for author in self._authors]
 
 

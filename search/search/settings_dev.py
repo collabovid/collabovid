@@ -3,6 +3,7 @@ from collabovid_settings.development.service_settings import *
 from collabovid_settings.development.database_settings import *
 from collabovid_settings.development.tasks_settings import *
 from collabovid_settings.development.volumes_settings import *
+from collabovid_settings.development.elasticsearch_settings import *
 
 os.environ['NLTK_DATA'] = os.path.join(RESOURCES_DIR, 'nltk_data')
 

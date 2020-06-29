@@ -5,7 +5,7 @@ from data.models import Paper
 from django.core.paginator import Paginator
 
 from search.forms import SearchForm
-from search.paginator import ScoreSortPaginator
+from search.paginator import FakePaginator
 
 
 class SearchRequestHelper:
@@ -36,36 +36,33 @@ class SearchRequestHelper:
 
         if self._response is None:
             self._error = True
-        else:
-            self._papers = Paper.objects.filter(pk__in=self._response.keys())
 
     @property
     def error(self):
         return self._error
 
     @property
-    def papers(self):
-        return self._papers
+    def response(self):
+        return self._response
 
-    def paginator_ordered_by(self, criterion, page_count=10):
+    def paginator(self):
+        if not self.error:
 
-        if criterion == Paper.SORTED_BY_TOPIC_SCORE:
-            paginator = Paginator(self.papers.order_by("-topic_score", "-published_at"), page_count)
-        elif criterion == Paper.SORTED_BY_NEWEST:
-            paginator = Paginator(self.papers.order_by("-published_at"), page_count)
-        elif criterion == Paper.SORTED_BY_SCORE:
-            filtered_items = []
-            for doi in self.papers.order_by("-published_at").values_list('doi', flat=True):
-                filtered_items.append((doi, self._response[doi]))
+            result_dois = [p['doi'] for p in self.response['results']]
+            papers = sorted(list(Paper.objects.filter(pk__in=result_dois).all()), key=lambda x: result_dois.index(x.doi))
 
-            paper_score_items = sorted(filtered_items, key=lambda x: x[1], reverse=True)
+            for paper, infos in zip(papers, self.response['results']):
+                if 'title' in infos:
+                    paper.title = infos['title']
+                if 'abstract' in infos:
+                    paper.abstract = infos['abstract']
 
-            paginator = ScoreSortPaginator(paper_score_items, page_count)
-        else:
-            paginator = Paginator(self.papers, page_count)
-            logger = logging.getLogger(__name__)
-            logger.warning("Unknown sorted by" + criterion)
-        return paginator
+            paginator = FakePaginator(total_count=self.response['count'],
+                                      page=self.response['page'],
+                                      per_page=self.response['per_page'],
+                                      papers=papers)
+
+            return paginator
 
 
 class SimilarPaperRequestHelper:

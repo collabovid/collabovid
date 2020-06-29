@@ -1,18 +1,19 @@
 from collections import defaultdict
+
+from django.core.paginator import Paginator
 from django.db.models import Q, F, Subquery
 from django.db.models import Value as V
 from django.db.models.functions import Concat
 
+from elasticsearch_dsl import Q as QEl
+
+from data.documents import PaperDocument
 from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry
 from typing import List
 
-from .exact_title_search import ExactTitleSearch
+from src.search.elasticsearch import Elasticsearch
 from .search import Search
 from .semantic_search import SemanticSearch
-from .doi_search import DoiSearch
-from .title_search import TitleSearch
-from .author_search import AuthorSearch
-
 from django.conf import settings
 
 
@@ -89,7 +90,6 @@ class SearchEngine:
         return filtered, papers.distinct()
 
     def search(self, form, score_min=0.6):
-        paper_score_table = defaultdict(int)
 
         query = form["query"].strip()
         category_ids = form['categories']
@@ -98,7 +98,9 @@ class SearchEngine:
 
         combined_factor = 0
 
-        paper_scores_items = dict()
+        paper_score_table = defaultdict(int)
+
+        filtered_dois = list(papers.values_list('doi', flat=True))
 
         if not query:
             """
@@ -107,8 +109,8 @@ class SearchEngine:
             have the same score. Therefore, we either give all papers score 1 or add Category Score.
             """
 
-            for doi in papers.values_list('doi', flat=True):
-                paper_scores_items[doi] = 1
+            for doi in filtered_dois:
+                paper_score_table[doi] = 1
 
             if category_ids and len(category_ids) == 1:
                 try:
@@ -118,7 +120,7 @@ class SearchEngine:
                         annotate(doi=F('paper__doi'))
 
                     for membership in memberships:
-                        paper_scores_items[membership.doi] = membership.score
+                        paper_score_table[membership.doi] = membership.score
 
                 except Category.DoesNotExist:
                     raise Exception("Provided unknown category")
@@ -126,17 +128,17 @@ class SearchEngine:
                     raise Exception("Filtering yielded incorrect papers for category")
         else:
             for search_component in self.search_pipeline:
-                paper_results, query = search_component.find(query, papers, score_min)
+                query = search_component.find(paper_score_table, query, filtered_dois, score_min)
 
                 if settings.DEBUG:
                     print(search_component.__class__, query)
 
-                found_sufficient_papers = False
+                found_sufficient_papers = True
 
-                for result in paper_results:
-                    if result.score > score_min:
-                        paper_score_table[result.paper_doi] += result.score * search_component.weight
-                        found_sufficient_papers = True
+                #for result in paper_results:
+                #    if result.score > score_min:
+                #        paper_score_table[result.paper_doi] += result.score * search_component.weight
+                #        found_sufficient_papers = True
 
                 if found_sufficient_papers:
                     # If a search component returns no papers its weight won't be taken into consideration
@@ -149,10 +151,7 @@ class SearchEngine:
                         print("breaking", query, found_sufficient_papers, search_component.exclusive)
                     break
 
-            for doi, score in paper_score_table.items():
-                paper_scores_items[doi] = score / combined_factor
-
-        return paper_scores_items
+        return paper_score_table
 
 
 def get_default_search_engine():
@@ -162,4 +161,4 @@ def get_default_search_engine():
 
     #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
     #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([DoiSearch(), ExactTitleSearch(), AuthorSearch(), TitleSearch(), SemanticSearch()])
+    return SearchEngine([Elasticsearch(), SemanticSearch()])

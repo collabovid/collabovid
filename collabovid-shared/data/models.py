@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
+from itertools import permutations
 
 
 class Topic(models.Model):
@@ -67,6 +68,14 @@ class Journal(models.Model):
     def displayname(self):
         return self.alias if self.alias else self.name
 
+    @property
+    def name_suggest(self):
+        suggestions = [self.name]
+        #suggestions = [' '.join(p) for p in permutations(self.name.split())]
+        #if self.alias:
+        #    suggestions += [' '.join(p) for p in permutations(self.alias.split())]
+        return suggestions
+
     @staticmethod
     def max_length(field: str):
         return Journal._meta.get_field(field).max_length
@@ -80,6 +89,14 @@ class Journal(models.Model):
 class Author(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
+    @property
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
+    @property
+    def full_name_suggest(self):
+        return [' '.join(p) for p in permutations(self.full_name.split())]
 
     @staticmethod
     def max_length(field: str):

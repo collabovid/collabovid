@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'dashboard.apps.DashboardConfig',
     'search.apps.SearchConfig',
     'django.contrib.postgres',
-    'pipeline'
+    'pipeline',
+    'django_elasticsearch_dsl'
 ]
 
 MIDDLEWARE = [

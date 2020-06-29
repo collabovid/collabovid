@@ -1,12 +1,12 @@
-from django.db.models import QuerySet
+from typing import List
 
 from .search import Search, PaperResult
 from src.analyze import get_semantic_paper_search
 
 
 class SemanticSearch(Search):
-    def find(self, query: str, papers: QuerySet, score_min):
-        paper_scores = {doi: score for doi, score in get_semantic_paper_search().query(query)}
-        return [PaperResult(paper_doi=doi, score=paper_scores[doi])
-                for doi in papers.values_list('doi', flat=True) if
-                doi in paper_scores and paper_scores[doi] > score_min], query
+    def find(self, paper_score_table: dict, query: str, ids: List[str], score_min):
+        for doi, score in get_semantic_paper_search().query(query):
+            if score > score_min:
+                paper_score_table[doi] += score
+        return query

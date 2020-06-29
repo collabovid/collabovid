@@ -6,6 +6,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from search.tagify.tagify_searchable import *
 from django.conf import settings
 
+
 class MinLengthValidator(validators.MinLengthValidator):
     message = 'Ensure this value has at least %(limit_value)d elements (it has %(show_value)d).'
 
@@ -98,6 +99,8 @@ class SearchForm(forms.Form):
     published_at_start = forms.DateField(required=False)
     published_at_end = forms.DateField(required=False)
 
+    page = forms.IntegerField(required=False)
+
     defaults = {
         'tab': 'top',
         'article_type': 'all',
@@ -127,12 +130,14 @@ class SearchForm(forms.Form):
         return {'published_at_start': self.cleaned_data['published_at_start'],
                 'published_at_end': self.cleaned_data['published_at_end'],
                 'query': self.cleaned_data['query'],
+                'tab': self.cleaned_data['tab'],
                 'authors': self.cleaned_data['authors'],
                 'authors_connection': self.cleaned_data['authors_connection'],
                 'categories': self.cleaned_data['categories'],
                 'article_type': self.cleaned_data['article_type'],
                 'journals': self.cleaned_data['journals'],
-                'locations': self.cleaned_data['locations']}
+                'locations': self.cleaned_data['locations'],
+                'page': self.cleaned_data['page']}
 
     def to_json(self):
         """
@@ -145,23 +150,4 @@ class SearchForm(forms.Form):
     @property
     def url(self):
         return settings.SEARCH_SERVICE_URL + "/search"
-
-
-class SimilarSearchForm(SearchForm):
-
-    similar_papers = CommaSeparatedCharField(required=False)
-    different_papers = CommaSeparatedCharField(required=False)
-
-    def to_dict(self):
-
-        form_dict = super(SimilarSearchForm, self).to_dict()
-
-        form_dict['similar_papers'] = self.cleaned_data['similar_papers']
-        form_dict['different_papers'] = self.cleaned_data['different_papers']
-
-        return form_dict
-
-    @property
-    def url(self):
-        return settings.SEARCH_SERVICE_URL + "/search/similar"
 
