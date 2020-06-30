@@ -23,9 +23,16 @@ spec:
               memory: 500Mi
           ports:
             - containerPort: 80
+          volumeMounts:
+            - name: resources
+              mountPath: /resources
           envFrom:
             - secretRef:
                 name: shared
             - secretRef:
                 name: web
       serviceAccountName: collabovid-sa
+      volumes:
+        - name: resources
+          hostPath:
+            path: /opt/resources

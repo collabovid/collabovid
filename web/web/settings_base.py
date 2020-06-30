@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'data',
     'dashboard.apps.DashboardConfig',
     'django.contrib.postgres',
-    'pipeline',
-    'geolocations'
+    'pipeline'
 ]
 
 MIDDLEWARE = [
