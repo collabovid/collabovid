@@ -51,7 +51,7 @@
                     <thead>
                     <tr>
                         <th class="text-left">Source Name</th>
-                        <th class="text-left">Target Name</th>
+                        <th class="text-left">Target Geonames ID</th>
                         <th class="text-left"></th>
                     </tr>
                     </thead>
@@ -60,8 +60,8 @@
                         <tr>
                             <td class="text-left">{{ name_resolution.source_name }}</td>
                             <td class="text-left">
-                                {% if name_resolution.target_name %}
-                                    <span class="text-success">Replace with: {{ name_resolution.target_name }}</span>
+                                {% if name_resolution.target_geonames_id %}
+                                    <span class="text-success">{{ name_resolution.target_geonames_id }}</span>
                                 {% else %}
                                     <span class="text-danger">Remove</span>
                                 {% endif %}

@@ -1,0 +1,48 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    <div class="container">
+            <h1 class="h1">Edit location {{ location.name }}</h1>
+
+            {% if location.alias %}
+                <div class="row ">
+                    <span>Alias: {{ location.alias }}</span>
+                </div>
+            {% endif %}
+
+            <div class=row">
+                {% if location.is_city %}
+                    <a href="{% url "admin:data_geocity_change" location.pk %}" class="btn btn-outline-primary">Edit Database Record</a>
+                {% else %}
+                    <a href="{% url "admin:data_geocountry_change" location.pk %}" class="btn btn-outline-primary">Edit Database Record</a>
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <form action="{% url "edit_location" location.pk %}" method="post">
+                    {% csrf_token %}
+                    <input type="number" name="geonames_id" min="1" step="1"/>
+                    <button class="btn btn-outline-primary" type="submit">Change Geonames ID</button>
+                </form>
+            </div>
+
+            {% if membership %}
+                <h5 class="h5">Selected Paper:</h5>
+                <div class="row">
+                    <span><strong>DOI:</strong> {{ membership.paper.doi }}</span>
+                    <span><strong>Title:</strong> {{ membership.paper.title }}</span>
+                    <span><strong>Word:</strong> {{ membership.word }}</span>
+                    <form action="{% url "delete_location_membership" %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" id="paper" name="paper" value="{{ membership.paper.doi }}">
+                        <input type="hidden" id="location" name="location" value="{{ location.pk }}">
+                        <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
+                </div>
+            {% endif %}
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}
