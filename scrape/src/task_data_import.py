@@ -7,6 +7,7 @@ from tasks.definitions import register_task, Runnable
 from src.export_import.data_import import DataImport
 from tasks.colors import *
 
+
 @register_task
 class ImportDataTask(Runnable):
     @staticmethod

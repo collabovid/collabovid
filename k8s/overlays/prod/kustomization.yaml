@@ -10,6 +10,7 @@ patchesStrategicMerge:
   - search.yaml
   - web.yaml
   - sync-daemon.yaml
+  - web-deployment.yaml
 
 secretGenerator:
   - name: web
