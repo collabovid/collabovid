@@ -11,14 +11,14 @@ from django.conf import settings
 
 from data.models import (
     CategoryMembership,
-    GeoCity,
-    GeoCountry,
     GeoLocationMembership,
     GeoNameResolution
 )
 
 
 class DataExport:
+    EXPORT_VERSION = 1
+
     @staticmethod
     def download_image(url):
         response = requests.get(url, stream=True)
@@ -160,6 +160,7 @@ class DataExport:
                     papers.append(paper_data)
 
                 data = {
+                    "export_version": DataExport.EXPORT_VERSION,
                     "authors": authors,
                     "paperhosts": paperhosts,
                     "papers": papers,

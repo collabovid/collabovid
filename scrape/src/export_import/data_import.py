@@ -28,6 +28,7 @@ from tasks.colors import Red
 
 class ImportMappings:
     """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
+
     def __init__(self):
         self.journal_mapping = {}
         self.paperhost_mapping = {}
@@ -368,6 +369,11 @@ class DataImport:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
 
+            export_version = data["export_version"] if "export_version" in data else None
+            if not export_version:
+                self.log("Export data does not contain version. Is the export too old? Aborting.")
+                return
+
             # Backward compatibility: only import the things that have been exported.
             import_journals = "journals" in data
             import_ml_categories = "categories_ml" in data
@@ -403,8 +409,8 @@ class DataImport:
             paper_information = self._compute_updatable_papers(data["papers"])
 
             self._import_paperdata(self.progress(data["papers"], proportion=0.3), paper_information)
-            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"], import_locations,
-                                import_ml_categories, import_journals, tar)
+            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"],
+                                import_locations, import_ml_categories, import_journals, tar)
 
         self.log("Starting cleanup")
         self._cleanup_models()
