@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import IntegrityError, transaction
 
-from data.models import GeoLocation, GeoLocationMembership, GeoNameResolution, VerificationState
+from data.models import GeoLocation, GeoLocationMembership, GeoNameResolution, Paper, VerificationState
 from geolocations.geoname_db import GeonamesDB, GeonamesDBError, Location
 
 
@@ -68,13 +68,15 @@ class LocationModifier:
         return location
 
     @staticmethod
-    def delete_location_membership(location, article):
+    def delete_location_membership(location_id, article_id):
         try:
-            membership = GeoLocationMembership.objects.get(paper_id=article.doi, location_id=location.pk)
+            membership = GeoLocationMembership.objects.get(paper_id=article_id, location_id=location_id)
             with transaction.atomic():
                 membership.delete()
+                article = Paper.objects.get(doi=article_id)
                 article.location_modified = True
                 article.save()
+                location = GeoLocation.objects.get(pk=location_id)
                 if location.count == 0:
                     if location.is_city and location.geocity.country.count == 0:
                         location.geocity.country.delete()
