@@ -426,13 +426,7 @@ label.nav-link {
     top: 0.5em;
 }
 
-.paper-title em
-{
-    font-weight: bold;
-    font-style: normal;
-}
-
-.abstract-container em
+.abstract-container em, .author em, .paper-title em
 {
     font-weight: bold;
     font-style: normal;

@@ -7,16 +7,17 @@ from src.analyze import get_semantic_paper_search
 class SemanticSearch(Search):
     def find(self, paper_score_table: dict, query: str, ids: List[str], score_min):
 
-        score_dict = dict()
-        for doi, score in get_semantic_paper_search().query(query):
-            score_dict[doi] = score
+        sorted_scores = sorted(
+            [(doi, score) for doi, score in get_semantic_paper_search().query(query) if score > score_min],
+            key=lambda x: x[1])
 
-        for doi in ids:
-            if doi in score_dict and score_dict[doi] > score_min:
-                paper_score_table[doi] += score_dict[doi]
+        ids_set = set(ids)
+
+        for doi, score in sorted_scores[:100]:
+            if doi in ids_set:
+                paper_score_table[doi] += score
 
         return query
-
 
     def compute_similars(self, page: dict, query: str, score_min):
         score_dict = dict()
@@ -27,4 +28,3 @@ class SemanticSearch(Search):
             infos['similar'] = False
             if doi in score_dict:
                 infos['similar'] = score_dict[doi] > score_min
-

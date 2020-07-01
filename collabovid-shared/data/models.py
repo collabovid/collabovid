@@ -87,12 +87,27 @@ class Journal(models.Model):
 
 
 class Author(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Author, self).__init__(*args, **kwargs)
+        self._display_name = None
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
 
     @property
     def full_name(self):
         return "{} {}".format(self.first_name, self.last_name)
+
+    @property
+    def display_name(self):
+        if not self._display_name:
+            self._display_name = self.full_name
+        return self._display_name
+
+    @display_name.setter
+    def display_name(self, value):
+        self._display_name = value
 
     @property
     def full_name_suggest(self):
@@ -209,6 +224,10 @@ class Paper(models.Model):
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
+    def __init__(self, *args, **kwargs):
+        super(Paper, self).__init__(*args, **kwargs)
+        self._highlighted_authors = None
+
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
     doi = models.CharField(max_length=100, primary_key=True)
@@ -245,6 +264,16 @@ class Paper(models.Model):
     last_scrape = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+
+    @property
+    def highlighted_authors(self):
+        """
+        This attribute is necessary as we want to highlight certain authors.
+        :return:
+        """
+        if not self._highlighted_authors:
+            self._highlighted_authors = [author for author in self.authors.all()]
+        return self._highlighted_authors
 
     @property
     def countries(self):

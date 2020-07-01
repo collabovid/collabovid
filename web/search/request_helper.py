@@ -56,6 +56,15 @@ class SearchRequestHelper:
                     paper.title = infos['title']
                 if 'abstract' in infos:
                     paper.abstract = infos['abstract']
+                if 'authors.full_name' in infos:
+                    highlighted_full_names = infos['authors.full_name']
+
+                    for highlighted_full_name in highlighted_full_names:
+                        cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
+
+                        for author in paper.highlighted_authors:
+                            if author.full_name == cleaned_full_name:
+                                author.display_name = highlighted_full_name
 
                 paper.is_similar = infos['similar']
 

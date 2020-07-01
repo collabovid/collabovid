@@ -28,6 +28,11 @@ class PaperDocument(Document):
                     'number_of_replicas': 0,
                     'max_result_window': 100000}
 
+    authors = fields.ObjectField(properties={
+        'pk': fields.IntegerField(),
+        'full_name': fields.TextField(),
+    })
+
     journal = fields.ObjectField(properties={
         'pk': fields.IntegerField(),
     })
@@ -44,7 +49,6 @@ class PaperDocument(Document):
             'published_at',
             'is_preprint',
         ]
-
 
 
 @registry.register_document
