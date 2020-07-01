@@ -36,13 +36,17 @@ class LocationModifier:
             new_location, _ = GeoLocation.get_or_create_from_geonames_object(geonames_object)
 
         for membership in GeoLocationMembership.objects.filter(location=location):
-            membership.location = new_location
-            membership.save()
+            GeoLocationMembership.objects.get_or_create(location=new_location, paper=membership.paper,
+                                                        state=VerificationState.ACCEPTED)
             try:
                 if membership.word:
-                    GeoNameResolution.objects.create(source_name=membership.word.lower(), target_geonames_id=new_geonames_id)
+                    GeoNameResolution.objects.create(source_name=membership.word.lower(),
+                                                     target_geonames_id=new_geonames_id)
             except IntegrityError:
                 pass
+            membership.delete()
+        if location.is_city and location.geocity.country.count == 0:
+            location.geocity.country.delete()
         location.delete()
         return new_location
 
