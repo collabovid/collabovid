@@ -1,9 +1,10 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation
+from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation, Topic
 from statistics import PaperStatistics, CategoryStatistics
 from django.template.loader import render_to_string
+import json
 
 from django.utils.timezone import datetime
 import requests
@@ -49,7 +50,14 @@ def paper(request, doi):
 
 
 def embedding_visualization(request):
-    return render(request, "core/embedding_visualization.html")
+    topics = Topic.objects.all()
+    topic_dict = {}
+    for topic in topics:
+        topic_dict[topic.pk] = [x['doi'] for x in topic.papers.values('doi')]
+    return render(request, "core/embedding_visualization.html", {
+        'topics': topics,
+        'topic_dict': json.dumps(topic_dict)
+    })
 
 
 def paper_cards(request):
@@ -62,9 +70,6 @@ def paper_cards(request):
     return render(template_name="core/partials/_search_results.html", request=request,
                   context={'papers': papers, 'show_score': False})
 
-
-def embeddings(request):
-    return JsonResponse({"embeddings": locations_to_json(locations)})
 
 
 def about(request):

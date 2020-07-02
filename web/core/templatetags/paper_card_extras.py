@@ -1,6 +1,6 @@
 from django import template
 from django.urls import reverse
-from data.models import Paper, Author, Journal
+from data.models import Paper, Author, Journal, Topic
 from django.utils.safestring import mark_safe
 
 register = template.Library()
@@ -26,6 +26,8 @@ def edit_object_link(user, object):
             url = reverse("admin:data_author_change", args=(object.pk,))
         elif isinstance(object, Journal):
             url = reverse("admin:data_journal_change", args=(object.pk,))
+        elif isinstance(object, Topic):
+            url = reverse("admin:data_topic_change", args=(object.pk,))
 
         if url:
             return mark_safe("<sup><a href='{}'>[Edit]</a></sup>".format(url))

@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    {% load paper_card_extras %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ topic.name }} ({{ topic.papers.count }})</h1> <div>{{ request.user|edit_object_link:topic}}</div>
+    </div>
+    <div class="container">
+        <div class="card p-3">
+            {{ topic.description }}
+        </div>
+        <div class="row pb-5">
+            {% for paper in papers %}
+                <div class="col-md-6 p-2">
+                    <div class="h-100 card">
+                        <div class="card-body d-flex flex-column">
+                            {{   paper.title }}
+                            <div class="mt-auto">
+                                <a href="#" class="card-link">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

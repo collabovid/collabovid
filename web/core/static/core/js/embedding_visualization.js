@@ -157,6 +157,12 @@ var EmbeddingVisualization = function () {
                 MIDDLE: THREE.MOUSE.DOLLY,
                 RIGHT: THREE.MOUSE.DOLLY
             }
+            /*controls.autoRotate = true;
+            controls.mouseButtons = {
+                LEFT: THREE.MOUSE.ROTATE,
+                MIDDLE: THREE.MOUSE.DOLLY,
+                RIGHT: THREE.MOUSE.PAN
+            }*/
             controls.update()
 
             window.addEventListener('resize', function () {
@@ -170,13 +176,14 @@ var EmbeddingVisualization = function () {
             light.position.set(1, 1, 10);
             scene.add(light)
 
-            function animate() {
+            function animate(time) {
                 requestAnimationFrame(animate);
+                TWEEN.update(time)
                 renderer.render(scene, camera);
                 controls.update();
             }
 
-            animate();
+            requestAnimationFrame(animate);
 
             var facesPerPoint = 2
 
@@ -219,12 +226,12 @@ var EmbeddingVisualization = function () {
             let startX;
             let startY;
 
-            window.addEventListener('mousedown', function (event) {
+            renderer.domElement.addEventListener('mousedown', function (event) {
                 startX = event.pageX;
                 startY = event.pageY;
             });
 
-            window.addEventListener('mouseup', function (event) {
+            renderer.domElement.addEventListener('mouseup', function (event) {
                 const diffX = Math.abs(event.pageX - startX);
                 const diffY = Math.abs(event.pageY - startY);
 
@@ -235,9 +242,14 @@ var EmbeddingVisualization = function () {
             scope.geometry = geometry;
             scope.renderer = renderer;
             scope.scene = scene;
+            scope.controls = controls;
             scope.material = material
             scope.camera = camera;
         })
+    }
+
+    this.onDeselect = function (callback) {
+        this.onDeselectCallback = callback;
     }
 
     this.computeNeighbors = function (paper, n) {
@@ -296,6 +308,9 @@ var EmbeddingVisualization = function () {
         this.geometry.colorsNeedUpdate = true
         this.geometry.elementsNeedUpdate = true
         this.renderer.render(this.scene, this.camera);
+        if (this.onDeselectCallback) {
+            this.onDeselectCallback();
+        }
     }
 
     this.selectPaper = function (paperIndex, neighborIndices) {
@@ -319,6 +334,54 @@ var EmbeddingVisualization = function () {
         this.geometry.colorsNeedUpdate = true
         this.geometry.elementsNeedUpdate = true
         this.renderer.render(this.scene, this.camera);
+    }
+
+    this.selectPapers = function (dois) {
+        var min_coordinates = new Array(3).fill(100000);
+        var max_coordinates = new Array(3).fill(-10000);
+        for (var i = 0; i < this.papers.length; i++) {
+            var color = 0xffffff;
+            var materialIndex = 2;
+            if (dois.includes(this.papers[i].doi)) {
+                color = this.getColorForPaper(this.papers[i])
+                materialIndex = 0;
+                for (var j = 0; j < 3; j++) {
+                    min_coordinates[j] = Math.min(this.papers[i].point[j], min_coordinates[j])
+                    max_coordinates[j] = Math.max(this.papers[i].point[j], max_coordinates[j])
+                }
+            }
+            var faceStartIndex = i * 2
+            for (var idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
+                this.geometry.faces[idx].color = new THREE.Color(color);
+                this.geometry.faces[idx].materialIndex = materialIndex
+            }
+        }
+        console.log(min_coordinates)
+        console.log(max_coordinates)
+        this.geometry.colorsNeedUpdate = true
+        this.geometry.elementsNeedUpdate = true
+        var newX = min_coordinates[0] + (max_coordinates[0] - min_coordinates[0]) / 2.0
+        var newY = min_coordinates[1] + (max_coordinates[1] - min_coordinates[1]) / 2.0
+        console.log(newY);
+        if (newY <= 0.5) {
+            newY -= 0.5
+        }
+
+        var newZ = max_coordinates[2] + 1.5;
+        this.renderer.render(this.scene, this.camera);
+
+        const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z}
+        const tween = new TWEEN.Tween(coords)
+            .to({
+                x: newX,
+                y: newY,
+                z: newZ
+            }, 1200)
+            .easing(TWEEN.Easing.Quadratic.Out)
+            .onUpdate(() => {
+                this.camera.position.set(coords.x, coords.y, coords.z)
+            }).start()
+
     }
 
 

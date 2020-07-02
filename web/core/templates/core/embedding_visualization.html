@@ -1,6 +1,7 @@
 {% extends "core/base.html" %}
 {% load static %}
 {% load pipeline %}
+{% load paper_card_extras %}
 
 {% block content %}
     <div class="gradient-header pb-0">
@@ -24,15 +25,29 @@
     <div class="container mt-5">
         <div id="selected-card-container"></div>
     </div>
+    <div class="pl-5 pr-5">
+    <div id="topics-container" class="row">
+            {% for topic in topics %}
+                <div class="col-md-3 p-2">
+                    <div class="topic-card card p-3 h-100" data-topic="{{ topic.pk }}">{{ topic.name }}
+                        ({{ topic.papers.count }})
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
 {% endblock %}
 
 {% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.0/tween.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.0.1/math.min.js"></script>
     {% javascript 'embedding-visualization' %}
     <script>
+        var topics = JSON.parse("{{ topic_dict | escapejs }}")
         var canvas = document.getElementById('visualization-container');
         var selectedCardContainer = document.getElementById('selected-card-container');
         var visualization = new EmbeddingVisualization()
+        var topicsContainer = $('#topics-container')
 
         function onSelected(idx, paper) {
             var indices = visualization.computeNeighbors(paper, 10)
@@ -46,6 +61,7 @@
                 'dois': JSON.stringify(dois)
             }, function (data) {
                 selectedCardContainer.innerHTML = data
+                topicsContainer.hide()
             })
         }
 
@@ -54,6 +70,17 @@
                 'fileUrl': '/static/embeddings_3d_scaled.json'
             }
         )
+
+        visualization.onDeselect(function () {
+            selectedCardContainer.innerHTML = ""
+            topicsContainer.show()
+        });
+
+        $('.topic-card').on('click', function (e) {
+            var topicId = $(e.target).data('topic')
+            var paperIds = topics[topicId];
+            visualization.selectPapers(paperIds);
+        })
 
     </script>
 {% endblock %}

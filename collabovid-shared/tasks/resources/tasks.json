@@ -208,6 +208,26 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "update-topic-assignment": {
+            "name": "Update Topic Assignment",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "n_clusters",
+                    "required": false,
+                    "type": "int",
+                    "default": 20,
+                    "is_primitive": true
+                },
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-oubiobert-512",
+                    "is_primitive": true
+                }
+            ]
         }
     }
 }
