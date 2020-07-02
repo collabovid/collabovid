@@ -1,5 +1,6 @@
 import os
 from tasks.task_runner import TaskRunner
+from src.geo.task_geo_parser import GeoParserTask
 from src.task_medrxiv_update import MedBiorxivNewArticlesTask
 from src.task_arxiv_update import ArxivNewArticlesTask
 from src.task_pubmed_update import PubmedNewArticlesTask
@@ -60,9 +61,14 @@ class ScrapeTask(Runnable):
             }
 
             task_launcher.launch_task(name="setup-vectorizer", config=task_config, block=True)
-            self.progress(90)
+            self.progress(80)
             task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
-
+            self.progress(90)
             self.log("Finished updating category assigment")
         else:
             self.log("Paper matrix update and topic assignment skipped.")
+
+        self.log("Extract locations from papers...")
+        TaskRunner.run_task(GeoParserTask,
+                            started_by=self._task.started_by)
+        self.log("Finished extracting locations from papers")
