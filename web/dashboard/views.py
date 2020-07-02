@@ -134,17 +134,8 @@ def delete_location_membership(request):
     if request.method == 'POST':
         location_id = request.POST.get('location')
         paper_id = request.POST.get('paper')
-        try:
-            paper = Paper.objects.get(doi=paper_id)
-            location = GeoLocation.objects.get(pk=location_id)
-        except (Paper.DoesNotExist, GeoLocation.DoesNotExist):
-            messages.add_message(
-                request, messages.ERROR,
-                f"No location {paper_id} or no Geonames object {location_id}"
-            )
-            return redirect('locations')
 
-        if LocationModifier.delete_location_membership(location, paper):
+        if LocationModifier.delete_location_membership(location_id, paper_id):
             messages.add_message(request, messages.SUCCESS, "Deleted location membership")
         else:
             messages.add_message(request, messages.ERROR,
