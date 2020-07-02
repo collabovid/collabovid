@@ -24,7 +24,9 @@ def search(request):
 
         form = SearchForm(request.GET)
         if form.is_valid():
-            return render(request, "search/search.html", {'form': form})
+            pass
+
+        return render(request, "search/search.html", {'form': form})
     elif request.method == "POST":
         form = SearchForm(request.POST)
         return render_search_result(request, form)
@@ -48,16 +50,15 @@ def render_search_result(request, form):
         statistics = None
         return render(request, "search/ajax/_statistics.html", {'statistics': statistics})
     else:
-        paginator = search_response_helper.paginator()
+        search_result = search_response_helper.build_search_result()
         try:
-            page_number = form.cleaned_data['page']
-            page_obj = paginator.get_page(page_number)
-        except PageNotAnInteger:
-            page_obj = paginator.page(1)
-        except EmptyPage:
+            page_obj = search_result['paginator'].page(search_result['paginator'].fixed_page)
+        except (PageNotAnInteger, EmptyPage):
             page_obj = None
 
-        return render(request, "search/ajax/_search_results.html", {'papers': page_obj})
+        search_result['papers'] = page_obj
+
+        return render(request, "search/ajax/_search_results.html", search_result)
 
 
 def list_authors(request):

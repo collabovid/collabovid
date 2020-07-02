@@ -2,10 +2,9 @@ import requests
 from django.conf import settings
 import logging
 from data.models import Paper
-from django.core.paginator import Paginator
 
 from search.forms import SearchForm
-from search.paginator import FakePaginator
+from search.paginator import FakePaginator, ScoreSortPaginator
 
 
 class SearchRequestHelper:
@@ -45,7 +44,7 @@ class SearchRequestHelper:
     def response(self):
         return self._response
 
-    def paginator(self):
+    def build_search_result(self):
         if not self.error:
 
             result_dois = [p['doi'] for p in self.response['results']]
@@ -68,12 +67,12 @@ class SearchRequestHelper:
 
                 paper.is_similar = infos['similar']
 
-            paginator = FakePaginator(total_count=self.response['count'],
+            paginator = FakePaginator(result_size=self.response['count'],
                                       page=self.response['page'],
                                       per_page=self.response['per_page'],
                                       papers=papers)
 
-            return paginator
+            return {'paginator': paginator, 'result_size': self.response['count']}
 
 
 class SimilarPaperRequestHelper:

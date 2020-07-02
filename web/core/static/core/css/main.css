@@ -246,9 +246,10 @@ a.invisible-link, a.invisible-link:hover {
     color: white;
     font-weight: bold;
     padding: 15px 15px 15px 15px;
-    border-radius: 0;
-    margin-bottom: 0;
+    border-radius: 10px;
+    margin-bottom: 0.5em;
 }
+
 
 .nav-search-types .nav-item .nav-link:hover:not(.active):not(.disabled) {
     background: #5475a1;
@@ -269,9 +270,8 @@ a.invisible-link, a.invisible-link:hover {
 }
 
 @media (min-width: 576px) {
-    .nav-search-types .nav-item .nav-link {
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+    .nav-search-types .nav-item:not(:first-child) .nav-link {
+        margin-left: 1em;
     }
 }
 
@@ -357,7 +357,7 @@ div.filter-card.collapsing {
         width: auto;
         height: auto;
         background: none;
-        margin-top: 3rem;
+        margin-top: .5rem;
         z-index: 0;
 
     }
@@ -420,14 +420,20 @@ label.nav-link {
     overflow: visible;
 }
 
-.paper-detail-card-top-badge
-{
+.paper-detail-card-top-badge {
     right: 1em;
     top: 0.5em;
 }
 
-.abstract-container em, .author em, .paper-title em
-{
+.search-error {
+    text-align: center;
+}
+
+.search-error ul {
+    text-align: left;
+}
+
+.abstract-container em, .author em, .paper-title em {
     font-weight: bold;
     font-style: normal;
 }

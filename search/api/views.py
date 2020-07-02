@@ -1,5 +1,5 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
-from src.search.search_engine import get_default_search_engine, SearchEngine
+from src.search.search_engine import SearchEngine
 from src.analyze import get_semantic_paper_search, get_similar_paper_finder
 import time
 import json
@@ -22,8 +22,8 @@ def search(request):
 
         score_min = float(request.GET.get("score_min", "0"))
         form = json.loads(request.GET.get('form'))
-        search_engine = get_default_search_engine()
-        search_result = search_engine.search(form, score_min=score_min)
+        search_engine = SearchEngine(form)
+        search_result = search_engine.search(score_min=score_min)
 
         paginator = VirtualPaginator(search_result, form)
 

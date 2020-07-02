@@ -5,7 +5,6 @@ from .models import Author, Journal, Paper
 from elasticsearch_dsl import analyzer
 from elasticsearch_dsl.analysis import token_filter
 
-
 edge_ngram_completion_filter = token_filter(
     'edge_ngram_completion_filter',
     type="edge_ngram",
@@ -21,37 +20,6 @@ edge_ngram_completion = analyzer(
 
 
 @registry.register_document
-class PaperDocument(Document):
-    class Index:
-        name = 'papers'
-        settings = {'number_of_shards': 1,
-                    'number_of_replicas': 0,
-                    'max_result_window': 100000}
-
-    authors = fields.ObjectField(properties={
-        'pk': fields.IntegerField(),
-        'full_name': fields.TextField(),
-    })
-
-    journal = fields.ObjectField(properties={
-        'pk': fields.IntegerField(),
-    })
-
-    categories = fields.ObjectField(properties={
-        'pk': fields.IntegerField(),
-    })
-
-    class Django:
-        model = Paper
-        fields = [
-            'title',
-            'abstract',
-            'published_at',
-            'is_preprint',
-        ]
-
-
-@registry.register_document
 class AuthorDocument(Document):
     class Index:
         name = 'authors'
@@ -59,6 +27,7 @@ class AuthorDocument(Document):
                     'number_of_replicas': 0}
 
     full_name_suggest = fields.CompletionField(attr='full_name_suggest')
+    full_name = fields.CompletionField(attr='full_name')
 
     class Django:
         model = Author
@@ -80,3 +49,24 @@ class JournalDocument(Document):
     class Django:
         model = Journal
 
+
+@registry.register_document
+class PaperDocument(Document):
+    class Index:
+        name = 'papers'
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0,
+                    'max_result_window': 100000}
+
+    authors = fields.ObjectField(properties={
+        'pk': fields.IntegerField(),
+        'full_name': fields.TextField(),
+    })
+
+    title = fields.TextField(analyzer='english')
+    abstract = fields.TextField(analyzer='english')
+
+    class Django:
+        model = Paper
+
+        related_models = [Author]

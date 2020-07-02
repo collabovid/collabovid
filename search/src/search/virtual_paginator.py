@@ -13,10 +13,10 @@ class VirtualPaginator:
     def __init__(self, search_results: dict, form: dict):
 
         self._form = form
-        if form['tab'] == 'newest':
+        if form['sorted_by'] == 'newest':
             self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",
                                                                                            "-created_at")
-        elif form['tab'] == 'top':
+        elif form['sorted_by'] == 'top':
             self.sorted_dois = sorted(search_results.keys(), key=lambda x: search_results[x], reverse=True)
 
         if isinstance(self.sorted_dois, QuerySet):
@@ -49,7 +49,7 @@ class VirtualPaginator:
         paginator['page'] = self._form['page']
 
         results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
-        Elasticsearch().highlights(results, self._form['query'], ids=dois_for_page)
+        Elasticsearch(keyword_search=True).highlights(results, self._form['query'], ids=dois_for_page)
         SemanticSearch().compute_similars(results, self._form['query'], score_min=0.6)
 
         paginator['results'] = sorted(results.values(), key=lambda x: x['order'])

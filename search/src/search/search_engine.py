@@ -1,18 +1,10 @@
 from collections import defaultdict
 
-from django.core.paginator import Paginator
-from django.db.models import Q, F, Subquery
-from django.db.models import Value as V
-from django.db.models.functions import Concat
+from django.db.models import Q, F
 
-from elasticsearch_dsl import Q as QEl
-
-from data.documents import PaperDocument
 from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry
-from typing import List
 
 from src.search.elasticsearch import Elasticsearch
-from .search import Search
 from .semantic_search import SemanticSearch
 from django.conf import settings
 
@@ -22,22 +14,31 @@ class SearchEngine:
     ARTICLE_TYPE_PREPRINTS = 2
     ARTICLE_TYPE_PEER_REVIEWED = 1
 
-    def __init__(self, search_pipeline: List[Search]):
-        self.search_pipeline = search_pipeline
+    def __init__(self, form):
 
-    @staticmethod
-    def filter_papers(form):
-        category_ids = form['categories']
-        start_date = form['published_at_start']
-        end_date = form['published_at_end']
+        if form['tab'] == 'combined':
+            self.search_pipeline = [Elasticsearch(keyword_search=False), SemanticSearch()]
+        elif form['tab'] == 'semantic':
+            self.search_pipeline = [SemanticSearch()]
+        elif form['tab'] == 'keyword':
+            self.search_pipeline = [Elasticsearch(keyword_search=True)]
+        else:
+            raise ValueError("No valid tab provided")
 
-        author_ids = form["authors"]
-        author_and = (form["authors_connection"] == 'all')
+        self.form = form
 
-        journal_ids = form["journals"]
-        location_ids = form["locations"]
+    def filter_papers(self):
+        category_ids = self.form['categories']
+        start_date = self.form['published_at_start']
+        end_date = self.form['published_at_end']
 
-        article_type_string = form["article_type"]
+        author_ids = self.form["authors"]
+        author_and = (self.form["authors_connection"] == 'all')
+
+        journal_ids = self.form["journals"]
+        location_ids = self.form["locations"]
+
+        article_type_string = self.form["article_type"]
 
         article_type = SearchEngine.ARTICLE_TYPE_ALL
 
@@ -89,12 +90,12 @@ class SearchEngine:
 
         return filtered, papers.distinct()
 
-    def search(self, form, score_min=0.6):
+    def search(self, score_min=0.6):
 
-        query = form["query"].strip()
-        category_ids = form['categories']
+        query = self.form["query"].strip()
+        category_ids = self.form['categories']
 
-        filtered, papers = SearchEngine.filter_papers(form)
+        filtered, papers = self.filter_papers()
 
         combined_factor = 0
 
@@ -135,11 +136,6 @@ class SearchEngine:
 
                 found_sufficient_papers = True
 
-                #for result in paper_results:
-                #    if result.score > score_min:
-                #        paper_score_table[result.paper_doi] += result.score * search_component.weight
-                #        found_sufficient_papers = True
-
                 if found_sufficient_papers:
                     # If a search component returns no papers its weight won't be taken into consideration
                     combined_factor += search_component.weight
@@ -152,13 +148,3 @@ class SearchEngine:
                     break
 
         return paper_score_table
-
-
-def get_default_search_engine():
-    """
-    :return:
-    """
-
-    #  Note that the order is important as the search will be aborted if the doi search finds a matching paper.
-    #  Moreover query cleaning will allow earlier search instances to clean the query for later ones.
-    return SearchEngine([Elasticsearch(), SemanticSearch()])

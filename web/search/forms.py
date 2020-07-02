@@ -79,13 +79,15 @@ class CommaSeparatedIntegerField(forms.Field):
 
 
 class SearchForm(forms.Form):
-    TAB_CHOICES = [('top', 'top'), ('newest', 'newest'), ('statistics', 'statistics')]
+    TAB_CHOICES = [('combined', 'Combined Search'), ('keyword', 'Keyword Search'), ('semantic', 'Semantic Search')]
+    SORT_CHOICES = [('top', 'Relevance'), ('newest', 'Newest')]
 
     AUTHOR_CONNECTION_CHOICES = [('all', 'all'), ('one', 'one')]
     ARTICLE_TYPES = [('all', 'all'), ('preprint', 'preprint'), ('reviewed', 'reviewed')]
 
     query = forms.CharField(required=False, initial='')
     tab = forms.ChoiceField(choices=TAB_CHOICES, required=True)
+    sorted_by = forms.ChoiceField(choices=SORT_CHOICES, required=True)
 
     authors_connection = forms.ChoiceField(choices=AUTHOR_CONNECTION_CHOICES, required=False)
     article_type = forms.ChoiceField(choices=ARTICLE_TYPES, required=False)
@@ -102,9 +104,10 @@ class SearchForm(forms.Form):
     page = forms.IntegerField(required=False)
 
     defaults = {
-        'tab': 'top',
+        'tab': 'combined',
         'article_type': 'all',
-        'authors_connection': 'one'
+        'authors_connection': 'one',
+        'sorted_by': 'top'
     }
 
     def __init__(self, data, *args, **kwargs):
@@ -131,6 +134,7 @@ class SearchForm(forms.Form):
                 'published_at_end': self.cleaned_data['published_at_end'],
                 'query': self.cleaned_data['query'],
                 'tab': self.cleaned_data['tab'],
+                'sorted_by': self.cleaned_data['sorted_by'],
                 'authors': self.cleaned_data['authors'],
                 'authors_connection': self.cleaned_data['authors_connection'],
                 'categories': self.cleaned_data['categories'],

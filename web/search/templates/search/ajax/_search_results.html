@@ -1,5 +1,5 @@
 {% for paper in papers %}
-    <div class="mt-5">
+    <div class="{% if forloop.first %}mt-2{% else %}mt-4{% endif %}">
         {% include 'search/partials/paper_card/_paper_card.html' with html=True extended=False paper=paper %}
     </div>
 
@@ -10,7 +10,7 @@
 
 <script type="text/javascript">
 
-    window.Pagination.result_size = {{ papers|length }};
+    window.Pagination.result_size = {{ result_size }};
 
     {% if papers.has_previous or papers.has_next %}
         window.Pagination.pagination_needed = true;
