@@ -3,7 +3,7 @@ from django.db.models import QuerySet
 from data.models import Paper
 from math import ceil
 
-from src.search.elasticsearch import Elasticsearch
+from src.search.elasticsearch import ElasticsearchRequestHelper
 from src.search.semantic_search import SemanticSearch
 
 
@@ -13,11 +13,14 @@ class VirtualPaginator:
     def __init__(self, search_results: dict, form: dict):
 
         self._form = form
+        print(form['sorted_by'])
         if form['sorted_by'] == 'newest':
             self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",
                                                                                            "-created_at")
         elif form['sorted_by'] == 'top':
             self.sorted_dois = sorted(search_results.keys(), key=lambda x: search_results[x], reverse=True)
+        else:
+            raise ValueError("Sorted by has unknown value" + str(form['sorted_by']))
 
         if isinstance(self.sorted_dois, QuerySet):
             self.count = self.sorted_dois.count()
@@ -41,17 +44,17 @@ class VirtualPaginator:
         top = bottom + self.per_page
 
         if isinstance(self.sorted_dois, QuerySet):
-            dois_for_page = self.sorted_dois[bottom:top].values_list('doi', flat=True)
+            dois_for_page = list(self.sorted_dois[bottom:top].values_list('doi', flat=True))
         else:
             dois_for_page = self.sorted_dois[bottom:top]
 
         paginator = self.build_paginator()
         paginator['page'] = self._form['page']
+        paginator['results'] = list()
 
-        results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
-        Elasticsearch(keyword_search=True).highlights(results, self._form['query'], ids=dois_for_page)
-        SemanticSearch().compute_similars(results, self._form['query'], score_min=0.6)
-
-        paginator['results'] = sorted(results.values(), key=lambda x: x['order'])
+        if len(dois_for_page) > 0:
+            results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
+            ElasticsearchRequestHelper.highlights(results, self._form['query'], ids=dois_for_page)
+            paginator['results'] = sorted(list(results.values()), key=lambda x: x['order'])
 
         return paginator

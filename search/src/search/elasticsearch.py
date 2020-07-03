@@ -1,10 +1,8 @@
 from data.documents import PaperDocument
-from src.search.search import Search, PaperResult
 
 from elasticsearch_dsl import Q as QEs
 
 from typing import List
-import time
 import re
 
 
@@ -17,8 +15,9 @@ class ElasticsearchQueryHelper:
                     'here', 'who', 'web', 'also', 'now', 'help', 'get',
                     'first', 'am', 'been', 'would', 'how', 'were', 'me', 'some', 'these',
                     'its', 'like', 'than', 'find',
-                    'had', 'just', 'over', 'into', 'whats'
-                    'next', 'used', 'go' 'know', 'covid19', 'sars' 'mers' 'cov', 'covid-19', 'sars-cov-2']
+                    'had', 'just', 'over', 'into', 'whats',
+                    'next', 'used', 'go' 'know', 'know', 'covid19', 'sars' 'mers' 'cov',
+                    'covid-19', 'sars-cov-2']
 
     @staticmethod
     def remove_common_words(query):
@@ -27,31 +26,70 @@ class ElasticsearchQueryHelper:
         return " ".join(query)
 
 
-class Elasticsearch(Search):
+class ElasticsearchRequestHelper:
 
-    def __init__(self, keyword_search: bool, *args, **kwargs):
-        super(Elasticsearch, self).__init__(*args, **kwargs)
-        self.keyword_search = keyword_search
+    @staticmethod
+    def _get_title_exact_match(query: str, boost=1):
+        return QEs({
+            'match_phrase': {
+                'title': {
+                    'query': query
+                }
+            }
+        })
 
-    def find(self, paper_score_table: dict, query: str, ids: List[str], score_min):
+    @staticmethod
+    def _get_title_match(query: str, boost=0.8):
+        return QEs('match', title={'query': query,
+                                   'fuzziness': 'AUTO',
+                                   'boost': boost})
+
+    @staticmethod
+    def _get_abstract_match(query: str, boost=0.8):
+        return QEs('match', abstract={'query': query,
+                                      'fuzziness': 'AUTO',
+                                      'boost': boost})
+
+    @staticmethod
+    def _get_author_match(query: str, boost=0.8):
+        return QEs('match', authors__full_name={'query': query,
+                                                'boost': boost})
+
+    @staticmethod
+    def _get_ids_match(ids: List[str]):
+        return QEs('ids', values=ids)
+
+    @staticmethod
+    def _build_search_request(must_match, should_match):
+
         search = PaperDocument.search()
+        search = search.query(QEs('bool',
+                                  must=must_match,
+                                  should=should_match,
+                                  minimum_should_match=1))
 
-        print(ElasticsearchQueryHelper.remove_common_words(query))
+        return search.source(excludes=['*'])
 
-        if ids is not None:
-            search = search.query('ids', values=ids)
+    @staticmethod
+    def enhance_results(score_table: dict, query: str, influence: float = 0.5):
+        """
+        Used for enhancing existing search results, i.e. potentially reordering them.
+        :param score_table:
+        :param query:
+        :param influence
+        :return:
+        """
 
-        if self.keyword_search:
-            search = search.query(QEs('match_phrase', title=query) |
-                                  QEs('match', title={'query': query,
-                                                      'fuzziness': 'AUTO',
-                                                      'boost': 0.8}) |
-                                  QEs('match', authors__full_name={'query': query, 'boost': 0.5}))
-        else:
-            search = search.query(QEs('match_phrase', title=query) |
-                                  QEs('match', title={'query': ElasticsearchQueryHelper.remove_common_words(query),
-                                                      'fuzziness': 'AUTO', 'boost': 0.8}))
-        search = search.source(excludes=['*'])
+        should_match = []
+        must_match = []
+
+        must_match.append(ElasticsearchRequestHelper._get_ids_match(list(score_table.keys())))
+        should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
+                            ElasticsearchRequestHelper._get_title_match(
+                                query=ElasticsearchQueryHelper.remove_common_words(query)
+                            ))
+
+        search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
 
         total = search.count()
         search = search[0:total]
@@ -62,23 +100,51 @@ class Elasticsearch(Search):
 
         for i, paper in enumerate(results):
             score = round(paper.meta.score / max_score, 2)
-            if score < score_min:
-                # Papers are sorted by score
-                print(score, i)
-                break
-            paper_score_table[paper.meta.id] += score
+            score_table[paper.meta.id] += score
+
+    @staticmethod
+    def find(score_table: dict, query: str, ids: List[str]):
+
+        should_match = []
+        must_match = []
+
+        if ids:
+            must_match.append(ElasticsearchRequestHelper._get_ids_match(ids))
+
+        should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
+                            ElasticsearchRequestHelper._get_title_match(query) |
+                            ElasticsearchRequestHelper._get_author_match(query))
+
+        search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
+        total = search.count()
+        search = search[0:total]
+        results = search.execute()
+
+        for i, paper in enumerate(results):
+            score_table[paper.meta.id] = paper.meta.score
 
         return query
 
-    def highlights(self, page: dict, query: str, ids: List[str]):
-        search = PaperDocument.search()
-        search = search.query('multi_match', query=query, fields=['title', 'abstract', 'authors.full_name'],
-                              fuzziness='AUTO').highlight(
+    @staticmethod
+    def highlights(page: dict, query: str, ids: List[str]):
+
+        should_match = []
+        must_match = []
+
+        if ids:
+            must_match.append(ElasticsearchRequestHelper._get_ids_match(ids))
+
+        should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
+                            ElasticsearchRequestHelper._get_abstract_match(query) |
+                            ElasticsearchRequestHelper._get_title_match(query) |
+                            ElasticsearchRequestHelper._get_author_match(query))
+
+        search = ElasticsearchRequestHelper._build_search_request(must_match, should_match).highlight(
             'title', 'abstract', 'authors.full_name', number_of_fragments=0, fragment_size=0)
-        search = search.query('ids', values=ids)
+
         total = search.count()
         search = search[0:total]
-        search = search.source(excludes=['*'])
+
         results = search.execute()
 
         for result in results:

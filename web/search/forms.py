@@ -79,11 +79,16 @@ class CommaSeparatedIntegerField(forms.Field):
 
 
 class SearchForm(forms.Form):
-    TAB_CHOICES = [('combined', 'Combined Search'), ('keyword', 'Keyword Search'), ('semantic', 'Semantic Search')]
+    TAB_CHOICES = [('combined', 'Semantic Search'), ('keyword', 'Keyword Search')]
     SORT_CHOICES = [('top', 'Relevance'), ('newest', 'Newest')]
 
-    AUTHOR_CONNECTION_CHOICES = [('all', 'all'), ('one', 'one')]
-    ARTICLE_TYPES = [('all', 'all'), ('preprint', 'preprint'), ('reviewed', 'reviewed')]
+    AUTHOR_CONNECTION_CHOICES = [('one', 'One matching'), ('all', 'All matching')]
+    ARTICLE_TYPES = [('all', 'All'), ('reviewed', 'Reviewed'), ('preprints', 'Preprints')]
+
+    RESULT_TYPE_PAPERS = 'papers'
+    RESULT_TYPE_STATISTICS = 'statistics'
+
+    RESULT_TYPES = [(RESULT_TYPE_PAPERS, 'Papers'), (RESULT_TYPE_STATISTICS, 'Statistics')]
 
     query = forms.CharField(required=False, initial='')
     tab = forms.ChoiceField(choices=TAB_CHOICES, required=True)
@@ -91,6 +96,8 @@ class SearchForm(forms.Form):
 
     authors_connection = forms.ChoiceField(choices=AUTHOR_CONNECTION_CHOICES, required=False)
     article_type = forms.ChoiceField(choices=ARTICLE_TYPES, required=False)
+
+    result_type = forms.ChoiceField(choices=RESULT_TYPES, required=True)
 
     authors = CommaSeparatedIntegerField(required=False)
     journals = CommaSeparatedIntegerField(required=False)
@@ -107,7 +114,8 @@ class SearchForm(forms.Form):
         'tab': 'combined',
         'article_type': 'all',
         'authors_connection': 'one',
-        'sorted_by': 'top'
+        'sorted_by': 'top',
+        'result_type': 'papers',
     }
 
     def __init__(self, data, *args, **kwargs):
@@ -141,6 +149,7 @@ class SearchForm(forms.Form):
                 'article_type': self.cleaned_data['article_type'],
                 'journals': self.cleaned_data['journals'],
                 'locations': self.cleaned_data['locations'],
+                'result_type': self.cleaned_data['result_type'],
                 'page': self.cleaned_data['page']}
 
     def to_json(self):

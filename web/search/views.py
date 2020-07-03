@@ -45,12 +45,14 @@ def render_search_result(request, form):
         return render(request, "search/ajax/_search_result_error.html",
                       {'message': 'We encountered an unexpected error. Please try again.'})
 
-    if form.cleaned_data['tab'] == "statistics":
-        #statistics = PaperStatistics(search_response_helper.papers)
-        statistics = None
+    search_result = search_response_helper.build_search_result()
+
+    if search_result['result_type'] == SearchForm.RESULT_TYPE_STATISTICS:
+        statistics = PaperStatistics(search_result['papers'])
         return render(request, "search/ajax/_statistics.html", {'statistics': statistics})
-    else:
-        search_result = search_response_helper.build_search_result()
+
+    elif search_result['result_type'] == SearchForm.RESULT_TYPE_PAPERS:
+
         try:
             page_obj = search_result['paginator'].page(search_result['paginator'].fixed_page)
         except (PageNotAnInteger, EmptyPage):
@@ -59,6 +61,9 @@ def render_search_result(request, form):
         search_result['papers'] = page_obj
 
         return render(request, "search/ajax/_search_results.html", search_result)
+
+    return render(request, "search/ajax/_search_result_error.html",
+                  {'message': 'Your request uses an invalid result type.'})
 
 
 def list_authors(request):

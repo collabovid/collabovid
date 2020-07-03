@@ -9,16 +9,16 @@ from search.paginator import FakePaginator, ScoreSortPaginator
 
 class SearchRequestHelper:
 
-    def __init__(self, form: SearchForm, score_min=0.6):
+    def __init__(self, form: SearchForm):
         logger = logging.getLogger(__name__)
 
         self._response = None
         self._error = False
+        self._form = form
 
         try:
             response = requests.get(form.url, params={
-                'form': form.to_json(),
-                'score_min': score_min
+                'form': form.to_json()
             })
             response.raise_for_status()
 
@@ -44,35 +44,47 @@ class SearchRequestHelper:
     def response(self):
         return self._response
 
+    def _parse_result_papers(self):
+        result_dois = [p['doi'] for p in self.response['results']]
+        papers = sorted(list(Paper.objects.filter(pk__in=result_dois).all()), key=lambda x: result_dois.index(x.doi))
+
+        for paper, infos in zip(papers, self.response['results']):
+            if 'title' in infos:
+                paper.title = infos['title']
+            if 'abstract' in infos:
+                paper.abstract = infos['abstract']
+            if 'authors.full_name' in infos:
+                highlighted_full_names = infos['authors.full_name']
+
+                for highlighted_full_name in highlighted_full_names:
+                    cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
+
+                    for author in paper.highlighted_authors:
+                        if author.full_name == cleaned_full_name:
+                            author.display_name = highlighted_full_name
+
+        paginator = FakePaginator(result_size=self.response['count'],
+                                  page=self.response['page'],
+                                  per_page=self.response['per_page'],
+                                  papers=papers)
+
+        return {'result_type': SearchForm.RESULT_TYPE_PAPERS, 'paginator': paginator, 'result_size': self.response['count']}
+
+    def _parse_result_statistics(self):
+        result_dois = self.response['results']
+        papers = Paper.objects.filter(pk__in=result_dois)
+        return {'result_type': SearchForm.RESULT_TYPE_STATISTICS, 'papers': papers}
+
     def build_search_result(self):
         if not self.error:
+            if self._form.cleaned_data['result_type'] == SearchForm.RESULT_TYPE_PAPERS:
+                return self._parse_result_papers()
+            elif self._form.cleaned_data['result_type'] == SearchForm.RESULT_TYPE_STATISTICS:
+                return self._parse_result_statistics()
 
-            result_dois = [p['doi'] for p in self.response['results']]
-            papers = sorted(list(Paper.objects.filter(pk__in=result_dois).all()), key=lambda x: result_dois.index(x.doi))
+        raise ValueError("Search yielded no result or used an invalid result type")
 
-            for paper, infos in zip(papers, self.response['results']):
-                if 'title' in infos:
-                    paper.title = infos['title']
-                if 'abstract' in infos:
-                    paper.abstract = infos['abstract']
-                if 'authors.full_name' in infos:
-                    highlighted_full_names = infos['authors.full_name']
 
-                    for highlighted_full_name in highlighted_full_names:
-                        cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
-
-                        for author in paper.highlighted_authors:
-                            if author.full_name == cleaned_full_name:
-                                author.display_name = highlighted_full_name
-
-                paper.is_similar = infos['similar']
-
-            paginator = FakePaginator(result_size=self.response['count'],
-                                      page=self.response['page'],
-                                      per_page=self.response['per_page'],
-                                      papers=papers)
-
-            return {'paginator': paginator, 'result_size': self.response['count']}
 
 
 class SimilarPaperRequestHelper:

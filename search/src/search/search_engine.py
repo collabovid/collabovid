@@ -1,15 +1,19 @@
 from collections import defaultdict
 
-from django.db.models import Q, F
-
+from django.db.models import Q, F, QuerySet
+from django.conf import settings
 from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry
 
-from src.search.elasticsearch import Elasticsearch
+from src.search.elasticsearch import ElasticsearchRequestHelper
+from src.search.utils import TimerUtilities
 from .semantic_search import SemanticSearch
-from django.conf import settings
+import time
 
 
 class SearchEngine:
+    COMBINED_SEARCH = 1
+    KEYWORD_SEARCH = 2
+
     ARTICLE_TYPE_ALL = 3
     ARTICLE_TYPE_PREPRINTS = 2
     ARTICLE_TYPE_PEER_REVIEWED = 1
@@ -17,11 +21,9 @@ class SearchEngine:
     def __init__(self, form):
 
         if form['tab'] == 'combined':
-            self.search_pipeline = [Elasticsearch(keyword_search=False), SemanticSearch()]
-        elif form['tab'] == 'semantic':
-            self.search_pipeline = [SemanticSearch()]
+            self.search_type = SearchEngine.COMBINED_SEARCH
         elif form['tab'] == 'keyword':
-            self.search_pipeline = [Elasticsearch(keyword_search=True)]
+            self.search_type = SearchEngine.KEYWORD_SEARCH
         else:
             raise ValueError("No valid tab provided")
 
@@ -90,61 +92,59 @@ class SearchEngine:
 
         return filtered, papers.distinct()
 
-    def search(self, score_min=0.6):
+    def get_papers_no_query(self, papers: QuerySet):
+        """
+        If the user did not provide a query we want to either show the newest papers or
+        show those papers first that have the best matching category. We sort by newest when two papers
+        have the same score. Therefore, we either give all papers score 1 or add Category Score.
+        """
 
-        query = self.form["query"].strip()
         category_ids = self.form['categories']
-
-        filtered, papers = self.filter_papers()
-
-        combined_factor = 0
-
-        paper_score_table = defaultdict(int)
 
         filtered_dois = list(papers.values_list('doi', flat=True))
 
-        if not query:
-            """
-            If the user did not provide a query we want to either show the newest papers or
-            show those papers first that have the best matching category. We sort by newest when two papers
-            have the same score. Therefore, we either give all papers score 1 or add Category Score.
-            """
+        score_table = dict()
 
-            for doi in filtered_dois:
-                paper_score_table[doi] = 1
+        for doi in filtered_dois:
+            score_table[doi] = 1
 
-            if category_ids and len(category_ids) == 1:
-                try:
-                    category = Category.objects.get(pk=category_ids[0])
+        if category_ids and len(category_ids) == 1:
+            try:
+                category = Category.objects.get(pk=category_ids[0])
 
-                    memberships = CategoryMembership.objects.filter(paper__in=papers, category=category). \
-                        annotate(doi=F('paper__doi'))
+                memberships = CategoryMembership.objects.filter(paper__in=papers, category=category). \
+                    annotate(doi=F('paper__doi'))
 
-                    for membership in memberships:
-                        paper_score_table[membership.doi] = membership.score
+                for membership in memberships:
+                    score_table[membership.doi] = membership.score
 
-                except Category.DoesNotExist:
-                    raise Exception("Provided unknown category")
-                except CategoryMembership.DoesNotExist:
-                    raise Exception("Filtering yielded incorrect papers for category")
+            except Category.DoesNotExist:
+                raise Exception("Provided unknown category")
+            except CategoryMembership.DoesNotExist:
+                raise Exception("Filtering yielded incorrect papers for category")
+
+    def search(self):
+
+        query = self.form["query"].strip()
+
+        filtered, papers = self.filter_papers()
+        paper_score_table = defaultdict(int)
+
+        if query:
+
+            filtered_dois = None
+
+            if filtered:
+                filtered_dois = list(papers.values_list('doi', flat=True))
+
+            if self.search_type == SearchEngine.KEYWORD_SEARCH:
+                TimerUtilities.time_function(ElasticsearchRequestHelper.find, paper_score_table, query, ids=filtered_dois)
+            elif self.search_type == SearchEngine.COMBINED_SEARCH:
+                TimerUtilities.time_function(SemanticSearch.find, paper_score_table, query, ids=filtered_dois)
+                TimerUtilities.time_function(ElasticsearchRequestHelper.enhance_results, paper_score_table, query, influence=0.6)
+            else:
+                raise ValueError("No valid search type provided")
         else:
-            for search_component in self.search_pipeline:
-                query = search_component.find(paper_score_table, query, filtered_dois, score_min)
-
-                if settings.DEBUG:
-                    print(search_component.__class__, query)
-
-                found_sufficient_papers = True
-
-                if found_sufficient_papers:
-                    # If a search component returns no papers its weight won't be taken into consideration
-                    combined_factor += search_component.weight
-
-                if not query or (found_sufficient_papers and search_component.exclusive):
-                    #  In case an exclusive search found a result, we abort further search
-                    #  In case query cleaning resulted in an empty query, we abort further search
-                    if settings.DEBUG:
-                        print("breaking", query, found_sufficient_papers, search_component.exclusive)
-                    break
+            return self.get_papers_no_query(papers)
 
         return paper_score_table

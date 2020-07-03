@@ -15,7 +15,14 @@
 
 
                         {% for choice in form.TAB_CHOICES %}
-                            <input class="d-none" id="{{ choice.0 }}-tab-input" data-no-url="true" type="radio"
+                            <input class="d-none"
+                                   id="{{ choice.0 }}-tab-input"
+                                    {% if form.defaults.tab == choice.0 %}
+                                        data-no-url="true"
+                                    {% else %}
+                                        data-no-url="false"
+                                    {% endif %}
+                                   type="radio"
                                    name="tab" value="{{ choice.0 }}"
                                    {% if form.cleaned_data.tab == choice.0 %}checked="checked"{% endif %}/>
                         {% endfor %}
@@ -171,7 +178,7 @@
                  * other: Input will be submitted and pushed to url
                  */
 
-                let submission_data = $(".search-form input[data-no-url!=true]").serialize();
+                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
                 let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
 
                 // Converting categories=x&categories=y to categories=x,y

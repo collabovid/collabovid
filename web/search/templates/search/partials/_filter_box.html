@@ -50,19 +50,20 @@
                 <div class="row mt-1">
                     <div class="col-12">
                         <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                            <label class="btn btn-light active">
-                                <input type="radio" data-no-url="true" name="authors_connection"
-                                       {% if form.cleaned_data.authors_connection == 'one' %}checked="checked"{% endif %}
-                                       data-default="true"
-                                       value="one"/> One matching
-                            </label>
-                            <label class="btn btn-light">
-                                <input type="radio" data-no-url="false" name="authors_connection"
-                                       {% if form.cleaned_data.authors_connection == 'all' %}checked="checked"{% endif %}
-                                       value="all"/> All
-                                matching
-                            </label>
-
+                            {% for choice in form.AUTHOR_CONNECTION_CHOICES %}
+                                <label class="btn btn-light {% if form.cleaned_data.authors_connection == choice.0 %}active{% endif %}">
+                                    <input type="radio"
+                                            {% if form.defaults.authors_connection == choice.0 %}
+                                                data-no-url="true"
+                                            {% else %}
+                                                data-no-url="false"
+                                            {% endif %}
+                                           name="authors_connection"
+                                           {% if form.cleaned_data.authors_connection == choice.0 %}checked="checked"{% endif %}
+                                           data-default="true"
+                                           value="{{ choice.0 }}"/> {{ choice.1 }}
+                                </label>
+                            {% endfor %}
                         </div>
                         <div class="text-muted small">Decide whether some or all people should be author of the paper.
                         </div>
@@ -147,23 +148,20 @@
                 <div class="row mt-1">
                     <div class="col-12">
                         <div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
-                            <label class="btn btn-light active">
-                                <input type="radio" data-no-url="true" name="article_type"
-                                       {% if form.cleaned_data.article_type == 'all' %}checked="checked"{% endif %}
-                                       value="all"/> All
-                            </label>
-                            <label class="btn btn-light">
-                                <input type="radio" data-count-filter="true" data-no-url="false" name="article_type"
-                                       {% if form.cleaned_data.article_type == 'reviewed' %}checked="checked"{% endif %}
-                                       value="reviewed"/>
-                                Reviewed
-                            </label>
-                            <label class="btn btn-light">
-                                <input type="radio" data-count-filter="true" data-no-url="false" name="article_type"
-                                       {% if form.cleaned_data.article_type == 'preprints' %}checked="checked"{% endif %}
-                                       value="preprints"/>
-                                Preprints
-                            </label>
+
+                            {% for choice in form.ARTICLE_TYPES %}
+                                <label class="btn btn-light {% if form.cleaned_data.article_type == choice.0 %}active{% endif %}">
+                                    <input type="radio"
+                                            {% if form.defaults.article_type == choice.0 %}
+                                                data-no-url="true"
+                                            {% else %}
+                                                data-count-filter="true" data-no-url="false"
+                                            {% endif %}
+                                           name="article_type"
+                                           {% if form.cleaned_data.article_type == choice.0 %}checked="checked"{% endif %}
+                                           value="{{ choice.0 }}"/> {{ choice.1 }}
+                                </label>
+                            {% endfor %}
                         </div>
                         <div class="text-muted small">
                             Reviewed articles were published in some journal while preprints are most often

@@ -4,6 +4,7 @@ from src.analyze import get_semantic_paper_search, get_similar_paper_finder
 import time
 import json
 
+from src.search.utils import TimerUtilities
 from src.search.virtual_paginator import VirtualPaginator
 
 
@@ -23,11 +24,17 @@ def search(request):
         score_min = float(request.GET.get("score_min", "0"))
         form = json.loads(request.GET.get('form'))
         search_engine = SearchEngine(form)
-        search_result = search_engine.search(score_min=score_min)
+        search_result = TimerUtilities.time_function(search_engine.search)
 
-        paginator = VirtualPaginator(search_result, form)
+        if form['result_type'] == 'papers':
+            paginator = VirtualPaginator(search_result, form)
+            page = TimerUtilities.time_function(paginator.get_page)
 
-        return JsonResponse(paginator.get_page())
+            return JsonResponse(page)
+        elif form['result_type'] == 'statistics':
+            return JsonResponse({'results': list(search_result.keys())})
+
+        return HttpResponseBadRequest()
 
 
 def similar(request):

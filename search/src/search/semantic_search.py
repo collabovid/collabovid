@@ -1,30 +1,22 @@
 from typing import List
 
-from .search import Search, PaperResult
 from src.analyze import get_semantic_paper_search
 
 
-class SemanticSearch(Search):
-    def find(self, paper_score_table: dict, query: str, ids: List[str], score_min):
+class SemanticSearch:
 
-        sorted_scores = sorted(
-            [(doi, score) for doi, score in get_semantic_paper_search().query(query) if score > score_min],
-            key=lambda x: x[1])
+    @staticmethod
+    def find(score_table: dict, query: str, ids: List[str], score_min=0.6, top=None):
 
-        ids_set = set(ids)
+        similar_papers = [(doi, score) for doi, score in get_semantic_paper_search().query(query) if score > score_min]
 
-        for doi, score in sorted_scores[:100]:
-            if doi in ids_set:
-                paper_score_table[doi] += score
+        if top:
+            similar_papers = sorted(similar_papers, key=lambda x: x[1], reverse=True)[:top]
+
+        ids_set = set(ids) if ids else None
+
+        for doi, score in similar_papers:
+            if ids_set is None or doi in ids_set:
+                score_table[doi] += score
 
         return query
-
-    def compute_similars(self, page: dict, query: str, score_min):
-        score_dict = dict()
-        for doi, score in [(doi, score) for (doi, score) in get_semantic_paper_search().query(query) if doi in page]:
-            score_dict[doi] = score
-
-        for doi, infos in page.items():
-            infos['similar'] = False
-            if doi in score_dict:
-                infos['similar'] = score_dict[doi] > score_min
