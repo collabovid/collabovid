@@ -74,8 +74,11 @@ class Journal(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Journal.objects.filter(papers=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Journal.objects.filter(papers=None).delete()
+        if n_objects_deleted == 0 or 'data.Journal' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Journal']
 
 
 class Author(models.Model):
@@ -88,8 +91,11 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Author.objects.filter(publications=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Author.objects.filter(publications=None).delete()
+        if n_objects_deleted == 0 or 'data.Author' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Author']
 
 
 class Category(models.Model):
@@ -111,8 +117,11 @@ class PaperData(models.Model):
     @staticmethod
     def cleanup():
         used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = PaperData.objects.exclude(id__in=used_data_ids).delete()
+        if n_objects_deleted == 0 or 'data.PaperData' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.PaperData']
 
 
 class VerificationState(models.IntegerChoices):
