@@ -369,27 +369,43 @@ class DataUpdater(object):
             F('last_scrape').asc(nulls_first=True)
         )
 
-        datapoints_completed = 0
-        for article in filtered_articles:
-            if count:
-                if datapoints_completed >= count:
-                    break
-                if progress:
-                    progress(int((datapoints_completed / count) * 100))
-            data_point = self._get_data_point(doi=article.doi)
-            if data_point:
-                datapoints_completed += 1
-                if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
-                    DataUpdater.set_last_scrape(data_point)
-                    continue
-                self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
-                                              pdf_image=pdf_image)
-            else:
-                self.log(f"Missing Data Point: {article.doi}")
-                self.statistics.n_missing_datapoints += 1
+        iterator = ArticleDatapointIterator(filtered_articles, count, self._get_data_point)
+
+        for article, data_point in progress(iterator, length=count):
+            if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+                DataUpdater.set_last_scrape(data_point)
+                continue
+            self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
+                                          pdf_image=pdf_image)
+
+        self.log(f"Missing Data Points: {iterator.missing_dois}")
+        self.statistics.n_missing_datapoints = len(iterator.missing_dois)
         self.log("Delete orphaned authors and journals")
         self.statistics.authors_deleted = Author.cleanup()
         self.statistics.journals_deleted = Journal.cleanup()
 
         self.statistics.stop()
         self.log(self.statistics)
+
+
+class ArticleDatapointIterator:
+    """
+    Iterator that yields articles and the corresponding datapoint for a list of articles.
+    The datapoint is obtained using the given get_data_point function.
+    Count is the max. number of tuples to yield (only existing datapoints are counted).
+    """
+    def __init__(self, articles, count, get_data_point):
+        self._articles = articles
+        self._get_data_point = get_data_point
+        self.missing_dois = []
+        self._count = count
+
+    def __iter__(self):
+        for i, article in enumerate(self._articles):
+            if i >= self._count + len(self.missing_dois):
+                break
+            datapoint = self._get_data_point(doi=article.doi)
+            if datapoint:
+                yield article, datapoint
+            else:
+                self.missing_dois.append(article.doi)
