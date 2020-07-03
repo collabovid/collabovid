@@ -9,7 +9,7 @@ class MedBiorxivUpdateTask(Runnable):
     def task_name():
         return "update-medbiorxiv"
 
-    def __init__(self, count: int = 200, update_pdf_image: bool = True, *args, **kwargs):
+    def __init__(self, count: int = 20, update_pdf_image: bool = True, *args, **kwargs):
         super(MedBiorxivUpdateTask, self).__init__(*args, **kwargs)
         self.count = count
         self.update_pdf_image = update_pdf_image

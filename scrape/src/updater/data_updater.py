@@ -51,7 +51,6 @@ class UpdateStatistics:
         self.n_skipped = 0
         self.n_already_tracked = 0
         self.n_success = 0
-        self.n_conflicts = 0
         self.n_missing_datapoints = 0
 
         self.authors_deleted = 0

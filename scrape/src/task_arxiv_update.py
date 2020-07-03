@@ -9,7 +9,7 @@ class ArxivUpdateTask(Runnable):
     def task_name():
         return "update-arxiv"
 
-    def __init__(self, count: int = 10, update_pdf_image: bool = True, *args, **kwargs):
+    def __init__(self, count: int = 20, update_pdf_image: bool = True, *args, **kwargs):
         super(ArxivUpdateTask, self).__init__(*args, **kwargs)
         self.count = count
         self.update_pdf_image = update_pdf_image

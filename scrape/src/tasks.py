@@ -1,5 +1,6 @@
 from src.task_medrxiv_update import MedBiorxivUpdateTask, MedBiorxivNewArticlesTask
 from src.task_scrape import ScrapeTask
+from src.task_update_existing import UpdateExistingTask
 from src.task_arxiv_update import ArxivUpdateTask, ArxivNewArticlesTask
 from src.task_check_covid_related import CheckCovidRelatedTask
 from src.task_pdf_image_download import PdfImageDownloadTask
