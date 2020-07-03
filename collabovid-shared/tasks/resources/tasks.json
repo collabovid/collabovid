@@ -153,6 +153,11 @@
             "name": "Parse Geo Locations",
             "description": "",
             "parameters": []
+        },
+        "detect-non-english-papers": {
+            "name": "Detect Non English Papers",
+            "description": "Determines papers with titles or abstract not in english",
+            "parameters": []
         }
     },
     "search": {

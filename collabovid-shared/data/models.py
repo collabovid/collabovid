@@ -6,7 +6,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
 
 
 class Topic(models.Model):
@@ -215,13 +214,15 @@ class GeoNameResolution(models.Model):
 
 
 class Paper(models.Model):
+    MAX_DOI_LENGTH = 100
+
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
-    doi = models.CharField(max_length=100, primary_key=True)
+    doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
@@ -284,13 +285,28 @@ class Paper(models.Model):
 
     def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
-        self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None),
+        self.preview_image.save(img_name,
+                                InMemoryUploadedFile(
+                                    pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
                                 save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class IgnoredPaper(models.Model):
+    doi = models.CharField(max_length=Paper.MAX_DOI_LENGTH, primary_key=True)
+
+
+class DeleteCandidate(models.Model):
+    class Type(models.IntegerChoices):
+        LANGUAGE = 0, gettext_lazy('Language')
+
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    type = models.IntegerField(choices=Type.choices)
+    false_positive = models.BooleanField(default=False)
+    score = models.FloatField(default=1)
 
 
 class GeoLocationMembership(models.Model):
@@ -340,6 +356,19 @@ def membership_changed(sender, instance, **kwargs):
                           action="post_add", pk_set={}, **kwargs)
 
 
+def paper_deleted(sender, instance, **kwargs):
+    for author in list(instance.authors.all()):
+        if author.publications.count() == 0:
+            author.delete()
+
+    if instance.journal.papers.count() == 0:
+        instance.journal.delete()
+
+    if instance.data:
+        instance.data.delete()
+
+
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
 post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(paper_deleted, sender=Paper, dispatch_uid="models.data")
