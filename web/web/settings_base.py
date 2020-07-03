@@ -118,7 +118,7 @@ FIXTURE_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = ''
+MEDIA_ROOT = 'generated/'
 
 if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:
     LOGGING = {
