@@ -49,7 +49,9 @@ def render_search_result(request, form):
 
     if search_result['result_type'] == SearchForm.RESULT_TYPE_STATISTICS:
         statistics = PaperStatistics(search_result['papers'])
-        return render(request, "search/ajax/_statistics.html", {'statistics': statistics})
+        return render(request, "search/ajax/_statistics.html", {
+            'statistics': statistics,
+            'default_result_type': SearchForm.defaults['result_type']})
 
     elif search_result['result_type'] == SearchForm.RESULT_TYPE_PAPERS:
 

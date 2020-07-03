@@ -1,6 +1,18 @@
 {% if statistics.available %}
 
-    <div class="row mt-5">
+    <div class="row mt-3">
+        <div class="col-12">
+            <label class="text-primary position-absolute d-sm-none d-md-inline" role="button" for="{{ default_result_type }}-result-type">
+                <i class="fas fa-arrow-left"></i> Back to the results page
+            </label>
+            <label class="text-primary d-md-none" role="button" for="{{ default_result_type }}-result-type">
+                <i class="fas fa-arrow-left"></i> Back to the results page
+            </label>
+            <h2 class="text-center">Statistics</h2>
+        </div>
+    </div>
+
+    <div class="row mt-2">
         <div class="col-12">
             <div class="card w-100 shadow rounded bg-white p-4">
                 <div class="card-body p-0">

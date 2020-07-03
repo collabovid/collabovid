@@ -1,5 +1,5 @@
 {% for paper in papers %}
-    <div class="{% if forloop.first %}mt-2{% else %}mt-4{% endif %}">
+    <div class="{% if forloop.first %}mt-3{% else %}mt-4{% endif %}">
         {% include 'search/partials/paper_card/_paper_card.html' with html=True extended=False paper=paper %}
     </div>
 

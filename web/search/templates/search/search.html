@@ -18,13 +18,26 @@
                             <input class="d-none"
                                    id="{{ choice.0 }}-tab-input"
                                     {% if form.defaults.tab == choice.0 %}
-                                        data-no-url="true"
+                                   data-no-url="true"
                                     {% else %}
-                                        data-no-url="false"
+                                   data-no-url="false"
                                     {% endif %}
                                    type="radio"
                                    name="tab" value="{{ choice.0 }}"
                                    {% if form.cleaned_data.tab == choice.0 %}checked="checked"{% endif %}/>
+                        {% endfor %}
+
+                        {% for choice in form.RESULT_TYPES %}
+                            <input class="d-none"
+                                   id="{{ choice.0 }}-result-type"
+                                    {% if form.defaults.result_type == choice.0 %}
+                                   data-no-url="true"
+                                    {% else %}
+                                   data-no-url="false"
+                                    {% endif %}
+                                   type="radio"
+                                   name="result_type" value="{{ choice.0 }}"
+                                   {% if form.cleaned_data.result_type == choice.0 %}checked="checked"{% endif %}/>
                         {% endfor %}
 
 
@@ -58,8 +71,8 @@
 
         </div>
 
-        <div class="row mt-5 mx-lg-5 mx-md-3 mx-1">
-            <div class="col-8">
+        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1">
+            <div class="col-6">
                 <ul class="nav nav-search-types nav-justified">
 
                     {% for choice in form.TAB_CHOICES %}
@@ -73,7 +86,7 @@
 
                 </ul>
             </div>
-            <div class="col-4 text-right">
+            <div class="col-6 text-right">
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
                         data-toggle="collapse"
@@ -92,22 +105,37 @@
             <div class="flex-fill" style="min-width: 0;">
                 <div id="paper-result-options-container" style="display: none;">
                     <div class="row mt-2 align-items-center ml-0 mr-0">
-                        <div class="col-9 text-muted pl-4">
-                            <i class="fas fa-info-circle"></i>
-                            We found <span id="result-size-container"></span> results that match your query.
-                            Click <a href="#">here</a> to see
-                            statistics about the papers we found.
+                        <div class="col-8 col-sm-9 col-lg-10 pl-4">
+
+                            <div class="d-flex flex-row text-muted align-items-center">
+                                <div>
+                                    <i class="fas fa-info-circle text-muted"></i>
+                                </div>
+                                <div class="pl-3 pr-0 pt-0 pb-0 text-left">
+                                    We found
+                                    <span id="result-size-container"></span>
+                                    results that match your query.
+                                    To get an overview of the papers that we found, visit the <label
+                                        class="text-primary d-inline" role="button"
+                                        for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">statistics</label> page.
+                                    If you notice papers with false information consider writing us an
+                                    <a href="mailto:info@collabovid.org">email</a>. Have fun
+                                    exploring!
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-3 text-right">
+                        <div class="col-4 col-sm-3 col-lg-2 text-right">
                             <form class="search-form">
-                                <div class="form-group mb-0">
-                                    <label>
-                                        <select class="form-control" name="sorted_by">
+                                <div class="form-group mb-0 pb-0 pr-0">
+
+                                    <label for="sorted-by" class="mb-0 pb-0">
+                                        <select class="sort-select form-control" name="sorted_by" id="sorted-by">
                                             {% for choice in form.SORT_CHOICES %}
                                                 <option value="{{ choice.0 }}">{{ choice.1 }}</option>
                                             {% endfor %}
                                         </select>
                                     </label>
+
                                 </div>
                             </form>
                         </div>
@@ -153,6 +181,10 @@
                 indicator: indicator,
                 paper_container: paper_container,
                 pagination_container: pagination_container
+            });
+
+            $("input[name=result_type], select[name=sorted_by]").change(function () {
+                form.submit();
             });
 
 
