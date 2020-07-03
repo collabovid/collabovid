@@ -245,6 +245,21 @@ class DataUpdater(object):
     def _count(self):
         raise NotImplementedError
 
+    @staticmethod
+    def set_last_scrape(datapoint):
+        """
+        Set the current time as last_scrape time.
+        Needs to be done if articles should be updated and now contain data errors.
+        Otherwise, we would try to update these articles over and over.
+        """
+        if datapoint.doi:
+            try:
+                db_article = Paper.objects.get(doi=datapoint.doi)
+                db_article.last_scrape = timezone.now()
+                db_article.save()
+            except Paper.DoesNotExist:
+                pass
+
     def get_or_create_db_article(self, datapoint, pdf_content, pdf_image, update_existing):
         try:
             db_article, created = datapoint.update_db(update_existing=update_existing, pdf_content=pdf_content,
@@ -254,18 +269,24 @@ class DataUpdater(object):
             return db_article, created
         except MissingDataError as ex:
             id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""
+            if update_existing:
+                DataUpdater.set_last_scrape(datapoint)
             self.log(f"Error: {id}: {ex.msg}")
             self.n_errors += 1
         except SkipArticle as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except NotCovidRelatedError as ex:
+            if update_existing:
+                DataUpdater.set_last_scrape(datapoint)
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_skipped += 1
         except DifferentDataSourceError as ex:
             self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.n_already_tracked += 1
         except (IntegrityError, DjangoDataError, PdfExtractError, DataError) as ex:
+            if update_existing:
+                DataUpdater.set_last_scrape(datapoint)
             self.log(f"Error: {datapoint.doi}: {ex}")
             self.n_errors += 1
         return None, None
@@ -304,9 +325,15 @@ class DataUpdater(object):
         self.log(f"Deleted Journals: {journals_deleted}")
 
     def update_existing_data(self, count=None, pdf_content=True, pdf_image=True, progress=None):
+        """
+        Updates the stored papers, starting with the one with the earliest last-scrape.
+        Count is the total number of papers to update.
+        """
+
         self.n_errors = 0
         self.n_skipped = 0
         self.n_already_tracked = 0
+        self.n_missing_datapoints = 0
         self.n_success = 0
 
         total = self._count()
@@ -319,18 +346,27 @@ class DataUpdater(object):
         start = timer()
 
         filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
-            F('last_scrape').asc(nulls_first=True))[:count]
+            F('last_scrape').asc(nulls_first=True)
+        )
 
-        iterator = progress(filtered_articles) if progress else filtered_articles
-
-        for article in iterator:
+        datapoints_completed = 0
+        for article in filtered_articles:
+            if count:
+                if datapoints_completed >= count:
+                    break
+                if progress:
+                    progress((datapoints_completed / count) * 100)
             data_point = self._get_data_point(doi=article.doi)
             if data_point:
+                datapoints_completed += 1
                 if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+                    DataUpdater.set_last_scrape(data_point)
                     continue
                 self.get_or_create_db_article(data_point, update_existing=True, pdf_content=pdf_content,
                                               pdf_image=pdf_image)
-
+            else:
+                self.log(f"Missing Data Point: {article.doi}")
+                self.n_missing_datapoints += 1
         self.log("Delete orphaned authors and journals")
         authors_deleted = Author.cleanup()
         journals_deleted = Journal.cleanup()
@@ -345,5 +381,6 @@ class DataUpdater(object):
         self.log(f"Skipped: {self.n_skipped}")
         self.log(f"Errors: {self.n_errors}")
         self.log(f"Tracked by other source: {self.n_already_tracked}")
+        self.log(f"Missing data points: {self.n_missing_datapoints}")
         self.log(f"Deleted Authors: {authors_deleted}")
         self.log(f"Deleted Journals: {journals_deleted}")

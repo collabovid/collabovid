@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+from collabovid_settings.installed_apps import SHARED_INSTALLED_APPS
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
     'pipeline'
 ]
+INSTALLED_APPS += SHARED_INSTALLED_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -116,7 +118,7 @@ FIXTURE_DIRS = (
 )
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = 'generated/'
+MEDIA_ROOT = ''
 
 if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CONSOLE']) > 0:
     LOGGING = {
