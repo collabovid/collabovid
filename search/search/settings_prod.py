@@ -4,6 +4,7 @@ from collabovid_settings.postgres_settings import *
 from collabovid_settings.tasks_settings import *
 from collabovid_settings.aws_settings import *
 from collabovid_settings.volumes_settings import *
+from collabovid_settings.elasticsearch_settings import *
 
 os.environ['NLTK_DATA'] = os.path.join(RESOURCES_DIR, 'nltk_data')
 

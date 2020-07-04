@@ -1,5 +1,6 @@
+import os
 ELASTICSEARCH_DSL={
     'default': {
-        'hosts': 'localhost:9200'
+        'hosts': os.getenv('ELASTICSEARCH_URL', 'localhost:9200')
     },
 }

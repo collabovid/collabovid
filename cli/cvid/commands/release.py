@@ -42,7 +42,7 @@ class ReleaseCommand(Command):
         if not success:
             print(f"{job_name} did not complete")
             exit(1)
-
+        print(version)
         migration_state = json.loads(version)
 
         # Check if migrations have to be applied

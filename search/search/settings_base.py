@@ -28,8 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'data',
-    'tasks',
-    'django_elasticsearch_dsl'
+    'tasks'
 ]
 INSTALLED_APPS += SHARED_INSTALLED_APPS
 
