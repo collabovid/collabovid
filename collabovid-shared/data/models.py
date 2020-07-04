@@ -1,5 +1,6 @@
 from typing import Union
 
+import pycountry
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
@@ -82,8 +83,11 @@ class Journal(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Journal.objects.filter(papers=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Journal.objects.filter(papers=None).delete()
+        if n_objects_deleted == 0 or 'data.Journal' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Journal']
 
 
 class Author(models.Model):
@@ -119,8 +123,11 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Author.objects.filter(publications=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Author.objects.filter(publications=None).delete()
+        if n_objects_deleted == 0 or 'data.Author' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Author']
 
 
 class Category(models.Model):
@@ -142,8 +149,11 @@ class PaperData(models.Model):
     @staticmethod
     def cleanup():
         used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = PaperData.objects.exclude(id__in=used_data_ids).delete()
+        if n_objects_deleted == 0 or 'data.PaperData' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.PaperData']
 
 
 class VerificationState(models.IntegerChoices):
@@ -155,27 +165,61 @@ class VerificationState(models.IntegerChoices):
 
 
 class GeoLocation(models.Model):
+    geonames_id = models.IntegerField(unique=True, primary_key=False)
     name = models.CharField(max_length=100, null=False)
-    alias = models.CharField(max_length=40, null=True)
+    alias = models.CharField(max_length=40, null=True, blank=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
     count = models.IntegerField(default=0)
 
+    @staticmethod
+    def get_or_create_from_geonames_object(geonames_object):
+        try:
+            db_country = GeoCountry.objects.get(alpha_2=geonames_object.country_code)
+            created = False
+        except GeoCountry.DoesNotExist:
+            db_country = GeoCountry.objects.create(
+                geonames_id=geonames_object.country.id,
+                name=geonames_object.country.name,
+                alias=pycountry.countries.get(alpha_2=geonames_object.country.country_code).name,
+                alpha_2=geonames_object.country.country_code,
+                latitude=geonames_object.country.latitude,
+                longitude=geonames_object.country.longitude,
+            )
+            created = True
+
+        if geonames_object.feature_label.startswith('A.PCL'):
+            return db_country, created
+        else:
+            try:
+                return GeoCity.objects.get(geonames_id=geonames_object.id), False
+            except GeoCity.DoesNotExist:
+                db_location = GeoCity.objects.create(
+                    geonames_id=geonames_object.id,
+                    name=geonames_object.name,
+                    country=db_country,
+                    latitude=geonames_object.latitude,
+                    longitude=geonames_object.longitude,
+                )
+                return db_location, created
+
     @property
     def is_city(self):
-        return False
+        return hasattr(self, 'geocity')
+
 
     @property
     def is_country(self):
-        return False
+        return hasattr(self, 'geocountry')
 
     @property
     def displayname(self):
         return self.alias if self.alias else self.name
 
-    def __eq__(self, other):
-        return isinstance(other, GeoLocation) and self.pk == other.pk
+    #
+    # def __eq__(self, other):
+    #     return isinstance(other, GeoLocation) and self.pk == other.pk
 
     @staticmethod
     def recompute_counts(cities, countries):
@@ -195,28 +239,20 @@ class GeoLocation(models.Model):
 
 
 class GeoCountry(GeoLocation):
-    alpha_2 = models.CharField(max_length=2)
+    alpha_2 = models.CharField(max_length=2, unique=True)
 
     @property
     def papers(self):
         return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
 
-    @property
-    def is_country(self):
-        return True
-
 
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
 
-    @property
-    def is_city(self):
-        return True
-
 
 class GeoNameResolution(models.Model):
-    source_name = models.CharField(max_length=50)
-    target_name = models.CharField(max_length=50, null=True)
+    source_name = models.CharField(unique=True, max_length=50)
+    target_geonames_id = models.IntegerField(null=True, default=None)
 
 
 class Paper(models.Model):
@@ -264,6 +300,7 @@ class Paper(models.Model):
     last_scrape = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+    location_modified = models.BooleanField(default=False)
 
     @property
     def highlighted_authors(self):
@@ -314,8 +351,13 @@ class Paper(models.Model):
 class GeoLocationMembership(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
-    word = models.CharField(max_length=50)
+    word = models.CharField(max_length=50, null=True, default=None)
     state = models.IntegerField(choices=VerificationState.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'location'], name='Paper and Location')
+        ]
 
 
 class CategoryMembership(models.Model):

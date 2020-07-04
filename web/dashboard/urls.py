@@ -15,4 +15,8 @@ urlpatterns = [
     path('data-import/delete-archive/<path:archive_path>', delete_archive, name='delete_archive'),
     path('locations', locations, name='locations'),
     path('locations/<int:id>', show_location, name='show-location'),
+    path('locations/delete/<int:location_id>', delete_location, name='delete_location'),
+    path('locations/delete-membership/', delete_location_membership, name='delete_location_membership'),
+    path('locations/edit/<int:location_id>', edit_location, name='edit_location'),
+    path('locations/add/<path:doi>', add_location, name='add_location'),
 ]

@@ -13,6 +13,7 @@ from data.models import (
     DataSource,
     GeoCity,
     GeoCountry,
+    GeoLocation,
     GeoLocationMembership,
     GeoNameResolution,
     Journal,
@@ -24,8 +25,10 @@ from django.utils.timezone import make_aware
 from PIL import Image
 from tasks.colors import Red
 
+
 class ImportMappings:
     """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
+
     def __init__(self):
         self.journal_mapping = {}
         self.paperhost_mapping = {}
@@ -166,11 +169,11 @@ class DataImport:
 
             for id, country in countries.items():
                 try:
-                    db_country = GeoCountry.objects.get(name=country["name"])
+                    db_country = GeoCountry.objects.get(geonames_id=country["geonames_id"])
                 except GeoCountry.DoesNotExist:
-                    db_country = GeoCountry(name=country["name"], alias=country["alias"],
-                                            latitude=country["latitude"], longitude=country["longitude"],
-                                            alpha_2=country["alpha_2"])
+                    db_country = GeoCountry(geonames_id=country["geonames_id"], name=country["name"],
+                                            alias=country["alias"], latitude=country["latitude"],
+                                            longitude=country["longitude"], alpha_2=country["alpha_2"])
                     self.statistics.countries_created += 1
                     db_country.save()
 
@@ -178,9 +181,9 @@ class DataImport:
 
             for id, city in cities.items():
                 try:
-                    db_city = GeoCity.objects.get(name=city["name"])
+                    db_city = GeoCity.objects.get(geonames_id=city["geonames_id"])
                 except GeoCity.DoesNotExist:
-                    db_city = GeoCity(name=city["name"], alias=city["alias"],
+                    db_city = GeoCity(geonames_id=city["geonames_id"], name=city["name"], alias=city["alias"],
                                       latitude=city["latitude"], longitude=city["longitude"],
                                       country=self._mappings.location_mapping[city["country_id"]])
                     self.statistics.cities_created += 1
@@ -214,7 +217,7 @@ class DataImport:
         for resolution in geo_name_resolutions:
             if not GeoNameResolution.objects.filter(source_name=resolution["source_name"]).exists():
                 resolutions_to_create.append(GeoNameResolution(source_name=resolution["source_name"],
-                                                               target_name=resolution["target_name"]))
+                                                               target_geonames_id=resolution["target_geonames_id"]))
         GeoNameResolution.objects.bulk_create(resolutions_to_create)
         self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
 
@@ -335,6 +338,7 @@ class DataImport:
                 # Set paper locations if they were not set (even on existing papers)
                 if paper["locations"]:
                     self.statistics.papers_w_new_location += 1
+                    db_paper.location_modified = paper["location_modified"]
                 for location in paper["locations"]:
                     membership = GeoLocationMembership(paper=db_paper,
                                                        location=self._mappings.location_mapping[location["id"]],
@@ -353,6 +357,8 @@ class DataImport:
              self._mappings.doi_to_author_mapping.items()
              for author in authors]
         )
+        # recompute counts because post save signals are not triggered on bulk create
+        GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
 
     def import_data(self, filepath):
         """Imports database data from .tar.gz archive to database."""
@@ -362,6 +368,11 @@ class DataImport:
         with tarfile.open(filepath) as tar:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
+
+            export_version = data["export_version"] if "export_version" in data else None
+            if not export_version:
+                self.log("Export data does not contain version. Is the export too old? Aborting.")
+                return
 
             # Backward compatibility: only import the things that have been exported.
             import_journals = "journals" in data
@@ -398,8 +409,8 @@ class DataImport:
             paper_information = self._compute_updatable_papers(data["papers"])
 
             self._import_paperdata(self.progress(data["papers"], proportion=0.3), paper_information)
-            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"], import_locations,
-                                import_ml_categories, import_journals, tar)
+            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"],
+                                import_locations, import_ml_categories, import_journals, tar)
 
         self.log("Starting cleanup")
         self._cleanup_models()

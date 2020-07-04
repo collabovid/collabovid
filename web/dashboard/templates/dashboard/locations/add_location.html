@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    <div class="container">
+            <h1 class="h1">Add location to {{ paper.doi }}</h1>
+
+            <div class="row">
+                <form action="{% url "add_location" paper.doi %}" method="post">
+                    {% csrf_token %}
+                    <label>Geonames ID:</label>
+                    <input type="number" name="geonames_id" min="1" step="1"/>
+                    <button class="btn btn-outline-primary" type="submit">Add</button>
+                </form>
+            </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

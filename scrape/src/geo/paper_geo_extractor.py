@@ -1,6 +1,6 @@
 import pycountry
 
-from data.models import GeoCity, GeoCountry, GeoLocationMembership, GeoNameResolution, VerificationState
+from data.models import GeoLocation, GeoLocationMembership, GeoNameResolution, VerificationState
 from src.geo.geo_parser import GeoParser
 
 
@@ -14,7 +14,7 @@ class PaperGeoExtractor:
     LOCATION_SKIPPED = 2
 
     def __init__(self, db_path):
-        name_resolutions = {x.source_name: x.target_name for x in GeoNameResolution.objects.iterator()}
+        name_resolutions = {x.source_name: x.target_geonames_id for x in GeoNameResolution.objects.iterator()}
         self.geo_parser = GeoParser(db_path=db_path, name_resolutions=name_resolutions)
 
     def __enter__(self):
@@ -30,32 +30,10 @@ class PaperGeoExtractor:
         locations, ignored_entities = self.geo_parser.parse(paper.title, merge=True)
         creation_states = []
 
-        for location, usage, country in locations:
+        for location, usage in locations:
             word = usage['word'].strip()
 
-            # Add the country (possibly the location) or the country that contains the location
-            try:
-                db_country = GeoCountry.objects.get(alpha_2=location.country_code)
-                created = False
-            except GeoCountry.DoesNotExist:
-                db_country = GeoCountry.objects.create(
-                    name=country.name,
-                    alias=pycountry.countries.get(alpha_2=country.country_code).name,
-                    alpha_2=country.country_code,
-                    latitude=country.latitude,
-                    longitude=country.longitude,
-                )
-                created = True
-
-            if location.feature_label.startswith('A.PCL'):
-                db_location = db_country
-            else:
-                db_location, created = GeoCity.objects.get_or_create(
-                    name=location.name,
-                    country=db_country,
-                    latitude=location.latitude,
-                    longitude=location.longitude,
-                )
+            db_location, created = GeoLocation.get_or_create_from_geonames_object(location)
 
             if not paper.locations.filter(pk=db_location.pk).exists():
 

@@ -1,13 +1,22 @@
 import csv
+import re
 from datetime import datetime, timedelta
 from functools import total_ordering
 from timeit import default_timer as timer
 
-from sqlalchemy import and_, Column, create_engine, Date, Float, ForeignKey, func, Integer, or_, String
+from sqlalchemy import and_, Column, create_engine, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
 Base = declarative_base()
+
+
+class GeonamesDBError(Exception):
+    def __init__(self, msg=None):
+        self.msg = msg
+
+    def __repr__(self):
+        return self.msg
 
 
 class TimeZone(Base):
@@ -23,7 +32,7 @@ class TimeZone(Base):
 class Location(Base):
     __tablename__ = 'location'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False, index=True)
     ascii_name = Column(String, nullable=False, index=True)
     latitude = Column(Float)
@@ -41,7 +50,9 @@ class Location(Base):
     dem = Column(Integer)
     timezone_id = Column(Integer, ForeignKey('timezone.id'))
     modification_date = Column(Date)
+    country_id = Column(Integer, ForeignKey('location.id'))
 
+    country = relationship('Location', remote_side=[id])
     aliases = relationship('Alias', backref='location', order_by='Alias.id')
 
     @property
@@ -59,9 +70,9 @@ class Location(Base):
         )
 
     def __lt__(self, other):
-        if self.feature_value != other.feature_value:
-            return self.feature_value < other.feature_value
-        return self.population < other.population
+        if self.population != other.population:
+            return self.population < other.population
+        return self.feature_value < other.feature_value
 
 
 class Alias(Base):
@@ -146,18 +157,38 @@ class GeonamesDB:
         Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
         core_session = Session()
 
-        def _int_or_none(x):
+        timezones, buffer_tz, buffer_loc, buffer_alias = [], [], [], []
+        country_mapping = {}
+
+        def int_or_none(x):
             return int(x) if x else None
 
-        def _float_or_none(x):
+        def float_or_none(x):
             return float(x) if x else None
+
+        def insert_data():
+            nonlocal buffer_loc, buffer_tz, buffer_alias
+            engine.execute(TimeZone.__table__.insert(), buffer_tz)
+            engine.execute(Location.__table__.insert(), buffer_loc)
+            engine.execute(Alias.__table__.insert(), buffer_alias)
+            buffer_tz, buffer_loc, buffer_alias = [], [], []
 
         if not self.session:
             self.connect()
+
         with open(path, 'r') as tsv_file:
             reader = csv.reader(tsv_file, delimiter='\t')
-            timezones, buffer_tz, buffer_loc, buffer_alias = [], [], [], []
             time = timer()
+
+            for idx, row in enumerate(reader):
+                if row[6] == 'A' and re.match(r'^(PCL[^H]*)$', row[7]):
+                    country_code = row[8]
+                    if country_code in country_mapping:
+                        raise Exception(f"Duplicate country code: {country_code}")
+                    country_mapping[country_code] = row[0]
+
+            tsv_file.seek(0)
+
             for idx, row in enumerate(reader):
                 if idx % 100000 == 0:
                     print(f"{idx}, {timedelta(seconds=timer() - time)}")
@@ -165,6 +196,14 @@ class GeonamesDB:
 
                 if row[6] not in ('A', 'P'):
                     continue
+
+                country_code = row[8]
+                if country_code:
+                    if country_code not in country_mapping:
+                        continue
+                    country_id = country_mapping[country_code]
+                else:
+                    country_id = None
 
                 tz_name = row[17].strip()
                 if tz_name:
@@ -177,7 +216,7 @@ class GeonamesDB:
                 else:
                     tz_id = None
 
-                pk = _int_or_none(row[0])
+                pk = int_or_none(row[0])
                 name = row[1].strip()
                 ascii_name = row[2].strip()
 
@@ -186,29 +225,31 @@ class GeonamesDB:
                     'name': name,
                     'ascii_name': ascii_name,
                     # ignore row 3, contains aliases
-                    'latitude': _float_or_none(row[4]),
-                    'longitude': _float_or_none(row[5]),
+                    'latitude': float_or_none(row[4]),
+                    'longitude': float_or_none(row[5]),
                     'feature_class': row[6],
                     'feature_code': row[7],
-                    'country_code': row[8],
+                    'country_code': country_code,
                     'cc2': row[9],
                     'admin1_code': row[10],
                     'admin2_code': row[11],
                     'admin3_code': row[12],
                     'admin4_code': row[13],
-                    'population': _int_or_none(row[14]),
-                    'elevation': _int_or_none(row[15]),
-                    'dem': _int_or_none(row[16]),
+                    'population': int_or_none(row[14]),
+                    'elevation': int_or_none(row[15]),
+                    'dem': int_or_none(row[16]),
                     'timezone_id': tz_id,
                     'modification_date': datetime.strptime(row[18], "%Y-%m-%d") if row[18] else None,
+                    'country_id': country_id,
                 })
 
-                aliases = {name.lower(), ascii_name.lower(), *[alias.strip().lower() for alias in row[3].split(",")]}
-                buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases]
+                aliases = {name.lower(), ascii_name.lower(), *[alias.strip().lower()
+                                                               for alias in row[3].split(",")]}
+                buffer_alias += [{'name': alias, 'location_id': pk} for alias in aliases if alias]
 
                 if len(buffer_loc) % 100000 == 0:
-                    engine.execute(TimeZone.__table__.insert(), buffer_tz)
-                    engine.execute(Location.__table__.insert(), buffer_loc)
-                    engine.execute(Alias.__table__.insert(), buffer_alias)
-                    buffer_tz, buffer_loc, buffer_alias = [], [], []
+                    insert_data()
+
+            if len(buffer_loc) > 0:
+                insert_data()
             core_session.close()

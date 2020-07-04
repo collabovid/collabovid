@@ -53,6 +53,9 @@
                         {% if paper.locations %}
                             {% include "search/partials/paper_card/_locations_badge.html" with locations=paper.ordered_locations %}
                         {% endif %}
+                        {% if user.is_authenticated and user.is_staff %}
+                            <a href="{% url "add_location" paper.doi %}">[Add location]</a>
+                        {% endif %}
                     </div>
                     <i class="fas fa-clock"></i> {{ paper.published_at }}
                     &nbsp;|&nbsp;

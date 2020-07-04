@@ -1,10 +1,9 @@
-import os
 from tasks.task_runner import TaskRunner
 from src.geo.task_geo_parser import GeoParserTask
-from src.task_medrxiv_update import MedBiorxivNewArticlesTask
-from src.task_arxiv_update import ArxivNewArticlesTask
-from src.task_pubmed_update import PubmedNewArticlesTask
-from src.task_elsevier_update import ElsevierNewArticlesTask
+from src.task_medrxiv_update import MedBiorxivUpdateTask
+from src.task_arxiv_update import ArxivUpdateTask
+from src.task_pubmed_update import PubmedUpdateTask
+from src.task_elsevier_update import ElsevierUpdateTask
 
 from tasks.definitions import Runnable, register_task
 from tasks.launcher.task_launcher import get_task_launcher
@@ -12,43 +11,44 @@ from django.conf import settings
 
 
 @register_task
-class ScrapeTask(Runnable):
+class UpdateExistingTask(Runnable):
     @staticmethod
     def task_name():
-        return "scrape"
+        return "update-existing-articles"
 
     def __init__(self,
                  *args, **kwargs):
-        super(ScrapeTask, self).__init__(*args, **kwargs)
+        super(UpdateExistingTask, self).__init__(*args, **kwargs)
 
     def run(self):
-        self.log("Get new medRxiv/bioRxiv articles...")
-        TaskRunner.run_task(MedBiorxivNewArticlesTask,
+        self.log("Updating medRxiv/bioRxiv articles...")
+        TaskRunner.run_task(MedBiorxivUpdateTask,
                             started_by=self._task.started_by)
-        self.log("Finished getting new medRxiv/bioRxiv articles...")
-
-        self.progress(10)
-
-        self.log("Get new arXiv articles...")
-        TaskRunner.run_task(ArxivNewArticlesTask,
-                            started_by=self._task.started_by)
+        self.log("Finished updating medRxiv/bioRxiv articles...")
 
         self.progress(20)
 
-        self.log("Finished getting new arXiv articles...")
-
-        self.log("Get new Elsevier articles...")
-        TaskRunner.run_task(ElsevierNewArticlesTask,
+        self.log("Updating arXiv articles...")
+        TaskRunner.run_task(ArxivUpdateTask,
                             started_by=self._task.started_by)
 
         self.progress(40)
 
-        self.log("Get new Pubmed articles...")
-        TaskRunner.run_task(PubmedNewArticlesTask,
+        self.log("Finished updating arXiv articles...")
+
+        self.log("Updating Elsevier articles...")
+        TaskRunner.run_task(ElsevierUpdateTask,
                             started_by=self._task.started_by)
-        self.log("Finished getting new Pubmed articles...")
+        self.log("Finished updating Elsevier articles...")
 
         self.progress(60)
+
+        self.log("Updating Pubmed articles...")
+        TaskRunner.run_task(PubmedUpdateTask,
+                            started_by=self._task.started_by)
+        self.log("Finished updating Pubmed articles...")
+
+        self.progress(70)
 
         if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")
