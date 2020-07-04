@@ -8,6 +8,13 @@ spec:
       labels:
         context: elasticsearch-pv
     spec:
+      initContainers:
+        - name: ebs-volume-ownership
+          image: busybox:1.29.2
+          command: ["chmod", "-R", "777", "/usr/share/elasticsearch/data"]
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
       volumes:
       - name: data
         persistentVolumeClaim:

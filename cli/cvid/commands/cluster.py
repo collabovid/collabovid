@@ -21,7 +21,7 @@ class ClusterCommand(KubectlCommand):
         if not args.resource and args.all:
             if args.command == 'restart':
                 for file in os.listdir(self.k8s_dist_env_path):
-                    if file.startswith('deployment') or file.startswith('daemonset'):
+                    if file.startswith('deployment') or file.startswith('daemonset') or file.startswith('statefulset'):
                         kubectl_args += f" -f {join(self.k8s_dist_env_path, file)}"
             else:
                 kubectl_args = '-f ' + self.k8s_dist_env_path

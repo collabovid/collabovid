@@ -123,6 +123,8 @@ class SearchEngine:
             except CategoryMembership.DoesNotExist:
                 raise Exception("Filtering yielded incorrect papers for category")
 
+        return score_table
+
     def search(self):
 
         query = self.form["query"].strip()

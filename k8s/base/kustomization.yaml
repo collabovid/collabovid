@@ -18,3 +18,4 @@ resources:
   - job-litcovid-init.yaml
   - job-locations-init.yaml
   - elasticsearch.yaml
+  - job-elasticsearch-setup-index.yaml
