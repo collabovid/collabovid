@@ -17,9 +17,7 @@
 
     <form id="paper-search-form" method="post" action="{% url "search" %}">
         {% csrf_token %}
-        <input type="hidden" name="tab" value="top">
         <input id="locations-input" type="hidden" name="locations" value="">
-
     </form>
 
     <div class="container mt-5">
