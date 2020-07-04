@@ -32,29 +32,34 @@ class UpdateCategoryAssignment(Runnable):
         else:
             papers = Paper.objects.filter(categories=None)
 
-        self.log("Categorizing", papers.count(), "papers")
+        papers_count = papers.count()
 
-        for paper, result in self.progress(classifier.prediction_iterator(papers), length=papers.count()):
+        if not papers_count or papers_count == 0:
+            self.log("No new papers to categorize")
+        else:
+            self.log("Categorizing", papers.count(), "papers")
 
-            found_matching_category = False
+            for paper, result in self.progress(classifier.prediction_iterator(papers), length=papers.count()):
 
-            for category, score in result.items():
-                if score > self._category_threshold:
-                    found_matching_category = True
-                    paper.categories.add(Category.objects.get(model_identifier=category), through_defaults={
-                        'score': (score - self._category_threshold) * 2
+                found_matching_category = False
+
+                for category, score in result.items():
+                    if score > self._category_threshold:
+                        found_matching_category = True
+                        paper.categories.add(Category.objects.get(model_identifier=category), through_defaults={
+                            'score': (score - self._category_threshold) * 2
+                        })
+                        paper.save()
+
+                if not found_matching_category:
+                    best_matching_category, score = max(result.items(), key=lambda x: x[1])
+
+                    self.log("Found paper", paper.doi, "with no good matching category. Assigned it to",
+                             best_matching_category, "where it has score", score)
+
+                    paper.categories.add(Category.objects.get(model_identifier=best_matching_category), through_defaults={
+                        'score': 0
                     })
                     paper.save()
-
-            if not found_matching_category:
-                best_matching_category, score = max(result.items(), key=lambda x: x[1])
-
-                self.log("Found paper", paper.doi, "with no good matching category. Assigned it to",
-                         best_matching_category, "where it has score", score)
-
-                paper.categories.add(Category.objects.get(model_identifier=best_matching_category), through_defaults={
-                    'score': 0
-                })
-                paper.save()
 
         self.log("Finished updating category assignment")

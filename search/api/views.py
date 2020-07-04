@@ -21,7 +21,6 @@ def search(request):
         if not wait_until(semantic_paper_search.is_ready):
             return HttpResponseBadRequest("Semantic Paper Search is not initialized yet")
 
-        score_min = float(request.GET.get("score_min", "0"))
         form = json.loads(request.GET.get('form'))
         search_engine = SearchEngine(form)
         search_result = TimerUtilities.time_function(search_engine.search)

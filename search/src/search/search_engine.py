@@ -55,6 +55,7 @@ class SearchEngine:
 
         if article_type != SearchEngine.ARTICLE_TYPE_ALL:
             papers = papers.filter(is_preprint=(article_type == SearchEngine.ARTICLE_TYPE_PREPRINTS))
+            filtered = True
 
         if category_ids and len(category_ids) > 0:
             papers = papers.filter(categories__pk__in=category_ids)
@@ -63,8 +64,8 @@ class SearchEngine:
         if location_ids and len(location_ids) > 0:
             countries = GeoCountry.objects.filter(pk__in=location_ids)
             cities = GeoCity.objects.filter(Q(pk__in=location_ids) | Q(country__in=countries))
-
             papers = papers.filter(Q(locations__in=cities) | Q(locations__in=countries))
+            filtered = True
 
         if journal_ids and len(journal_ids) > 0:
             journals = Journal.objects.filter(pk__in=journal_ids)
@@ -133,7 +134,6 @@ class SearchEngine:
         paper_score_table = defaultdict(int)
 
         if query:
-
             filtered_dois = None
 
             if filtered:

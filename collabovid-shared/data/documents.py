@@ -70,3 +70,11 @@ class PaperDocument(Document):
         model = Paper
 
         related_models = [Author]
+
+    def get_instances_from_related(self, related_instance):
+        """If related_models is set, define how to retrieve the paper instance(s) from the related model.
+        The related_models option should be used with caution because it can lead in the index
+        to the updating of a lot of items.
+        """
+        if isinstance(related_instance, Author):
+            return related_instance.publications.all()

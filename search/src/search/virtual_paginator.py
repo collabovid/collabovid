@@ -13,8 +13,8 @@ class VirtualPaginator:
     def __init__(self, search_results: dict, form: dict):
 
         self._form = form
-        print(form['sorted_by'])
-        if form['sorted_by'] == 'newest':
+
+        if form['sorted_by'] == 'newest' or not form['query'].strip(): # If no query is given we sort by newest.
             self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",
                                                                                            "-created_at")
         elif form['sorted_by'] == 'top':
