@@ -308,6 +308,11 @@ class DeleteCandidate(models.Model):
     false_positive = models.BooleanField(default=False)
     score = models.FloatField(default=1)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'type'], name='Paper and Type')
+        ]
+
 
 class GeoLocationMembership(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)

@@ -11,13 +11,15 @@ from django.conf import settings
 
 from data.models import (
     CategoryMembership,
+    DeleteCandidate,
     GeoLocationMembership,
-    GeoNameResolution
+    GeoNameResolution,
+    IgnoredPaper
 )
 
 
 class DataExport:
-    EXPORT_VERSION = 1
+    EXPORT_VERSION = 2
 
     @staticmethod
     def download_image(url):
@@ -33,6 +35,16 @@ class DataExport:
                 for resolution in GeoNameResolution.objects.all()]
 
     @staticmethod
+    def _export_ignored_papers():
+        return [paper.doi for paper in IgnoredPaper.objects.all()]
+
+    @staticmethod
+    def _export_delete_candidates():
+        return [{"doi": candidate.paper.doi, "type": candidate.type,
+                 "fp": candidate.false_positive, "score": candidate.score}
+                for candidate in DeleteCandidate.objects.all()]
+
+    @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
         """Exports database data in json format and preview images to a tar.gz archive.
         Returns the path to the newly created archive."""
@@ -43,7 +55,6 @@ class DataExport:
         journals = {}
         categories_ml = {}
         locations = {}
-        geo_name_resolutions = DataExport._export_geo_name_resolutions()
         papers = []
 
         if not os.path.exists(out_dir):
@@ -159,6 +170,10 @@ class DataExport:
 
                     papers.append(paper_data)
 
+                geo_name_resolutions = DataExport._export_geo_name_resolutions()
+                ignored_papers = DataExport._export_ignored_papers()
+                delete_candidates = DataExport._export_delete_candidates()
+
                 data = {
                     "export_version": DataExport.EXPORT_VERSION,
                     "authors": authors,
@@ -167,7 +182,9 @@ class DataExport:
                     "journals": journals,
                     "categories_ml": categories_ml,
                     "locations": locations,
-                    "geo_name_resolutions": geo_name_resolutions
+                    "geo_name_resolutions": geo_name_resolutions,
+                    "ignored_papers": ignored_papers,
+                    "delete_candidates": delete_candidates,
                 }
 
                 with open(json_path, "w") as file:
@@ -186,7 +203,7 @@ class DataExport:
 
         end = timer()
 
-        log(f"Finished export in {timedelta(seconds=end - start)}")
+        log(f"Finished export (version {DataExport.EXPORT_VERSION}) in {timedelta(seconds=end - start)}")
         log("Exported")
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
@@ -195,6 +212,8 @@ class DataExport:
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{len(geo_name_resolutions)} geo name resolutions")
+        log(f"\t{len(ignored_papers)} ignored papers")
+        log(f"\t{len(delete_candidates)} delete candidates")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 
