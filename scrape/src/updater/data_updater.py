@@ -2,7 +2,7 @@ from datetime import timedelta
 from time import sleep
 from timeit import default_timer as timer
 
-from data.models import Author, DataSource, Journal, Paper, PaperData, PaperHost
+from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperData, PaperHost
 from django.db import transaction
 from django.db.models import F
 from django.db.utils import DataError as DjangoDataError, IntegrityError
@@ -194,6 +194,9 @@ class ArticleDataPoint(object):
             raise MissingDataError("Couldn't extract abstract")
         if not published_at:
             raise MissingDataError("Couldn't extract date")
+
+        if IgnoredPaper.objects.filter(doi=doi).exists():
+            raise SkipArticle("Article DOI is on ignore list")
 
         with transaction.atomic():
             try:
