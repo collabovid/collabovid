@@ -25,11 +25,6 @@
             "description": "No description provided.",
             "parameters": []
         },
-        "parse-geo-locations": {
-            "name": "Parse Geo Locations",
-            "description": "",
-            "parameters": []
-        },
         "update-arxiv": {
             "name": "Update Arxiv",
             "description": "No description provided.",
@@ -158,6 +153,16 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "parse-geo-locations": {
+            "name": "Parse Geo Locations",
+            "description": "",
+            "parameters": []
+        },
+        "detect-non-english-papers": {
+            "name": "Detect Non English Papers",
+            "description": "Determines papers with titles or abstract not in english",
+            "parameters": []
         }
     },
     "search": {

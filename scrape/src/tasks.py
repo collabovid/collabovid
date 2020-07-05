@@ -8,3 +8,4 @@ from src.task_data_import import ImportDataTask
 from src.task_data_export import ExportDataTask
 from src.task_elsevier_update import ElsevierUpdateTask, ElsevierNewArticlesTask
 from src.geo.task_geo_parser import GeoParserTask
+from src.language_detection.task_language_detection import LanguageDetectionTask

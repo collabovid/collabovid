@@ -1,9 +1,21 @@
+import json
+
 from django.conf import settings
+from django.db import transaction
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
-from data.models import GeoCity, GeoLocation, GeoCountry, GeoLocationMembership, GeoNameResolution, Paper
+from data.models import (
+    DeleteCandidate,
+    GeoCity,
+    GeoLocation,
+    GeoCountry,
+    GeoLocationMembership,
+    GeoNameResolution,
+    IgnoredPaper,
+    Paper,
+)
 from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
 from django.contrib import messages
@@ -291,3 +303,31 @@ def location_sanitizing(request):
 
     return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
                   {'location_papers': location_memberships, 'debug': settings.DEBUG})
+
+@staff_member_required
+def language_detection(request):
+    if request.method == 'GET':
+        candidates = DeleteCandidate.objects.filter(
+                type=DeleteCandidate.Type.LANGUAGE, false_positive=False).order_by('-score').select_related('paper')
+        return render(request, 'dashboard/language_detection/language_detection.html',
+                      {'candidates': candidates, 'debug': settings.DEBUG})
+    elif request.method == 'POST':
+        paper_doi = request.POST.get('paper_doi')
+        action = request.POST.get('action')
+
+        if action == 'delete':
+            paper = Paper.objects.get(doi=paper_doi)
+            with transaction.atomic():
+                paper.delete()
+                IgnoredPaper.objects.create(doi=paper_doi)
+        elif action == 'ignore':
+            candidate = DeleteCandidate.objects.get(paper_id=paper_doi, type=DeleteCandidate.Type.LANGUAGE)
+            candidate.false_positive = True
+            candidate.save()
+        else:
+            return HttpResponseNotFound()
+
+        return HttpResponse(
+            json.dumps({'status': 'success'}),
+            content_type="application/json"
+        )

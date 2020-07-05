@@ -256,6 +256,8 @@ class GeoNameResolution(models.Model):
 
 
 class Paper(models.Model):
+    MAX_DOI_LENGTH = 100
+
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
@@ -266,7 +268,7 @@ class Paper(models.Model):
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
-    doi = models.CharField(max_length=100, primary_key=True)
+    doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
@@ -339,13 +341,33 @@ class Paper(models.Model):
 
     def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
-        self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None),
+        self.preview_image.save(img_name,
+                                InMemoryUploadedFile(
+                                    pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
                                 save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class IgnoredPaper(models.Model):
+    doi = models.CharField(max_length=Paper.MAX_DOI_LENGTH, primary_key=True)
+
+
+class DeleteCandidate(models.Model):
+    class Type(models.IntegerChoices):
+        LANGUAGE = 0, gettext_lazy('Language')
+
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    type = models.IntegerField(choices=Type.choices)
+    false_positive = models.BooleanField(default=False)
+    score = models.FloatField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'type'], name='Paper and Type')
+        ]
 
 
 class GeoLocationMembership(models.Model):
@@ -395,6 +417,31 @@ def membership_changed(sender, instance, **kwargs):
                           action="post_add", pk_set={}, **kwargs)
 
 
+def paper_deleted(sender, instance, **kwargs):
+    for author in list(instance.authors.all()):
+        if author.publications.count() == 0:
+            author.delete()
+
+    if instance.journal and instance.journal.papers.count() == 0:
+        instance.journal.delete()
+
+    if instance.data:
+        instance.data.delete()
+
+
+def paper_ignored(sender, instance, **kwargs):
+    """
+    Delete associated paper from database, if exists.
+    If the list of ignored papers is loaded as an initial fixture, the 'raw' argument is passed. In that case, the
+    deletion of the papers should be done manually.
+    See https://docs.djangoproject.com/en/dev/ref/signals/#post-save
+    """
+    if not kwargs['raw']:
+        Paper.objects.filter(doi=instance.doi).delete()
+
+
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
 post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(paper_deleted, sender=Paper, dispatch_uid="models.data")
+post_save.connect(paper_ignored, sender=IgnoredPaper, dispatch_uid="models.data")
