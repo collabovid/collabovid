@@ -5,6 +5,7 @@ metadata:
   labels:
     type: amazonEBS
 spec:
+  storageClassName: elastic
   capacity:
     storage: 16Gi
   accessModes:
@@ -19,6 +20,7 @@ metadata:
   labels:
     type: amazonEBS
 spec:
+  storageClassName: elastic
   accessModes:
     - ReadWriteOnce
   resources:

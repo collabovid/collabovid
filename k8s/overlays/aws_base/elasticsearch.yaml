@@ -19,3 +19,5 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: elasticsearch-pvc
+      nodeSelector:
+        node.kubernetes.io/instance-type: t3.large

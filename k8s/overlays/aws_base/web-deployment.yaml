@@ -9,3 +9,5 @@ spec:
         - name: resources
           hostPath:
             path: /opt/resources
+      nodeSelector:
+        node.kubernetes.io/instance-type: t3.small

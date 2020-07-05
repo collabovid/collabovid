@@ -104,27 +104,29 @@
 
             <div class="flex-fill" style="min-width: 0;">
                 <div id="paper-result-options-container" style="display: none;">
-                    <div class="row mt-3 align-items-center ml-0 mr-0">
-                        <div class="col-6 col-lg-6 pl-4">
+                    <div class="d-flex flex-row mt-3">
+                        <div class="flex-grow-0">
 
-                            <div class="d-flex flex-row text-muted align-items-center">
+                            <div class="d-flex flex-row text-muted">
                                 <div>
                                     <i class="fas fa-info-circle text-muted"></i>
                                 </div>
                                 <div class="pl-2 pr-0 pt-0 pb-0 text-left">
                                     We found
                                     <span class="font-weight-bold" id="result-size-container"></span>
-                                    results that match your query.
+                                    results that match your query. If you want to find out how these results are calculated
+                                    read the <a href="{% url 'about' %}">frequently asked questions</a>.
                                 </div>
                             </div>
                         </div>
-                        <div class="col-6 text-right">
+                        <div class="flex-grow-0 flex-shrink-0 search-info-container text-right">
                             <form class="search-form">
                                 <div class="form-group mb-0 pb-0 pr-0">
 
-                                    <label id="statistics-label" class="mb-1 mb-md-0 pb-0" for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">
+                                    <label id="statistics-label"
+                                           class="mb-1 mb-md-0 pb-0" for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">
                                         <button type="button" class="btn btn-info b-none">
-                                            <i class="d-none d-sm-inline fas fa-chart-area"></i> <span class="d-none d-sm-inline">Show</span> Statistics
+                                            <i class="fas fa-chart-area"></i> Show Statistics
                                         </button>
                                     </label>
                                     <label for="sorted-by" class="mb-0 pb-0">

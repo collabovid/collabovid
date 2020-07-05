@@ -12,3 +12,4 @@ patchesStrategicMerge:
   - sync-daemon.yaml
   - web-deployment.yaml
   - elasticsearch.yaml
+  - scrape.yaml

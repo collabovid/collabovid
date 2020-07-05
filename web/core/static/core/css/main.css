@@ -460,8 +460,21 @@ label.nav-link {
     border-radius: .25rem;
 }
 
-#statistics-label > button
-{
+#statistics-label > button {
     margin-top: -3px;
     border: 1px solid #ced4da;
+}
+
+.search-info-container {
+    flex: 0 0 160px;
+}
+
+.search-info-container label > button , .search-info-container label > select {
+    width: 160px;
+}
+
+@media (min-width: 768px) {
+    .search-info-container {
+        flex: 0 0 340px;
+    }
 }
