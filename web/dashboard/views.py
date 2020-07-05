@@ -32,7 +32,7 @@ import os
 
 @staff_member_required
 def tasks(request):
-    tasks = Task.objects.all().order_by('-started_at')
+    tasks = Task.objects.order_by('-started_at')
     return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks, 'debug': settings.DEBUG})
 
 
@@ -109,7 +109,7 @@ def delete_all_finished(request):
     if request.method == 'POST':
         days = 1
         date_limit = timezone.now() - timedelta(days=days)
-        query = Task.objects.filter(status=Task.STATUS_FINISHED, ended_at__lte=date_limit)
+        query = Task.objects.filter(ended_at__lte=date_limit)
         if query.count() > 0:
             query.delete()
             messages.add_message(request, messages.SUCCESS, 'Deleted All Finished Tasks.')

@@ -10,4 +10,4 @@ spec:
           hostPath:
             path: /opt/resources
       nodeSelector:
-        node.kubernetes.io/instance-type: t3.small
+        node.kubernetes.io/instance-type: t3.large
