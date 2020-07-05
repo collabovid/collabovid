@@ -228,19 +228,15 @@ class DataImport:
         GeoNameResolution.objects.bulk_create(resolutions_to_create)
         self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
 
-    def _import_ignored_papers(self, ignored_papers):
+    def _import_paper_ignore_list(self, ignored_papers):
         """
         Import a list of dois that shall be ignored.
+        Do not create in bulk, since we want to send post_save signals (to delete ignored papers, if present).
         """
-        ignores_to_create = []
         for doi in ignored_papers:
-            try:
-                IgnoredPaper.objects.get(doi=doi)
-            except IgnoredPaper.DoesNotExist:
-                db_ignored_p = IgnoredPaper(doi=doi)
-                ignores_to_create.append(db_ignored_p)
-        IgnoredPaper.objects.bulk_create(ignores_to_create)
-        self.statistics.ignored_papers_created = len(ignores_to_create)
+            ignored_paper, created = IgnoredPaper.objects.get_or_create(doi=doi)
+            if created:
+                self.statistics.ignored_papers_created += 1
 
     def _compute_updatable_papers(self, papers):
         """
@@ -455,7 +451,7 @@ class DataImport:
                                 import_locations, import_ml_categories, import_journals, tar)
 
             if self.export_version > 1:
-                self._import_ignored_papers(data["ignored_papers"])
+                self._import_paper_ignore_list(data["ignored_papers"])
                 self._import_delete_candidates(data["delete_candidates"])
 
         self.log("Starting cleanup")
