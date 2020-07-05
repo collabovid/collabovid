@@ -34,7 +34,7 @@ class UpdateCategoryAssignment(Runnable):
 
         self.log("Categorizing", papers.count(), "papers")
 
-        for paper, result in classifier.prediction_iterator(papers):
+        for paper, result in self.progress(classifier.prediction_iterator(papers), length=papers.count()):
 
             found_matching_category = False
 

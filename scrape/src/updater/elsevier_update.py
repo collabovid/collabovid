@@ -106,7 +106,7 @@ class ElsevierDatapoint(ArticleDataPoint):
 
     @staticmethod
     def update_pdf_data(db_article, extract_image=True, extract_content=True):
-        if not extract_image and not extract_content:
+        if not extract_image:
             return
         with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
             pdf = elsevier.get_pdf(db_article.doi)
@@ -116,8 +116,6 @@ class ElsevierDatapoint(ArticleDataPoint):
             image = PdfFromBytesExtractor.image_from_bytes(pdf, page=2)
             if image:
                 db_article.add_preview_image(image)
-        # TODO: Does not yet extract content from PDF.
-        #  The first page should be excluded for all Elsevier articles (cover page) for content detection
 
 
 class ElsevierUpdater(DataUpdater):

@@ -1,8 +1,6 @@
 from django.conf import settings
 
-from data.models import DataSource, Paper
 from src.updater.pubmed_update import PubmedUpdater
-from src.updater.cord19_fulltext_update import Cord19FulltextUpdater
 from tasks.definitions import register_task, Runnable
 
 
@@ -12,7 +10,7 @@ class PubmedUpdateTask(Runnable):
     def task_name():
         return "update-pubmed"
 
-    def __init__(self, count: int = 10, update_pdf_image: bool = True, *args, **kwargs):
+    def __init__(self, count: int = 100, update_pdf_image: bool = True, *args, **kwargs):
         super(PubmedUpdateTask, self).__init__(*args, **kwargs)
         self.count = count
         self.update_pdf_image = update_pdf_image
@@ -46,5 +44,3 @@ class PubmedNewArticlesTask(Runnable):
 
         updater = PubmedUpdater(log=self.log)
         updater.get_new_data(pdf_content=True, pdf_image=pdf_image, progress=self.progress)
-
-        # Cord19FulltextUpdater.update(papers=Paper.objects.filter(data_source_value=DataSource.PUBMED))
