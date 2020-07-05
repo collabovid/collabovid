@@ -366,14 +366,26 @@ def paper_deleted(sender, instance, **kwargs):
         if author.publications.count() == 0:
             author.delete()
 
-    if instance.journal.papers.count() == 0:
+    if instance.journal and instance.journal.papers.count() == 0:
         instance.journal.delete()
 
     if instance.data:
         instance.data.delete()
 
 
+def paper_ignored(sender, instance, **kwargs):
+    """
+    Delete associated paper from database, if exists.
+    If the list of ignored papers is loaded as an initial fixture, the 'raw' argument is passed. In that case, the
+    deletion of the papers should be done manually.
+    See https://docs.djangoproject.com/en/dev/ref/signals/#post-save
+    """
+    if not kwargs['raw']:
+        Paper.objects.filter(doi=instance.doi).delete()
+
+
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
 post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(paper_deleted, sender=Paper, dispatch_uid="models.data")
+post_save.connect(paper_ignored, sender=IgnoredPaper, dispatch_uid="models.data")

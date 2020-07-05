@@ -24,8 +24,8 @@ class LanguageDetectionTask(Runnable):
 
         language_detector = LanguageDetector()
         for paper in self.progress(Paper.objects.all()):
-            title_lang_prediction = language_detector.detect(paper.title.lower().replace('covid-19', '').replace('sars-cov-2', ''))
-            abs_lang_prediction = language_detector.detect(paper.abstract.lower().replace('covid-19', '').replace('sars-cov-2', ''))
+            title_lang_prediction = language_detector.detect(paper.title.lower())
+            abs_lang_prediction = language_detector.detect(paper.abstract.lower())
 
 
             if not_english_prob(title_lang_prediction) > 0 or not_english_prob(abs_lang_prediction) > 0:
