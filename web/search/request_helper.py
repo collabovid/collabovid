@@ -1,11 +1,12 @@
 import requests
 from django.conf import settings
 import logging
-from data.models import Paper
+from data.models import Paper, Author
 
 from search.forms import SearchForm
 from search.paginator import FakePaginator, ScoreSortPaginator
-
+from search.tagify.tagify_searchable import AuthorSearchable
+import json
 
 class SearchRequestHelper:
 
@@ -68,7 +69,17 @@ class SearchRequestHelper:
                                   per_page=self.response['per_page'],
                                   papers=papers)
 
-        return {'result_type': SearchForm.RESULT_TYPE_PAPERS, 'paginator': paginator, 'result_size': self.response['count']}
+        authors = []
+        for author in self.response['authors']:
+            current_author = Author.objects.get(pk=author['pk'])
+            current_author.display_name = author['full_name']
+            current_author.json_object = json.dumps(AuthorSearchable.single_object(current_author))
+            authors.append(current_author)
+
+        return {'result_type': SearchForm.RESULT_TYPE_PAPERS,
+                'paginator': paginator,
+                'result_size': self.response['count'],
+                'authors': authors}
 
     def _parse_result_statistics(self):
         result_dois = self.response['results']

@@ -56,13 +56,17 @@ class VirtualPaginator:
         paginator = self.build_paginator()
         paginator['page'] = self._form['page']
         paginator['results'] = list()
+        paginator['authors'] = list()
 
         if len(dois_for_page) > 0:
             results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
+            authors = []
 
             if settings.USING_ELASTICSEARCH:
                 ElasticsearchRequestHelper.highlights(results, self._form['query'], ids=dois_for_page)
+                ElasticsearchRequestHelper.authors(authors, self._form['query'], self._form['authors'])
 
             paginator['results'] = sorted(list(results.values()), key=lambda x: x['order'])
+            paginator['authors'] = authors
 
         return paginator

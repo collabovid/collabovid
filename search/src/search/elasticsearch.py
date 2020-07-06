@@ -1,4 +1,4 @@
-from data.documents import PaperDocument
+from data.documents import PaperDocument, AuthorDocument
 
 from elasticsearch_dsl import Q as QEs
 
@@ -93,7 +93,6 @@ class ElasticsearchRequestHelper:
 
         total = search.count()
         search = search[0:total]
-        print(total)
         results = search.execute()
 
         max_score = results.hits.max_score
@@ -113,7 +112,9 @@ class ElasticsearchRequestHelper:
 
         should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
                             ElasticsearchRequestHelper._get_title_match(query) |
-                            ElasticsearchRequestHelper._get_author_match(query))
+                            ElasticsearchRequestHelper._get_author_match(
+                                ElasticsearchQueryHelper.remove_common_words(query))
+                            )
 
         search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
         total = search.count()
@@ -124,6 +125,23 @@ class ElasticsearchRequestHelper:
             score_table[paper.meta.id] = paper.meta.score
 
         return query
+
+    @staticmethod
+    def authors(authors: List, query: str, excluded_author_ids: List, max_author_count: int = 8):
+        search = AuthorDocument.search()
+        search = search.query(QEs('bool',
+                                  should=[QEs('match', full_name={
+                                      'query': ElasticsearchQueryHelper.remove_common_words(query)})],
+                                  must_not=[QEs('ids', values=excluded_author_ids)])) \
+            .highlight('full_name', number_of_fragments=0, fragment_size=0)
+
+        search = search[0:max_author_count]
+        results = search.execute()
+
+        for result in results:
+            if hasattr(result.meta, 'highlight'):
+                if hasattr(result.meta.highlight, 'full_name'):
+                    authors.append({'pk': result.meta.id, 'full_name': result.meta.highlight.full_name[0]})
 
     @staticmethod
     def highlights(page: dict, query: str, ids: List[str]):
@@ -137,7 +155,9 @@ class ElasticsearchRequestHelper:
         should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
                             ElasticsearchRequestHelper._get_abstract_match(query) |
                             ElasticsearchRequestHelper._get_title_match(query) |
-                            ElasticsearchRequestHelper._get_author_match(query))
+                            ElasticsearchRequestHelper._get_author_match(
+                                ElasticsearchQueryHelper.remove_common_words(query)
+                            ))
 
         search = ElasticsearchRequestHelper._build_search_request(must_match, should_match).highlight(
             'title', 'abstract', 'authors.full_name', number_of_fragments=0, fragment_size=0)

@@ -138,6 +138,12 @@ class SearchEngine:
             if filtered:
                 filtered_dois = list(papers.values_list('doi', flat=True))
 
+            if settings.DEBUG:
+                if settings.USING_ELASTICSEARCH:
+                    print("Using elasticsearch")
+                else:
+                    print("Using postgres search")
+
             if self.search_type == SearchEngine.KEYWORD_SEARCH:
                 if settings.USING_ELASTICSEARCH:
                     TimerUtilities.time_function(ElasticsearchRequestHelper.find, paper_score_table, query, ids=filtered_dois)

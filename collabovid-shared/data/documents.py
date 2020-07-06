@@ -27,7 +27,7 @@ class AuthorDocument(Document):
                     'number_of_replicas': 0}
 
     full_name_suggest = fields.CompletionField(attr='full_name_suggest')
-    full_name = fields.CompletionField(attr='full_name')
+    full_name = fields.TextField(attr='full_name')
 
     class Django:
         model = Author
