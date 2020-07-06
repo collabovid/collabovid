@@ -267,7 +267,8 @@ class Paper(models.Model):
         self._highlighted_authors = None
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
-
+    scrape_hash = models.CharField(max_length=22, null=True, default=None)
+    manually_modified = models.BooleanField(default=False)
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
