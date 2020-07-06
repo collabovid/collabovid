@@ -156,12 +156,14 @@
                     <h2 class="display-5 font-weight-light">Most Recent Papers</h2>
                 </div>
 
-                <div class="col-lg-5 d-none d-lg-flex text-center">
-                    <h6 class="font-weight-light">
-                        Categories for papers
-                        from {{ most_recent_paper_date }}
-                    </h6>
-                </div>
+                {% if most_recent_paper_statistics.has_category_data %}
+                    <div class="col-lg-5 d-none d-lg-flex text-center">
+                        <h6 class="font-weight-light" id="categoryDistributionTitle">
+                            Categories for papers
+                            from {{ most_recent_paper_date }}
+                        </h6>
+                    </div>
+                {% endif %}
             </div>
 
             <div class="row display-flex">
@@ -185,10 +187,11 @@
                     </div>
                 </div>
 
-
-                <div class="col-lg-5 d-none d-lg-flex mt-3">
-                    <canvas id="categoryDistributionChart"></canvas>
-                </div>
+                {% if most_recent_paper_statistics.has_category_data %}
+                    <div class="col-lg-5 d-none d-lg-flex mt-3">
+                        <canvas id="categoryDistributionChart"></canvas>
+                    </div>
+                {% endif %}
 
             </div>
         </div>
@@ -232,11 +235,15 @@
         $(document).ready(function () {
             let published_at_data = JSON.parse('{{ statistics.published_at_data|escapejs }}');
             let paper_host_data = JSON.parse('{{ statistics.paper_host_data|escapejs }}');
-            let recent_paper_categories = JSON.parse('{{ most_recent_paper_statistics.category_data|escapejs }}');
+
+            {% if most_recent_paper_statistics.has_category_data %}
+                let recent_paper_categories = JSON.parse('{{ most_recent_paper_statistics.category_data|escapejs }}');
+                $("#categoryDistributionChart").paperCategoryDistribution({plot_data: recent_paper_categories});
+            {% endif %}
+
 
             $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
             $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
-            $("#categoryDistributionChart").paperCategoryDistribution({plot_data: recent_paper_categories});
         });
 
     </script>
