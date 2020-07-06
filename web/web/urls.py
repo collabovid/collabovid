@@ -7,6 +7,7 @@ from django.conf.urls import url
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
+    path('', include('search.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('classification/', include('classification.urls')),
     url(r'^system-health/?', include('health_check.urls'))

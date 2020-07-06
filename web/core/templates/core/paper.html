@@ -150,7 +150,7 @@
         {% else %}
             {% for current_paper in similar_papers %}
                 <div class="my-5">
-                    {% include 'core/partials/_paper_card.html' with html=True paper=current_paper %}
+                    {% include 'search/partials/paper_card/_paper_card.html' with paper=current_paper %}
                 </div>
             {% empty %}
                 <div class="my-5 text-center font-weight-bold">No similar papers found</div>

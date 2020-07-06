@@ -10,6 +10,7 @@ from django.conf import settings
 from .exceptions import CouldNotLoadModel
 from tqdm import tqdm
 
+
 class TransformerPaperVectorizer(PaperVectorizer):
     def __init__(self, matrix_file_name, device='cpu', transformer_model_name='transformer_paper_oubiobert_512', transformer_model_type='bert', max_token_length=512, batch_size=8, *args, **kwargs):
         super(TransformerPaperVectorizer, self).__init__(matrix_file_name=matrix_file_name,
@@ -23,6 +24,21 @@ class TransformerPaperVectorizer(PaperVectorizer):
 
         self._transformer_model_name = transformer_model_name
         self._transformer_model_type = transformer_model_type
+
+    def extract_paper_matrix(self, dois=None):
+        """
+        The method extracts the submatrix for a given doi.
+        It must return a single (possibly)
+        :param dois:
+        :return:
+        """
+        if dois:
+            indices = [self.paper_matrix['id_map'][doi] for doi in dois]
+            matrix = 0.5 * self.paper_matrix['title'][indices, :] + 0.5 * self.paper_matrix['abstract'][indices, :]
+        else:
+            matrix = 0.5 * self.paper_matrix['title'] + 0.5 * self.paper_matrix['abstract']
+
+        return matrix
 
     def _load_models(self):
         model_path = os.path.join(settings.MODELS_BASE_DIR, self._transformer_model_name)

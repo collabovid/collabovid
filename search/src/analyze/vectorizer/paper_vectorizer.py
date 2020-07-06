@@ -63,7 +63,7 @@ class PaperVectorizer:
 
     def similar_to_paper(self, doi: str):
         matrix = self.paper_matrix['matrix']
-        matrix_index = self.paper_matrix['id_map']['doi']
+        matrix_index = self.paper_matrix['id_map'][doi]
         dois, scores = self._compute_similarity_scores(matrix[matrix_index])
         del scores[matrix_index]
         dois = dois[:matrix_index] + dois[matrix_index + 1:]
@@ -195,3 +195,5 @@ class PaperVectorizer:
             return paper_matrix
         else:
             return old_paper_matrix
+
+

@@ -17,3 +17,6 @@ resources:
   - job-pubmed-cleanup.yaml
   - job-litcovid-init.yaml
   - job-locations-init.yaml
+  - elasticsearch.yaml
+  - job-elasticsearch-setup-index.yaml
+  - job-non-english-papers-init.yaml

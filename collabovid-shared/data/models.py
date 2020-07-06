@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
+from itertools import permutations
 
 
 class Topic(models.Model):
@@ -68,19 +69,53 @@ class Journal(models.Model):
     def displayname(self):
         return self.alias if self.alias else self.name
 
+    @property
+    def name_suggest(self):
+        suggestions = [self.name]
+        #suggestions = [' '.join(p) for p in permutations(self.name.split())]
+        #if self.alias:
+        #    suggestions += [' '.join(p) for p in permutations(self.alias.split())]
+        return suggestions
+
     @staticmethod
     def max_length(field: str):
         return Journal._meta.get_field(field).max_length
 
     @staticmethod
     def cleanup():
-        deleted, _ = Journal.objects.filter(papers=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Journal.objects.filter(papers=None).delete()
+        if n_objects_deleted == 0 or 'data.Journal' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Journal']
 
 
 class Author(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Author, self).__init__(*args, **kwargs)
+        self._display_name = None
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
+    @property
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
+    @property
+    def display_name(self):
+        if not self._display_name:
+            self._display_name = self.full_name
+        return self._display_name
+
+    @display_name.setter
+    def display_name(self, value):
+        self._display_name = value
+
+    @property
+    def full_name_suggest(self):
+        return [' '.join(p) for p in permutations(self.full_name.split())]
 
     @staticmethod
     def max_length(field: str):
@@ -88,8 +123,11 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Author.objects.filter(publications=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Author.objects.filter(publications=None).delete()
+        if n_objects_deleted == 0 or 'data.Author' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Author']
 
 
 class Category(models.Model):
@@ -111,8 +149,11 @@ class PaperData(models.Model):
     @staticmethod
     def cleanup():
         used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = PaperData.objects.exclude(id__in=used_data_ids).delete()
+        if n_objects_deleted == 0 or 'data.PaperData' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.PaperData']
 
 
 class VerificationState(models.IntegerChoices):
@@ -215,13 +256,19 @@ class GeoNameResolution(models.Model):
 
 
 class Paper(models.Model):
+    MAX_DOI_LENGTH = 100
+
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
+    def __init__(self, *args, **kwargs):
+        super(Paper, self).__init__(*args, **kwargs)
+        self._highlighted_authors = None
+
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
-    doi = models.CharField(max_length=100, primary_key=True)
+    doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
@@ -258,6 +305,16 @@ class Paper(models.Model):
     location_modified = models.BooleanField(default=False)
 
     @property
+    def highlighted_authors(self):
+        """
+        This attribute is necessary as we want to highlight certain authors.
+        :return:
+        """
+        if not self._highlighted_authors:
+            self._highlighted_authors = [author for author in self.authors.all()]
+        return self._highlighted_authors
+
+    @property
     def countries(self):
         return GeoCountry.objects.filter(Q(pk__in=self.locations.all()) | Q(pk__in=self.cities.values('country')))
 
@@ -284,13 +341,33 @@ class Paper(models.Model):
 
     def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
-        self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None),
+        self.preview_image.save(img_name,
+                                InMemoryUploadedFile(
+                                    pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
                                 save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+
+class IgnoredPaper(models.Model):
+    doi = models.CharField(max_length=Paper.MAX_DOI_LENGTH, primary_key=True)
+
+
+class DeleteCandidate(models.Model):
+    class Type(models.IntegerChoices):
+        LANGUAGE = 0, gettext_lazy('Language')
+
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    type = models.IntegerField(choices=Type.choices)
+    false_positive = models.BooleanField(default=False)
+    score = models.FloatField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'type'], name='Paper and Type')
+        ]
 
 
 class GeoLocationMembership(models.Model):
@@ -340,6 +417,31 @@ def membership_changed(sender, instance, **kwargs):
                           action="post_add", pk_set={}, **kwargs)
 
 
+def paper_deleted(sender, instance, **kwargs):
+    for author in list(instance.authors.all()):
+        if author.publications.count() == 0:
+            author.delete()
+
+    if instance.journal and instance.journal.papers.count() == 0:
+        instance.journal.delete()
+
+    if instance.data:
+        instance.data.delete()
+
+
+def paper_ignored(sender, instance, **kwargs):
+    """
+    Delete associated paper from database, if exists.
+    If the list of ignored papers is loaded as an initial fixture, the 'raw' argument is passed. In that case, the
+    deletion of the papers should be done manually.
+    See https://docs.djangoproject.com/en/dev/ref/signals/#post-save
+    """
+    if not kwargs['raw']:
+        Paper.objects.filter(doi=instance.doi).delete()
+
+
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
 post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(paper_deleted, sender=Paper, dispatch_uid="models.data")
+post_save.connect(paper_ignored, sender=IgnoredPaper, dispatch_uid="models.data")

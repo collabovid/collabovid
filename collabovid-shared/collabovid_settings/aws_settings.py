@@ -4,7 +4,7 @@ AWS_S3_OBJECT_PARAMETERS = {
     'Expires': 'Thu, 31 Dec 2099 20:00:00 GMT',
     'CacheControl': 'max-age=94608000',
 }
-
+AWS_DEFAULT_ACL = None
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', None)
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', None)
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', None)

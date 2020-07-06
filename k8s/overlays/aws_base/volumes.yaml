@@ -1,0 +1,28 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: elasticsearch-pv
+  labels:
+    type: amazonEBS
+spec:
+  storageClassName: elastic
+  capacity:
+    storage: 16Gi
+  accessModes:
+    - ReadWriteOnce
+  awsElasticBlockStore:
+    fsType: ext4
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: elasticsearch-pvc
+  labels:
+    type: amazonEBS
+spec:
+  storageClassName: elastic
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 16Gi

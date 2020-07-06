@@ -1,33 +1,25 @@
 import requests
 from django.conf import settings
 import logging
-from data.models import Paper
-from django.core.paginator import Paginator
-from search.paginator import ScoreSortPaginator
+from data.models import Paper, Author
 
+from search.forms import SearchForm
+from search.paginator import FakePaginator, ScoreSortPaginator
+from search.tagify.tagify_searchable import AuthorSearchable
+import json
 
 class SearchRequestHelper:
 
-    def __init__(self, start_date, end_date, search_query, authors, authors_connection, journals, categories,
-                 locations, article_type,
-                 score_min=0.6):
+    def __init__(self, form: SearchForm):
         logger = logging.getLogger(__name__)
 
         self._response = None
         self._error = False
+        self._form = form
 
         try:
-            response = requests.get(settings.SEARCH_SERVICE_URL, params={
-                'start_date': start_date,
-                'end_date': end_date,
-                'search': search_query,
-                'score_min': score_min,
-                'authors': authors,
-                'authors_connection': authors_connection,
-                'categories': categories,
-                'article_type': article_type,
-                'journals': journals,
-                'locations': locations
+            response = requests.get(form.url, params={
+                'form': form.to_json()
             })
             response.raise_for_status()
 
@@ -44,36 +36,66 @@ class SearchRequestHelper:
 
         if self._response is None:
             self._error = True
-        else:
-            self._papers = Paper.objects.filter(pk__in=self._response.keys())
 
     @property
     def error(self):
         return self._error
 
     @property
-    def papers(self):
-        return self._papers
+    def response(self):
+        return self._response
 
-    def paginator_ordered_by(self, criterion, page_count=10):
+    def _parse_result_papers(self):
+        result_dois = [p['doi'] for p in self.response['results']]
+        papers = sorted(list(Paper.objects.filter(pk__in=result_dois).all()), key=lambda x: result_dois.index(x.doi))
 
-        if criterion == Paper.SORTED_BY_TOPIC_SCORE:
-            paginator = Paginator(self.papers.order_by("-topic_score", "-published_at"), page_count)
-        elif criterion == Paper.SORTED_BY_NEWEST:
-            paginator = Paginator(self.papers.order_by("-published_at"), page_count)
-        elif criterion == Paper.SORTED_BY_SCORE:
-            filtered_items = []
-            for doi in self.papers.order_by("-published_at").values_list('doi', flat=True):
-                filtered_items.append((doi, self._response[doi]))
+        for paper, infos in zip(papers, self.response['results']):
+            if 'title' in infos:
+                paper.title = infos['title']
+            if 'abstract' in infos:
+                paper.abstract = infos['abstract']
+            if 'authors.full_name' in infos:
+                highlighted_full_names = infos['authors.full_name']
 
-            paper_score_items = sorted(filtered_items, key=lambda x: x[1], reverse=True)
+                for highlighted_full_name in highlighted_full_names:
+                    cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
 
-            paginator = ScoreSortPaginator(paper_score_items, page_count)
-        else:
-            paginator = Paginator(self.papers, page_count)
-            logger = logging.getLogger(__name__)
-            logger.warning("Unknown sorted by" + criterion)
-        return paginator
+                    for author in paper.highlighted_authors:
+                        if author.full_name == cleaned_full_name:
+                            author.display_name = highlighted_full_name
+
+        paginator = FakePaginator(result_size=self.response['count'],
+                                  page=self.response['page'],
+                                  per_page=self.response['per_page'],
+                                  papers=papers)
+
+        authors = []
+        for author in self.response['authors']:
+            current_author = Author.objects.get(pk=author['pk'])
+            current_author.display_name = author['full_name']
+            current_author.json_object = json.dumps(AuthorSearchable.single_object(current_author))
+            authors.append(current_author)
+
+        return {'result_type': SearchForm.RESULT_TYPE_PAPERS,
+                'paginator': paginator,
+                'result_size': self.response['count'],
+                'authors': authors}
+
+    def _parse_result_statistics(self):
+        result_dois = self.response['results']
+        papers = Paper.objects.filter(pk__in=result_dois)
+        return {'result_type': SearchForm.RESULT_TYPE_STATISTICS, 'papers': papers}
+
+    def build_search_result(self):
+        if not self.error:
+            if self._form.cleaned_data['result_type'] == SearchForm.RESULT_TYPE_PAPERS:
+                return self._parse_result_papers()
+            elif self._form.cleaned_data['result_type'] == SearchForm.RESULT_TYPE_STATISTICS:
+                return self._parse_result_statistics()
+
+        raise ValueError("Search yielded no result or used an invalid result type")
+
+
 
 
 class SimilarPaperRequestHelper:

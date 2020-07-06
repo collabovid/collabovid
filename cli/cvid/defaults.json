@@ -16,12 +16,17 @@
     "s3_access_key": "",
     "s3_secret_access_key": "",
     "s3_endpoint_url": "http://localhost:30002",
-    "s3_bucket_name": "test"
+    "s3_bucket_name": "test",
+    "base_overlays": []
   },
   "envs": {
     "dev": {
     },
     "prod": {
+      "base_overlays": ["aws_base"]
+    },
+    "test": {
+      "base_overlays": ["aws_base"]
     }
   },
   "local-export-dir" : "resources/export",

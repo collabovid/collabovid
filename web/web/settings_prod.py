@@ -5,6 +5,7 @@ from collabovid_settings.tasks_settings import *
 from collabovid_settings.aws_settings import *
 from collabovid_settings.export_settings import *
 from collabovid_settings.volumes_settings import *
+from collabovid_settings.elasticsearch_settings import *
 
 DEBUG = False
 

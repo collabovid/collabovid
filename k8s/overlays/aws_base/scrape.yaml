@@ -1,0 +1,11 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scrape-cron
+spec:
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          nodeSelector:
+            node.kubernetes.io/instance-type: t3.large

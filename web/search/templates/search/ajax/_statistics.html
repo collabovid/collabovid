@@ -1,0 +1,125 @@
+{% if statistics.available %}
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <label class="text-primary" role="button" for="{{ default_result_type }}-result-type">
+                <i class="fas fa-arrow-left"></i> Back to the results page
+            </label>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card w-100 shadow rounded bg-white p-4">
+                <div class="card-body p-0">
+                    <div>
+                        <h3>Release dates of publications on the given query</h3>
+                    </div>
+                    <div>
+                        <canvas id="publicationsOverTimeChart" style="width:100%; height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-12">
+            <div class="card w-100 shadow rounded bg-white p-4 mt-3">
+
+                <div class="card-body pt-0">
+
+                    <div class="row p-0 align-items-top">
+
+                        <div class="col-lg-6 col-md-6 col-12 pl-0">
+
+                            <div>
+                                <h3>Search results</h3>
+                            </div>
+
+                            <table class="table table-striped mt-4 ml-4">
+
+                                <tbody>
+                                <tr>
+                                    <td>Papers:</td>
+                                    <td class="text-center">{{ statistics.paper_count }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Authors:</td>
+                                    <td class="text-center">{{ statistics.author_count }}</td>
+                                </tr>
+
+                                <tr>
+                                    <td>Dataset Sources:</td>
+                                    <td class="text-center">{{ statistics.paper_host_count }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-12">
+
+                            <div class="text-center mb-2">
+                                <h4>Sources</h4>
+                            </div>
+
+                            <div>
+                                <canvas id="paperHostDistribution" style="width: 100%;height:300px;"></canvas>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-12">
+            <div class="card w-100 shadow rounded bg-white p-4 mt-3">
+
+                <div class="card-body pt-0">
+
+                    <div class="row p-0 align-items-top">
+                        <div class="col-12">
+
+                            <div>
+                                <h3>Categories</h3>
+                            </div>
+
+                            <div>
+                                <canvas id="categoryDistributionChart" style="width: 100%;height:300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.Pagination.pagination_needed = false;
+        window.Pagination.result_size = 0;
+
+        $(document).ready(function () {
+            let published_at_data = JSON.parse('{{ statistics.published_at_data|escapejs }}');
+            let paper_host_data = JSON.parse('{{ statistics.paper_host_data|escapejs }}');
+            let paper_categories = JSON.parse('{{ statistics.category_data|escapejs }}');
+
+
+            $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
+            $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
+            $("#categoryDistributionChart").paperCategoryDistribution({plot_data: paper_categories});
+        });
+
+    </script>
+
+{% else %}
+    <div class="my-5 text-center font-weight-bold">No papers found. Thus, no statistics are available.</div>
+{% endif %}

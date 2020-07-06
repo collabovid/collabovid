@@ -88,6 +88,10 @@ class Command:
         temp_dir = join(kubernetes_dir, 'tmp')
         kubernetes_env_dir = join(kubernetes_dir, 'overlays', env)
         self.run_shell_command('mkdir -p {} && cp -r {} {}'.format(temp_dir, kubernetes_env_dir, temp_dir), quiet=quiet)
+
+        for base_overlay in self.current_env_config()['base_overlays']:
+            self.run_shell_command(f'cp -r {join(kubernetes_dir, "overlays", base_overlay)} {temp_dir}')
+
         for repo, config in self.config['services'].items():
             if image_tag is None:
                 image_tag = self.generate_tag()

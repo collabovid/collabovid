@@ -8,7 +8,7 @@
                     "name": "count",
                     "required": false,
                     "type": "int",
-                    "default": 200,
+                    "default": 20,
                     "is_primitive": true
                 },
                 {
@@ -33,7 +33,7 @@
                     "name": "count",
                     "required": false,
                     "type": "int",
-                    "default": 10,
+                    "default": 20,
                     "is_primitive": true
                 },
                 {
@@ -58,7 +58,7 @@
                     "name": "count",
                     "required": false,
                     "type": "int",
-                    "default": 10,
+                    "default": 100,
                     "is_primitive": true
                 },
                 {
@@ -102,6 +102,11 @@
         },
         "scrape": {
             "name": "Scrape",
+            "description": "No description provided.",
+            "parameters": []
+        },
+        "update-existing-articles": {
+            "name": "Update Existing Articles",
             "description": "No description provided.",
             "parameters": []
         },
@@ -152,6 +157,11 @@
         "parse-geo-locations": {
             "name": "Parse Geo Locations",
             "description": "",
+            "parameters": []
+        },
+        "detect-non-english-papers": {
+            "name": "Detect Non English Papers",
+            "description": "Determines papers with titles or abstract not in english",
             "parameters": []
         }
     },

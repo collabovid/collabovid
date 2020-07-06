@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  template:
+    spec:
+      volumes:
+        - name: resources
+          hostPath:
+            path: /opt/resources
+      nodeSelector:
+        node.kubernetes.io/instance-type: t3.small

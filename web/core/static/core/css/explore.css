@@ -1,0 +1,30 @@
+body.explore
+{
+}
+
+.explore-input-container {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    padding: 0;
+}
+.explore-input-container > .vertical-center {
+    margin-top: -17px;
+    top: 50%;
+    position: absolute;
+    width: 100%;
+}
+
+.explore-input-container .bottom-container
+{
+    margin-top: -17px;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    margin-left: auto;
+    margin-right: auto;
+    position: absolute;
+}
