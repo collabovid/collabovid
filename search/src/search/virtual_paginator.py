@@ -4,10 +4,15 @@ from data.models import Paper
 from math import ceil
 
 from src.search.elasticsearch import ElasticsearchRequestHelper
-from src.search.semantic_search import SemanticSearch
+from django.conf import settings
 
 
 class VirtualPaginator:
+    """
+    This class abstracts a paginator and its main purpose is to compute the correct
+    page the user searches for and computing highlights that are placed alongside the correctly ordered
+    pages as a json result.
+    """
     PAPER_PAGE_COUNT = 10
 
     def __init__(self, search_results: dict, form: dict):
@@ -54,7 +59,10 @@ class VirtualPaginator:
 
         if len(dois_for_page) > 0:
             results = {doi: {'order': i, 'doi': doi} for i, doi in enumerate(dois_for_page)}
-            ElasticsearchRequestHelper.highlights(results, self._form['query'], ids=dois_for_page)
+
+            if settings.USING_ELASTICSEARCH:
+                ElasticsearchRequestHelper.highlights(results, self._form['query'], ids=dois_for_page)
+
             paginator['results'] = sorted(list(results.values()), key=lambda x: x['order'])
 
         return paginator

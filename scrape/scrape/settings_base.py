@@ -1,5 +1,7 @@
 import os
 from collabovid_settings.installed_apps import SHARED_INSTALLED_APPS
+from collabovid_settings.using_elasticsearch import USING_ELASTICSEARCH
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'test'

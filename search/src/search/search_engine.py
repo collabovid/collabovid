@@ -7,8 +7,7 @@ from data.models import Paper, Author, Journal, Category, CategoryMembership, Ge
 from src.search.elasticsearch import ElasticsearchRequestHelper
 from src.search.utils import TimerUtilities
 from .semantic_search import SemanticSearch
-import time
-
+from .development.title_search import TitleSearch
 
 class SearchEngine:
     COMBINED_SEARCH = 1
@@ -140,10 +139,16 @@ class SearchEngine:
                 filtered_dois = list(papers.values_list('doi', flat=True))
 
             if self.search_type == SearchEngine.KEYWORD_SEARCH:
-                TimerUtilities.time_function(ElasticsearchRequestHelper.find, paper_score_table, query, ids=filtered_dois)
+                if settings.USING_ELASTICSEARCH:
+                    TimerUtilities.time_function(ElasticsearchRequestHelper.find, paper_score_table, query, ids=filtered_dois)
+                else:
+                    TimerUtilities.time_function(TitleSearch.find, paper_score_table, query, papers=papers)
             elif self.search_type == SearchEngine.COMBINED_SEARCH:
                 TimerUtilities.time_function(SemanticSearch.find, paper_score_table, query, ids=filtered_dois)
-                TimerUtilities.time_function(ElasticsearchRequestHelper.enhance_results, paper_score_table, query, influence=0.6)
+
+                if settings.USING_ELASTICSEARCH:
+                    TimerUtilities.time_function(ElasticsearchRequestHelper.enhance_results, paper_score_table, query,
+                                                 influence=0.6)
             else:
                 raise ValueError("No valid search type provided")
         else:

@@ -15,6 +15,7 @@ from search.forms import SearchForm
 from search.tagify.tagify_searchable import *
 
 from data.documents import AuthorDocument, JournalDocument
+from django.conf import settings
 
 PAPER_PAGE_COUNT = 10
 
@@ -71,12 +72,12 @@ def render_search_result(request, form):
 def list_authors(request):
     query = request.GET.get('query', '')
 
-    if query:
-        authors = SuggestionsHelper.compute_suggestions(model=Author,
-                                                        search=AuthorDocument.search(),
-                                                        query=query, field='full_name_suggest')
+    if settings.USING_ELASTICSEARCH:
+        authors = SuggestionsHelper.compute_elasticsearch_suggestions(model=Author,
+                                                                      search=AuthorDocument.search(),
+                                                                      query=query, field='full_name_suggest')
     else:
-        authors = Author.objects.none()
+        authors = SuggestionsHelper.compute_postgres_suggestions(model=Author, query=query)
 
     return JsonResponse({"authors": AuthorSearchable(authors=authors).dict})
 
@@ -84,27 +85,20 @@ def list_authors(request):
 def list_journals(request):
     query = request.GET.get('query', '')
 
-    if query:
-        journals = SuggestionsHelper.compute_suggestions(model=Journal,
-                                                         search=JournalDocument.search(),
-                                                         query=query, field='name_suggest').annotate(
+    if settings.USING_ELASTICSEARCH:
+        journals = SuggestionsHelper.compute_elasticsearch_suggestions(model=Journal,
+                                                                       search=JournalDocument.search(),
+                                                                       query=query, field='name_suggest').annotate(
             paper_count=Count('papers'))
     else:
-        journals = Journal.objects.annotate(paper_count=Count('papers')).order_by('-paper_count')[:6]
+        journals = SuggestionsHelper.compute_postgres_suggestions(model=Journal, query=query)
 
     return JsonResponse({"journals": JournalSearchable(journals=journals).dict})
 
 
 def list_locations(request):
-    locations = GeoLocation.objects.all().annotate(paper_count=Count('papers'))
-
     query = request.GET.get('query', '')
 
-    if query:
-        locations = locations.annotate(similarity_name=TrigramSimilarity('name', query)).annotate(
-            similarity_alias=TrigramSimilarity('alias', query)).annotate(
-            similarity=Greatest('similarity_name', 'similarity_alias')).order_by('-similarity')[:6]
-    else:
-        locations = locations.order_by('-paper_count')[:6]
+    locations = SuggestionsHelper.compute_postgres_suggestions(model=GeoLocation, query=query)
 
     return JsonResponse({"locations": LocationSearchable(locations=locations).dict})
