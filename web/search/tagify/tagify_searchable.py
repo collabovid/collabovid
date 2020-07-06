@@ -57,10 +57,14 @@ class AuthorSearchable(TagifySearchable):
         else:
             return AuthorSearchable(Author.objects.none())
 
+    @staticmethod
+    def single_object(author):
+        return {"value": author.full_name,
+                 "pk": author.pk}
+
     @property
     def dict(self):
-        return [{"value": author.full_name,
-                 "pk": author.pk} for author in self._authors]
+        return [self.single_object(author) for author in self._authors]
 
 
 class LocationSearchable(TagifySearchable):

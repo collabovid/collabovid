@@ -1,0 +1,19 @@
+{% extends "search/partials/_search_description_modal.html" %}
+
+{% block id %}keyword{% endblock %}
+
+{% block title %}
+    How does keyword search work?
+{% endblock %}
+{% block description %}
+    <p>
+        The keyword search uses
+        <a href="https://www.elastic.co/">Elasticsearch</a> to find papers with matching
+        keywords in their title, abstract or authors. Despite being very efficient when the user
+        provides a good set of keywords, the search is not able to generalize the search
+        query.
+    </p>
+
+    <p>You can find out more details about the project at the
+        <a href="{% url "about" %}">frequently asked questions</a> page.</p>
+{% endblock %}

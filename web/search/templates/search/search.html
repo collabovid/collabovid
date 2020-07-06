@@ -1,7 +1,8 @@
 {% extends "search/search_base.html" %}
 {% load static %}
 {% block content %}
-    <div id="paper-cover" class="paper-cover"></div>
+    {% include "search/partials/_search_description_combined.html" %}
+    {% include "search/partials/_search_description_keyword.html" %}
 
     <div class="gradient-header pb-0">
         <div class="container">
@@ -80,12 +81,15 @@
                             <label for="{{ choice.0 }}-tab-input"
                                    class="nav-link {% if form.cleaned_data.tab == choice.0 %}active{% endif %}">
                                 {{ choice.1 }}
+                                <sup class="help-opener">
+                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label" data-toggle="modal"
+                                        data-target="#{{ choice.0 }}-modal"></i></sup>
                             </label>
                         </li>
                     {% endfor %}
-
                 </ul>
             </div>
+
             <div class="col-3 col-lg-6 text-right">
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
@@ -114,8 +118,7 @@
                                 <div class="pl-2 pr-0 pt-0 pb-0 text-left">
                                     We found
                                     <span class="font-weight-bold" id="result-size-container"></span>
-                                    results that match your query. If you want to find out how these results are calculated
-                                    read the <a href="{% url 'about' %}">frequently asked questions</a>.
+                                    results that match your query.
                                 </div>
                             </div>
                         </div>
@@ -124,7 +127,8 @@
                                 <div class="form-group mb-0 pb-0 pr-0">
 
                                     <label id="statistics-label"
-                                           class="mb-1 mb-md-0 pb-0" for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">
+                                           class="mb-1 mb-md-0 pb-0"
+                                           for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">
                                         <button type="button" class="btn btn-info b-none">
                                             <i class="fas fa-chart-area"></i> Show Statistics
                                         </button>
@@ -177,11 +181,14 @@
             let result_size_container = $("#result-size-container"); // Contains the amount of papers found.
             let paper_result_options_container = $("#paper-result-options-container"); // Contains the info and sort
 
-
             let searchEngine = form.collabovidSearch({
                 indicator: indicator,
                 paper_container: paper_container,
                 pagination_container: pagination_container
+            });
+
+            $(".help-opener").click(function (e) {
+                e.preventDefault();
             });
 
             $("#statistics-label > button").click(function (e) {

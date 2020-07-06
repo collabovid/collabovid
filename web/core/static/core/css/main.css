@@ -433,7 +433,7 @@ label.nav-link {
     text-align: left;
 }
 
-.abstract-container em, .author em, .paper-title em {
+.abstract-container em, .author em, .paper-title em, .author-suggestions em {
     font-weight: bold;
     font-style: normal;
 }
@@ -477,4 +477,13 @@ label.nav-link {
     .search-info-container {
         flex: 0 0 340px;
     }
+}
+
+.badge-info-light {
+    color: #fff;
+    background-color: #3c7d97;
+}
+
+.tooltip-inner {
+    max-width: none;
 }
