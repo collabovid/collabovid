@@ -1,7 +1,7 @@
 from django.db import transaction
 from django.utils import timezone
 
-from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperHost
+from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperHost, ScrapeConflict
 from src.static_functions import covid_related
 from src.updater.serializable_article_record import SerializableArticleRecord
 
@@ -30,35 +30,41 @@ class DatabaseUpdate:
         if IgnoredPaper.objects.filter(doi=datapoint.doi).exists():
             raise DatabaseUpdate.SkipArticle("DOI is on ignore list")
 
-        with transaction.atomic():
-            try:
-                db_article = Paper.objects.get(doi=datapoint.doi)
-                created = False
-            except Paper.DoesNotExist:
-                db_article = Paper(doi=datapoint.doi)
-                created = True
+        conflict = False
+        try:
+            with transaction.atomic():
+                try:
+                    db_article = Paper.objects.get(doi=datapoint.doi)
+                    created = False
+                except Paper.DoesNotExist:
+                    db_article = Paper(doi=datapoint.doi)
+                    created = True
 
-            if not created:
-                datasource_comparison = DataSource.compare(db_article.data_source_value, datapoint.datasource)
-                if datasource_comparison > 0:
-                    datasource_name = DataSource(db_article.data_source_value).name
-                    raise DatabaseUpdate.SkipArticle(f"Article already tracked by {datasource_name}")
-                elif not self.update_existing and datasource_comparison == 0:
-                    raise DatabaseUpdate.SkipArticle("Article already in database")
+                if not created:
+                    datasource_comparison = DataSource.compare(db_article.data_source_value, datapoint.datasource)
+                    if datasource_comparison > 0:
+                        datasource_name = DataSource(db_article.data_source_value).name
+                        raise DatabaseUpdate.SkipArticle(f"Article already tracked by {datasource_name}")
+                    elif not self.update_existing and datasource_comparison == 0:
+                        raise DatabaseUpdate.SkipArticle("Article already in database")
 
-                changed_externally = db_article.scrape_hash != datapoint.md5
-                changed_internally = db_article.manually_modified
+                    changed_externally = db_article.scrape_hash != datapoint.md5
+                    changed_internally = db_article.manually_modified
 
-                if not changed_externally:
-                    db_article.last_scrape = timezone.now()
-                    db_article.save()
-                    return db_article, False, False  # Article was neither created, nor updated
+                    if not changed_externally:
+                        db_article.last_scrape = timezone.now()
+                        db_article.save()
+                        return db_article, False, False  # Article was neither created, nor updated
 
-                if changed_internally:
-                    self._handle_conflict(db_article, datapoint)
-                    raise DatabaseUpdate.Error("Conflict: Manual modification and external change")
+                    if changed_internally:
+                        conflict = True
+                        raise DatabaseUpdate.Error("Conflict: Manual modification and external change")
 
-            self._update(db_article, datapoint)
+                self._update(db_article, datapoint)
+        except DatabaseUpdate.Error as ex:
+            if conflict:
+                self._handle_conflict(db_article, datapoint)
+            raise ex
 
         return db_article, created, True  # Article was updated
 
@@ -139,4 +145,9 @@ class DatabaseUpdate:
         db_article.save()
 
     def _handle_conflict(self, db_article, datapoint):
-        pass
+        try:
+            conflict = ScrapeConflict.objects.get(paper=db_article)
+        except ScrapeConflict.DoesNotExist:
+            conflict = ScrapeConflict(paper=db_article)
+        conflict.datapoint = datapoint.json()
+        conflict.save()

@@ -96,5 +96,11 @@ PIPELINE = {
             ),
             'output_filename': 'map.css',
         },
+        'conflict_card': {
+            'source_filenames': (
+                'dashboard/scrape/conflict_card.css',
+            ),
+            'output_filename': 'conflict_card.css',
+        }
     },
 }

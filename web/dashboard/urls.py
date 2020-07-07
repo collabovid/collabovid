@@ -20,4 +20,5 @@ urlpatterns = [
     path('locations/edit/<int:location_id>', edit_location, name='edit_location'),
     path('locations/add/<path:doi>', add_location, name='add_location'),
     path('language-detection', language_detection, name='language-detection'),
+    path('scrape-conflict', scrape_conflict, name='scrape_conflict')
 ]

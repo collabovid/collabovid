@@ -49,9 +49,13 @@ class DataUpdater(object):
             db_article, created, updated = self.db_updater.insert(datapoint)
             if updated:
                 self._update_pdf_data(db_article)
-                self.statistics.n_created += int(created)
-                self.statistics.n_updated += int(updated)
-            self.log(f"Updated/Created {datapoint.doi}")
+                if created:
+                    self.statistics.n_created += int(created)
+                else:
+                    self.statistics.n_updated += int(updated)
+                self.log(f"{'Create' if created else 'Updated'} {datapoint.doi}")
+            else:
+                self.statistics.n_skipped += 1
             return db_article, created
         except (DatabaseUpdate.Error, PdfExtractError) as ex:
             id = datapoint.doi if datapoint.doi else f"\"{datapoint.title}\""

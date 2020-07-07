@@ -1,12 +1,12 @@
 from typing import Union
 
 import pycountry
+from django.contrib.postgres.fields import JSONField
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
 from itertools import permutations
 
 
@@ -91,13 +91,15 @@ class Journal(models.Model):
 
 
 class Author(models.Model):
+    MAX_LENGTH_FIRST_NAME = 50
+    MAX_LENGTH_LAST_NAME = MAX_LENGTH_FIRST_NAME
 
     def __init__(self, *args, **kwargs):
         super(Author, self).__init__(*args, **kwargs)
         self._display_name = None
 
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=MAX_LENGTH_FIRST_NAME)
+    last_name = models.CharField(max_length=MAX_LENGTH_LAST_NAME)
 
     @property
     def full_name(self):
@@ -128,6 +130,29 @@ class Author(models.Model):
             return 0
         else:
             return deleted_objects['data.Author']
+
+
+class AuthorNameResolution(models.Model):
+    source_name = models.TextField(max_length=(Author.MAX_LENGTH_LAST_NAME + Author.MAX_LENGTH_FIRST_NAME + 2))
+    target_author = models.ForeignKey(Author, on_delete=models.CASCADE)
+
+    @staticmethod
+    def add(old_first, old_last, new_first, new_last):
+        target_author, created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
+        AuthorNameResolution.objects.get_or_create(source_name=f"{old_last}; {old_first}", target_author=target_author)
+        try:
+            old_author = Author.objects.get(first_name=old_first, last_name=old_last)
+            old_author.map_to_different_author(target_author)
+
+            memberships = Paper.authors.through.filter(author=old_author)
+            for membership in memberships:
+                membership.author = target_author
+
+            old_author.delete()
+        except Author.DoesNotExist:
+            pass
+        return created
+
 
 
 class Category(models.Model):
@@ -352,6 +377,11 @@ class Paper(models.Model):
         return Paper._meta.get_field(field).max_length
 
 
+class ScrapeConflict(models.Model):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    datapoint = JSONField()
+
+
 class IgnoredPaper(models.Model):
     doi = models.CharField(max_length=Paper.MAX_DOI_LENGTH, primary_key=True)
 
@@ -439,6 +469,7 @@ def paper_ignored(sender, instance, **kwargs):
     """
     if not kwargs['raw']:
         Paper.objects.filter(doi=instance.doi).delete()
+
 
 
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")

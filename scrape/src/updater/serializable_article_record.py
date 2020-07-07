@@ -1,8 +1,11 @@
+import json
 import pickle
 from dataclasses import dataclass, field
 import hashlib
 from datetime import date
 from typing import List, Optional, Tuple
+
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 @dataclass
@@ -31,6 +34,11 @@ class SerializableArticleRecord:
     @property
     def md5(self):
         if not self._md5:
-            m = hashlib.md5(pickle.dumps(self))
+            m = hashlib.md5(self.json().encode('utf-8'))
             self._md5 = m.hexdigest()[:22] # Maximum length of MD5 is 22 hex digits
         return self._md5
+
+    def json(self):
+        data_dict = self.__dict__
+        data_dict.pop('_md5', None)
+        return json.dumps(data_dict, sort_keys=True, cls=DjangoJSONEncoder)

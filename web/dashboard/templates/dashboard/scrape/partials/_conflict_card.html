@@ -1,0 +1,162 @@
+{% load static %}
+{% load pipeline %}
+{% load dashboard_utils %}
+{% stylesheet 'conflict_card' %}
+
+<div class="card h-100">
+    <div class="card-body d-flex flex-column">
+        <div class="card-text mb-2 text-muted">
+            <table>
+            <colgroup>
+               <col span="1" style="width: 15%;">
+               <col span="1" style="width: 42%;">
+               <col span="1" style="width: 43%;">
+            </colgroup>
+                <tr>
+                    <th>URL:</th>
+                    <td><a target="_blank" rel="noopener noreferrer"
+                           href="{{ datapoint.url }}">
+                        {{ datapoint.url }}
+                    </a></td>
+                    <td class="col-differences">
+                    {% if paper.url != datapoint.url %}
+                        {{ paper.url }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>DOI:</th>
+                    <td>{{ datapoint.doi }}</td>
+                    <td class="col-differences">
+                    {% if  paper .doi != datapoint.doi %}
+                        {{ paper.doi }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Title:</th>
+                    <td>{{ datapoint.title }}</td>
+                    <td class="col-differences">
+                    {% if paper.title != datapoint.title %}
+                        {{ paper.title }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Publication Date:</th>
+                    <td>{{ datapoint.published_at }}</td>
+                    <td class="col-differences">
+                    {% if paper.published_at != datapoint.published_at %}
+                        {{ paper.published_at }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Authors:</th>
+                    <td>
+                        {% for author in datapoint.authors %}
+                            {{ author }}
+                            {% if not forloop.last %}
+                                ,
+                            {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td class="col-differences">
+                        {% if paper.authors|sort|join:" // " != datapoint.authors|sort|join:" // " %}
+                            {{ paper.authors|sort|join:" // " }} <br>
+                            {{ datapoint.authors|sort|join:" // " }} <br>
+                            {% for author in datapoint.authors %}
+                                {{ author }}
+                                {% if not forloop.last %}
+                                    ,
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Abstract: </th>
+                    <td>{{ datapoint.abstract }}</td>
+                    <td class="col-differences">
+                    {% if paper.abstract != datapoint.abstract %}
+                        {{ paper.abstract }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>PDF URL:</th>
+                    <td>
+                    {% if datapoint.pdf_url %}
+                    <a target="_blank" rel="noopener noreferrer" href="{{ datapoint.pdf_url }}">{{ datapoint.pdf_url }}</a>
+                    {% else %}
+                    None
+                    {% endif %}
+                    </td>
+                    <td class="col-differences">
+                    {% if paper.pdf_url != datapoint.pdf_url %}
+                        {{ paper.pdf_url }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Version:</th>
+                    <td>{{ datapoint.version }}</td>
+                    <td class="col-differences">
+                    {% if paper.version != datapoint.version %}
+                        {{ paper.version }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Datasource:</th>
+                    <td>{{ datapoint.datasource }}</td>
+                    <td class="col-differences">
+                    </td>
+                </tr>
+                <tr>
+                    <th>Paperhost:</th>
+                    <td>{{ datapoint.paperhost_name }}{# ({{ datapoint.paperhost_url }}) #}</td>
+                </tr>
+                <tr>
+                    <th>Pubmed ID:</th>
+                    <td>{{ datapoint.pubmedid }}</td>
+                    <td class="col-differences">
+                    {% if paper.pubmed_id != datapoint.pubmed_id %}
+                        {{ paper.pubmed_id }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Is preprint:</th>
+                    <td>{{ datapoint.is_preprint }}</td>
+                </tr>
+                <tr>
+                    <th>Journal:</th>
+                    <td>{{ datapoint.journal }}</td>
+                    <td class="col-differences">
+                    {% if paper.journal != datapoint.journal %}
+                        {{ paper.journal }}
+                    {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Update timestamp:</th>
+                    <td>{{ datapoint.update_timestamp }}</td>
+                    <td class="col-differences">
+                    {% if paper.update_timestamp != datapoint.update_timestamp %}
+                        {{ paper.update_timestamp }}
+                    {% endif %}
+                    </td>
+                </tr>
+            </table>
+
+            <div>
+                <button type="submit" class="btn btn-outline-primary">Edit</button>
+            </div>
+            <div>
+                <button class="btn btn-outline-danger" type="submit"
+                        onclick="confirmDeleteModal({{ error.pk }})">Ignore Article</button>
+            </div>
+        </div>
+    </div>
+</div>

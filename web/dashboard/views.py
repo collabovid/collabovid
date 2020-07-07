@@ -15,6 +15,7 @@ from data.models import (
     GeoNameResolution,
     IgnoredPaper,
     Paper,
+    ScrapeConflict,
 )
 from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
@@ -304,6 +305,7 @@ def location_sanitizing(request):
     return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
                   {'location_papers': location_memberships, 'debug': settings.DEBUG})
 
+
 @staff_member_required
 def language_detection(request):
     if request.method == 'GET':
@@ -331,3 +333,14 @@ def language_detection(request):
             json.dumps({'status': 'success'}),
             content_type="application/json"
         )
+
+
+@staff_member_required
+def scrape_conflict(request):
+    if request.method == 'POST':
+        # handle 'ignore article' case
+        return HttpResponse("Posted to scrape conflict!")
+    errors = [{'paper': err.paper, 'datapoint': err.datapoint} for err in ScrapeConflict.objects.all()]
+
+    return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
+                  {'errors': errors, 'debug': settings.DEBUG})
