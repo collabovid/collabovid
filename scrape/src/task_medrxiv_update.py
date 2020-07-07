@@ -21,8 +21,8 @@ class MedBiorxivUpdateTask(Runnable):
         else:
             pdf_image = self.update_pdf_image
 
-        updater = MedrxivUpdater(log=self.log)
-        updater.update_existing_data(count=self.count, pdf_image=pdf_image, progress=self.progress)
+        updater = MedrxivUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False, update_existing=True)
+        updater.update_existing_data(count=self.count, progress=self.progress)
 
 
 @register_task
@@ -41,5 +41,5 @@ class MedBiorxivNewArticlesTask(Runnable):
         else:
             pdf_image = True
 
-        updater = MedrxivUpdater(log=self.log)
-        updater.get_new_data(pdf_content=True, pdf_image=pdf_image, progress=self.progress)
+        updater = MedrxivUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False, update_existing=False)
+        updater.get_new_data(progress=self.progress)

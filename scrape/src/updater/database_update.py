@@ -1,10 +1,7 @@
-from time import sleep
-
 from django.db import transaction
 from django.utils import timezone
 
-from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperData, PaperHost
-from src.pdf_extractor import PdfFromUrlExtractor
+from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperHost
 from src.static_functions import covid_related
 from src.updater.serializable_article_record import SerializableArticleRecord
 
@@ -23,10 +20,8 @@ class DatabaseUpdate:
     class SkipArticle(UpdateException):
         pass
 
-    def __init__(self, datasource, pdfimage=False, pdfcontent=False, update_existing=False):
+    def __init__(self, datasource, update_existing=False):
         self.datasource = datasource
-        self.pdfimage = pdfimage
-        self.pdfcontent = pdfcontent
         self.update_existing = update_existing
 
     def insert(self, datapoint: SerializableArticleRecord):
@@ -36,7 +31,12 @@ class DatabaseUpdate:
             raise DatabaseUpdate.SkipArticle("DOI is on ignore list")
 
         with transaction.atomic():
-            db_article, created = Paper.objects.get_or_create(doi=datapoint.doi)
+            try:
+                db_article = Paper.objects.get(doi=datapoint.doi)
+                created = False
+            except Paper.DoesNotExist:
+                db_article = Paper(doi=datapoint.doi)
+                created = True
 
             if not created:
                 datasource_comparison = DataSource.compare(db_article.data_source_value, datapoint.datasource)
@@ -46,11 +46,13 @@ class DatabaseUpdate:
                 elif not self.update_existing and datasource_comparison == 0:
                     raise DatabaseUpdate.SkipArticle("Article already in database")
 
-                changed_externally = db_article.scrape_hash and db_article.scrape_hash != datapoint.md5
+                changed_externally = db_article.scrape_hash != datapoint.md5
                 changed_internally = db_article.manually_modified
 
                 if not changed_externally:
-                    return db_article, False, False # Article was neither created, nor updated
+                    db_article.last_scrape = timezone.now()
+                    db_article.save()
+                    return db_article, False, False  # Article was neither created, nor updated
 
                 if changed_internally:
                     self._handle_conflict(db_article, datapoint)
@@ -58,7 +60,7 @@ class DatabaseUpdate:
 
             self._update(db_article, datapoint)
 
-        return db_article, created, True # Article was updated
+        return db_article, created, True  # Article was updated
 
     @staticmethod
     def _validate_integrity_constraints(datapoint: SerializableArticleRecord):
@@ -129,10 +131,7 @@ class DatabaseUpdate:
                 name=datapoint.journal[:Journal.max_length("name")]
             )
 
-        if self.pdfcontent or self.pdfimage:
-            self._update_pdf_data(db_article, extract_image=self.pdfimage, extract_content=self.pdfcontent)
         db_article.version = datapoint.version
-
         db_article.last_scrape = timezone.now()
 
         db_article.categories.clear()
@@ -141,27 +140,3 @@ class DatabaseUpdate:
 
     def _handle_conflict(self, db_article, datapoint):
         pass
-
-    @staticmethod
-    def _update_pdf_data(db_article, extract_image=True, extract_content=True):
-        if not extract_image and not extract_content:
-            return
-        if not db_article.pdf_url:
-            return
-
-        sleep(3)
-        pdf_extractor = PdfFromUrlExtractor(db_article.pdf_url)
-
-        if extract_image:
-            image = pdf_extractor.extract_image()
-            if image:
-                db_article.add_preview_image(image)
-
-        if extract_content:
-            content = pdf_extractor.extract_contents()
-            if content:
-                if db_article.data:
-                    db_article.data.content = content
-                else:
-                    db_content = PaperData.objects.create(content=content)
-                    db_article.data = db_content

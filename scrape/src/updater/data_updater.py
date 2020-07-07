@@ -1,9 +1,9 @@
-from timeit import default_timer as timer
+from time import sleep
 
-from data.models import Author, Journal, Paper
+from data.models import Author, Journal, Paper, PaperData
 from django.db.models import F
 from django.utils import timezone
-from src.pdf_extractor import PdfExtractError
+from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
 from src.updater.database_update import DatabaseUpdate
 from src.updater.update_statistics import UpdateStatistics
 
@@ -12,7 +12,9 @@ class DataUpdater(object):
     def __init__(self, log=print, pdf_content=False, pdf_image=False, update_existing=False):
         self.log = log
         self.update_existing = update_existing
-        self.db_updater = DatabaseUpdate(self.data_source, pdf_content, pdf_image, update_existing)
+        self.pdf_image = pdf_image
+        self.pdf_content = pdf_content
+        self.db_updater = DatabaseUpdate(self.data_source, update_existing)
 
     @property
     def data_source(self):
@@ -45,6 +47,10 @@ class DataUpdater(object):
     def get_or_create_db_article(self, datapoint):
         try:
             db_article, created, updated = self.db_updater.insert(datapoint)
+            if updated:
+                self._update_pdf_data(db_article)
+                self.statistics.n_created += int(created)
+                self.statistics.n_updated += int(updated)
             self.log(f"Updated/Created {datapoint.doi}")
             return db_article, created
         except (DatabaseUpdate.Error, PdfExtractError) as ex:
@@ -54,7 +60,6 @@ class DataUpdater(object):
             self.log(f"Error: {id}: {ex.msg}")
             self.statistics.n_errors += 1
         except DatabaseUpdate.SkipArticle as ex:
-            self.log(f"Skip: {datapoint.doi}: {ex.msg}")
             self.statistics.n_skipped += 1
         return None, None
 
@@ -65,7 +70,6 @@ class DataUpdater(object):
         total = self._count()
         self.log(f"Check {total} publications")
 
-        start = timer()
         iterator = progress(self._get_data_points(), length=total) if progress else self._get_data_points()
 
         for data_point in iterator:
@@ -113,6 +117,29 @@ class DataUpdater(object):
 
         self.statistics.stop()
         self.log(self.statistics)
+
+    def _update_pdf_data(self, db_article):
+        if not self.pdf_image and not self.pdf_content:
+            return
+        if not db_article.pdf_url:
+            return
+
+        sleep(3)
+        pdf_extractor = PdfFromUrlExtractor(db_article.pdf_url)
+
+        if self.pdf_image:
+            image = pdf_extractor.extract_image()
+            if image:
+                db_article.add_preview_image(image)
+
+        if self.pdf_content:
+            content = pdf_extractor.extract_contents()
+            if content:
+                if db_article.data:
+                    db_article.data.content = content
+                else:
+                    db_content = PaperData.objects.create(content=content)
+                    db_article.data = db_content
 
 
 class ArticleDatapointIterator:
