@@ -13,20 +13,26 @@
                     </div>
                 </div>
                 <div class="legend">
-                    <ul>
-                        <li>Treatment</li>
-                        <li>Prevention</li>
-                    </ul>
+                    <div>
+                        {% for category in categories %}
+                            <div><span class="badge badge-primary" style="background-color: {{ category.color }}">{{ category.name }}</span></div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
+    <div id="paper-loading-indicator"
+         class="text-muted text-center fa-5x my-5"
+         style="display: none;">
+        <i class="fas fa-circle-notch fa-spin"></i>
+    </div>
     <div class="container mt-5">
         <div id="selected-card-container"></div>
     </div>
     <div class="pl-5 pr-5">
-    <div id="topics-container" class="row">
+        <div id="topics-container" class="row">
             {% for topic in topics %}
                 <div class="col-md-3 p-2">
                     <div class="topic-card card p-3 h-100" data-topic="{{ topic.pk }}">{{ topic.name }}
@@ -43,15 +49,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.0.1/math.min.js"></script>
     {% javascript 'embedding-visualization' %}
     <script>
-        var topics = JSON.parse("{{ topic_dict | escapejs }}")
-        var canvas = document.getElementById('visualization-container');
-        var selectedCardContainer = document.getElementById('selected-card-container');
-        var visualization = new EmbeddingVisualization()
-        var topicsContainer = $('#topics-container')
+        const topics = JSON.parse("{{ topic_dict | escapejs }}")
+        const colors = JSON.parse("{{ category_colors | escapejs }}")
+
+        const canvas = document.getElementById('visualization-container');
+        const selectedCardContainer = $('#selected-card-container')
+        const visualization = new EmbeddingVisualization()
+        const topicsContainer = $('#topics-container')
+        const paperLoadingIndicator = $('#paper-loading-indicator')
 
         function onSelected(idx, paper) {
-            var indices = visualization.computeNeighbors(paper, 10)
-            var dois = [paper.doi];
+            paperLoadingIndicator.show()
+            selectedCardContainer.hide()
+            topicsContainer.hide()
+            const indices = visualization.computeNeighbors(paper, 10)
+            const dois = [paper.doi];
             indices.forEach((i) => {
                 dois.push(visualization.papers[i].doi)
             })
@@ -60,25 +72,27 @@
             $.get('/paper-cards/', {
                 'dois': JSON.stringify(dois)
             }, function (data) {
-                selectedCardContainer.innerHTML = data
-                topicsContainer.hide()
+                selectedCardContainer.html(data);
+                paperLoadingIndicator.hide()
+                selectedCardContainer.show()
             })
         }
 
         visualization.renderEmbeddings(canvas, onSelected, {
                 'imageUrl': '/static/img/atlas.jpg',
-                'fileUrl': '/static/embeddings_3d_scaled.json'
+                'fileUrl': '/static/embeddings_3d_scaled.json',
+                'categoryColors': colors
             }
         )
 
         visualization.onDeselect(function () {
-            selectedCardContainer.innerHTML = ""
+            selectedCardContainer.hide()
             topicsContainer.show()
         });
 
         $('.topic-card').on('click', function (e) {
-            var topicId = $(e.target).data('topic')
-            var paperIds = topics[topicId];
+            const topicId = $(e.target).data('topic')
+            const paperIds = topics[topicId];
             visualization.selectPapers(paperIds);
         })
 

@@ -228,6 +228,33 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "cluster-topic": {
+            "name": "Cluster Topic",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "topic_id",
+                    "required": true,
+                    "type": "int",
+                    "default": null,
+                    "is_primitive": true
+                },
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-oubiobert-512",
+                    "is_primitive": true
+                },
+                {
+                    "name": "n_clusters",
+                    "required": false,
+                    "type": "int",
+                    "default": 2,
+                    "is_primitive": true
+                }
+            ]
         }
     }
 }

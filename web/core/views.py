@@ -54,9 +54,16 @@ def embedding_visualization(request):
     topic_dict = {}
     for topic in topics:
         topic_dict[topic.pk] = [x['doi'] for x in topic.papers.values('doi')]
+    categories = Category.objects.all()
+    category_colors = {}
+    for category in categories:
+        category_colors[category.name] = category.color
+
     return render(request, "core/embedding_visualization.html", {
         'topics': topics,
-        'topic_dict': json.dumps(topic_dict)
+        'topic_dict': json.dumps(topic_dict),
+        'categories': categories,
+        'category_colors': json.dumps(category_colors)
     })
 
 
@@ -69,7 +76,6 @@ def paper_cards(request):
     papers = sorted(papers, key=lambda x: dois.index(x.doi))
     return render(template_name="core/partials/_search_results.html", request=request,
                   context={'papers': papers, 'show_score': False})
-
 
 
 def about(request):

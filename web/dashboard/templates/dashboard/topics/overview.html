@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
         <h1 class="h2">Topics</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
-              <a href="{% url 'topics_merge' %}" class="btn btn-sm btn-outline-secondary">
+            <a href="{% url 'topics_merge' %}" class="btn btn-sm btn-outline-secondary">
                 Merge Topics
             </a>
         </div>
@@ -19,7 +19,7 @@
                     <div class="topic-card h-100 card" data-topic="{{ topic.pk }}">
                         <div class="card-body  d-flex flex-column">
                             {{ topic.name }} ({{ topic.papers.count }})
-                            <div>{{ request.user|edit_object_link:topic}}</div>
+                            <div>{{ request.user|edit_object_link:topic }}</div>
                             <div class="mt-auto">
                                 <a href="{% url 'topic_papers' topic_id=topic.pk %}" class="card-link">View Papers</a>
                             </div>
