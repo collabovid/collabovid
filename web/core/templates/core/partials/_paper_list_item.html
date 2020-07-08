@@ -1,0 +1,12 @@
+{% load humanize %}
+
+<li class="list-group-item">
+    {{ paper.title }}
+    <div class="text-muted small mt-2">
+        {{ paper.published_at }} &middot; {{ paper.host.name }}
+        &middot; Added {{ paper.created_at|naturaltime }}
+        <a href="{{ paper.url }}" class="float-right">
+            Read more
+        </a>
+    </div>
+</li>

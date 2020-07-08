@@ -95,6 +95,6 @@ PIPELINE = {
                 'css/jquery-jvectormap-2.0.5.css',
             ),
             'output_filename': 'map.css',
-        },
+        }
     },
 }

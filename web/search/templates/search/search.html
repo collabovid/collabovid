@@ -91,6 +91,11 @@
             </div>
 
             <div class="col-3 col-lg-6 text-right">
+                <a id="download-button" class="btn btn-light mt-2"
+                   href="{% url "search-export" %}">
+                    <i class="fas fa-download"></i> Download Page
+                </a>
+
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
                         data-toggle="collapse"
@@ -181,6 +186,8 @@
             let result_size_container = $("#result-size-container"); // Contains the amount of papers found.
             let paper_result_options_container = $("#paper-result-options-container"); // Contains the info and sort
 
+            let download_button = $("#download-button");
+
             let searchEngine = form.collabovidSearch({
                 indicator: indicator,
                 paper_container: paper_container,
@@ -214,18 +221,9 @@
                 form.submit();
             });
 
-            form.submit(function (e) {
-                e.preventDefault();
-
-                /**
-                 * We have three types of inputs:
-                 * data-no-url: These inputs will not be pushed to the url
-                 * data-url-manually: These inputs will not be pushed to the url automatically
-                 * other: Input will be submitted and pushed to url
-                 */
-
+            function generate_submission_data()
+            {
                 let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
-                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
 
                 // Converting categories=x&categories=y to categories=x,y
                 let checked_categories = $('.search-form input[name=categories]:checked');
@@ -237,6 +235,35 @@
                         return this.value;
                     }).get().join(',');
                 }
+
+                return submission_data;
+            }
+
+            download_button.click(function (e) {
+                e.preventDefault();
+
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+                let submission_data = generate_submission_data();
+
+                // Full data must be submitted to the view. Submission data can be saved in the url.
+                let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
+
+                window.open($(this).attr('href')+ "?" + full_data , '_blank');
+
+            });
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                /**
+                 * We have three types of inputs:
+                 * data-no-url: These inputs will not be pushed to the url
+                 * data-url-manually: These inputs will not be pushed to the url automatically
+                 * other: Input will be submitted and pushed to url
+                 */
+
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+                let submission_data = generate_submission_data();
 
                 // Full data must be submitted to the view. Submission data can be saved in the url.
                 let full_data = submission_data + "&" + no_url_submission_data;

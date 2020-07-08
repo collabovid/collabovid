@@ -1,0 +1,62 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="gradient-header">
+        <div class="container mt-4">
+            <h2 class="text-white">Find similar papers</h2>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+    <div id="paper-container" class="container mt-3">
+
+        <div class="row mt-3">
+            <div class="col-lg-4">
+                <h4 class="text-muted font-weight-light">Your papers</h4>
+            </div>
+            <div class="col-lg-8">
+                <h3 class="text-muted">Similar papers</h3>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <div class="col-lg-4">
+                <ul class="list-group">
+                    {% for paper in query_papers.all %}
+                        <li class="list-group-item">{{ paper.title }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-lg-8">
+                {% if error %}
+                    <div class="my-5 text-center text-danger font-weight-bold">We encountered an unexpected
+                        error.
+                    </div>
+                {% else %}
+                    {% for current_paper in similar_papers %}
+                        <div class="mb-5">
+                            {% include 'search/partials/paper_card/_paper_card.html' with paper=current_paper %}
+                        </div>
+                    {% empty %}
+                        <div class="my-5 text-center font-weight-bold">No similar papers found</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+
+
+
+{% endblock %}
+
+{% block script %}
+
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}

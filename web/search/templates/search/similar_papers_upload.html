@@ -1,0 +1,130 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="gradient-header pb-5">
+        <div class="container">
+            <div class="row mt-5 mb-5">
+                <div class="col-12">
+
+                    <form id="upload-form" action="{% url "upload_ris" %}" method="post"
+                          enctype="multipart/form-data">
+
+                        {% csrf_token %}
+                        <input type="file" name="file" id="literature-file"/>
+
+                        <div class="upload-area">
+                            <h4 class="font-weight-light">Upload your file</h4>
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% include 'core/partials/_rounded_bottom.html' %}
+
+    </div>
+
+
+    <div class="container mt-5">
+        <div id="analysis-container"></div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        $(document).ready(function () {
+            let html = $("html");
+            let upload_form = $("#upload-form");
+            let upload_area = $(".upload-area");
+            let upload_area_text = $(".upload-area h4");
+            let file_field = $("#literature-file");
+
+            let analysis_container = $("#analysis-container");
+
+
+            // preventing page from redirecting
+            html.on("dragover", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                upload_area_text.text("Drag here");
+            });
+
+            html.on("drop", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            // Drag enter
+            upload_area.on('dragenter', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                upload_area_text.text("Drop");
+            });
+
+            // Drag over
+            upload_area.on('dragover', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                upload_area_text.text("Drop");
+            });
+
+            // Drop
+            upload_area.on('drop', function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                upload_area_text.text("Upload");
+
+                let fd = new FormData();
+
+                file_field.prop('files', e.originalEvent.dataTransfer.files);
+
+                fd.append('file', e.originalEvent.dataTransfer.files[0]);
+                fd.append('csrfmiddlewaretoken', upload_form.children('input[name=csrfmiddlewaretoken]').val());
+
+                uploadData(fd);
+            });
+
+            function uploadData(form_data) {
+
+                for (var p of form_data) {
+                    console.log(p);
+                }
+
+                $.ajax({
+                    url: upload_form.attr('action'),
+                    type: 'post',
+                    data: form_data,
+                    contentType: false,
+                    processData: false,
+                    success: function (data) {
+                        analysis_container.html(data);
+                        console.log("here")
+                    },
+                    error: function (request, error) {
+                        console.log("Request: " + JSON.stringify(request));
+                        console.log("Error: " + error);
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+    <style>
+        .upload-area {
+            width: 100%;
+            height: 200px;
+            background: white;
+        }
+    </style>
+{% endblock %}

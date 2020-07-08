@@ -164,3 +164,6 @@ class SearchForm(forms.Form):
     def url(self):
         return settings.SEARCH_SERVICE_URL + "/search"
 
+
+class FindSimilarPapersForm(forms.Form):
+    file = forms.FileField()

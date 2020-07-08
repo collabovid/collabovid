@@ -1,4 +1,6 @@
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
+
+from data.models import Paper
 from src.search.search_engine import SearchEngine
 from src.analyze import get_semantic_paper_search, get_similar_paper_finder
 import time
@@ -6,7 +8,8 @@ import json
 
 from src.search.utils import TimerUtilities
 from src.search.virtual_paginator import VirtualPaginator
-
+from collections import defaultdict
+import heapq
 
 def wait_until(condition, interval=0.1, timeout=10):
     start = time.time()
@@ -47,15 +50,31 @@ def similar(request):
         if not wait_until(paper_finder.is_ready):
             return HttpResponseBadRequest("Similar Paper finder is not initialized yet")
 
-        doi = request.GET.get('doi')
-        limit = request.GET.get('limit')
-        similar_paper = paper_finder.similar(doi, top=limit)
+        dois = request.GET.getlist('dois')
+        limit = int(request.GET.get('limit'))
+
+        dois = list(Paper.objects.filter(pk__in=dois).values_list('doi', flat=True))
+
+        print(dois)
+
+        doi_scores = defaultdict(int)
+        for doi in dois:
+            similar_paper = paper_finder.similar(doi)
+            for doi, score in similar_paper:
+                doi_scores[doi] += score
+
         result = []
-        for doi, score in similar_paper:
+
+        flattened_score_dict = list(doi_scores.items())
+        print(flattened_score_dict)
+
+        for doi, score in heapq.nlargest(limit, flattened_score_dict, key=lambda x: x[1]):
             result.append({
                 'doi': doi,
                 'score': score
             })
+            print(doi, score)
+
         return JsonResponse({'similar': result})
     return HttpResponseBadRequest("Only Get is allowed here")
 

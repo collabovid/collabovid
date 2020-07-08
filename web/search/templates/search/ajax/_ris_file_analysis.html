@@ -1,0 +1,30 @@
+<h3 class="text-muted">Literature Analysis</h3>
+
+We analyzed your file and found {{ found_papers.count }} papers that are in our database and {{ ignored_papers|length }}
+that we don't have in our database. You can review the results below. To continue to the similar paper search click
+continue at the end of this page.
+
+<h4 class="text-muted mt-3">Found Papers</h4>
+<ul class="list-group w-100">
+    {% for paper in found_papers.all %}
+        {% include "core/partials/_paper_list_item.html" with paper=paper %}
+    {% endfor %}
+</ul>
+
+<h4 class="text-muted mt-3">Ignored Papers</h4>
+<ul class="list-group w-100">
+    {% for paper in ignored_papers %}
+        <li class="list-group-item text-danger">
+            {{ paper.title }}
+        </li>
+    {% endfor %}
+</ul>
+
+<div class="text-right mt-3">
+    <form method="get" action="{% url "similar_papers" %}">
+        {% for paper in found_papers.all %}
+            <input type="hidden" name="dois" value="{{ paper.doi }}">
+        {% endfor %}
+        <button class="btn btn-success">Continue</button>
+    </form>
+</div>

@@ -27,7 +27,7 @@ def home(request):
 
 def paper(request, doi):
     current_paper = get_object_or_404(Paper, doi=doi)
-    similar_request = SimilarPaperRequestHelper(doi, number_papers=10)
+    similar_request = SimilarPaperRequestHelper([doi], total_papers=10, papers_per_page=10)
     similar_paper = []
     if not similar_request.error:
         similar_paper = similar_request.paginator.page(1)
