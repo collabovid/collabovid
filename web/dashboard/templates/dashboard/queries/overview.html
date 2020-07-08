@@ -3,9 +3,9 @@
 
 {% block content %}
 
-    <h2>Queries</h2>
-
-    <table class="table table-striped w-100">
+    <h2>Latest {{ search_queries.count }}/{{ total }} Queries</h2>
+    
+    <table class="table table-striped w-100 mt-3">
 
         {% for search_query in search_queries %}
 

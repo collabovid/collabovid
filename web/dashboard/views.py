@@ -30,10 +30,13 @@ from geolocations.location_modifier import LocationModifier
 
 import os
 
+
 @staff_member_required
 def queries(request):
     queries = SearchQuery.objects.order_by('-created_at')[:100]
-    return render(request, "dashboard/queries/overview.html", {'search_queries': queries})
+    return render(request, "dashboard/queries/overview.html",
+                  {'search_queries': queries, 'total': SearchQuery.objects.count()})
+
 
 @staff_member_required
 def tasks(request):
@@ -50,7 +53,8 @@ def task_detail(request, id):
 @staff_member_required
 def select_task(request):
     if request.method == 'GET':
-        return render(request, 'dashboard/tasks/task_select.html', {'services_with_tasks': AVAILABLE_TASKS, 'debug': settings.DEBUG})
+        return render(request, 'dashboard/tasks/task_select.html',
+                      {'services_with_tasks': AVAILABLE_TASKS, 'debug': settings.DEBUG})
 
     return HttpResponseNotFound()
 
@@ -188,7 +192,8 @@ def edit_location(request, location_id):
         location = GeoLocation.objects.get(pk=location_id)
         try:
             new_location = LocationModifier.change_location(location, new_geonames_id)
-            messages.add_message(request, messages.SUCCESS, f"Successfully changed location from {location.name} to {new_location.name}")
+            messages.add_message(request, messages.SUCCESS,
+                                 f"Successfully changed location from {location.name} to {new_location.name}")
         except GeonamesDBError as ex:
             messages.add_message(request, messages.ERROR, ex)
         return redirect('locations')
@@ -223,7 +228,8 @@ def locations(request):
         name_resolutions = GeoNameResolution.objects.all()
 
         return render(request, 'dashboard/locations/locations.html',
-                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions, 'debug': settings.DEBUG})
+                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions,
+                       'debug': settings.DEBUG})
 
 
 # @staff_member_required
@@ -268,7 +274,8 @@ def data_import(request):
 
     sorted_archives = sorted([os.path.basename(x) for x in import_archives if x.endswith('.tar.gz')], reverse=True)
 
-    return render(request, 'dashboard/data_import/data_import_overview.html', {'archives': sorted_archives, 'debug': settings.DEBUG})
+    return render(request, 'dashboard/data_import/data_import_overview.html',
+                  {'archives': sorted_archives, 'debug': settings.DEBUG})
 
 
 @staff_member_required
@@ -309,11 +316,12 @@ def location_sanitizing(request):
     return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
                   {'location_papers': location_memberships, 'debug': settings.DEBUG})
 
+
 @staff_member_required
 def language_detection(request):
     if request.method == 'GET':
         candidates = DeleteCandidate.objects.filter(
-                type=DeleteCandidate.Type.LANGUAGE, false_positive=False).order_by('-score').select_related('paper')
+            type=DeleteCandidate.Type.LANGUAGE, false_positive=False).order_by('-score').select_related('paper')
         return render(request, 'dashboard/language_detection/language_detection.html',
                       {'candidates': candidates, 'debug': settings.DEBUG})
     elif request.method == 'POST':
