@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import Paper
+from data.models import Paper, Category
 from search.suggestions_helper import SuggestionsHelper
 from statistics import PaperStatistics
 
@@ -27,7 +27,7 @@ def search(request):
         if form.is_valid():
             pass
 
-        return render(request, "search/search.html", {'form': form})
+        return render(request, "search/search.html", {'form': form, 'categories': Category.objects.all()})
     elif request.method == "POST":
         form = SearchForm(request.POST)
         return render_search_result(request, form)
