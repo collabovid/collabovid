@@ -1,3 +1,4 @@
 from django.contrib import admin
+from search.models import SearchQuery
 
-# Register your models here.
+admin.site.register(SearchQuery)

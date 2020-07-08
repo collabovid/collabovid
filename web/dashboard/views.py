@@ -17,6 +17,7 @@ from data.models import (
     Paper,
 )
 from geolocations.geoname_db import GeonamesDBError
+from search.models import SearchQuery
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -29,6 +30,10 @@ from geolocations.location_modifier import LocationModifier
 
 import os
 
+@staff_member_required
+def queries(request):
+    queries = SearchQuery.objects.order_by('-created_at')[:100]
+    return render(request, "dashboard/queries/overview.html", {'search_queries': queries})
 
 @staff_member_required
 def tasks(request):

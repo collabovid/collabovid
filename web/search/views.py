@@ -40,7 +40,7 @@ def render_search_result(request, form):
         return render(request, "search/ajax/_search_result_error.html",
                       {'message': 'Your request is invalid.' + str(form.errors)})
 
-    search_response_helper = SearchRequestHelper(form)
+    search_response_helper = SearchRequestHelper(form, save_request=not request.user.is_authenticated)
 
     if search_response_helper.error:
         return render(request, "search/ajax/_search_result_error.html",
