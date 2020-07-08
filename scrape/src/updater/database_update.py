@@ -53,7 +53,7 @@ class DatabaseUpdate:
 
                     if not changed_externally:
                         db_article.last_scrape = timezone.now()
-                        db_article.save()
+                        db_article.save(set_manually_modified=False)
                         return db_article, False, False  # Article was neither created, nor updated
 
                     if changed_internally:
@@ -122,11 +122,11 @@ class DatabaseUpdate:
         db_article.pdf_url = datapoint.pdf_url
         db_article.is_preprint = datapoint.is_preprint
         db_article.pubmed_id = datapoint.pubmed_id
-        db_article.save()
+        db_article.save(set_manually_modified=False)
 
         db_article.authors.clear()
         for author in datapoint.authors:
-            db_author, _ = Author.objects.get_or_create(
+            db_author, _ = Author.get_or_create_by_name(
                 first_name=author[1],
                 last_name=author[0],
             )
@@ -142,7 +142,7 @@ class DatabaseUpdate:
 
         db_article.categories.clear()
         db_article.scrape_hash = datapoint.md5
-        db_article.save()
+        db_article.save(set_manually_modified=False)
 
     def _handle_conflict(self, db_article, datapoint):
         try:

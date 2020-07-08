@@ -131,9 +131,30 @@ class Author(models.Model):
         else:
             return deleted_objects['data.Author']
 
+    @staticmethod
+    def get_by_name(first_name, last_name):
+        try:
+            name_resolution = AuthorNameResolution.objects.get(source_first_name=first_name, source_last_name=last_name)
+            return name_resolution.target_author
+        except AuthorNameResolution.DoesNotExist:
+            return Author.objects.get(first_name=first_name, last_name=last_name)
+
+    @staticmethod
+    def get_or_create_by_name(first_name, last_name):
+        try:
+            return Author.get_by_name(first_name=first_name, last_name=last_name), False
+        except Author.DoesNotExist:
+            return Author.objects.create(first_name=first_name, last_name=last_name), True
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['last_name', 'first_name']),
+        ]
+
 
 class AuthorNameResolution(models.Model):
-    source_name = models.TextField(max_length=(Author.MAX_LENGTH_LAST_NAME + Author.MAX_LENGTH_FIRST_NAME + 2))
+    source_first_name = models.TextField(max_length=Author.MAX_LENGTH_FIRST_NAME)
+    source_last_name = models.TextField(max_length=Author.MAX_LENGTH_LAST_NAME)
     target_author = models.ForeignKey(Author, on_delete=models.CASCADE)
 
     @staticmethod
@@ -153,6 +174,10 @@ class AuthorNameResolution(models.Model):
             pass
         return created
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['source_last_name', 'source_first_name']),
+        ]
 
 
 class Category(models.Model):
@@ -291,7 +316,7 @@ class Paper(models.Model):
         super(Paper, self).__init__(*args, **kwargs)
         self._highlighted_authors = None
 
-    preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
+    preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None, blank=True)
     scrape_hash = models.CharField(max_length=22, null=True, default=None)
     manually_modified = models.BooleanField(default=False)
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
@@ -301,27 +326,28 @@ class Paper(models.Model):
     categories = models.ManyToManyField(Category, related_name="papers", through='CategoryMembership')
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source_value = models.IntegerField(choices=DataSource.choices)
-    version = models.CharField(max_length=40, null=True, default=None)
+    version = models.CharField(max_length=40, null=True, blank=True, default=None)
 
-    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
+    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', blank=True, on_delete=models.SET_NULL)
 
-    pubmed_id = models.CharField(max_length=20, unique=True, null=True, default=None)
+    pubmed_id = models.CharField(max_length=20, unique=True, null=True, blank=True, default=None)
 
     topic = models.ForeignKey(Topic,
                               related_name="papers",
                               null=True,
                               default=None,
+                              blank=True,
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
-    url = models.URLField(null=True, default=None)
-    pdf_url = models.URLField(null=True, default=None)
+    url = models.URLField(null=True, blank=True, default=None)
+    pdf_url = models.URLField(null=True, blank=True, default=None)
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField(null=True, default=None)
-    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, blank=True, default=None)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -375,6 +401,12 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+    def save(self, set_manually_modified=True, *args, **kwargs):
+        if set_manually_modified:
+            self.manually_modified = True
+        super(Paper, self).save(*args, **kwargs)
+
 
 
 class ScrapeConflict(models.Model):
@@ -469,7 +501,6 @@ def paper_ignored(sender, instance, **kwargs):
     """
     if not kwargs['raw']:
         Paper.objects.filter(doi=instance.doi).delete()
-
 
 
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
