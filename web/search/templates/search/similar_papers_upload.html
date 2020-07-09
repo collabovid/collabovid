@@ -8,21 +8,44 @@
             <div class="row mt-5 mb-5">
                 <div class="col-12">
 
-                    <h1 class="display-4">Upload your literature</h1>
+                    <h1 class="text-white display-4">Upload your literature</h1>
 
                     <div class="muted-white">
-                        We provide
+                        You can upload your existing literature files to find COVID-19 publications which are
+                        <strong>similar</strong> to your favorite articles. The data you upload will be processed
+                        in order to identify articles which we have in our database. Afterwards the uploaded file
+                        will be deleted permanently from our servers.
+                        For the articles which are in our database, we provide a similarity search function that
+                        allows you find similar articles for your query. Upload your literature as a
+                        <strong>.ris</strong> file and try it out!
                     </div>
 
-                    <form id="upload-form" action="{% url "upload_ris" %}" method="post"
+                    <form class="mt-5 mr-5 ml-5" id="upload-form" action="{% url "upload_ris" %}" method="post"
                           enctype="multipart/form-data">
 
                         {% csrf_token %}
                         <input type="file" name="file" id="literature-file" style="display: none;"/>
 
-                        <div role="button" class="upload-area shadow rounded">
-                            <div><i class="fas fa-file-upload fa-4x"></i></div>
-                            <h4 class="font-weight-light text-center">Upload your file</h4>
+                        <div role="button" class="upload-area rounded">
+                            <div class="icon default">
+                                <i class="fas fa-file-upload fa-4x"></i>
+                            </div>
+                            <div class="icon drag" style="display: none;">
+                                <i class="fas fa-4x fa-hand-point-down"></i>
+                            </div>
+                            <div class="icon indicator" style="display: none;">
+                                <i class="fas fa-4x fa-circle-notch fa-spin"></i>
+                            </div>
+                            <div class="icon success" style="display: none;">
+                                <i class="fas fa-4x fa-check-circle"></i>
+                            </div>
+                            <h4 class="font-weight-light text-center"
+                                data-text-default="Upload your file"
+                                data-text-dragging="Drag here"
+                                data-text-dragover="Drop it!"
+                                data-text-uploading="Uploading..."
+                                data-text-success="Your file was analyzed. Check the results below."
+                            >Upload your file</h4>
                         </div>
 
                     </form>
@@ -52,6 +75,13 @@
             let upload_form = $("#upload-form");
             let upload_area = $(".upload-area");
             let upload_area_text = $(".upload-area h4");
+
+            let drag_icon = $(".upload-area .icon.drag");
+            let default_icon = $(".upload-area .icon.default");
+            let indicator_icon = $(".upload-area .icon.indicator");
+            let success_icon = $(".upload-area .icon.success");
+
+            let icons = $(".upload-area .icon");
             let file_field = $("#literature-file");
 
             let analysis_container = $("#analysis-container");
@@ -61,34 +91,38 @@
             html.on("dragover", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
-                upload_area_text.text("Drag here");
+                upload_area_text.text(upload_area_text.data('text-dragging'));
+                icons.hide();
+                drag_icon.show();
             });
 
             html.on("drop", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                upload_area_text.text(upload_area_text.data('text-default'));
+                icons.hide();
+                default_icon.show();
             });
 
             // Drag enter
             upload_area.on('dragenter', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-                upload_area_text.text("Drop");
+                upload_area_text.text(upload_area_text.data('text-dragover'));
             });
 
             // Drag over
             upload_area.on('dragover', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-                upload_area_text.text("Drop");
+                upload_area_text.text(upload_area_text.data('text-dragover'));
             });
 
             // Drop
             upload_area.on('drop', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-
-                upload_area_text.text("Upload");
 
 
                 file_field.prop('files', e.originalEvent.dataTransfer.files);
@@ -117,6 +151,12 @@
                     console.log(p);
                 }
 
+                icons.hide();
+                indicator_icon.show();
+                upload_area.addClass('uploaded');
+                upload_area_text.text(upload_area_text.data('text-uploading'));
+
+
                 $.ajax({
                     url: upload_form.attr('action'),
                     type: 'post',
@@ -125,7 +165,12 @@
                     processData: false,
                     success: function (data) {
                         analysis_container.html(data);
-                        console.log("here")
+                        console.log("here");
+
+                        icons.hide();
+                        success_icon.show();
+                        upload_area_text.text(upload_area_text.data('text-success'));
+
                     },
                     error: function (request, error) {
                         console.log("Request: " + JSON.stringify(request));
@@ -146,6 +191,14 @@
             border-radius: 10px;
             position: relative;
             color: #e0e0e0;
+
+            -webkit-transition: background-color 1s;
+            transition: background-color 1s;
+
+            -webkit-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+            -moz-box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+            box-shadow: 0px 0px 17px 0px rgba(0, 0, 0, 0.75);
+
         }
 
         .upload-area:after {
@@ -159,6 +212,15 @@
             left: -5px;
             bottom: -5px;
             right: -5px;
+        }
+
+        .upload-area.uploaded, .upload-area.uploaded:after {
+            border: none;
+            background: none;
+
+            -webkit-box-shadow: 0 0 0 0;
+            -moz-box-shadow: 0 0 0 0;
+            box-shadow: 0 0 0 0;
         }
 
         .upload-area div {

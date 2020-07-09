@@ -66,17 +66,17 @@ def similar_papers(request):
 
         query_papers = Paper.objects.filter(pk__in=dois).all()
 
-        similar_request = SimilarPaperRequestHelper(list(query_papers.values_list('doi', flat=True)),
-                                                    total_papers=20,
-                                                    papers_per_page=20)
-        papers = []
+        #similar_request = SimilarPaperRequestHelper(list(query_papers.values_list('doi', flat=True)),
+        #                                            total_papers=20,
+        #                                            papers_per_page=20)
+        papers = list(Paper.objects.all()[:2])
 
-        if not similar_request.error:
-            papers = similar_request.paginator.page(1)
+        #if not similar_request.error:
+        #    papers = similar_request.paginator.page(1)
         return render(request, "search/search_similar_papers.html", {
             "query_papers": query_papers,
             "similar_papers": papers,
-            "error": similar_request.error
+            #"error": similar_request.error
         })
 
 

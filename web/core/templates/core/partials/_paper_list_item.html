@@ -1,7 +1,7 @@
 {% load humanize %}
 
 {% if selectable %}
-    <input type="checkbox" name="dois" id="input-paper-{{ paper.doi }}" value="{{ paper.doi }}"/>
+    <input type="checkbox" name="dois" id="input-paper-{{ paper.doi }}" value="{{ paper.doi }}" {% if checked %}checked="checked"{% endif %}/>
 
     <label class="list-group-item" for="input-paper-{{ paper.doi }}">
 {% else %}
@@ -16,10 +16,12 @@
         {{ paper.title }}<br>
         <div class="text-muted small mt-2 d-inline">
             {{ paper.published_at }} &middot; {{ paper.host.name }}
+            {% if not short %}
             &middot; Added {{ paper.created_at|naturaltime }}
             <a href="{{ paper.url }}" class="float-right">
                 Read more
             </a>
+            {% endif %}
         </div>
     </div>
 </div>

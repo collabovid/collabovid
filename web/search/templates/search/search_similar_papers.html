@@ -24,9 +24,13 @@
         <div class="row">
 
             <div class="col-lg-4">
-                <ul class="list-group">
+                <div class="text-muted">
+                    You can find the list of selected papers below. You can enable/disable certain papers
+                    and refresh the results if you like.
+                </div>
+                <ul class="list-group selectable-list-group">
                     {% for paper in query_papers.all %}
-                        <li class="list-group-item">{{ paper.title }}</li>
+                        {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True short=True checked=True %}
                     {% endfor %}
                 </ul>
             </div>

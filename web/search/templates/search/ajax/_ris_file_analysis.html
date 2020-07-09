@@ -4,8 +4,11 @@ We analyzed your file and found {{ found_papers.count }} papers that are in our 
 that we don't have in our database. You can review the results below. To continue to the similar paper select between
 two and ten papers that you want to analyze.
 
-<h4 class="d-inline-block text-muted mt-3">Found Papers</h4>
-<strong class="selected-count-label float-right">Selected <span>0</span>/10</strong>
+
+<h4 class="text-muted mt-3">
+    Found Papers
+    <span class="selected-count-label float-right small">Selected <span>0</span>/10</span>
+</h4>
 
 <form id="similar-paper-form" method="get" action="{% url "similar_papers" %}">
     <ul class="list-group selectable-list-group w-100">
@@ -25,7 +28,7 @@ two and ten papers that you want to analyze.
 
     <div class="text-right mt-3">
         <span id="similar-paper-form-disabled-button" data-toggle="tooltip" title="Disabled tooltip">
-            <button class="btn btn-success disabled">Continue</button>
+            <button class="btn btn-success" disabled="disabled">Continue</button>
         </span>
 
         <span id="similar-paper-form-enabled-button" style="display: none;">
