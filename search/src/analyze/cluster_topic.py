@@ -14,6 +14,10 @@ class ClusterTopic(Runnable):
     def task_name():
         return "cluster-topic"
 
+    @staticmethod
+    def description():
+        return "Splits up a topic through clustering in n_clusters new topics."
+
     def __init__(self, topic_id: int, vectorizer_name: str = 'transformer-paper-oubiobert-512', n_clusters: int = 2,
                  *args,
                  **kwargs):

@@ -1,30 +1,30 @@
 from tasks.definitions import Runnable, register_task
-from sklearn.manifold import TSNE
 from . import get_vectorizer
-from django.conf import settings
-import json
-from collabovid_store.s3_utils import S3BucketClient
 from data.models import Paper, Topic
-from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.cluster import KMeans
 import numpy as np
-from .utils import get_top_n_words, get_predictive_words
+from .utils import get_predictive_words
 import joblib
 
 
 @register_task
-class UpdateTopicAssignment(Runnable):
+class RecomputeTopicAssignment(Runnable):
 
     @staticmethod
     def task_name():
-        return "update-topic-assignment"
+        return "recompute-topic-assignment"
+
+    @staticmethod
+    def description():
+        return "Computes a full clustering of the paper embeddings and assigns all papers to newly created topics."
 
     def __init__(self, n_clusters: int = 20, vectorizer_name: str = 'transformer-paper-oubiobert-512', *args, **kwargs):
-        super(UpdateTopicAssignment, self).__init__(*args, **kwargs)
+        super(RecomputeTopicAssignment, self).__init__(*args, **kwargs)
         self._vectorizer_name = vectorizer_name
         self.n_clusters = n_clusters
 
     def run(self):
-        self.log("Starting UpdateTopicAssignment")
+        self.log("Starting RecomputeTopicAssignment")
         vectorizer = get_vectorizer(self._vectorizer_name)
         paper_matrix = vectorizer.paper_matrix
         X = 0.5 * paper_matrix['abstract'] + 0.5 * paper_matrix['title']
@@ -63,4 +63,4 @@ class UpdateTopicAssignment(Runnable):
             topic.description_html = ', '.join(words)
             topic.icon_path = '#'
             topic.save()
-        print('UpdateTopicAssignment Finished')
+        print('RecomputeTopicAssignment Finished')

@@ -209,9 +209,9 @@
                 }
             ]
         },
-        "update-topic-assignment": {
-            "name": "Update Topic Assignment",
-            "description": "No description provided.",
+        "recompute-topic-assignment": {
+            "name": "Recompute Topic Assignment",
+            "description": "Computes a full clustering of the paper embeddings and assigns all papers to newly created topics.",
             "parameters": [
                 {
                     "name": "n_clusters",
@@ -231,7 +231,7 @@
         },
         "cluster-topic": {
             "name": "Cluster Topic",
-            "description": "No description provided.",
+            "description": "Splits up a topic through clustering in n_clusters new topics.",
             "parameters": [
                 {
                     "name": "topic_id",
@@ -252,6 +252,19 @@
                     "required": false,
                     "type": "int",
                     "default": 2,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "nearest-neighbor-topic-assignment": {
+            "name": "Nearest Neighbor Topic Assignment",
+            "description": "Assigns all unassigned papers to a topic through a majority vote of the nearest neighbors.",
+            "parameters": [
+                {
+                    "name": "n_neighbors",
+                    "required": false,
+                    "type": "int",
+                    "default": 20,
                     "is_primitive": true
                 }
             ]

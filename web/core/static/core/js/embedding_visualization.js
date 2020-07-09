@@ -90,16 +90,16 @@ let EmbeddingVisualization = function () {
     }
 
     this.renderEmbeddings = function (canvas, onSelected, options) {
-        let fieldOfView = 45;
+        let fieldOfView = 75;
         let scope = this;
         let aspectRatio = canvas.offsetWidth / canvas.offsetHeight;
-        let nearPlane = 0.1;
+        let nearPlane = 0.001;
         let farPlane = 1000;
 
         let camera = new THREE.PerspectiveCamera(
             fieldOfView, aspectRatio, nearPlane, farPlane
         );
-        camera.position.z = 3.5;
+        camera.position.z = 2.5;
         camera.position.x = 0;
 
         let renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true});
@@ -135,12 +135,14 @@ let EmbeddingVisualization = function () {
             });
             let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial])
             let mesh = new THREE.Mesh(geometry, material);
-            //mesh.position.set(-0.518, -0.547 / 2, -0.558)
+            mesh.position.set(-0.518, -0.25, -0.558)
             console.log(mesh.up)
             scene.add(mesh);
 
             let controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.zoomSpeed = 0.5
+            controls.zoomSpeed = options.zoomSpeed;
+            controls.panSpeed = options.panSpeed;
+
             controls.enableRotate = false
             controls.screenSpacePanning = true
             controls.mouseButtons = {
@@ -152,9 +154,10 @@ let EmbeddingVisualization = function () {
 
             // handle resize of window
             window.addEventListener('resize', function () {
+                renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
                 camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
                 camera.updateProjectionMatrix();
-                renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+                controls.update();
                 //controls.handleResize();
             });
 
@@ -168,7 +171,9 @@ let EmbeddingVisualization = function () {
                 requestAnimationFrame(animate);
                 TWEEN.update(time)
                 renderer.render(scene, camera);
-                controls.update();
+                if (!scope.animating) {
+                    controls.update();
+                }
             }
 
             requestAnimationFrame(animate);
@@ -271,15 +276,24 @@ let EmbeddingVisualization = function () {
     }
 
     this.getColorForPaper = function (paper) {
-        let maxScore = 0;
         let color = 0xffffff
+        const category = this.getHighestCategoryForPaper(paper);
+        if (category) {
+            color = colors[category]
+        }
+        return color;
+    }
+
+    this.getHighestCategoryForPaper = function (paper) {
+        let maxScore = 0;
+        let category = null;
         paper.categories.forEach(function (item) {
             if (item.score > maxScore) {
                 maxScore = item.score
-                color = colors[item.name]
+                category = item.name
             }
         })
-        return color;
+        return category;
     }
 
     this.deselectAll = function () {
@@ -323,14 +337,14 @@ let EmbeddingVisualization = function () {
         this.renderer.render(this.scene, this.camera);
     }
 
-    this.selectPapers = function (dois) {
+    this.selectPapers = function (dois, selectionColor) {
         let minCoordinates = new Array(3).fill(100000);
         let maxCoordinates = new Array(3).fill(-10000);
         for (let i = 0; i < this.papers.length; i++) {
             let color = 0xffffff;
             let materialIndex = 2;
             if (dois.includes(this.papers[i].doi)) {
-                //color = 0x32CD32;
+                color = selectionColor;
                 materialIndex = 0;
                 for (let j = 0; j < 3; j++) {
                     minCoordinates[j] = Math.min(this.papers[i].point[j], minCoordinates[j])
@@ -346,17 +360,14 @@ let EmbeddingVisualization = function () {
         this.geometry.colorsNeedUpdate = true
         this.geometry.elementsNeedUpdate = true
 
-        let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0
-        let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0
-        let newZ = maxCoordinates[2] + 2;
-        console.log('max min')
-        console.log(maxCoordinates);
-        console.log(minCoordinates);
-        console.log('new coordinates')
-        console.log([newX, newY, newZ])
+        let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0 - 0.518
+        let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0 - 0.5
+        let newZ = maxCoordinates[2] + 1.2
 
 
         const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z}
+        this.animating = true;
+        //this.controls.enableRotate = false;
         const tween = new TWEEN.Tween(coords)
             .to({
                 x: newX,
@@ -365,12 +376,18 @@ let EmbeddingVisualization = function () {
             }, 1200)
             .easing(TWEEN.Easing.Quadratic.Out)
             .onUpdate(() => {
-                this.camera.position.set(coords.x, coords.y, coords.z)
-                //this.camera.up.set(0, 1, 0);
-                //this.camera.lookAt(newX, newY, newZ);
-                //this.camera.updateProjectionMatrix();
+                //this.camera.lookAt(newX, newY, newZ - 2);
+                this.camera.position.x = coords.x
+                this.camera.position.y = coords.y
+                this.camera.position.z = coords.z
+                this.controls.target.set(coords.x, coords.y, coords.z - 5);
+                this.camera.lookAt(coords.x, coords.y, coords.z - 5)
+                this.camera.rotation.z = 0;
+                this.camera.rotation.x = 0;
+                this.camera.rotation.y = 0;
+                this.camera.updateProjectionMatrix();
+            }).onComplete(() => {
+                this.animating = false;
             }).start()
-
-        //this.renderer.render(this.scene, this.camera);
     }
 }

@@ -12,11 +12,39 @@
                         <canvas id="visualization-container"></canvas>
                     </div>
                 </div>
-                <div class="legend">
-                    <div>
-                        {% for category in categories %}
-                            <div><span class="badge badge-primary" style="background-color: {{ category.color }}">{{ category.name }}</span></div>
-                        {% endfor %}
+                <div class="sidebar">
+                    <div style="align-content: flex-end">
+                        <div class="legend mr-3">
+                            <div id="category-legend">
+                                {% for category in categories %}
+                                    <div class="category-label" data-category="{{ category.name }}">
+                                        <span class="badge badge-primary"
+                                              style="background-color: {{ category.color }}">{{ category.name }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div id="topic-legend" style="display: none">
+                                <span id="topic-label" class="badge badge-light"></span>
+                            </div>
+                            <div id="paper-selected-legend" style="display: none">
+                                <div><span class="badge badge-primary"
+                                           style="background-color: #ffc266">Selected Paper</span>
+                                </div>
+                                <span class="badge badge-primary" style="background-color: #cc7a00">Neighbors</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 controls text-white">
+                            <div>
+                                <div class="">Zoom Speed</div>
+                                <input id="zoom-slider" type="text" data-slider-min="0.01"
+                                       data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
+                            </div>
+                            <div class="mt-2">
+                                <div class="">Pan Speed</div>
+                                <input id="pan-slider" type="text" data-slider-min="0.01"
+                                       data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -33,13 +61,47 @@
     </div>
     <div class="pl-5 pr-5">
         <div id="topics-container" class="row">
-            {% for topic in topics %}
-                <div class="col-md-3 p-2">
-                    <div class="topic-card card p-3 h-100" data-topic="{{ topic.pk }}">{{ topic.name }}
-                        ({{ topic.papers.count }})
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card">
+                        <button type="button" class="btn btn-outline-secondary position-absolute mr-2 mt-2" style="right: 0;" data-dismiss="alert" aria-label="Close">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="card-body">
+                            <h4 class="card-title">Research Landscape Visualization</h4>
+                            <h6 class="card-title">How to use it?</h6>
+                            <p>
+                                The visualization above shows every publication in a 3D space which can be navigated.
+                            </p>
+
+                            <h6 class="card-title">How were these embeddings generated?</h6>
+
+                            <h6 class="card-title">How were the topics generated?</h6>
+                        </div>
+
                     </div>
                 </div>
-            {% endfor %}
+                <div class="col-md-8">
+                    <div class="row">
+                        {% for topic in topics %}
+                            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 p-2">
+                                <div class="topic-card card p-3 h-100" data-topic-name="{{ topic.name }}"
+                                     data-topic="{{ topic.pk }}">
+                                    <h6 class="card-title">{{ topic.name }}</h6>
+                                    <div class="card-subtitle text-muted">
+                                        {{ topic.papers.count }} Papers
+                                    </div>
+                                    <div class="position-absolute" style="right:1em; bottom: .5em;">
+                                        <div class="float-right">
+                                            <a href="#" class="">View All</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
@@ -47,6 +109,7 @@
 {% block script %}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.0/tween.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/7.0.1/math.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/11.0.2/bootstrap-slider.min.js"></script>
     {% javascript 'embedding-visualization' %}
     <script>
         const topics = JSON.parse("{{ topic_dict | escapejs }}")
@@ -57,6 +120,22 @@
         const visualization = new EmbeddingVisualization()
         const topicsContainer = $('#topics-container')
         const paperLoadingIndicator = $('#paper-loading-indicator')
+        const topicLegend = $('#topic-legend')
+        const topicLabel = $('#topic-label')
+        const categoryLegend = $('#category-legend')
+        const paperSelectedLegend = $('#paper-selected-legend')
+
+        const zoomSlider = $("#zoom-slider").slider();
+        zoomSlider.on('slide', function (e) {
+            visualization.controls.zoomSpeed = e.value;
+            visualization.controls.update();
+        })
+
+        const panSlider = $("#pan-slider").slider();
+        panSlider.on('slide', function (e) {
+            visualization.controls.panSpeed = e.value;
+            visualization.controls.update();
+        })
 
         function onSelected(idx, paper) {
             paperLoadingIndicator.show()
@@ -75,31 +154,63 @@
                 selectedCardContainer.html(data);
                 paperLoadingIndicator.hide()
                 selectedCardContainer.show()
+
+                paperSelectedLegend.show();
+                categoryLegend.hide();
+                topicLegend.hide();
             })
         }
 
         visualization.renderEmbeddings(canvas, onSelected, {
                 'imageUrl': '/static/img/atlas.jpg',
                 'fileUrl': '/static/embeddings_3d_scaled.json',
-                'categoryColors': colors
+                'categoryColors': colors,
+                'zoomSpeed': 0.25,
+                'panSpeed': 0.5
             }
         )
 
         visualization.onDeselect(function () {
             selectedCardContainer.hide()
             topicsContainer.show()
+            categoryLegend.show();
+            paperSelectedLegend.hide();
+            topicLegend.hide();
         });
 
         $('.topic-card').on('click', function (e) {
-            const topicId = $(e.target).data('topic')
+            const topicId = $(e.target).closest('.topic-card').data('topic')
             const paperIds = topics[topicId];
-            visualization.selectPapers(paperIds);
+            document.body.scrollTop = 0;
+            document.documentElement.scrollTop = 0;
+            topicLabel.text($(e.target).data('topic-name'))
+            topicLegend.show();
+            categoryLegend.hide();
+            paperSelectedLegend.hide();
+            visualization.selectPapers(paperIds, 0xffffff);
+        })
+
+        $('.category-label').on('click', function (e) {
+            let categoryId = $(e.target).closest('.category-label').data('category');
+            let dois = [];
+            visualization.papers.forEach(function (paper) {
+                let category = visualization.getHighestCategoryForPaper(paper)
+                if (category === categoryId) {
+                    dois.push(paper.doi);
+                }
+            })
+            visualization.selectPapers(dois, colors[categoryId]);
+            categoryLegend.show();
+            paperSelectedLegend.hide();
+            topicLegend.hide();
         })
 
     </script>
 {% endblock %}
 
 {% block css %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/11.0.2/css/bootstrap-slider.min.css"
+          rel="stylesheet"></link>
     <style>
         #visualization-container {
             height: 100%;
@@ -118,11 +229,21 @@
             width: 100%;
         }
 
-        .legend {
+        .topic-card {
+            user-select: none;
+        }
+
+        .badge {
+            user-select: none;
+        }
+
+        .sidebar {
             position: absolute;
-            right: 0;
-            margin-right: 50px;
-            top: 100px;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            margin-left: 50px;
+            top: 80px;
             color: white;
         }
 
