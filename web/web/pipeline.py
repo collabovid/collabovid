@@ -50,6 +50,9 @@ PIPELINE = {
             'source_filenames': (
                 'js/three.js',
                 'js/OrbitControls.js',
+                'js/math.min.js',
+                'js/bootstrap-slider.min.js',
+                'js/tween.umd.js',
                 'core/js/embedding_visualization.js',
             ),
             'output_filename': 'embedding_visualization.js'
@@ -104,6 +107,12 @@ PIPELINE = {
                 'css/jquery-jvectormap-2.0.5.css',
             ),
             'output_filename': 'map.css',
+        },
+        'embedding_visualization': {
+            'source_filenames': (
+                'css/bootstrap-slider.css',
+            ),
+            'output_filename': 'embedding_visualization.css',
         },
     },
 }

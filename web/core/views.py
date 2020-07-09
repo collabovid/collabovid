@@ -50,7 +50,7 @@ def paper(request, doi):
 
 
 def embedding_visualization(request):
-    topics = Topic.objects.all()
+    topics = Topic.objects.order_by('name')
     topic_dict = {}
     for topic in topics:
         topic_dict[topic.pk] = [x['doi'] for x in topic.papers.values('doi')]
