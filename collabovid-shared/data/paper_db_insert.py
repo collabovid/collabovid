@@ -1,9 +1,60 @@
+import re
+
 from django.db import transaction
 from django.utils import timezone
 
 from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperHost, ScrapeConflict
-from src.static_functions import covid_related
-from src.updater.serializable_article_record import SerializableArticleRecord
+
+import json
+from dataclasses import dataclass, field
+import hashlib
+from datetime import date
+from typing import List, Optional, Tuple
+
+from django.core.serializers.json import DjangoJSONEncoder
+
+
+def covid_related(db_article):
+    if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
+        return False
+
+    covid19_keywords = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?(20)?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
+
+    return (bool(re.search(covid19_keywords, db_article.title, re.IGNORECASE)) or
+            bool(db_article.abstract and re.search(covid19_keywords, db_article.abstract, re.IGNORECASE)) or
+            bool((db_article.data and re.search(covid19_keywords, db_article.data.content, re.IGNORECASE)))
+            )
+
+
+@dataclass
+class SerializableArticleRecord:
+    doi: Optional[str] = None
+    title: Optional[str] = None
+    abstract: Optional[str] = None
+    authors: List[Tuple[str, str]] = field(default_factory=list)
+    datasource: Optional[str] = None
+    paperhost: Optional[str] = None
+    paperhost_url: Optional[str] = None
+    pubmed_id: Optional[str] = None
+    publication_date: Optional[date] = None
+    url: Optional[str] = None
+    pdf_url: Optional[str] = None
+    version: Optional[str] = None
+    is_preprint: Optional[bool] = None
+    journal: Optional[str] = None
+    update_timestamp: Optional[str] = None
+    _md5: Optional[str] = None
+
+    @property
+    def md5(self):
+        if not self._md5:
+            m = hashlib.md5(self.json().encode('utf-8'))
+            self._md5 = m.hexdigest()[:22]  # Maximum length of MD5 is 22 hex digits
+        return self._md5
+
+    def json(self):
+        self.authors = sorted(self.authors)
+        return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
 
 
 class DatabaseUpdate:
@@ -144,7 +195,8 @@ class DatabaseUpdate:
         db_article.scrape_hash = datapoint.md5
         db_article.save(set_manually_modified=False)
 
-    def _handle_conflict(self, db_article, datapoint):
+    @staticmethod
+    def _handle_conflict(db_article, datapoint):
         try:
             conflict = ScrapeConflict.objects.get(paper=db_article)
         except ScrapeConflict.DoesNotExist:

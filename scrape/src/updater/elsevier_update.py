@@ -4,7 +4,7 @@ from django.utils.timezone import make_aware
 from data.models import DataSource
 from src.pdf_extractor import PdfFromBytesExtractor
 from src.updater.data_updater import DataUpdater
-from src.updater.serializable_article_record import SerializableArticleRecord
+from data.paper_db_insert import SerializableArticleRecord
 from src.updater.elsevier_cache import ElsevierCache
 from nameparser import HumanName
 import datetime

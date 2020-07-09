@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from data.models import DataSource, Paper
 from datetime import datetime
 from src.updater.data_updater import DataUpdater
-from src.updater.serializable_article_record import SerializableArticleRecord
+from data.paper_db_insert import SerializableArticleRecord
 
 
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'

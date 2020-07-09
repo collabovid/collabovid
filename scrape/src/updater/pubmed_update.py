@@ -3,7 +3,7 @@ from pymed import PubMed
 
 from data.models import DataSource
 from src.updater.data_updater import DataUpdater
-from src.updater.serializable_article_record import SerializableArticleRecord
+from data.paper_db_insert import SerializableArticleRecord
 
 
 class PubmedUpdater(DataUpdater):

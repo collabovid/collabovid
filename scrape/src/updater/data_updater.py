@@ -4,7 +4,7 @@ from data.models import Author, Journal, Paper, PaperData
 from django.db.models import F
 from django.utils import timezone
 from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
-from src.updater.database_update import DatabaseUpdate
+from data.paper_db_insert import DatabaseUpdate
 from src.updater.update_statistics import UpdateStatistics
 
 
