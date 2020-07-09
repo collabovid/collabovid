@@ -3,7 +3,7 @@ import json
 from django.db.models import QuerySet, Count, Value
 from django.db.models.functions import Concat
 
-from data.models import Journal, Author, GeoLocation
+from data.models import Journal, Author, GeoLocation, Topic
 
 
 class TagifySearchable:
@@ -86,3 +86,25 @@ class LocationSearchable(TagifySearchable):
         return [{"pk": location.pk,
                  "value": location.displayname,
                  "count": location.paper_count} for location in self._locations]
+
+
+class TopicSearchable(TagifySearchable):
+
+    def __init__(self, topics: QuerySet):
+        self._topics = topics
+
+    @staticmethod
+    def from_ids(ids):
+        if ids:
+            return TopicSearchable(Topic.objects.filter(pk__in=ids))
+        else:
+            return TopicSearchable(Topic.objects.none())
+
+    @staticmethod
+    def single_object(topic):
+        return {"value": topic.name,
+                 "pk": topic.pk}
+
+    @property
+    def dict(self):
+        return [self.single_object(topic=topic) for topic in self._topics]

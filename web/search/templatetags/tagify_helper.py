@@ -16,3 +16,8 @@ def authors_to_json(value):
 @register.filter()
 def locations_to_json(value):
     return LocationSearchable.from_ids(value).json
+
+
+@register.filter()
+def topics_to_json(value):
+    return TopicSearchable.from_ids(value).json

@@ -102,6 +102,7 @@ class SearchForm(forms.Form):
     authors = CommaSeparatedIntegerField(required=False)
     journals = CommaSeparatedIntegerField(required=False)
     locations = CommaSeparatedIntegerField(required=False)
+    topics = CommaSeparatedIntegerField(required=False)
 
     categories = CommaSeparatedIntegerField(required=False)
 
@@ -144,6 +145,7 @@ class SearchForm(forms.Form):
                 'tab': self.cleaned_data['tab'],
                 'sorted_by': self.cleaned_data['sorted_by'],
                 'authors': self.cleaned_data['authors'],
+                'topics': self.cleaned_data['topics'],
                 'authors_connection': self.cleaned_data['authors_connection'],
                 'categories': self.cleaned_data['categories'],
                 'article_type': self.cleaned_data['article_type'],
