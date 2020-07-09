@@ -1,16 +1,4 @@
-/*let colors = {
-    "General": 0x424242,
-    "Mechanism": 0x488f31,
-    "Transmission": 0xbc5090,
-    "Diagnosis": 0xc0af4a,
-    "Treatment": 0xffa49c,
-    "Prevention": 0x6d4c41,
-    "Case Report": 0x009692,
-    "Epidemic Forecasting": 0xde425b
-}*/
-
-
-let EmbeddingVisualization = function () {
+const EmbeddingVisualization = function () {
 
     const paperProperties = {width: 0.005, height: 0.005, depth: 0.005, color: 0x5475a1}
     const atlasImage = {cols: 10, rows: 10};
@@ -110,7 +98,8 @@ let EmbeddingVisualization = function () {
 
         let loader = new THREE.FileLoader();
         loader.load(options.fileUrl, function (data) {
-            let papers = JSON.parse(data);
+            let paperData = JSON.parse(data);
+            let papers = paperData.papers;
             let geometry = scope.buildGeometry(papers);
             let loader = new THREE.TextureLoader();
             let url = options.imageUrl;
@@ -135,8 +124,7 @@ let EmbeddingVisualization = function () {
             });
             let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial])
             let mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(-0.518, -0.25, -0.558)
-            console.log(mesh.up)
+            mesh.position.set(-paperData.means[0], -paperData.means[1], -paperData.means[2])
             scene.add(mesh);
 
             let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -158,7 +146,6 @@ let EmbeddingVisualization = function () {
                 camera.aspect = canvas.offsetWidth / canvas.offsetHeight;
                 camera.updateProjectionMatrix();
                 controls.update();
-                //controls.handleResize();
             });
 
             // setup the light
@@ -180,8 +167,6 @@ let EmbeddingVisualization = function () {
 
 
             let raycaster = new THREE.Raycaster();
-            let mouse = new THREE.Vector2();
-
             const facesPerPoint = 2;
 
             // gets called when there is a click event
@@ -285,15 +270,7 @@ let EmbeddingVisualization = function () {
     }
 
     this.getHighestCategoryForPaper = function (paper) {
-        let maxScore = 0;
-        let category = null;
-        paper.categories.forEach(function (item) {
-            if (item.score > maxScore) {
-                maxScore = item.score
-                category = item.name
-            }
-        })
-        return category;
+        return paper.categories[paper.top_category_index]
     }
 
     this.deselectAll = function () {
@@ -364,10 +341,8 @@ let EmbeddingVisualization = function () {
         let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0 - 0.5
         let newZ = maxCoordinates[2] + 1.2
 
-
         const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z}
         this.animating = true;
-        //this.controls.enableRotate = false;
         const tween = new TWEEN.Tween(coords)
             .to({
                 x: newX,
@@ -376,7 +351,6 @@ let EmbeddingVisualization = function () {
             }, 1200)
             .easing(TWEEN.Easing.Quadratic.Out)
             .onUpdate(() => {
-                //this.camera.lookAt(newX, newY, newZ - 2);
                 this.camera.position.x = coords.x
                 this.camera.position.y = coords.y
                 this.camera.position.z = coords.z

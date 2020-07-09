@@ -32,11 +32,11 @@ class RecomputeTopicAssignment(Runnable):
         clusters = clustering.labels_
         id_map = paper_matrix['id_map']
 
-        centers = clustering.cluster_centers_
-        joblib.dump(centers, '../resources/kmeans_centers.pkl')
+        #centers = clustering.cluster_centers_
+        #joblib.dump(centers, '../resources/kmeans_centers.pkl')
 
         # delete all old topics
-        Topic.objects.all().delete()
+        old_topics = list(Topic.objects.all())
 
         papers = Paper.objects.all()
         # clusters = np.random.randint(low=0, high=20, size=len(papers))

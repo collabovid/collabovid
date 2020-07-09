@@ -57,7 +57,9 @@ def embedding_visualization(request):
         'topics': topics,
         'topic_dict': json.dumps(topic_dict),
         'categories': categories,
-        'category_colors': json.dumps(category_colors)
+        'category_colors': json.dumps(category_colors),
+        'atlas_image_url': '/static/img/atlas.jpg',
+        'paper_file_url': '/static/embeddings_3d.json'
     })
 
 
@@ -68,8 +70,8 @@ def paper_cards(request):
     dois = json.loads(dois)
     papers = Paper.objects.filter(pk__in=dois)
     papers = sorted(papers, key=lambda x: dois.index(x.doi))
-    return render(template_name="core/partials/_search_results.html", request=request,
-                  context={'papers': papers, 'show_score': False})
+    return render(template_name="search/ajax/_search_results.html", request=request,
+                  context={'papers': papers, 'show_score': False, 'use_paging': False})
 
 
 def about(request):

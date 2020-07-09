@@ -62,6 +62,7 @@ def render_search_result(request, form):
             page_obj = None
 
         search_result['papers'] = page_obj
+        search_result['use_paginator'] = True
 
         return render(request, "search/ajax/_search_results.html", search_result)
 

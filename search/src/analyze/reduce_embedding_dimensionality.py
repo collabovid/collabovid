@@ -46,18 +46,27 @@ class ReduceEmbeddingDimensionality(Runnable):
                 result[doi] = {
                     'doi': doi,
                     'point': points[matrix_index].tolist(),
-                    'categories': [category_info]
+                    'categories': [category_info],
+                    'top_category_index': 0
                 }
             else:
                 result[doi]['categories'].append(category_info)
+                if result[doi]['categories'][result[doi]['top_category_index']]['score'] <= membership.score:
+                    result[doi]['top_category_index'] = len(result[doi]['categories']) - 1
+        output = {
+            'papers': list(result.values()),
+            'means': points.mean(axis=0).tolist(),
+            'max': points.max(axis=0).tolist(),
+            'min': points.min(axis=0).tolist()
+        }
         if settings.DEBUG:
             with open('../web/assets/embeddings_3d.json', 'w+') as f:
-                json.dump(list(result.values()), f)
+                json.dump(output, f)
         else:
             s3_bucket_client = S3BucketClient(aws_access_key=settings.AWS_ACCESS_KEY_ID,
                                               aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                                               endpoint_url=settings.AWS_S3_ENDPOINT_URL,
                                               bucket=settings.AWS_STORAGE_BUCKET_NAME)
-            s3_bucket_client.upload_as_json('embeddings/embeddings_3d.json', result)
+            s3_bucket_client.upload_as_json('embeddings/embeddings_3d.json', output)
 
         self.log("ReduceEmbeddingDimensionality finished")
