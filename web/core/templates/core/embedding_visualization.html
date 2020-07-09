@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div class="sidebar">
-                    <div style="align-content: flex-end">
+                    <div class="" style="align-content: flex-end">
                         <div class="legend mr-3">
                             <div id="category-legend">
                                 {% for category in categories %}
@@ -36,12 +36,12 @@
                         <div class="mt-2 controls text-white">
                             <div>
                                 <div class="">Zoom Speed</div>
-                                <input id="zoom-slider" type="text" data-slider-min="0.01"
+                                <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
                                        data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
                             </div>
                             <div class="mt-2">
                                 <div class="">Pan Speed</div>
-                                <input id="pan-slider" type="text" data-slider-min="0.01"
+                                <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
                                        data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
                             </div>
                         </div>
@@ -60,74 +60,86 @@
         <div id="selected-card-container"></div>
     </div>
     <div class="pl-5 pr-5">
-        <div id="topics-container" class="row">
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="card">
-                        <button type="button" class="btn btn-outline-secondary position-absolute mr-2 mt-2"
-                                style="right: 0;" data-dismiss="alert" aria-label="Close">
-                            <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <div class="card-body">
-                            <h4 class="card-title">Research Landscape Visualization</h4>
-                            <h6 class="card-title">What is shown?</h6>
-                            <p>
-                                The visualization above shows every publication embedded in a 3D space where the
-                                position determines
-                                the topic of the publication. This means that papers that deal with the same topic are
-                                closer together than
-                                others.
-                            </p>
+    <div id="topics-container" class="d-flex flex-row">
+        <div>
+            <div id="description-container" class="collapse show width position-relative"
+                 style="width: auto; height: auto; overflow: hidden">
+                <div class="card" style="width: 500px;">
+                    <button type="button" class="btn btn-outline-secondary position-absolute mr-2 mt-2"
+                            style="right: 0;" data-toggle="collapse"
+                            data-target="#description-container"
+                            aria-expanded="true"
+                            aria-controls="description-container">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="card-body">
+                        <h4 class="card-title">Research Landscape Visualization</h4>
+                        <h6 class="card-title">What is shown?</h6>
+                        <p>
+                            The visualization above shows every publication embedded in a 3D space where the
+                            position determines
+                            the topic of the publication. This means that papers that deal with the same topic are
+                            closer together than
+                            others.
+                        </p>
 
-                            <h6 class="card-title">How to navigate?</h6>
-                            <p>
+                        <h6 class="card-title">How to navigate?</h6>
+                        <p>
 
-                            </p>
+                        </p>
 
-                            <h6 class="card-title">What is the purpose?</h6>
+                        <h6 class="card-title">What is the purpose?</h6>
 
-                            <h6 class="card-title">How are these embeddings generated?</h6>
+                        <h6 class="card-title">How are these embeddings generated?</h6>
 
-                            <h6 class="card-title">How were the topics generated?</h6>
-                        </div>
-
+                        <h6 class="card-title">How were the topics generated?</h6>
                     </div>
                 </div>
-                <div class="col-md-8">
-                    <div class="row justify-content-md-center">
-                        <div class="mb-2 col-md-6">
-                            <div class="input-group" style="border-radius: 2rem">
-                                <div class="input-group-prepend">
+            </div>
+        </div>
+        <div class="flex-fill" style="min-width: 0">
+            <div class="float-left ml-3 position-absolute">
+                <button id="show-info-btn" type="button" class="btn btn-outline-secondary"
+                        style="right: 0; display: none" data-toggle="collapse"
+                        data-target="#description-container"
+                        aria-expanded="true"
+                        aria-controls="description-container">
+                    <i class="fa fa-info-circle"></i>
+                    Show Info
+                </button>
+            </div>
+            <div class="row mr-0 ml-0 justify-content-center">
+                <div class="mb-2 col-md-6" style="max-width: 400px;">
+                    <div class="input-group" style="border-radius: 2rem;">
+                        <div class="input-group-prepend">
                                     <span class="input-group-text" id="filter-prepend"><i
                                             class="fas fa-search text-body"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="topic-filter-input"
+                               placeholder="Filter Topics" aria-describedby="filter-prepend"
+                               required>
+                    </div>
+                </div>
+            </div>
+
+            <!--end of col-->
+            <div class="row mr-0 ml-2">
+                {% for topic in topics %}
+                    <div class="topic-card-container col-xl-4 col-lg-6 col-md-6 col-sm-12 col-xs-12 p-2">
+                        <div class="topic-card card p-3 h-100" data-topic-name="{{ topic.name }}"
+                             data-topic="{{ topic.pk }}">
+                            <h6 class="card-title">{{ topic.name }}</h6>
+                            <div class="card-subtitle text-muted">
+                                {{ topic.papers.count }} Papers
+                            </div>
+                            <div class="position-absolute" style="right:1em; bottom: .5em;">
+                                <div class="float-right">
+                                    <a href="#" class="">View All</a>
                                 </div>
-                                <input type="text" class="form-control" id="topic-filter-input"
-                                       placeholder="Filter Topics" aria-describedby="filter-prepend"
-                                       required>
                             </div>
                         </div>
                     </div>
-
-                    <!--end of col-->
-                    <div class="row">
-                        {% for topic in topics %}
-                            <div class="topic-card-container col-xl-3 col-lg-4 col-md-6 col-sm-12 col-xs-12 p-2">
-                                <div class="topic-card card p-3 h-100" data-topic-name="{{ topic.name }}"
-                                     data-topic="{{ topic.pk }}">
-                                    <h6 class="card-title">{{ topic.name }}</h6>
-                                    <div class="card-subtitle text-muted">
-                                        {{ topic.papers.count }} Papers
-                                    </div>
-                                    <div class="position-absolute" style="right:1em; bottom: .5em;">
-                                        <div class="float-right">
-                                            <a href="#" class="">View All</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -149,6 +161,20 @@
         const categoryLegend = $('#category-legend')
         const paperSelectedLegend = $('#paper-selected-legend')
         const topicFilterInput = $('#topic-filter-input')
+        const descriptionContainer = $('#description-container');
+        const showInfoButton = $('#show-info-btn');
+        const topicCardContainer = $('.topic-card-container')
+
+        descriptionContainer.on('show.bs.collapse', function () {
+            showInfoButton.hide()
+            topicCardContainer.removeClass("col-xl-3 col-lg-4 col-md-6 col-sm-12")
+            topicCardContainer.addClass("col-xl-4 col-lg-6 col-md-6 col-sm-12")
+        });
+        descriptionContainer.on('hidden.bs.collapse', function () {
+            showInfoButton.show()
+            topicCardContainer.removeClass("col-xl-4 col-lg-6 col-md-6 col-sm-12")
+            topicCardContainer.addClass("col-xl-3 col-lg-4 col-md-6 col-sm-12")
+        });
 
         topicFilterInput.on('input', function (e) {
             const query = topicFilterInput.val()
@@ -262,6 +288,16 @@
             border: none !important;
         }
 
+        #description-container.collapsing {
+            -webkit-transition-property: width, visibility;
+            transition-property: width, visibility;
+            transition-duration: .5s;
+            -webkit-transition-duration: .5s;
+            height: auto;
+            width: 0;
+            opacity: 1;
+        }
+
         #canvas-container {
             top: 0;
             position: absolute;
@@ -270,6 +306,10 @@
 
         .topic-card {
             user-select: none;
+        }
+
+        .slider .slider-handle {
+            background: #e83e8c;
         }
 
         .badge {
@@ -283,7 +323,6 @@
             flex-direction: column;
             margin-left: 50px;
             top: 80px;
-            color: white;
         }
 
         .gradient-header {
