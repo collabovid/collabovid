@@ -10,6 +10,7 @@ from collabovid_store.s3_utils import S3BucketClient
 from dashboard.forms import PaperForm
 from data.models import (
     Author,
+    AuthorNameResolution,
     DeleteCandidate,
     GeoCity,
     GeoLocation,
@@ -19,7 +20,7 @@ from data.models import (
     IgnoredPaper,
     Journal,
     Paper,
-    ScrapeConflict
+    ScrapeConflict,
 )
 from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
@@ -392,3 +393,18 @@ def scrape_conflict(request):
                         messages.add_message(request, messages.ERROR, "Integrity error.")
 
         return redirect('scrape_conflict')
+
+
+@staff_member_required
+def add_author_name_resolution(request, author_id):
+    author = Author.objects.get(pk=author_id)
+    if request.method == 'GET':
+        return render(
+            request,
+            'dashboard/authors/add_name_resolution.html',
+            {'author': author, 'debug': settings.DEBUG}
+        )
+    elif request.method == 'POST':
+        AuthorNameResolution.add(author.first_name, author.last_name,
+                                 request.POST.get('first_name'), request.POST.get('last_name'))
+        return HttpResponse('Success')

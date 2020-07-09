@@ -25,6 +25,11 @@
             "description": "No description provided.",
             "parameters": []
         },
+        "parse-geo-locations": {
+            "name": "Parse Geo Locations",
+            "description": "",
+            "parameters": []
+        },
         "update-arxiv": {
             "name": "Update Arxiv",
             "description": "No description provided.",
@@ -110,11 +115,6 @@
             "description": "No description provided.",
             "parameters": []
         },
-        "check-covid-related": {
-            "name": "Check Covid Related",
-            "description": "No description provided.",
-            "parameters": []
-        },
         "download-pdf-images": {
             "name": "Download Pdf Images",
             "description": "No description provided.",
@@ -154,14 +154,9 @@
                 }
             ]
         },
-        "parse-geo-locations": {
-            "name": "Parse Geo Locations",
-            "description": "",
-            "parameters": []
-        },
         "detect-non-english-papers": {
             "name": "Detect Non English Papers",
-            "description": "Determines papers with titles or abstract not in english",
+            "description": "Determine papers with titles or abstract not in english",
             "parameters": []
         }
     },

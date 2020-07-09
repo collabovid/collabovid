@@ -3,7 +3,7 @@ from typing import Union
 import pycountry
 from django.contrib.postgres.fields import JSONField
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete, pre_save
@@ -159,18 +159,30 @@ class AuthorNameResolution(models.Model):
 
     @staticmethod
     def add(old_first, old_last, new_first, new_last):
-        target_author, created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
-        AuthorNameResolution.objects.get_or_create(source_first_name=old_first, source_last_name=old_last, target_author=target_author)
-        try:
-            old_author = Author.objects.get(first_name=old_first, last_name=old_last)
+        if old_first == new_first and old_last == new_last:
+            return False
 
-            memberships = Paper.authors.through.filter(author=old_author)
-            for membership in memberships:
-                membership.author = target_author
+        new_author, created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
+        with transaction.atomic():
+            AuthorNameResolution.objects.get_or_create(source_first_name=old_first, source_last_name=old_last, target_author=new_author)
+            try:
+                old_author = Author.objects.get(first_name=old_first, last_name=old_last)
 
-            old_author.delete()
-        except Author.DoesNotExist:
-            pass
+                if new_author == old_author:
+                    return False
+
+                memberships = Paper.authors.through.objects.filter(author=old_author)
+                for membership in memberships:
+                    membership.author = new_author
+                    membership.save()
+
+                for resolution in AuthorNameResolution.objects.filter(target_author=old_author):
+                    resolution.target_author = new_author
+                    resolution.save()
+
+                old_author.delete()
+            except Author.DoesNotExist:
+                pass
         return created
 
     class Meta:
