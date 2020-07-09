@@ -25,6 +25,11 @@
             "description": "No description provided.",
             "parameters": []
         },
+        "parse-geo-locations": {
+            "name": "Parse Geo Locations",
+            "description": "",
+            "parameters": []
+        },
         "update-arxiv": {
             "name": "Update Arxiv",
             "description": "No description provided.",
@@ -154,14 +159,9 @@
                 }
             ]
         },
-        "parse-geo-locations": {
-            "name": "Parse Geo Locations",
-            "description": "",
-            "parameters": []
-        },
         "detect-non-english-papers": {
             "name": "Detect Non English Papers",
-            "description": "Determines papers with titles or abstract not in english",
+            "description": "Determine papers with titles or abstract not in english",
             "parameters": []
         }
     },
@@ -227,14 +227,14 @@
                     "name": "n_clusters",
                     "required": false,
                     "type": "int",
-                    "default": 20,
+                    "default": 48,
                     "is_primitive": true
                 },
                 {
                     "name": "vectorizer_name",
                     "required": false,
                     "type": "str",
-                    "default": "transformer-paper-oubiobert-512",
+                    "default": "transformer-paper-nearest-512",
                     "is_primitive": true
                 }
             ]
@@ -254,7 +254,7 @@
                     "name": "vectorizer_name",
                     "required": false,
                     "type": "str",
-                    "default": "transformer-paper-oubiobert-512",
+                    "default": "transformer-paper-nearest-512",
                     "is_primitive": true
                 },
                 {

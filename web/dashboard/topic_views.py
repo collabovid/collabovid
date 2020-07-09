@@ -34,7 +34,7 @@ def merge_topics(request):
             for paper in topic2.papers.all():
                 paper.topic = topic1
                 paper.save()
-            topic1.description += '\n-------------\n' + topic2.description
+            topic1.keywords += ', ' + topic2.keywords
             topic1.save()
             topic2.delete()
             messages.add_message(request, messages.SUCCESS, f"Merged Topics")

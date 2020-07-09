@@ -18,7 +18,7 @@ class ClusterTopic(Runnable):
     def description():
         return "Splits up a topic through clustering in n_clusters new topics."
 
-    def __init__(self, topic_id: int, vectorizer_name: str = 'transformer-paper-oubiobert-512', n_clusters: int = 2,
+    def __init__(self, topic_id: int, vectorizer_name: str = 'transformer-paper-nearest-512', n_clusters: int = 2,
                  *args,
                  **kwargs):
         super(ClusterTopic, self).__init__(*args, **kwargs)
@@ -28,6 +28,7 @@ class ClusterTopic(Runnable):
 
     def run(self):
         self.log("Starting ClusterTopic of topic: ", self.topic_id)
+        self.log('using vectorizer', self._vectorizer_name)
         vectorizer = get_vectorizer(self._vectorizer_name)
         paper_matrix = vectorizer.paper_matrix
         X = 0.5 * paper_matrix['abstract'] + 0.5 * paper_matrix['title']
@@ -60,9 +61,7 @@ class ClusterTopic(Runnable):
         top_words = get_predictive_words(titles_list, top=50)
         for topic, words in zip(topics, top_words):
             topic.name = 'Generated: ' + ', '.join(words[:7])
-            topic.description = ', '.join(words)
-            topic.description_html = ', '.join(words)
-            topic.icon_path = '#'
+            topic.keywords = ', '.join(words)
             topic.save()
             self.log(f'Assigned Title to topic: {topic.name}')
 
