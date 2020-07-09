@@ -12,7 +12,7 @@
                         <canvas id="visualization-container"></canvas>
                     </div>
                 </div>
-                <div class="sidebar">
+                <!--<div class="sidebar">
                     <div class="" style="align-content: flex-end">
                         <div class="legend mr-3">
                             <div id="category-legend">
@@ -30,7 +30,7 @@
                                 <div><span class="badge badge-primary"
                                            style="background-color: #ffc266">Selected Paper</span>
                                 </div>
-                                <span class="badge badge-primary" style="background-color: #cc7a00">Neighbors</span>
+                                <span class="badge badge-primary" style="background-color: #cc7a00">Most similar papers</span>
                             </div>
                         </div>
                         <div class="mt-2 controls text-white">
@@ -47,6 +47,8 @@
                         </div>
                     </div>
                 </div>
+                -->
+
             </div>
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
@@ -146,12 +148,12 @@
                         <div class="topic-card card p-3 h-100" data-topic-name="{{ topic.name }}"
                              data-topic="{{ topic.pk }}">
                             <h6 class="card-title">{{ topic.name }}</h6>
-                            <div class="card-subtitle text-muted">
+                            <div class="card-subtitle text-muted mb-3">
                                 {{ topic.papers.count }} Papers
                             </div>
                             <div class="position-absolute" style="right:1em; bottom: .5em;">
                                 <div class="float-right">
-                                    <a href="#" class="">View All</a>
+                                    <a href="{% url "search" %}?topics={{ topic.pk }}" class="">View all papers</a>
                                 </div>
                             </div>
                         </div>
@@ -165,46 +167,42 @@
 {% block script %}
     {% javascript 'embedding-visualization' %}
     <script>
-        const topics = JSON.parse("{{ topic_dict | escapejs }}")
-        const colors = JSON.parse("{{ category_colors | escapejs }}")
+        const topics = JSON.parse("{{ topic_dict | escapejs }}");
+        const colors = JSON.parse("{{ category_colors | escapejs }}");
 
         const canvas = document.getElementById('visualization-container');
-        const selectedCardContainer = $('#selected-card-container')
-        const visualization = new EmbeddingVisualization()
-        const topicsContainer = $('#topics-container')
-        const paperLoadingIndicator = $('#paper-loading-indicator')
-        const topicLegend = $('#topic-legend')
-        const topicLabel = $('#topic-label')
-        const categoryLegend = $('#category-legend')
-        const paperSelectedLegend = $('#paper-selected-legend')
-        const topicFilterInput = $('#topic-filter-input')
+        const selectedCardContainer = $('#selected-card-container');
+        const visualization = new EmbeddingVisualization();
+        const topicsContainer = $('#topics-container');
+        const paperLoadingIndicator = $('#paper-loading-indicator');
+        const topicLegend = $('#topic-legend');
+        const topicLabel = $('#topic-label');
+        const categoryLegend = $('#category-legend');
+        const paperSelectedLegend = $('#paper-selected-legend');
+        const topicFilterInput = $('#topic-filter-input');
         const descriptionContainer = $('#description-container');
         const showInfoButton = $('#show-info-btn');
-        const topicCardContainer = $('.topic-card-container')
+        const topicCardContainer = $('.topic-card-container');
 
         descriptionContainer.on('show.bs.collapse', function () {
-            showInfoButton.hide()
-            topicCardContainer.removeClass("col-xl-3 col-lg-4 col-md-6 col-sm-12")
-            topicCardContainer.addClass("col-xl-4 col-lg-6 col-md-6 col-sm-12")
+            showInfoButton.hide();
         });
         descriptionContainer.on('hidden.bs.collapse', function () {
-            showInfoButton.show()
-            topicCardContainer.removeClass("col-xl-4 col-lg-6 col-md-6 col-sm-12")
-            topicCardContainer.addClass("col-xl-3 col-lg-4 col-md-6 col-sm-12")
+            showInfoButton.fadeIn();
         });
 
         function toggleTopicsContainer(show) {
             if (show) {
-                topicsContainer.addClass('d-flex')
-                topicsContainer.removeClass('d-none')
+                topicsContainer.addClass('d-flex');
+                topicsContainer.removeClass('d-none');
             } else {
-                topicsContainer.addClass('d-none')
-                topicsContainer.removeClass('d-flex')
+                topicsContainer.addClass('d-none');
+                topicsContainer.removeClass('d-flex');
             }
         }
 
         topicFilterInput.on('input', function (e) {
-            const query = topicFilterInput.val()
+            const query = topicFilterInput.val();
             $('.topic-card').each(function (i) {
                 const element = $(this);
                 let topicName = element.data('topic-name');
@@ -215,19 +213,19 @@
                     container.hide()
                 }
             })
-        })
+        });
 
         const zoomSlider = $("#zoom-slider").slider();
         zoomSlider.on('slide', function (e) {
             visualization.controls.zoomSpeed = e.value;
             visualization.controls.update();
-        })
+        });
 
         const panSlider = $("#pan-slider").slider();
         panSlider.on('slide', function (e) {
             visualization.controls.panSpeed = e.value;
             visualization.controls.update();
-        })
+        });
 
         function onSelected(idx, paper) {
             paperLoadingIndicator.show();
@@ -238,7 +236,7 @@
             const dois = [paper.doi];
             indices.forEach((i) => {
                 dois.push(visualization.papers[i].doi)
-            })
+            });
             visualization.selectPaper(idx, indices);
 
             $.get('/paper-cards/', {
@@ -260,19 +258,19 @@
                 'zoomSpeed': 0.25,
                 'panSpeed': 0.5
             }
-        )
+        );
 
         visualization.onDeselect(function () {
-            selectedCardContainer.hide()
-            toggleTopicsContainer(true)
+            selectedCardContainer.hide();
+            toggleTopicsContainer(true);
             categoryLegend.show();
             paperSelectedLegend.hide();
             topicLegend.hide();
         });
 
         $('.topic-card').on('click', function (e) {
-            const topicCard = $(e.target).closest('.topic-card')
-            const topicId = topicCard.data('topic')
+            const topicCard = $(e.target).closest('.topic-card');
+            const topicId = topicCard.data('topic');
             const paperIds = topics[topicId];
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
@@ -281,7 +279,7 @@
             categoryLegend.hide();
             paperSelectedLegend.hide();
             visualization.selectPapers(paperIds, 0xffffff);
-        })
+        });
 
         $('.category-label').on('click', function (e) {
             let categoryId = $(e.target).closest('.category-label').data('category');
@@ -291,7 +289,7 @@
                 if (category === categoryId) {
                     dois.push(paper.doi);
                 }
-            })
+            });
             visualization.selectPapers(dois, colors[categoryId]);
             categoryLegend.show();
             paperSelectedLegend.hide();
@@ -329,6 +327,7 @@
             top: 0;
             position: absolute;
             width: 100%;
+            height: 100%;
         }
 
         .topic-card {
@@ -336,7 +335,7 @@
         }
 
         .slider .slider-handle {
-            background: #e83e8c;
+            background: #abad9f;
         }
 
         .badge {
