@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
-from django.db.models.signals import m2m_changed, post_save, post_delete
+from django.db.models.signals import m2m_changed, post_save, post_delete, pre_save
 from itertools import permutations
 
 
@@ -406,7 +406,6 @@ class Paper(models.Model):
         if set_manually_modified:
             self.manually_modified = True
         super(Paper, self).save(*args, **kwargs)
-
 
 
 class ScrapeConflict(models.Model):

@@ -1,12 +1,14 @@
 import json
+from time import strftime
 
 from django.conf import settings
 from django.db import transaction
-from django.http import HttpResponseNotFound, HttpResponse
+from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
 from data.models import (
+    Author,
     DeleteCandidate,
     GeoCity,
     GeoLocation,
@@ -329,18 +331,56 @@ def language_detection(request):
         else:
             return HttpResponseNotFound()
 
-        return HttpResponse(
-            json.dumps({'status': 'success'}),
-            content_type="application/json"
-        )
+        return JsonResponse({'status': 'success'})
 
 
 @staff_member_required
 def scrape_conflict(request):
-    if request.method == 'POST':
-        # handle 'ignore article' case
-        return HttpResponse("Posted to scrape conflict!")
-    errors = [{'paper': err.paper, 'datapoint': err.datapoint} for err in ScrapeConflict.objects.all()]
+    if request.method == 'GET':
+        errors = []
+        for error in ScrapeConflict.objects.all():
+            authors = []
+            datapoint = json.loads(error.datapoint)
+            for dp_author in datapoint['authors']:
+                try:
+                    db_author = Author.get_by_name(first_name=dp_author[1], last_name=dp_author[0])
+                    authors.append([db_author.last_name, db_author.first_name])
+                except Author.DoesNotExist:
+                    authors.append([dp_author[1], dp_author[0]])
+            paper = error.paper.__dict__
+            paper['authors'] = sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()])
+            paper['datasource'] = paper['data_source_value']
+            paper['paperhost'] = error.paper.host.name
+            paper['journal'] = error.paper.journal.name if error.paper.journal else None
+            paper['publication_date'] = error.paper.published_at.strftime('%Y-%m-%d')
+            errors.append({'paper': paper, 'datapoint': json.loads(error.datapoint)})
 
-    return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
-                  {'errors': errors, 'debug': settings.DEBUG})
+        return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
+                      {'errors': errors, 'debug': settings.DEBUG})
+    elif request.method == 'POST':
+        action = request.POST.get('action', None)
+        if action not in ['discard', 'accept']:
+            return JsonResponse({'status': 'error', 'error': 'Invalid action'})
+        doi = request.POST.get('doi')
+        paper = Paper.objects.get(doi=doi)
+        conflict = ScrapeConflict.objects.get(paper=paper)
+        if action == 'discard':
+            paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
+            paper.save()
+            conflict.delete()
+        elif action == 'accept':
+            if not request.POST.get('title', None):
+                # form was submitted without fields, so accept datapoint without changes
+                datapoint = json.loads(conflict.datapoint)
+                dp = SerializableArticleRecord(**datapoint)  # not working with import :(
+            else:
+
+                dp_dict = request.POST.dict()
+                dp_dict.pop('encoding', None)
+                dp_dict.pop('csrfmiddlewaretoken', None)
+                dp_dict.pop('action', None)
+                dp_dict['is_preprint'] = True if dp_dict['is_preprint'] == 'on' else False
+                for key, val in dp_dict.items():
+                    if val == 'None':
+                        dp_dict[key] = None
+        return JsonResponse({'status': 'success'})
