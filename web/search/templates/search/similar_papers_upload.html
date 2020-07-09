@@ -8,14 +8,21 @@
             <div class="row mt-5 mb-5">
                 <div class="col-12">
 
+                    <h1 class="display-4">Upload your literature</h1>
+
+                    <div class="muted-white">
+                        We provide
+                    </div>
+
                     <form id="upload-form" action="{% url "upload_ris" %}" method="post"
                           enctype="multipart/form-data">
 
                         {% csrf_token %}
-                        <input type="file" name="file" id="literature-file"/>
+                        <input type="file" name="file" id="literature-file" style="display: none;"/>
 
-                        <div class="upload-area">
-                            <h4 class="font-weight-light">Upload your file</h4>
+                        <div role="button" class="upload-area shadow rounded">
+                            <div><i class="fas fa-file-upload fa-4x"></i></div>
+                            <h4 class="font-weight-light text-center">Upload your file</h4>
                         </div>
 
                     </form>
@@ -83,17 +90,28 @@
 
                 upload_area_text.text("Upload");
 
-                let fd = new FormData();
 
                 file_field.prop('files', e.originalEvent.dataTransfer.files);
 
-                fd.append('file', e.originalEvent.dataTransfer.files[0]);
-                fd.append('csrfmiddlewaretoken', upload_form.children('input[name=csrfmiddlewaretoken]').val());
+                uploadData(e.originalEvent.dataTransfer.files[0])
 
-                uploadData(fd);
             });
 
-            function uploadData(form_data) {
+            upload_area.click(function (e) {
+                e.preventDefault();
+                file_field.click();
+            });
+
+            file_field.change(function (e) {
+                uploadData(file_field.prop('files')[0]);
+            });
+
+            function uploadData(file) {
+
+                let form_data = new FormData();
+
+                form_data.append('file', file);
+                form_data.append('csrfmiddlewaretoken', upload_form.children('input[name=csrfmiddlewaretoken]').val());
 
                 for (var p of form_data) {
                     console.log(p);
@@ -124,7 +142,34 @@
         .upload-area {
             width: 100%;
             height: 200px;
-            background: white;
+            background: rgba(0.8, 0.8, 0.8, 0.2);
+            border-radius: 10px;
+            position: relative;
+            color: #e0e0e0;
+        }
+
+        .upload-area:after {
+            border-radius: 10px;
+            padding: 5px;
+            border: 5px dashed #e0e0e0;
+
+            position: absolute;
+            content: '';
+            top: -5px;
+            left: -5px;
+            bottom: -5px;
+            right: -5px;
+        }
+
+        .upload-area div {
+            height: 80px;
+            text-align: center;
+            padding-top: 30px;
+        }
+
+        .upload-area h4 {
+            line-height: 120px;
+            margin-bottom: 0;
         }
     </style>
 {% endblock %}

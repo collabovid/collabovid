@@ -487,3 +487,51 @@ label.nav-link {
 .tooltip-inner {
     max-width: none;
 }
+
+
+/** Selectable List Group **/
+
+.selectable-list-group .list-group-item {
+    user-select: none;
+    margin-bottom: -1px !important;
+}
+
+.selectable-list-group .list-group-item:first-of-type
+{
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] {
+  display: none;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item {
+  cursor: pointer;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item .selector:before{
+  content: "\2713";
+  color: transparent;
+  font-weight: bold;
+  margin-right: 1em;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item div.text-muted{
+    color: rgb(201, 218, 226) !important;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item a{
+    color: rgb(255, 255, 237) !important;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item {
+  background-color: #0275D8;
+  color: #FFF;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item .selector:before {
+  color: inherit;
+}
+
+/** Selectable List Group End */

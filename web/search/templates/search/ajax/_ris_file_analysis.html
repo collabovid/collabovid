@@ -1,30 +1,65 @@
 <h3 class="text-muted">Literature Analysis</h3>
 
 We analyzed your file and found {{ found_papers.count }} papers that are in our database and {{ ignored_papers|length }}
-that we don't have in our database. You can review the results below. To continue to the similar paper search click
-continue at the end of this page.
+that we don't have in our database. You can review the results below. To continue to the similar paper select between
+two and ten papers that you want to analyze.
 
-<h4 class="text-muted mt-3">Found Papers</h4>
-<ul class="list-group w-100">
-    {% for paper in found_papers.all %}
-        {% include "core/partials/_paper_list_item.html" with paper=paper %}
-    {% endfor %}
-</ul>
+<h4 class="d-inline-block text-muted mt-3">Found Papers</h4>
+<strong class="selected-count-label float-right">Selected <span>0</span>/10</strong>
 
-<h4 class="text-muted mt-3">Ignored Papers</h4>
-<ul class="list-group w-100">
-    {% for paper in ignored_papers %}
-        <li class="list-group-item text-danger">
-            {{ paper.title }}
-        </li>
-    {% endfor %}
-</ul>
-
-<div class="text-right mt-3">
-    <form method="get" action="{% url "similar_papers" %}">
+<form id="similar-paper-form" method="get" action="{% url "similar_papers" %}">
+    <ul class="list-group selectable-list-group w-100">
         {% for paper in found_papers.all %}
-            <input type="hidden" name="dois" value="{{ paper.doi }}">
+            {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True %}
         {% endfor %}
-        <button class="btn btn-success">Continue</button>
-    </form>
-</div>
+    </ul>
+
+    <h4 class="text-muted mt-3">Ignored Papers</h4>
+    <ul class="list-group w-100">
+        {% for paper in ignored_papers %}
+            <li class="list-group-item text-danger">
+                {{ paper.title }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <div class="text-right mt-3">
+        <span id="similar-paper-form-disabled-button" data-toggle="tooltip" title="Disabled tooltip">
+            <button class="btn btn-success disabled">Continue</button>
+        </span>
+
+        <span id="similar-paper-form-enabled-button" style="display: none;">
+            <button class="btn btn-success">Continue</button>
+        </span>
+    </div>
+</form>
+
+<script>
+    $(document).ready(function (e) {
+
+        let form = $("#similar-paper-form");
+        let disabled_button = $("#similar-paper-form-disabled-button");
+        let enabled_button = $("#similar-paper-form-enabled-button");
+
+
+        form.find("input[name=dois]").change(function () {
+
+            let total = form.find("input[name=dois]").length;
+            let selected = form.find("input[name=dois]:checked").length;
+
+            if(selected >= 2)
+            {
+                disabled_button.hide();
+                enabled_button.show();
+            } else
+            {
+                disabled_button.show();
+                enabled_button.hide();
+            }
+
+            $(".selected-count-label span").html(selected)
+
+        });
+
+    })
+</script>

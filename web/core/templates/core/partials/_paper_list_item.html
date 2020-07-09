@@ -1,12 +1,32 @@
 {% load humanize %}
 
-<li class="list-group-item">
-    {{ paper.title }}
-    <div class="text-muted small mt-2">
-        {{ paper.published_at }} &middot; {{ paper.host.name }}
-        &middot; Added {{ paper.created_at|naturaltime }}
-        <a href="{{ paper.url }}" class="float-right">
-            Read more
-        </a>
+{% if selectable %}
+    <input type="checkbox" name="dois" id="input-paper-{{ paper.doi }}" value="{{ paper.doi }}"/>
+
+    <label class="list-group-item" for="input-paper-{{ paper.doi }}">
+{% else %}
+    <li class="list-group-item">
+{% endif %}
+
+<div class="d-flex flex-row align-items-center">
+
+    <div class="selector"></div>
+
+    <div class="content flex-fill">
+        {{ paper.title }}<br>
+        <div class="text-muted small mt-2 d-inline">
+            {{ paper.published_at }} &middot; {{ paper.host.name }}
+            &middot; Added {{ paper.created_at|naturaltime }}
+            <a href="{{ paper.url }}" class="float-right">
+                Read more
+            </a>
+        </div>
     </div>
-</li>
+</div>
+
+
+{% if not selectable %}
+    </li>
+{% else %}
+    </label>
+{% endif %}
