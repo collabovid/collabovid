@@ -193,6 +193,16 @@
             topicCardContainer.addClass("col-xl-3 col-lg-4 col-md-6 col-sm-12")
         });
 
+        function toggleTopicsContainer(show) {
+            if (show) {
+                topicsContainer.addClass('d-flex')
+                topicsContainer.removeClass('d-none')
+            } else {
+                topicsContainer.addClass('d-none')
+                topicsContainer.removeClass('d-flex')
+            }
+        }
+
         topicFilterInput.on('input', function (e) {
             const query = topicFilterInput.val()
             $('.topic-card').each(function (i) {
@@ -222,7 +232,7 @@
         function onSelected(idx, paper) {
             paperLoadingIndicator.show();
             selectedCardContainer.hide();
-            topicsContainer.hide();
+            toggleTopicsContainer(false);
 
             const indices = visualization.computeNeighbors(paper, 10);
             const dois = [paper.doi];
@@ -254,7 +264,7 @@
 
         visualization.onDeselect(function () {
             selectedCardContainer.hide()
-            topicsContainer.show()
+            toggleTopicsContainer(true)
             categoryLegend.show();
             paperSelectedLegend.hide();
             topicLegend.hide();

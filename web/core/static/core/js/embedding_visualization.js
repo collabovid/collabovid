@@ -124,7 +124,7 @@ const EmbeddingVisualization = function () {
             });
             let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial])
             let mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(-paperData.means[0], -paperData.means[1], -paperData.means[2])
+            //mesh.position.set(-paperData.means[0], -paperData.means[1] / 4, -paperData.means[2])
             scene.add(mesh);
 
             let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -222,6 +222,9 @@ const EmbeddingVisualization = function () {
             scope.controls = controls;
             scope.material = material
             scope.camera = camera;
+            scope.paperData = paperData;
+
+            scope.viewArea(paperData.means[0], paperData.means[1] / 4, paperData.means[2] + 2.5)
         })
     }
 
@@ -270,7 +273,7 @@ const EmbeddingVisualization = function () {
     }
 
     this.getHighestCategoryForPaper = function (paper) {
-        return paper.categories[paper.top_category_index]
+        return paper.categories[paper.top_category_index].name
     }
 
     this.deselectAll = function () {
@@ -314,6 +317,18 @@ const EmbeddingVisualization = function () {
         this.renderer.render(this.scene, this.camera);
     }
 
+    this.viewArea = function (x, y, z) {
+        this.camera.position.x = x
+        this.camera.position.y = y
+        this.camera.position.z = z
+        this.controls.target.set(x, y, z - 5);
+        this.camera.lookAt(x, y, z - 5)
+        this.camera.rotation.z = 0;
+        this.camera.rotation.x = 0;
+        this.camera.rotation.y = 0;
+        this.camera.updateProjectionMatrix();
+    }
+
     this.selectPapers = function (dois, selectionColor) {
         let minCoordinates = new Array(3).fill(100000);
         let maxCoordinates = new Array(3).fill(-10000);
@@ -337,9 +352,9 @@ const EmbeddingVisualization = function () {
         this.geometry.colorsNeedUpdate = true
         this.geometry.elementsNeedUpdate = true
 
-        let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0 - 0.518
-        let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0 - 0.5
-        let newZ = maxCoordinates[2] + 1.2
+        let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0
+        let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0 - this.paperData.means[1]
+        let newZ = maxCoordinates[2] + 2
 
         const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z}
         this.animating = true;
@@ -351,15 +366,7 @@ const EmbeddingVisualization = function () {
             }, 1200)
             .easing(TWEEN.Easing.Quadratic.Out)
             .onUpdate(() => {
-                this.camera.position.x = coords.x
-                this.camera.position.y = coords.y
-                this.camera.position.z = coords.z
-                this.controls.target.set(coords.x, coords.y, coords.z - 5);
-                this.camera.lookAt(coords.x, coords.y, coords.z - 5)
-                this.camera.rotation.z = 0;
-                this.camera.rotation.x = 0;
-                this.camera.rotation.y = 0;
-                this.camera.updateProjectionMatrix();
+               this.viewArea(coords.x, coords.y, coords.z)
             }).onComplete(() => {
                 this.animating = false;
             }).start()
