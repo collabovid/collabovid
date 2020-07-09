@@ -178,8 +178,8 @@ class DatabaseUpdate:
         db_article.authors.clear()
         for author in datapoint.authors:
             db_author, _ = Author.get_or_create_by_name(
-                first_name=author[1],
-                last_name=author[0],
+                first_name=author[1].replace(';', '').replace(',', ''),
+                last_name=author[0].replace(';', '').replace(',', ''),
             )
             db_article.authors.add(db_author)
 

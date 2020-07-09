@@ -12,52 +12,11 @@
                 <div class="row">
                     {% for error in errors %}
                         <div class="col-12 p-2">
-                            {% include 'dashboard/scrape/partials/_conflict_card.html' with paper=error.paper datapoint=error.datapoint %}
+                            {% include 'dashboard/scrape/partials/_conflict_card.html' with error=error %}
                         </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block script %}
-    <script>
-        function handle_paper(form, action) {
-            let action_input = form.children('input[name=action]');
-            action_input.val(action)
-            console.log(form.serialize())
-            $.ajax({
-                url: "{% url "scrape_conflict" %}",
-                type: 'POST',
-                data: form.serialize(),
-                success: result => {
-                    if (result.status === 'success') {
-                        form.closest('.card').remove();
-                    }
-                }
-            });
-        }
-
-        $(document).ready(function() {
-            $(".btn-modify").click(function(event){
-                event.preventDefault();
-                let form = $(this).closest('form')
-                form.find('.edit-field').prop('disabled', false);
-            });
-
-            $(".btn-accept").click(function(event){
-                event.preventDefault();
-                let form = $(this).closest('form')
-                handle_paper(form, 'accept')
-            })
-
-            $(".btn-discard").click(function(event){
-                event.preventDefault();
-                let form = $(this).closest('form')
-                handle_paper(form, 'discard')
-            })
-        });
-
-    </script>
 {% endblock %}

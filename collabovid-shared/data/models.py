@@ -160,10 +160,9 @@ class AuthorNameResolution(models.Model):
     @staticmethod
     def add(old_first, old_last, new_first, new_last):
         target_author, created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
-        AuthorNameResolution.objects.get_or_create(source_name=f"{old_last}; {old_first}", target_author=target_author)
+        AuthorNameResolution.objects.get_or_create(source_first_name=old_first, source_last_name=old_last, target_author=target_author)
         try:
             old_author = Author.objects.get(first_name=old_first, last_name=old_last)
-            old_author.map_to_different_author(target_author)
 
             memberships = Paper.authors.through.filter(author=old_author)
             for membership in memberships:

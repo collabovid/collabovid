@@ -2,11 +2,12 @@ import json
 from time import strftime
 
 from django.conf import settings
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
+from dashboard.forms import PaperForm
 from data.models import (
     Author,
     DeleteCandidate,
@@ -16,14 +17,15 @@ from data.models import (
     GeoLocationMembership,
     GeoNameResolution,
     IgnoredPaper,
+    Journal,
     Paper,
-    ScrapeConflict,
+    ScrapeConflict
 )
 from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from tasks.launcher.task_launcher import get_task_launcher
 
@@ -339,48 +341,54 @@ def scrape_conflict(request):
     if request.method == 'GET':
         errors = []
         for error in ScrapeConflict.objects.all():
-            authors = []
             datapoint = json.loads(error.datapoint)
-            for dp_author in datapoint['authors']:
-                try:
-                    db_author = Author.get_by_name(first_name=dp_author[1], last_name=dp_author[0])
-                    authors.append([db_author.last_name, db_author.first_name])
-                except Author.DoesNotExist:
-                    authors.append([dp_author[1], dp_author[0]])
-            paper = error.paper.__dict__
-            paper['authors'] = sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()])
-            paper['datasource'] = paper['data_source_value']
-            paper['paperhost'] = error.paper.host.name
-            paper['journal'] = error.paper.journal.name if error.paper.journal else None
-            paper['publication_date'] = error.paper.published_at.strftime('%Y-%m-%d')
-            errors.append({'paper': paper, 'datapoint': json.loads(error.datapoint)})
+            form = PaperForm(instance=error.paper)
+            comparison = {
+                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
+                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
+                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint['journal'],
+            }
+            errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
 
         return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
                       {'errors': errors, 'debug': settings.DEBUG})
+
     elif request.method == 'POST':
-        action = request.POST.get('action', None)
-        if action not in ['discard', 'accept']:
-            return JsonResponse({'status': 'error', 'error': 'Invalid action'})
         doi = request.POST.get('doi')
         paper = Paper.objects.get(doi=doi)
         conflict = ScrapeConflict.objects.get(paper=paper)
-        if action == 'discard':
-            paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
-            paper.save()
-            conflict.delete()
-        elif action == 'accept':
-            if not request.POST.get('title', None):
-                # form was submitted without fields, so accept datapoint without changes
-                datapoint = json.loads(conflict.datapoint)
-                dp = SerializableArticleRecord(**datapoint)  # not working with import :(
-            else:
 
-                dp_dict = request.POST.dict()
-                dp_dict.pop('encoding', None)
-                dp_dict.pop('csrfmiddlewaretoken', None)
-                dp_dict.pop('action', None)
-                dp_dict['is_preprint'] = True if dp_dict['is_preprint'] == 'on' else False
-                for key, val in dp_dict.items():
-                    if val == 'None':
-                        dp_dict[key] = None
-        return JsonResponse({'status': 'success'})
+        if 'accept-button' in request.POST:
+            form = PaperForm(request.POST, instance=paper)
+            if not form.is_valid():
+                messages.add_message(request, messages.ERROR, f"{form.errors}")
+            else:
+                with transaction.atomic():
+                    try:
+                        form.save()
+                        if request.POST.get('manually_modified') == 'on':
+                            manually_modified = True
+                        else:
+                            manually_modified = False
+
+                        authors = []
+                        for author in request.POST.get('author_list').split(';'):
+                            author, _ = Author.get_or_create_by_name(author.split(',')[1], author.split(',')[0])
+                            authors.append(author)
+                        paper.authors.clear()
+                        paper.authors.add(*authors)
+
+                        journal_name = request.POST.get('journal_name', None)
+                        if journal_name:
+                            journal = Journal.objects.get_or_create(name=journal_name)
+                        else:
+                            journal = None
+                        paper.journal = journal
+                        paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
+                        paper.save(set_manually_modified=manually_modified)
+                        conflict.delete()
+                        messages.add_message(request, messages.SUCCESS, "Successfully saved the changes.")
+                    except IntegrityError:
+                        messages.add_message(request, messages.ERROR, "Integrity error.")
+
+        return redirect('scrape_conflict')
