@@ -161,6 +161,11 @@ class SearchForm(forms.Form):
         return json.dumps(self.to_dict(), cls=DjangoJSONEncoder)
 
     @property
+    def interesting(self):
+        return self.cleaned_data['query'].strip() or self.cleaned_data['authors'] or self.cleaned_data['categories'] or \
+               self.cleaned_data['journals'] or self.cleaned_data['locations'] or self.cleaned_data[
+                   'published_at_start'] or self.cleaned_data['published_at_end']
+
+    @property
     def url(self):
         return settings.SEARCH_SERVICE_URL + "/search"
-

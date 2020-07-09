@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import Paper
+from data.models import Paper, Category
 from search.suggestions_helper import SuggestionsHelper
 from statistics import PaperStatistics
 
@@ -27,7 +27,7 @@ def search(request):
         if form.is_valid():
             pass
 
-        return render(request, "search/search.html", {'form': form})
+        return render(request, "search/search.html", {'form': form, 'categories': Category.objects.all()})
     elif request.method == "POST":
         form = SearchForm(request.POST)
         return render_search_result(request, form)
@@ -40,7 +40,7 @@ def render_search_result(request, form):
         return render(request, "search/ajax/_search_result_error.html",
                       {'message': 'Your request is invalid.' + str(form.errors)})
 
-    search_response_helper = SearchRequestHelper(form)
+    search_response_helper = SearchRequestHelper(form, save_request=not request.user.is_authenticated)
 
     if search_response_helper.error:
         return render(request, "search/ajax/_search_result_error.html",
