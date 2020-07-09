@@ -1,0 +1,4977 @@
+[
+    {
+        "model": "data.deletecandidate",
+        "pk": 2667,
+        "fields": {
+            "paper": "10.1101/2020.04.23.20076786",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37472742795944214
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2668,
+        "fields": {
+            "paper": "10.3201/eid2609.202135",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4553541839122772
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2669,
+        "fields": {
+            "paper": "10.1101/2020.03.05.20031591",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4745159447193146
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2671,
+        "fields": {
+            "paper": "10.1186/s13054-020-02882-x",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49330654740333557
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2672,
+        "fields": {
+            "paper": "10.1530/EJE-20-0386",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4945633113384247
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2673,
+        "fields": {
+            "paper": "10.1101/2020.06.03.132357",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4829496741294861
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2674,
+        "fields": {
+            "paper": "10.1161/HYPERTENSIONAHA.120.15312",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4945633113384247
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2675,
+        "fields": {
+            "paper": "10.7554/eLife.59147",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40472856163978577
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2676,
+        "fields": {
+            "paper": "10.1177/0020764020932207",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4682618975639343
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2679,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30569-8",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38742974400520325
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2680,
+        "fields": {
+            "paper": "10.1002/jmv.25688",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49531474709510803
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2681,
+        "fields": {
+            "paper": "10.1556/650.2020.31811",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4182133078575134
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2682,
+        "fields": {
+            "paper": "10.1002/hep.31257",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38001951575279236
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2684,
+        "fields": {
+            "paper": "10.1101/2020.05.23.20111302",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40081411600112915
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2685,
+        "fields": {
+            "paper": "10.1016/j.ijantimicag.2020.105944",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4434078335762024
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2688,
+        "fields": {
+            "paper": "10.1101/2020.04.28.20082784",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39299044013023376
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2689,
+        "fields": {
+            "paper": "10.1101/2020.02.24.20027474",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4203204810619354
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2690,
+        "fields": {
+            "paper": "10.1101/2020.04.28.20083311",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4219035804271698
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2691,
+        "fields": {
+            "paper": "10.3390/antibiotics9060298",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49260464310646057
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2692,
+        "fields": {
+            "paper": "10.1101/2020.04.09.20049924",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.5
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2693,
+        "fields": {
+            "paper": "10.1016/j.vetmic.2019.108513",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4383401870727539
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2694,
+        "fields": {
+            "paper": "arXiv:2005.06413",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.47036054730415344
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2695,
+        "fields": {
+            "paper": "arXiv:2004.07229",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42914021015167236
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2696,
+        "fields": {
+            "paper": "10.1002/ptr.6733",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4932369291782379
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2697,
+        "fields": {
+            "paper": "10.2217/fvl-2016-0060",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4020441472530365
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2699,
+        "fields": {
+            "paper": "10.1101/2020.04.13.20063792",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45732083916664124
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2700,
+        "fields": {
+            "paper": "10.1002/hed.26276",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.356631875038147
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2702,
+        "fields": {
+            "paper": "10.1101/2020.03.03.20029983",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4596395194530487
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2703,
+        "fields": {
+            "paper": "10.1101/2020.04.23.20076562",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48179134726524353
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2704,
+        "fields": {
+            "paper": "10.1111/acem.14007",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49701061844825745
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2705,
+        "fields": {
+            "paper": "10.1101/2020.03.29.20046730",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35732877254486084
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2706,
+        "fields": {
+            "paper": "10.31128/AJGP-COVID-16",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48781701922416687
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2707,
+        "fields": {
+            "paper": "10.1016/j.tmrv.2020.02.003",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3969511389732361
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2708,
+        "fields": {
+            "paper": "10.1111/dth.13438",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4798599183559418
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2709,
+        "fields": {
+            "paper": "10.2217/bmm-2020-0254",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4027072489261627
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2710,
+        "fields": {
+            "paper": "10.3760/cma.j.issn.0253-9624.2020.0001",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41621828079223633
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2712,
+        "fields": {
+            "paper": "10.1111/medu.14213",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41682565212249756
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2714,
+        "fields": {
+            "paper": "10.3760/cma.j.issn.0253-9624.2020.03.002",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41621828079223633
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2715,
+        "fields": {
+            "paper": "10.1037/tra0000925",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4518299698829651
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2717,
+        "fields": {
+            "paper": "10.1101/2020.02.19.957118",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43866974115371704
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2718,
+        "fields": {
+            "paper": "10.2217/fvl.10.4",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42022669315338135
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2719,
+        "fields": {
+            "paper": "10.1007/s10072-020-04375-9",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3763774335384369
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2720,
+        "fields": {
+            "paper": "10.1002/jmv.25685",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4847266376018524
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2721,
+        "fields": {
+            "paper": "10.1007/s10010-004-0130-2",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3563007712364197
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2723,
+        "fields": {
+            "paper": "10.1620/tjem.250.271",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37550657987594604
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2725,
+        "fields": {
+            "paper": "10.1148/radiol.2020200274",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36290881037712097
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2731,
+        "fields": {
+            "paper": "10.1101/2020.03.20.20037325",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4976765513420105
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2732,
+        "fields": {
+            "paper": "10.1186/s12916-020-01596-9",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42571696639060974
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2733,
+        "fields": {
+            "paper": "10.1007/s00401-020-02166-2",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4919305145740509
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2734,
+        "fields": {
+            "paper": "10.1007/BF01404267",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4462501108646393
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2735,
+        "fields": {
+            "paper": "10.1101/2020.06.01.127589",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3803407549858093
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2737,
+        "fields": {
+            "paper": "10.1101/2020.05.24.20111872",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38126683235168457
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2739,
+        "fields": {
+            "paper": "10.1016/S0168-7069(08)70094-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4996682405471802
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2740,
+        "fields": {
+            "paper": "10.1016/j.jgar.2020.02.021",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37996044754981995
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2741,
+        "fields": {
+            "paper": "10.1016/S1773-035X(10)70561-X",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.398442804813385
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2744,
+        "fields": {
+            "paper": "10.33314/jnhrc.v18i1.2629",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41037431359291077
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2746,
+        "fields": {
+            "paper": "10.1101/2020.03.24.004655",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45783182978630066
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2748,
+        "fields": {
+            "paper": "10.1007/s00508-020-01678-x",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4761274456977844
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2749,
+        "fields": {
+            "paper": "10.1111/omi.12289",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43889319896698
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2750,
+        "fields": {
+            "paper": "10.11606/s1518-8787.2020054002494",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38176092505455017
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2752,
+        "fields": {
+            "paper": "10.3390/v12020135",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46442824602127075
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2755,
+        "fields": {
+            "paper": "10.1101/2020.05.09.20096511",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4744136929512024
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2756,
+        "fields": {
+            "paper": "10.1097/RLU.0000000000003141",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35722416639328003
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2759,
+        "fields": {
+            "paper": "10.1186/s13046-020-01590-2",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4857446849346161
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2760,
+        "fields": {
+            "paper": "10.23750/abm.v91i2.9534",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41612502932548523
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2761,
+        "fields": {
+            "paper": "10.1101/2020.05.11.20095158",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35059458017349243
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2762,
+        "fields": {
+            "paper": "10.1016/j.vas.2018.11.003",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3648267388343811
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2763,
+        "fields": {
+            "paper": "10.3390/jcm9061651",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37534114718437195
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2764,
+        "fields": {
+            "paper": "10.1186/s12887-020-02140-7",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37575626373291016
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2769,
+        "fields": {
+            "paper": "10.1101/2020.03.17.20037432",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4465489685535431
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2771,
+        "fields": {
+            "paper": "10.3760/cma.j.issn.0253-9624.2020.0002",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35561877489089966
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2773,
+        "fields": {
+            "paper": "10.1101/2020.05.13.093195",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36176571249961853
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2775,
+        "fields": {
+            "paper": "10.1186/s40249-020-00640-3",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3651570677757263
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2776,
+        "fields": {
+            "paper": "10.1002/jmv.26042",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46957844495773315
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2778,
+        "fields": {
+            "paper": "10.1016/j.mnl.2020.03.017",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4011039435863495
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2779,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30834-4",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4991576671600342
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2780,
+        "fields": {
+            "paper": "10.1016/j.bios.2020.112349",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4089381992816925
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2781,
+        "fields": {
+            "paper": "10.1016/j.ebiom.2020.102799",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37699460983276367
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2782,
+        "fields": {
+            "paper": "10.1016/j.joen.2020.04.001",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35564014315605164
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2784,
+        "fields": {
+            "paper": "10.1016/j.phrs.2020.104761",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36551278829574585
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2786,
+        "fields": {
+            "paper": "10.1016/j.immuni.2020.04.016",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4439515471458435
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2789,
+        "fields": {
+            "paper": "10.1016/j.ajogmf.2020.100111",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36359646916389465
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2790,
+        "fields": {
+            "paper": "10.1101/2020.04.07.029884",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3552086651325226
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2793,
+        "fields": {
+            "paper": "10.1101/2020.04.07.20056606",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.488252192735672
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2797,
+        "fields": {
+            "paper": "10.1093/ajhp/zxaa147",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38253864645957947
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2807,
+        "fields": {
+            "paper": "10.1101/2020.05.18.20105783",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38597342371940613
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2810,
+        "fields": {
+            "paper": "arXiv:2004.02739",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36461421847343445
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2811,
+        "fields": {
+            "paper": "10.1016/j.psychres.2020.112915",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46555593609809875
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2813,
+        "fields": {
+            "paper": "10.1101/2020.05.19.20103036",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4753969609737396
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2814,
+        "fields": {
+            "paper": "10.1101/2020.04.13.20063271",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4590687155723572
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2816,
+        "fields": {
+            "paper": "10.33314/jnhrc.v18i1.2593",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49990272521972656
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2821,
+        "fields": {
+            "paper": "10.1016/j.jiph.2020.03.019",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4015023708343506
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2826,
+        "fields": {
+            "paper": "10.1101/2020.05.19.100214",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49789777398109436
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2828,
+        "fields": {
+            "paper": "10.1002/jmv.25700",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4706611931324005
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2829,
+        "fields": {
+            "paper": "10.1016/j.xinn.2020.04.005",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42277517914772034
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2830,
+        "fields": {
+            "paper": "10.1080/01478885.2020.1734718",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4542594254016876
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2831,
+        "fields": {
+            "paper": "10.1016/j.dib.2020.105684",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3893376290798187
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2833,
+        "fields": {
+            "paper": "arXiv:2003.12232",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4982055425643921
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2835,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30520-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4939364194869995
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2836,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30402-4",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3856264650821686
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2838,
+        "fields": {
+            "paper": "10.7883/yoken.JJID.2020.061",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45678818225860596
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2839,
+        "fields": {
+            "paper": "10.1101/2020.06.03.20119818",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4014694392681122
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2840,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30663-1",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48298099637031555
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2841,
+        "fields": {
+            "paper": "10.1101/2020.04.19.20068072",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36593273282051086
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2843,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30721-1",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39619964361190796
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2845,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30234-7",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4783352315425873
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2846,
+        "fields": {
+            "paper": "10.1007/s12539-020-00376-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4900640547275543
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2847,
+        "fields": {
+            "paper": "10.1101/2020.04.20.20061861",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48156580328941345
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2848,
+        "fields": {
+            "paper": "10.1002/jmv.25681",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3640148937702179
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2850,
+        "fields": {
+            "paper": "arXiv:2005.09426",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3929668366909027
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2854,
+        "fields": {
+            "paper": "10.1016/j.ijinfomgt.2020.102157",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4457690417766571
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2855,
+        "fields": {
+            "paper": "10.1038/s41421-020-0153-3",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3746509552001953
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2859,
+        "fields": {
+            "paper": "10.1016/j.jval.2020.04.1824",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39187854528427124
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2860,
+        "fields": {
+            "paper": "10.1002/etc.4756",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.44673168659210205
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2865,
+        "fields": {
+            "paper": "10.3390/biomedicines8050109",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39212003350257874
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2866,
+        "fields": {
+            "paper": "10.1080/09603123.2020.1747602",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4071543514728546
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2870,
+        "fields": {
+            "paper": "10.1002/cjoc.20040220825",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3625006377696991
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2871,
+        "fields": {
+            "paper": "10.1161/HYPERTENSIONAHA.120.15622",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4945633113384247
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2878,
+        "fields": {
+            "paper": "10.1007/s12098-020-03263-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37314584851264954
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2880,
+        "fields": {
+            "paper": "10.1101/2020.04.23.20072850",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39350274205207825
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2881,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30858-7",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49964916706085205
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2882,
+        "fields": {
+            "paper": "10.1111/head.13856",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42596957087516785
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2884,
+        "fields": {
+            "paper": "10.1016/j.comppsych.2020.152184",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42846015095710754
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2886,
+        "fields": {
+            "paper": "10.1093/cid/ciaa674",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4484579265117645
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2887,
+        "fields": {
+            "paper": "10.1016/j.arcmed.2020.04.012",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3949950337409973
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2888,
+        "fields": {
+            "paper": "10.1097/PHM.0000000000001451",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4501122534275055
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2889,
+        "fields": {
+            "paper": "10.1016/j.clinthera.2020.04.010",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4334011673927307
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2890,
+        "fields": {
+            "paper": "10.1002/ddr.21689",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3680326044559479
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2893,
+        "fields": {
+            "paper": "10.1016/j.med.2018.04.019",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4517575800418854
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2895,
+        "fields": {
+            "paper": "10.1080/14767058.2020.1759542",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4903179109096527
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2896,
+        "fields": {
+            "paper": "10.1101/2020.04.24.20078477",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.376577764749527
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2897,
+        "fields": {
+            "paper": "10.1016/j.cell.2020.04.011",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4988740384578705
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2898,
+        "fields": {
+            "paper": "10.1016/j.oraloncology.2020.104821",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.47645676136016846
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2899,
+        "fields": {
+            "paper": "10.1038/s41579-020-0394-z",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48219630122184753
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2900,
+        "fields": {
+            "paper": "10.3949/ccjm.87a.ccc036",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42626217007637024
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2901,
+        "fields": {
+            "paper": "10.37201/req/098.2020",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40347108244895935
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2902,
+        "fields": {
+            "paper": "10.1016/j.jinf.2020.03.022",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3825211524963379
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2903,
+        "fields": {
+            "paper": "10.1016/j.clim.2020.108427",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37954866886138916
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2905,
+        "fields": {
+            "paper": "10.1002/jmv.26047",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4701510965824127
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2906,
+        "fields": {
+            "paper": "10.1111/jgs.16519",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49220409989356995
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2907,
+        "fields": {
+            "paper": "10.1016/j.nurpra.2020.03.021",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41363710165023804
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2908,
+        "fields": {
+            "paper": "10.1016/j.matt.2020.04.026",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4888331890106201
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2909,
+        "fields": {
+            "paper": "10.1051/medsci/2020113",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4895077347755432
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2910,
+        "fields": {
+            "paper": "10.1101/2020.05.04.20090688",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43912723660469055
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2912,
+        "fields": {
+            "paper": "10.1177/0194599820933253",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.353910893201828
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2917,
+        "fields": {
+            "paper": "10.1016/j.diabres.2020.108200",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36791083216667175
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2923,
+        "fields": {
+            "paper": "10.1002/ppul.24762",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39664727449417114
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2926,
+        "fields": {
+            "paper": "10.1016/j.ijlp.2020.101560",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4258306622505188
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2928,
+        "fields": {
+            "paper": "10.1016/j.ijantimicag.2020.105947",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36750757694244385
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2930,
+        "fields": {
+            "paper": "10.6061/clinics/2020/e1980",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4983728229999542
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2931,
+        "fields": {
+            "paper": "10.1111/1471-0528.16308",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48121505975723267
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2932,
+        "fields": {
+            "paper": "10.1016/j.ejrad.2020.109008",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3895723819732666
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2940,
+        "fields": {
+            "paper": "10.1556/650.2020.31832",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4311506748199463
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2941,
+        "fields": {
+            "paper": "10.1007/5584_2020_549",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45152759552001953
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2946,
+        "fields": {
+            "paper": "10.1016/j.epsc.2020.101495",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.371110200881958
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2951,
+        "fields": {
+            "paper": "10.1088/0957-0233/17/11/015",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39898428320884705
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2952,
+        "fields": {
+            "paper": "10.1155/2019/2796971",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3588261902332306
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2957,
+        "fields": {
+            "paper": "10.1097/CCM.0000000000004458",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4223025143146515
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2958,
+        "fields": {
+            "paper": "10.1186/s40169-020-00271-z",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.459952175617218
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2963,
+        "fields": {
+            "paper": "10.1016/j.chom.2020.04.004",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48472893238067627
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2969,
+        "fields": {
+            "paper": "10.1101/2020.06.15.153411",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36767128109931946
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2979,
+        "fields": {
+            "paper": "10.1016/j.jviscsurg.2020.04.011",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.401068776845932
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2981,
+        "fields": {
+            "paper": "10.1016/j.marpolbul.2020.111375",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45590123534202576
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2983,
+        "fields": {
+            "paper": "10.1111/jocd.13509",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4659823477268219
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2984,
+        "fields": {
+            "paper": "10.3906/sag-2004-122",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48009198904037476
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2986,
+        "fields": {
+            "paper": "arXiv:2005.03909",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40007665753364563
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2989,
+        "fields": {
+            "paper": "10.1016/j.echo.2020.05.019",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39187854528427124
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2990,
+        "fields": {
+            "paper": "10.1016/j.medidd.2020.100039",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41381898522377014
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2992,
+        "fields": {
+            "paper": "10.1016/j.mehy.2020.109976",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3754771947860718
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2994,
+        "fields": {
+            "paper": "10.1096/fj.202001025",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4788053333759308
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2995,
+        "fields": {
+            "paper": "10.1101/2020.01.24.915157",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49531474709510803
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2996,
+        "fields": {
+            "paper": "10.1101/2020.01.28.923011",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3559628427028656
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 2999,
+        "fields": {
+            "paper": "10.1101/2020.02.04.20020503",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4995719790458679
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3003,
+        "fields": {
+            "paper": "arXiv:2006.08608",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.47388508915901184
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3005,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30499-1",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45922502875328064
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3007,
+        "fields": {
+            "paper": "10.3760/cma.j.cn112150-20200216-0016",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36057430505752563
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3008,
+        "fields": {
+            "paper": "10.15585/mmwr.mm6906e1",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36986154317855835
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3009,
+        "fields": {
+            "paper": "10.1016/j.arcmed.2020.04.001",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4598701596260071
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3010,
+        "fields": {
+            "paper": "10.1016/j.bioorg.2020.104027",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42120325565338135
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3011,
+        "fields": {
+            "paper": "10.3390/jcm9030789",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3578474819660187
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3014,
+        "fields": {
+            "paper": "10.4103/ijph.IJPH_467_20",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4053322970867157
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3015,
+        "fields": {
+            "paper": "10.26355/eurrev_202003_20706",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4713529348373413
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3019,
+        "fields": {
+            "paper": "10.31053/1853.0605.v77.n1.28066",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.5
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3020,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30376-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4744987487792969
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3021,
+        "fields": {
+            "paper": "10.5455/JPMA.14",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4879700839519501
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3022,
+        "fields": {
+            "paper": "10.1093/cid/ciaa656",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4589492082595825
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3023,
+        "fields": {
+            "paper": "10.1016/j.joms.2020.06.029",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3985545337200165
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3024,
+        "fields": {
+            "paper": "10.1101/2020.04.06.026765",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45773187279701233
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3025,
+        "fields": {
+            "paper": "arXiv:2003.00305",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4063742458820343
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3026,
+        "fields": {
+            "paper": "arXiv:2004.04732",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37319743633270264
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3028,
+        "fields": {
+            "paper": "arXiv:2004.00825",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.488252192735672
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3029,
+        "fields": {
+            "paper": "10.4140/TCP.n.2020.146.",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3718176484107971
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3032,
+        "fields": {
+            "paper": "10.1093/cid/ciaa414",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3911702334880829
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3033,
+        "fields": {
+            "paper": "10.1093/ajhp/zxaa162",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4631747305393219
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3034,
+        "fields": {
+            "paper": "10.3201/eid2608.201413",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40056535601615906
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3035,
+        "fields": {
+            "paper": "10.1556/650.2020.31896",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3567904233932495
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3036,
+        "fields": {
+            "paper": "10.3949/ccjm.87a.ccc043",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46545737981796265
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3037,
+        "fields": {
+            "paper": "arXiv:2006.01283",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38838085532188416
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3038,
+        "fields": {
+            "paper": "10.4081/monaldi.2020.1316",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4894237220287323
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3039,
+        "fields": {
+            "paper": "10.1101/2020.04.02.019075",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37279725074768066
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3040,
+        "fields": {
+            "paper": "10.4269/ajtmh.20-0356",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37563514709472656
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3041,
+        "fields": {
+            "paper": "10.1101/2020.05.14.20102418",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37499409914016724
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3042,
+        "fields": {
+            "paper": "10.1002/pbc.28435",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3643997311592102
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3043,
+        "fields": {
+            "paper": "10.1016/j.mehy.2020.109884",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3552791178226471
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3045,
+        "fields": {
+            "paper": "10.1089/ars.2020.8142",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3806542754173279
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3046,
+        "fields": {
+            "paper": "10.1161/HYPERTENSIONAHA.120.15360",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4945633113384247
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3047,
+        "fields": {
+            "paper": "10.1016/S0304-5412(14)70720-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4227042496204376
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3048,
+        "fields": {
+            "paper": "10.2340/16501977-2704",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4334569573402405
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3050,
+        "fields": {
+            "paper": "10.1111/jgs.16690",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37696295976638794
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3053,
+        "fields": {
+            "paper": "10.1042/BST20200505",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49864667654037476
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3054,
+        "fields": {
+            "paper": "10.36233/0507-4088-2020-65-2-62-70",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.47312915325164795
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3055,
+        "fields": {
+            "paper": "10.1140/epjp/s13360-020-00494-6",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3968455195426941
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3056,
+        "fields": {
+            "paper": "arXiv:2006.04278",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35401248931884766
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3058,
+        "fields": {
+            "paper": "10.5455/JPMA.15",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4745417535305023
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3062,
+        "fields": {
+            "paper": "10.1097/JCMA.0000000000000323",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3845500648021698
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3067,
+        "fields": {
+            "paper": "10.1186/s13054-020-03077-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42661231756210327
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3069,
+        "fields": {
+            "paper": "10.19852/j.cnki.jtcm.2020.03.016",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36969757080078125
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3070,
+        "fields": {
+            "paper": "10.16288/j.yczz.20-030",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4860505163669586
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3073,
+        "fields": {
+            "paper": "10.4103/ijph.IJPH_506_20",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.359873503446579
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3080,
+        "fields": {
+            "paper": "10.1172/JCI140296",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.440519779920578
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3081,
+        "fields": {
+            "paper": "10.3201/eid2609.202603",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4019513726234436
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3084,
+        "fields": {
+            "paper": "10.1684/vir.2014.0544",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43464165925979614
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3085,
+        "fields": {
+            "paper": "10.1111/jocd.13559",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4379236102104187
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3086,
+        "fields": {
+            "paper": "10.1093/clinchem/hvaa029",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4605411887168884
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3090,
+        "fields": {
+            "paper": "10.1002/jmv.25766",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37067654728889465
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3091,
+        "fields": {
+            "paper": "10.1016/j.it.2020.02.007",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4826476275920868
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3093,
+        "fields": {
+            "paper": "10.2217/fvl-2018-0144",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3653218150138855
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3094,
+        "fields": {
+            "paper": "10.1016/j.earlhumdev.2020.105116",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38161060214042664
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3095,
+        "fields": {
+            "paper": "10.1016/j.lfs.2020.117836",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38587772846221924
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3096,
+        "fields": {
+            "paper": "10.1016/j.idcr.2020.e00860",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.407491534948349
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3098,
+        "fields": {
+            "paper": "10.4103/jehp.jehp_189_20",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.435127317905426
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3099,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30424-3",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48421192169189453
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3101,
+        "fields": {
+            "paper": "10.21037/atm.2020.03.60",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37981662154197693
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3102,
+        "fields": {
+            "paper": "10.1016/j.cca.2020.04.018",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39311864972114563
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3103,
+        "fields": {
+            "paper": "10.1016/S0262-4079(20)30706-5",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3544178605079651
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3104,
+        "fields": {
+            "paper": "10.1101/2020.05.18.101717",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40407678484916687
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3105,
+        "fields": {
+            "paper": "10.24171/j.phrp.2020.11.3.08",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3735460340976715
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3107,
+        "fields": {
+            "paper": "arXiv:2003.06184",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4628276526927948
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3108,
+        "fields": {
+            "paper": "10.1016/j.microc.2020.104928",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39122357964515686
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3110,
+        "fields": {
+            "paper": "10.12968/bjon.2020.29.12.721",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4754490852355957
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3111,
+        "fields": {
+            "paper": "10.1016/j.cytogfr.2020.05.010",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35585692524909973
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3113,
+        "fields": {
+            "paper": "10.4103/ijph.IJPH_459_20",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39001771807670593
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3114,
+        "fields": {
+            "paper": "arXiv:2003.05004",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3940622806549072
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3115,
+        "fields": {
+            "paper": "10.1002/ijgo.13247",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42865508794784546
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3117,
+        "fields": {
+            "paper": "10.1101/2020.03.20.000141",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39813554286956787
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3118,
+        "fields": {
+            "paper": "10.7150/ijbs.45053",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4285206198692322
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3119,
+        "fields": {
+            "paper": "10.1177/0300891620923790",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46163085103034973
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3120,
+        "fields": {
+            "paper": "10.1007/s00467-020-04617-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43144354224205017
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3121,
+        "fields": {
+            "paper": "10.1016/j.ejmp.2020.06.011",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49435582756996155
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3122,
+        "fields": {
+            "paper": "10.1111/1467-8322.12575",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4847353994846344
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3123,
+        "fields": {
+            "paper": "10.1007/BF03346188",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.44025227427482605
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3125,
+        "fields": {
+            "paper": "10.1016/B978-0-323-64198-2.00030-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4720947742462158
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3126,
+        "fields": {
+            "paper": "arXiv:2005.02766",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.471306174993515
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3129,
+        "fields": {
+            "paper": "10.1101/2020.02.11.20022095",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.5
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3131,
+        "fields": {
+            "paper": "10.1093/infdis/jiaa152",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39010289311408997
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3132,
+        "fields": {
+            "paper": "10.1038/s41598-020-61700-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3685380220413208
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3134,
+        "fields": {
+            "paper": "10.1111/febs.15369",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39048701524734497
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3137,
+        "fields": {
+            "paper": "10.1101/2020.06.05.20123133",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3636328876018524
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3138,
+        "fields": {
+            "paper": "10.1101/2020.05.30.125856",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37814828753471375
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3140,
+        "fields": {
+            "paper": "10.1016/j.meegid.2020.104285",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3590415120124817
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3149,
+        "fields": {
+            "paper": "10.1111/apa.15412",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3862989544868469
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3152,
+        "fields": {
+            "paper": "10.7861/clinmed.2020-0207",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35878753662109375
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3154,
+        "fields": {
+            "paper": "10.4149/av_2020_215",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4926530420780182
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3157,
+        "fields": {
+            "paper": "10.3390/jcm9020571",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49085453152656555
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3158,
+        "fields": {
+            "paper": "10.4149/av_2020_214",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4583311676979065
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3159,
+        "fields": {
+            "paper": "10.1016/j.jcv.2020.104379",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4903711974620819
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3160,
+        "fields": {
+            "paper": "10.1101/2020.05.01.071050",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4313826560974121
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3161,
+        "fields": {
+            "paper": "10.1021/acs.jmedchem.9b01828",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4982045888900757
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3162,
+        "fields": {
+            "paper": "arXiv:2003.03848",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4049571454524994
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3163,
+        "fields": {
+            "paper": "10.1016/j.mehy.2020.109861",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37641045451164246
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3164,
+        "fields": {
+            "paper": "10.1101/2020.06.25.171744",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42699453234672546
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3165,
+        "fields": {
+            "paper": "10.1101/2020.06.06.112474",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.44975951313972473
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3166,
+        "fields": {
+            "paper": "10.1016/j.mjafi.2020.04.008",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4264056980609894
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3167,
+        "fields": {
+            "paper": "10.3390/pathogens9050367",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38805654644966125
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3170,
+        "fields": {
+            "paper": "10.1016/j.puhe.2020.05.036",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4987303614616394
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3171,
+        "fields": {
+            "paper": "arXiv:2006.10266",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45004355907440186
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3172,
+        "fields": {
+            "paper": "10.2196/20157",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3816644549369812
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3173,
+        "fields": {
+            "paper": "10.1101/2020.03.12.988865",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4988740384578705
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3174,
+        "fields": {
+            "paper": "10.1007/s15010-020-01461-0",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4245416224002838
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3177,
+        "fields": {
+            "paper": "10.1080/13685538.2020.1769058",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43384239077568054
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3178,
+        "fields": {
+            "paper": "10.1101/2020.01.30.926477",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3503228425979614
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3179,
+        "fields": {
+            "paper": "10.26355/eurrev_202003_20709",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37584227323532104
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3180,
+        "fields": {
+            "paper": "10.1016/j.ajem.2020.05.024",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4052863121032715
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3183,
+        "fields": {
+            "paper": "10.15420/cfr.2020.10",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4824953079223633
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3185,
+        "fields": {
+            "paper": "10.1016/j.therap.2020.04.004",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49996280670166016
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3191,
+        "fields": {
+            "paper": "10.1101/2020.06.10.20127837",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49514707922935486
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3192,
+        "fields": {
+            "paper": "10.1007/s10272-020-0893-1",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38944941759109497
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3196,
+        "fields": {
+            "paper": "10.1101/2020.06.18.147074",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4629146158695221
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3197,
+        "fields": {
+            "paper": "10.1101/2020.05.08.20095703",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.5
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3198,
+        "fields": {
+            "paper": "10.1016/j.drudis.2020.03.019",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36344844102859497
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3200,
+        "fields": {
+            "paper": "10.1111/tbed.13684",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4829496741294861
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3201,
+        "fields": {
+            "paper": "10.1007/s00109-020-01931-w",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4404345154762268
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3202,
+        "fields": {
+            "paper": "10.18502/ijaai.v19i(s1.r1).2848",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4926398992538452
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3203,
+        "fields": {
+            "paper": "10.18502/ijaai.v19i(s1.r1).2847",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4926398992538452
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3204,
+        "fields": {
+            "paper": "10.18502/ijaai.v19i(s1.r1).2849",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4926398992538452
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3205,
+        "fields": {
+            "paper": "10.18502/ijaai.v19i(s1.r1).2846",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4926398992538452
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3209,
+        "fields": {
+            "paper": "10.1016/j.rceng.2020.03.001",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4741102159023285
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3211,
+        "fields": {
+            "paper": "10.1101/2020.06.13.20130237",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3550037741661072
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3212,
+        "fields": {
+            "paper": "10.1101/2020.06.13.20127605",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38799622654914856
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3213,
+        "fields": {
+            "paper": "10.1016/j.clindermatol.2020.06.002",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3926559090614319
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3214,
+        "fields": {
+            "paper": "10.1016/j.apsb.2020.05.009",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3826003074645996
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3215,
+        "fields": {
+            "paper": "10.1101/2020.06.12.20129304",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.47663992643356323
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3216,
+        "fields": {
+            "paper": "arXiv:2006.08536",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3861818015575409
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3217,
+        "fields": {
+            "paper": "10.1101/2020.06.19.20134908",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4046124219894409
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3224,
+        "fields": {
+            "paper": "10.1101/2020.05.07.20094409",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4090692400932312
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3225,
+        "fields": {
+            "paper": "10.1016/j.jiph.2019.11.007",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37709274888038635
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3226,
+        "fields": {
+            "paper": "10.1016/j.immuni.2020.03.007",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.48905232548713684
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3230,
+        "fields": {
+            "paper": "10.1016/j.scitotenv.2020.138998",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4193483293056488
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3231,
+        "fields": {
+            "paper": "10.1016/j.ijantimicag.2020.106037",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.37214934825897217
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3232,
+        "fields": {
+            "paper": "10.1016/j.lfs.2020.117839",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.44750136137008667
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3238,
+        "fields": {
+            "paper": "10.1080/26410397.2020.1781583",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49338653683662415
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3242,
+        "fields": {
+            "paper": "10.1016/j.jamda.2020.06.002",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46693968772888184
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3243,
+        "fields": {
+            "paper": "10.1016/j.scitotenv.2020.139330",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4987855553627014
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3244,
+        "fields": {
+            "paper": "arXiv:2005.10154",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.470039039850235
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3246,
+        "fields": {
+            "paper": "10.1177/0194599820933595",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3720077574253082
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3248,
+        "fields": {
+            "paper": "10.3389/fmed.2020.00246",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4144631624221802
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3249,
+        "fields": {
+            "paper": "arXiv:2006.13877",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.38409924507141113
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3250,
+        "fields": {
+            "paper": "10.1016/j.cels.2020.06.008",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3949136734008789
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3251,
+        "fields": {
+            "paper": "10.1038/s41586-020-2456-9",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40830105543136597
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3252,
+        "fields": {
+            "paper": "10.1714/3386.33633",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40894365310668945
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3253,
+        "fields": {
+            "paper": "10.5858/arpa.2020-0324-SA",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36790910363197327
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3254,
+        "fields": {
+            "paper": "10.4155/bio-2020-0109",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3785596489906311
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3255,
+        "fields": {
+            "paper": "arXiv:2006.11988",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.438702791929245
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3256,
+        "fields": {
+            "paper": "arXiv:2006.11881",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4463807940483093
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3257,
+        "fields": {
+            "paper": "10.3760/cma.j.cn121430-20200312-00159",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4425325095653534
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3258,
+        "fields": {
+            "paper": "arXiv:2006.13816",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3676106333732605
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3259,
+        "fields": {
+            "paper": "10.1016/j.hrthm.2020.06.016",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49614304304122925
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3260,
+        "fields": {
+            "paper": "10.1021/acs.biochem.0c00309",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.41202959418296814
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3262,
+        "fields": {
+            "paper": "10.1590/1806-9282.66.4.547",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36325889825820923
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3263,
+        "fields": {
+            "paper": "10.1111/1471-0528.16369",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.43636736273765564
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3264,
+        "fields": {
+            "paper": "10.1001/jamanetworkopen.2020.12934",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4240192472934723
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3265,
+        "fields": {
+            "paper": "10.1101/2020.06.22.20136309",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.39877811074256897
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3266,
+        "fields": {
+            "paper": "10.1101/2020.01.23.916726",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3642020523548126
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3267,
+        "fields": {
+            "paper": "10.1016/j.mehy.2020.110026",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4472973942756653
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3268,
+        "fields": {
+            "paper": "10.1101/2020.06.21.20136523",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.49893301725387573
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3270,
+        "fields": {
+            "paper": "10.1101/2020.03.16.20037036",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35098329186439514
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3271,
+        "fields": {
+            "paper": "10.1101/2020.02.21.20026179",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3600097894668579
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3272,
+        "fields": {
+            "paper": "10.1101/2020.03.31.20048595",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.5
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3273,
+        "fields": {
+            "paper": "10.1101/2020.03.29.20045880",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.376127690076828
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3274,
+        "fields": {
+            "paper": "arXiv:2004.01207",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4990377128124237
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3275,
+        "fields": {
+            "paper": "10.1101/2020.04.22.20075630",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4996739625930786
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3276,
+        "fields": {
+            "paper": "10.1101/2020.03.23.20039446",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.35696229338645935
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3277,
+        "fields": {
+            "paper": "arXiv:2003.08447",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3636838495731354
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3278,
+        "fields": {
+            "paper": "10.1101/2020.04.24.060418",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3820420801639557
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3279,
+        "fields": {
+            "paper": "arXiv:2004.02689",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45773187279701233
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3280,
+        "fields": {
+            "paper": "10.1101/2020.05.10.20097550",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3979628086090088
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3281,
+        "fields": {
+            "paper": "10.1101/2020.04.06.028647",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4037724733352661
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3282,
+        "fields": {
+            "paper": "10.1101/2020.04.06.20055384",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.45773187279701233
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3283,
+        "fields": {
+            "paper": "10.1101/2020.02.02.931162",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.46477827429771423
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3284,
+        "fields": {
+            "paper": "10.1101/2020.05.19.20099317",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4667727053165436
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3285,
+        "fields": {
+            "paper": "10.1101/2020.04.26.061705",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42741823196411133
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3286,
+        "fields": {
+            "paper": "10.1101/2020.02.24.20027268",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4128997027873993
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3287,
+        "fields": {
+            "paper": "10.1101/2020.02.01.930537",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.42795664072036743
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3288,
+        "fields": {
+            "paper": "10.1101/2020.03.14.992156",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3636838495731354
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3289,
+        "fields": {
+            "paper": "10.1101/2020.02.07.939124",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.40651649236679077
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3290,
+        "fields": {
+            "paper": "arXiv:2005.11008",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.3873746991157532
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3291,
+        "fields": {
+            "paper": "arXiv:2003.05447",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.36659255623817444
+        }
+    },
+    {
+        "model": "data.deletecandidate",
+        "pk": 3292,
+        "fields": {
+            "paper": "10.1101/2020.02.17.20024034",
+            "type": 0,
+            "false_positive": true,
+            "score": 0.4648163914680481
+        }
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/S0769-2617(87)80010-2",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/S0769-2617(87)80018-7",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acci.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acci.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acci.2020.04.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acu.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acuro.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acuro.2020.04.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acuro.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.acuro.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ad.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.admp.2020.03.829",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.admp.2020.04.018",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.admp.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.admp.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.04.018",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.05.012",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aforl.2020.06.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.alter.2020.06.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.amp.2020.06.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ancard.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anpedi.2020.02.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anpedi.2020.04.016",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anpedi.2020.04.022",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anpedi.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anrea.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anrea.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.anrea.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.aprim.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.arbres.2020.03.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.arbres.2020.03.017",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.arbres.2020.03.019",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.arteri.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.banm.2020.04.015",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.bjan.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.bjan.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.bjan.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.bulcan.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.canrad.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.canrad.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.circv.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.04.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.04.029",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.04.031",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.ciresp.2020.06.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.douler.2020.04.012",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.edumed.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.edumed.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.edumed.2020.06.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.04.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.encep.2020.05.012",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.012",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.013",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.014",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.015",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.016",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.017",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.018",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfcli.2020.05.021",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfi.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.enfi.2020.03.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.etiqe.2020.04.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.etiqe.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.etiqe.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.04.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.04.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gaceta.2020.06.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gastrohep.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gine.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gine.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gofs.2020.03.014",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.gofs.2020.03.017",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.hipert.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.hipert.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jacr.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.03.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.012",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.013",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.014",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.04.015",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jchirv.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jemep.2020.100537",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jemep.2020.100538",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jemep.2020.100539",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jfo.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jhqr.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jidi.2020.04.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.jidi.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.kine.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.kine.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medcli.2020.04.018",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medcli.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.meddro.2020.04.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.meddro.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.03.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.03.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.04.016",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.05.018",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.medin.2020.06.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.mmm.2020.05.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.morpho.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.msom.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.msom.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nefro.2020.03.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nefro.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nefro.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nefro.2020.04.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nefro.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.npg.2020.04.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.npg.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.04.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.04.015",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nrl.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nupar.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.nupar.2020.03.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.oftal.2020.04.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.opresp.2020.05.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.otorri.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.otorri.2020.04.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.otorri.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.patol.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.phclin.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.purol.2020.03.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.purol.2020.04.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.purol.2020.04.021",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.purol.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.pxur.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.04.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccar.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccl.2020.03.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccl.2020.04.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccl.2020.05.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rccot.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.05.013",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rce.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rcreu.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rec.2020.04.025",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.recesp.2020.03.027",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.recesp.2020.04.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.redar.2020.03.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.redar.2020.03.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.redar.2020.03.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.redar.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.redar.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.regg.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.regg.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.007",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reml.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.remn.2020.04.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reuma.2020.04.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reuma.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reuma.2020.05.006",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reuma.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.reuma.2020.06.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.revmed.2020.04.004",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.revmed.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rgmx.2020.04.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rgmx.2020.04.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rgmx.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rgmx.2020.05.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rgmx.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rh.2020.05.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rmr.2020.05.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.rmr.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.05.010",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.05.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.05.014",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.06.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.06.003",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.06.008",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.06.009",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.semerg.2020.06.011",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.vacun.2020.03.001",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.zefq.2020.05.005",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1016/j.zefq.2020.06.002",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1556/650.2020.31866",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1556/650.2020.31871",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1556/650.2020.31873",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.1556/650.2020.31901",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "10.26633/RPSP.2020.69",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "arXiv:2004.10291",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "arXiv:2005.10527",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "arXiv:2006.04985",
+        "fields": {}
+    },
+    {
+        "model": "data.ignoredpaper",
+        "pk": "arXiv:2006.06447",
+        "fields": {}
+    }
+]

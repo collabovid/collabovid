@@ -16,6 +16,8 @@ spec:
         # remove it if your masters can't run pods
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/role: node
       containers:
         - name: daemon-set
           image: sync-daemon

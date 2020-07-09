@@ -4,7 +4,7 @@ from src.analyze.vectorizer.exceptions import *
 from src.analyze.vectorizer import get_vectorizer
 from threading import Thread
 
-SEARCH_VECTORIZER = 'title-sentence'
+SEARCH_VECTORIZER = 'transformer-paper-oubiobert-512'
 SIMILAR_VECTORIZER = 'transformer-paper-oubiobert-512'
 
 dir_path = os.path.dirname(os.path.realpath(__file__))

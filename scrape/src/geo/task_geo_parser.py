@@ -23,8 +23,8 @@ class GeoParserTask(Runnable):
     def run(self):
         n_locations = 0
 
-        with PaperGeoExtractor(db_path=f'{settings.RESOURCES_DIR}/{settings.GEONAMES_DB_REL_PATH}') as geo:
-            for paper in Paper.objects.all():
+        with PaperGeoExtractor(db_path=f'{settings.GEONAMES_DB_PATH}') as geo:
+            for paper in self.progress(Paper.objects.filter(location_modified=False)):
                 locations, ignored_entities = geo.extract_locations(paper, recompute_count=False)
                 locations = [x for x in locations if x[2] != PaperGeoExtractor.LOCATION_SKIPPED]
                 n_locations += len(locations)

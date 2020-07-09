@@ -1,0 +1,96 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    <div class="container">
+        <div class="tab-pane fade show active" id="countries" role="tabpanel" aria-labelledby="countries-tab">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1>Delete Candidates (Language)</h1>
+            </div>
+            <p>
+                The following papers were predicted to be non-English. Click <em>Ignore</em> to skip false positives
+                and <em>Delete</em> to delete the paper finally.
+            </p>
+            <div class="pt-3">
+                {% for candidate in candidates %}
+                    <div id="candidate-row-{{ candidate.paper.doi }}" class="row rounded border col-12 m-2 p-2 align-items-top">
+                            <div class="col-10 pl-1">
+                                <h5>
+                                    {{ candidate.paper.title }}
+                                </h5>
+                                <p>
+                                    {{ candidate.paper.abstract|truncatechars:200 }}
+                                </p>
+                                <p>
+                                    <strong>Probability:</strong> {{ candidate.score }}
+                                </p>
+                            </div>
+                            <div class="col-2 text-right pr-0">
+                                <div>
+
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary ignore-button"
+                                        value="{{ candidate.paper.doi }}"
+                                >Ignore</button>
+                                <button class="btn btn-sm btn-outline-danger delete-button"
+                                        value="{{ candidate.paper.doi }}"
+                                >Delete</button>
+                            </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        function handle_paper(doi, action) {
+            $.ajax({
+                url: "{% url "language-detection" %}",
+                type: 'POST',
+                data: {
+                    'csrfmiddlewaretoken': csrftoken,
+                    'paper_doi': doi,
+                    'action': action,
+                },
+                dataType: 'json',
+                success: result => {
+                    if (result.status === 'success') {
+                        row_id = "candidate-row-" + doi;
+                        $("div[id='" + row_id +"']").remove();
+                    }
+                }
+            });
+        }
+
+        $('.delete-button').on('click', event => {
+            event.preventDefault();
+            let doi = event.target.value;
+            handle_paper(doi, 'delete')
+        });
+
+        $('.ignore-button').on('click', event => {
+            event.preventDefault();
+            let doi = event.target.value;
+            handle_paper(doi, 'ignore')
+        });
+    </script>
+{% endblock %}

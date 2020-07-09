@@ -1,7 +1,7 @@
 from data.models import Topic
 
 from collections import defaultdict
-from django.db.models import Count, QuerySet, F
+from django.db.models import Count, QuerySet, F, Q
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.utils.timezone import datetime, timedelta
@@ -49,6 +49,10 @@ class PaperStatistics:
         return self._paper_host_data
 
     @property
+    def has_category_data(self):
+        return self._papers.filter(~Q(categories=None)).exists()
+
+    @property
     def category_data(self):
         if not self._category_data:
 
@@ -60,7 +64,7 @@ class PaperStatistics:
                     'count': category['count'],
                     'color': category['color']
                 }
-                for category in categories
+                for category in categories if category['name'] is not None
             }, cls=DjangoJSONEncoder)
 
         return self._category_data

@@ -1,0 +1,61 @@
+{% if authors %}
+    <div class="author-suggestions d-flex flex-row mt-1">
+
+        <div>
+            <i class="fas fa-exclamation-triangle text-warning"></i>
+        </div>
+        <div class="pl-2 pr-0 pt-0 pb-0 text-left text-muted">
+            Putting author names in your search query might have negative effects on the search result quality.
+            Please add authors via the filter menu or by clicking on one of the suggested author names instead and
+            remove them from your query:<br>
+            {% for author in authors %}
+                <span role="button" class="badge badge-pill badge-info-light author-add-tag"
+                      data-object='{{ author.json_object }}'>
+                <i class="fas small fa-plus"></i> {{ author.display_name|safe }}
+                </span>
+            {% endfor %}
+        </div>
+
+    </div>
+
+{% endif %}
+
+{% for paper in papers %}
+    <div class="{% if forloop.first %}mt-3{% else %}mt-4{% endif %}">
+        {% include 'search/partials/paper_card/_paper_card.html' with html=True extended=False paper=paper %}
+    </div>
+
+{% empty %}
+    <div class="my-5 text-center font-weight-bold">No results were found for your query.</div>
+{% endfor %}
+
+
+<script type="text/javascript">
+
+    window.Pagination.result_size = {{ result_size }};
+
+    {% if papers.has_previous or papers.has_next %}
+        window.Pagination.pagination_needed = true;
+
+        window.Pagination.first_page = 1;
+        window.Pagination.current_page = {{ papers.number }};
+
+        {% if papers.has_previous %}
+            window.Pagination.previous_page = {{ papers.previous_page_number }};
+        {% else %}
+            window.Pagination.previous_page = -1;
+        {% endif %}
+
+        {% if papers.has_next %}
+            window.Pagination.next_page = {{ papers.next_page_number }};
+            window.Pagination.last_page = {{ papers.paginator.num_pages }};
+        {% else %}
+            window.Pagination.next_page = -1;
+        {% endif %}
+
+    {% else %}
+        window.Pagination.pagination_needed = false;
+    {% endif %}
+
+    $(".need-tooltip").tooltip();
+</script>

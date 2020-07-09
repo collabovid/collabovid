@@ -11,14 +11,16 @@ from django.conf import settings
 
 from data.models import (
     CategoryMembership,
-    GeoCity,
-    GeoCountry,
+    DeleteCandidate,
     GeoLocationMembership,
-    GeoNameResolution
+    GeoNameResolution,
+    IgnoredPaper
 )
 
 
 class DataExport:
+    EXPORT_VERSION = 2
+
     @staticmethod
     def download_image(url):
         response = requests.get(url, stream=True)
@@ -29,8 +31,18 @@ class DataExport:
 
     @staticmethod
     def _export_geo_name_resolutions():
-        return [{"source_name": resolution.source_name, "target_name": resolution.target_name}
+        return [{"source_name": resolution.source_name, "target_geonames_id": resolution.target_geonames_id}
                 for resolution in GeoNameResolution.objects.all()]
+
+    @staticmethod
+    def _export_ignored_papers():
+        return [paper.doi for paper in IgnoredPaper.objects.all()]
+
+    @staticmethod
+    def _export_delete_candidates():
+        return [{"doi": candidate.paper.doi, "type": candidate.type,
+                 "fp": candidate.false_positive, "score": candidate.score}
+                for candidate in DeleteCandidate.objects.all()]
 
     @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
@@ -43,7 +55,6 @@ class DataExport:
         journals = {}
         categories_ml = {}
         locations = {}
-        geo_name_resolutions = DataExport._export_geo_name_resolutions()
         papers = []
 
         if not os.path.exists(out_dir):
@@ -79,32 +90,29 @@ class DataExport:
                                                                         "color": category.color}
                     for location in paper.locations.all():
                         if location.pk not in locations:
-                            location_info = {"name": location.name, "alias": location.alias,
-                                             "latitude": location.latitude, "longitude": location.longitude}
-                            try:
-                                # Try whether the location is a country
+                            location_info = {"geonames_id": location.geonames_id, "name": location.name,
+                                             "alias": location.alias, "latitude": location.latitude,
+                                             "longitude": location.longitude}
+                            if location.is_country:
                                 country = location.geocountry
                                 location_info["type"] = "country"
                                 location_info["alpha_2"] = country.alpha_2
-                            except GeoCountry.DoesNotExist:
-                                # Location has to be a city
-                                try:
-                                    city = location.geocity
-                                    location_info["type"] = "city"
-                                    location_info["country_id"] = city.country.pk
-                                    #  We need to export the city's country here as well, if it is not already
-                                    #  in the list. Can happen that this country is not added (because not referenced
-                                    #  from anywhere else (from no paper directly).
-                                    citys_country = city.country
-                                    if citys_country.pk not in locations:
-                                        locations[citys_country.pk] = {"name": citys_country.name,
-                                                                       "alias": citys_country.alias,
-                                                                       "latitude": citys_country.latitude,
-                                                                       "longitude": citys_country.longitude,
-                                                                       "type": "country",
-                                                                       "alpha_2": citys_country.alpha_2}
-                                except GeoCity.DoesNotExist:
-                                    raise Exception(f"Location {location.name} is neither city nor country!")
+                            else:
+                                city = location.geocity
+                                location_info["type"] = "city"
+                                location_info["country_id"] = city.country.pk
+                                #  We need to export the city's country here as well, if it is not already
+                                #  in the list. Can happen that this country is not added (because not referenced
+                                #  from anywhere else (from no paper directly).
+                                citys_country = city.country
+                                if citys_country.pk not in locations:
+                                    locations[citys_country.pk] = {"geonames_id": citys_country.geonames_id,
+                                                                   "name": citys_country.name,
+                                                                   "alias": citys_country.alias,
+                                                                   "latitude": citys_country.latitude,
+                                                                   "longitude": citys_country.longitude,
+                                                                   "type": "country",
+                                                                   "alpha_2": citys_country.alpha_2}
                             locations[location.pk] = location_info
 
                     paper_data = {
@@ -137,9 +145,12 @@ class DataExport:
                                                   "score": CategoryMembership.objects.get(
                                                       category__model_identifier=c.model_identifier, paper=paper).score}
                                                  for c in paper.categories.all()],
-                        "locations": [{"id": l.pk, "state": GeoLocationMembership.objects.get(paper=paper,
-                                                                                              location__id=l.pk).state}
-                                      for l in paper.locations.all()]
+                        "locations": [{"id": loc.pk, "state": GeoLocationMembership.objects.get(paper=paper,
+                                                                                              location__id=loc.pk).state,
+                                       "word": GeoLocationMembership.objects.get(paper=paper,
+                                                                                 location__id=loc.pk).word}
+                                      for loc in paper.locations.all()],
+                        "location_modified": paper.location_modified,
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
@@ -159,14 +170,21 @@ class DataExport:
 
                     papers.append(paper_data)
 
+                geo_name_resolutions = DataExport._export_geo_name_resolutions()
+                ignored_papers = DataExport._export_ignored_papers()
+                delete_candidates = DataExport._export_delete_candidates()
+
                 data = {
+                    "export_version": DataExport.EXPORT_VERSION,
                     "authors": authors,
                     "paperhosts": paperhosts,
                     "papers": papers,
                     "journals": journals,
                     "categories_ml": categories_ml,
                     "locations": locations,
-                    "geo_name_resolutions": geo_name_resolutions
+                    "geo_name_resolutions": geo_name_resolutions,
+                    "ignored_papers": ignored_papers,
+                    "delete_candidates": delete_candidates,
                 }
 
                 with open(json_path, "w") as file:
@@ -185,7 +203,7 @@ class DataExport:
 
         end = timer()
 
-        log(f"Finished export in {timedelta(seconds=end - start)}")
+        log(f"Finished export (version {DataExport.EXPORT_VERSION}) in {timedelta(seconds=end - start)}")
         log("Exported")
         log(f"\t{len(paperhosts)} paperhosts")
         log(f"\t{len(authors)} authors")
@@ -194,6 +212,8 @@ class DataExport:
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{len(geo_name_resolutions)} geo name resolutions")
+        log(f"\t{len(ignored_papers)} ignored papers")
+        log(f"\t{len(delete_candidates)} delete candidates")
         log(f"\t{image_id_counter} images")
         log("Archive size: {0} MB".format(round(os.stat(path).st_size / (1000 ** 2), 2)))
 

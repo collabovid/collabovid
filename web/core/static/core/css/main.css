@@ -246,9 +246,10 @@ a.invisible-link, a.invisible-link:hover {
     color: white;
     font-weight: bold;
     padding: 15px 15px 15px 15px;
-    border-radius: 0;
-    margin-bottom: 0;
+    border-radius: 10px;
+    margin-bottom: 0.5em;
 }
+
 
 .nav-search-types .nav-item .nav-link:hover:not(.active):not(.disabled) {
     background: #5475a1;
@@ -269,9 +270,8 @@ a.invisible-link, a.invisible-link:hover {
 }
 
 @media (min-width: 576px) {
-    .nav-search-types .nav-item .nav-link {
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
+    .nav-search-types .nav-item:not(:first-child) .nav-link {
+        margin-left: 1em;
     }
 }
 
@@ -357,7 +357,7 @@ div.filter-card.collapsing {
         width: auto;
         height: auto;
         background: none;
-        margin-top: 3rem;
+        margin-top: 1rem;
         z-index: 0;
 
     }
@@ -420,8 +420,70 @@ label.nav-link {
     overflow: visible;
 }
 
-.paper-detail-card-top-badge
-{
+.paper-detail-card-top-badge {
     right: 1em;
     top: 0.5em;
+}
+
+.search-error {
+    text-align: center;
+}
+
+.search-error ul {
+    text-align: left;
+}
+
+.abstract-container em, .author em, .paper-title em, .author-suggestions em {
+    font-weight: bold;
+    font-style: normal;
+}
+
+.btn-circle {
+    width: 30px;
+    height: 30px;
+    padding: 6px 0px;
+    border-radius: 15px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.42857;
+}
+
+.sort-select {
+    vertical-align: middle;
+    background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3e%3cpath fill='%23343a40' d='M2 0L0 2h4zm0 5L0 3h4z'/%3e%3c/svg%3e") no-repeat right .75rem center;
+    background-size: auto 12px;
+    border: 1px solid #ced4da;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding-right: 1.75rem;
+    border-radius: .25rem;
+}
+
+#statistics-label > button {
+    margin-top: -3px;
+    border: 1px solid #ced4da;
+}
+
+.search-info-container {
+    flex: 0 0 160px;
+}
+
+.search-info-container label > button , .search-info-container label > select {
+    width: 160px;
+}
+
+@media (min-width: 768px) {
+    .search-info-container {
+        flex: 0 0 340px;
+    }
+}
+
+.badge-info-light {
+    color: #fff;
+    background-color: #3c7d97;
+}
+
+.tooltip-inner {
+    max-width: none;
 }

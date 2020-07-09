@@ -1,0 +1,31 @@
+{% extends "search/partials/_search_description_modal.html" %}
+
+{% block id %}combined{% endblock %}
+
+{% block title %}
+    How does semantic search work?
+{% endblock %}
+{% block description %}
+    <p>
+        Our semantic search should be used to explore a previously unknown research field.
+        It works best when the user provides us with a sentence or question about a COVID-19
+        related research field, i.e. "How does COVID-19 affect childrens mental health?".
+    </p>
+    <p>
+        The search algorithm is able to analyze and generalize
+        a given query and provide the user with
+        papers that match the query's topic. It is capable of recognizing connections
+        between words, e.g. temperature, weather, humidity. These connections are used
+        to show papers of the overall topics that do not necessarily contain any word that the
+        user provided.
+    </p>
+    <p>
+        We use natural language processing techniques
+        to find correlations between a given query and the content of a paper. For semantic
+        analysis, we trained a BERT model on our dataset that learned to find similarities
+        between papers and a given query.
+    </p>
+
+    <p>You can find out more details about the project at the
+        <a href="{% url "about" %}">frequently asked questions</a> page.</p>
+{% endblock %}

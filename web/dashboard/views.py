@@ -1,9 +1,22 @@
+import json
+
 from django.conf import settings
+from django.db import transaction
 from django.http import HttpResponseNotFound, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
-from data.models import GeoLocationMembership, Paper, GeoCountry, GeoCity, GeoNameResolution
+from data.models import (
+    DeleteCandidate,
+    GeoCity,
+    GeoLocation,
+    GeoCountry,
+    GeoLocationMembership,
+    GeoNameResolution,
+    IgnoredPaper,
+    Paper,
+)
+from geolocations.geoname_db import GeonamesDBError
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,13 +25,14 @@ from django.utils import timezone
 from tasks.launcher.task_launcher import get_task_launcher
 
 from tasks.load import AVAILABLE_TASKS, get_task_by_id
+from geolocations.location_modifier import LocationModifier
 
 import os
 
 
 @staff_member_required
 def tasks(request):
-    tasks = Task.objects.all().order_by('-started_at')
+    tasks = Task.objects.order_by('-started_at')
     return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks, 'debug': settings.DEBUG})
 
 
@@ -95,7 +109,7 @@ def delete_all_finished(request):
     if request.method == 'POST':
         days = 1
         date_limit = timezone.now() - timedelta(days=days)
-        query = Task.objects.filter(status=Task.STATUS_FINISHED, ended_at__lte=date_limit)
+        query = Task.objects.filter(ended_at__lte=date_limit)
         if query.count() > 0:
             query.delete()
             messages.add_message(request, messages.SUCCESS, 'Deleted All Finished Tasks.')
@@ -111,7 +125,89 @@ def show_location(request, id):
         country = get_object_or_404(GeoCountry, pk=id)
 
         return render(request, 'dashboard/locations/country.html',
-                      {'country': country})
+                      {'country': country, 'debug': settings.DEBUG})
+
+
+@staff_member_required
+def delete_location(request, location_id):
+    if request.method == 'POST':
+        if location_id:
+            try:
+                location = GeoLocation.objects.get(pk=location_id)
+                LocationModifier.delete_and_ignore_location(location)
+                messages.add_message(request, messages.SUCCESS, f"Successfully deleted location {location.name}")
+            except GeoLocation.DoesNotExist:
+                messages.add_message(request, messages.ERROR, f"No location with id{location_id}")
+    return redirect('locations')
+
+
+@staff_member_required
+def delete_location_membership(request):
+    if request.method == 'POST':
+        location_id = request.POST.get('location')
+        paper_id = request.POST.get('paper')
+
+        if LocationModifier.delete_location_membership(location_id, paper_id):
+            messages.add_message(request, messages.SUCCESS, "Deleted location membership")
+        else:
+            messages.add_message(request, messages.ERROR,
+                                 "No location membership (Maybe the paper is related to a city within that country)"
+                                 )
+        return redirect('locations')
+
+
+@staff_member_required
+def edit_location(request, location_id):
+    location = GeoLocation.objects.get(pk=location_id)
+    if request.method == 'GET':
+        selected_paper_doi = request.GET.get("paper")
+        if selected_paper_doi:
+            try:
+                membership = GeoLocationMembership.objects.get(location_id=location_id, paper_id=selected_paper_doi)
+            except GeoLocationMembership.DoesNotExist:
+                messages.add_message(request, messages.ERROR,
+                                     "No location membership (Maybe the paper is related to a city within that country)"
+                                     )
+                return redirect('locations')
+        else:
+            membership = None
+        return render(
+            request, 'dashboard/locations/edit_location.html',
+            {'location': location, 'membership': membership, 'debug': settings.DEBUG}
+        )
+    elif request.method == 'POST':
+        new_geonames_id = request.POST.get("geonames_id", None)
+        if not new_geonames_id:
+            messages.add_message(request, messages.ERROR, f"New Geonames ID not specified")
+            return redirect('locations')
+        location = GeoLocation.objects.get(pk=location_id)
+        try:
+            new_location = LocationModifier.change_location(location, new_geonames_id)
+            messages.add_message(request, messages.SUCCESS, f"Successfully changed location from {location.name} to {new_location.name}")
+        except GeonamesDBError as ex:
+            messages.add_message(request, messages.ERROR, ex)
+        return redirect('locations')
+
+
+@staff_member_required
+def add_location(request, doi):
+    paper = Paper.objects.get(doi=doi)
+    if request.method == 'GET':
+        return render(request, 'dashboard/locations/add_location.html', {'paper': paper, 'debug': settings.DEBUG})
+    elif request.method == 'POST':
+        geonames_id = request.POST.get("geonames_id", None)
+        if not geonames_id:
+            messages.add_message(request, messages.ERROR, f"Geonames ID not specified")
+            return redirect('add_location', doi=doi)
+
+        try:
+            location = LocationModifier.add_location(paper, geonames_id)
+            messages.add_message(request, messages.SUCCESS,
+                                 f"Successfully added location {location.name} to {doi}")
+        except GeonamesDBError as ex:
+            messages.add_message(request, messages.ERROR, ex)
+            return redirect('add_location', doi=doi)
+        return redirect('paper', doi=doi)
 
 
 @staff_member_required
@@ -122,7 +218,7 @@ def locations(request):
         name_resolutions = GeoNameResolution.objects.all()
 
         return render(request, 'dashboard/locations/locations.html',
-                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions})
+                      {'countries': countries, 'cities': cities, 'name_resolutions': name_resolutions, 'debug': settings.DEBUG})
 
 
 # @staff_member_required
@@ -207,3 +303,31 @@ def location_sanitizing(request):
 
     return render(request, 'dashboard/sanitizing/location_sanitizing_overview.html',
                   {'location_papers': location_memberships, 'debug': settings.DEBUG})
+
+@staff_member_required
+def language_detection(request):
+    if request.method == 'GET':
+        candidates = DeleteCandidate.objects.filter(
+                type=DeleteCandidate.Type.LANGUAGE, false_positive=False).order_by('-score').select_related('paper')
+        return render(request, 'dashboard/language_detection/language_detection.html',
+                      {'candidates': candidates, 'debug': settings.DEBUG})
+    elif request.method == 'POST':
+        paper_doi = request.POST.get('paper_doi')
+        action = request.POST.get('action')
+
+        if action == 'delete':
+            paper = Paper.objects.get(doi=paper_doi)
+            with transaction.atomic():
+                paper.delete()
+                IgnoredPaper.objects.create(doi=paper_doi)
+        elif action == 'ignore':
+            candidate = DeleteCandidate.objects.get(paper_id=paper_doi, type=DeleteCandidate.Type.LANGUAGE)
+            candidate.false_positive = True
+            candidate.save()
+        else:
+            return HttpResponseNotFound()
+
+        return HttpResponse(
+            json.dumps({'status': 'success'}),
+            content_type="application/json"
+        )

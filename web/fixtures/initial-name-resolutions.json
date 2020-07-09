@@ -4,7 +4,7 @@
     "pk": 1,
     "fields": {
       "source_name": "mt",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -12,7 +12,7 @@
     "pk": 2,
     "fields": {
       "source_name": "ct",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -20,7 +20,7 @@
     "pk": 3,
     "fields": {
       "source_name": "ms",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -28,7 +28,7 @@
     "pk": 4,
     "fields": {
       "source_name": "awake",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -36,7 +36,7 @@
     "pk": 5,
     "fields": {
       "source_name": "multi",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -44,7 +44,7 @@
     "pk": 6,
     "fields": {
       "source_name": "las",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -52,7 +52,7 @@
     "pk": 7,
     "fields": {
       "source_name": "mobile",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -60,7 +60,7 @@
     "pk": 8,
     "fields": {
       "source_name": "ksa",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -68,7 +68,7 @@
     "pk": 9,
     "fields": {
       "source_name": "cross",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -76,7 +76,7 @@
     "pk": 10,
     "fields": {
       "source_name": "stan",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -84,7 +84,7 @@
     "pk": 11,
     "fields": {
       "source_name": "st",
-      "target_name": null
+      "target_geonames_id": null
     }
   },
   {
@@ -92,7 +92,7 @@
     "pk": 12,
     "fields": {
       "source_name": "us",
-      "target_name": "united states"
+      "target_geonames_id": 6252001
     }
   },
   {
@@ -100,7 +100,7 @@
     "pk": 13,
     "fields": {
       "source_name": "u.s.a",
-      "target_name": "united states"
+      "target_geonames_id": 6252001
     }
   },
   {
@@ -108,7 +108,7 @@
     "pk": 14,
     "fields": {
       "source_name": "u.s",
-      "target_name": "united states"
+      "target_geonames_id": 6252001
     }
   },
   {
@@ -116,7 +116,7 @@
     "pk": 15,
     "fields": {
       "source_name": "al-jouf",
-      "target_name": "al jouf"
+      "target_geonames_id": 74219
     }
   },
   {
@@ -124,15 +124,47 @@
     "pk": 16,
     "fields": {
       "source_name": "south-africa",
-      "target_name": "south africa"
+      "target_geonames_id": 953987
     }
   },
   {
     "model": "data.geonameresolution",
     "pk": 17,
     "fields": {
-      "source_name": "cape town",
-      "target_name": "capetown"
+      "source_name": "smart city",
+      "target_geonames_id": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 18,
+    "fields": {
+      "source_name": "ards",
+      "target_geonames_id": null
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 19,
+    "fields": {
+      "source_name": "munich",
+      "target_geonames_id": 2867714
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 20,
+    "fields": {
+      "source_name": "munich, germany",
+      "target_geonames_id": 2867714
+    }
+  },
+  {
+    "model": "data.geonameresolution",
+    "pk": 21,
+    "fields": {
+      "source_name": "ent",
+      "target_geonames_id": null
     }
   }
 ]

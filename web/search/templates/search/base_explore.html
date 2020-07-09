@@ -1,0 +1,52 @@
+{% load static %}
+{% load pipeline %}
+{% load settings_helper %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description"
+          content="Researchers from all over the world are working hard on the investigation of the SARS-CoV-2 virus, resulting in many new publications in so-called preprint versions per day, e.g. at medRxiv or bioRxiv.  Time is short and thus Collabovid provides, a good interface to access, sort and classify the huge amount of preprint papers.">
+    <meta name="author" content="Jonas Dippel, Yannic Lieder, Michael Perk, Moritz Pfister">
+    <meta http-equiv="content-language" content="en-us">
+
+    <title>Collabovid</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static "core/img/favicon/apple-touch-icon.png" %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static "core/img/favicon/favicon-32x32.png" %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static "core/img/favicon/favicon-16x16.png" %}">
+
+    <!-- Bootstrap core CSS -->
+
+    <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}"/>
+    {% stylesheet 'base' %}
+    {% stylesheet 'custom_base' %}
+
+    {% settings_value "USING_ANALYTICS" as using_analytics %}
+    {% if using_analytics %}
+        <script async defer data-domain="collabovid.org" src="https://plausible.io/js/plausible.js"></script>
+    {% endif %}
+
+    {% block css %}
+    {% endblock %}
+</head>
+
+<body class="explore">
+
+{% include "core/partials/base/_navbar.html" %}
+
+<div id="content">
+    <!-- Page Content -->
+    {% block content %}
+    {% endblock %}
+</div>
+
+
+{% javascript 'base' %}
+
+{% block script %}
+{% endblock %}
+
+</body>
+</html>

@@ -49,7 +49,8 @@
                         <div class="card-body mt-0 pt-0 px-4 pb-4">
                             <ul>
                                 <li>List and access published articles</li>
-                                <li>Sort and filter articles by publishing date, authors name, category, journal, location, title and
+                                <li>Sort and filter articles by publishing date, authors name, category, journal,
+                                    location, title and
                                     content
                                 </li>
                                 <li>
@@ -75,35 +76,14 @@
                         <hr>
                         <div class="card-body mt-0 pt-0">
                             This website was created during the
-                            <a href="https://covid-global-hackathon.devpost.com">COVID-19 Global Hackathon</a> at the end
+                            <a href="https://covid-global-hackathon.devpost.com">COVID-19 Global Hackathon</a> at the
+                            end
                             of March 2020. Since then, Collabovid is updated and improved very frequently.
                             Please note that the website
                             is still under development. We are always looking for feedback to improve the site.
                             We kindly ask you to fill out our <a
                                 href="https://collabovid-feedback.limequery.org/321314?lang=en">feedback survey</a>
                             or write an <a href="mailto:info@collabovid.org?Subject=Collabovid%20Feedback">email</a>.
-                        </div>
-
-                    </div>
-
-                    <div class="card-block shadow bg-white rounded mt-4">
-
-                        <h3 class="card-title px-4 pt-4 pb-0">How does it work?</h3>
-                        <hr>
-                        <div class="card-body mt-0 pt-0">
-                            We use natural language processing techniques
-                            to find correlations between a given query and the content of a paper. For semantic
-                            analysis, we
-                            make use of a pretrained BERT
-                            <a href="https://github.com/UKPLab/sentence-transformers">model</a>.
-                            The category
-                            assignment is computed by a machine learning algorithm. The model was trained with
-                            an existing dataset from
-                            <a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. LitCovid
-                            is a curated literature hub for tracking scientific information about SARS-CoV-2.
-                            Collabovid is an open source project that is licenced under GNU General Public
-                            License v3.0. The source code can be found at
-                            <a href="https://github.com/michip/collabovid">GitHub</a>.
                         </div>
 
                     </div>
@@ -147,7 +127,8 @@
                                     preprints page. Furthermore, we include publications from <a
                                             href="https://arxiv.org/covid19search">arXiv</a>,
                                     <a href="https://www.elsevier.com/clinical-solutions/coronavirus-research-hub">Elsevier</a>
-                                     and <a href="https://pubmed.ncbi.nlm.nih.gov/?term=(%222019/12/01%22[Date%20-%20Create]%20:%20%223000%22[Date%20-%20Create])%20AND%20((COVID-19)%20OR%20(SARS-CoV-2)%20OR%20(Coronavirus))%20AND%20Journal%20Article[ptyp]">PubMed</a>.
+                                    and
+                                    <a href="https://pubmed.ncbi.nlm.nih.gov/?term=(%222019/12/01%22[Date%20-%20Create]%20:%20%223000%22[Date%20-%20Create])%20AND%20((COVID-19)%20OR%20(SARS-CoV-2)%20OR%20(Coronavirus))%20AND%20Journal%20Article[ptyp]">PubMed</a>.
                                     All sources are updated several times a day.
                                 </li>
 
@@ -157,6 +138,47 @@
                                 </li>
                             </ul>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card-block shadow bg-white rounded mt-4">
+
+                        <h3 class="card-title px-4 pt-4 pb-0">How does it work?</h3>
+                        <hr>
+                        <div class="card-body mt-0 pt-0">
+                            <strong>Semantic Search:</strong>
+                            Our semantic search should be used to explore a previously unknown research field.
+                            It works best when the user provides us with a sentence or question about a COVID-19
+                            related research field, i.e. "How does COVID-19 affect childrens mental health?".
+                            The search algorithm is able to analyze and generalize
+                            a given query and provide the user with
+                            papers that match the query's topic. It is capable of recognizing connections
+                            between words, e.g. temperature, weather, humidity. These connections are used
+                            to show papers of the overall topics that do not necessarily contain any word that the
+                            user provided.
+                            We use natural language processing techniques
+                            to find correlations between a given query and the content of a paper. For semantic
+                            analysis, we trained a BERT model on our dataset that learned to find similarities
+                            between papers and a given query.<br><br>
+                            <strong>Keyword Search:</strong> The keyword search uses
+                            <a href="https://www.elastic.co/">Elasticsearch</a> to find papers with matching
+                            keywords in their title, abstract or authors. Despite being very efficient when the user
+                            provides a good set of keywords, the search is not able to generalize the search
+                            query.<br><br>
+                            <strong>Category Assignment:</strong>
+                            The category
+                            assignment is computed by a machine learning algorithm. The model was trained with
+                            an existing dataset from
+                            <a href="https://www.ncbi.nlm.nih.gov/research/coronavirus/">LitCovid</a>. LitCovid
+                            is a curated literature hub for tracking scientific information about SARS-CoV-2.
+                            Collabovid is an open source project that is licenced under GNU General Public
+                            License v3.0. The source code can be found at
+                            <a href="https://github.com/michip/collabovid">GitHub</a>.
+                        </div>
+
                     </div>
                 </div>
             </div>

@@ -1,0 +1,166 @@
+{% load static %}
+{% load paper_card_extras %}
+<div class="card p-4 rounded shadow">
+
+    <div class="row d-flex flex-wrap">
+        {% if paper.preview_image %}
+            <div class="col-lg-2 d-none d-lg-block">
+                <div class="row align-items-center h-100">
+                    <div class="col-12">
+                        <img src="{{ paper.preview_image.url }}" style="max-height: 175px"
+                             class="img-fluid mx-auto my-auto d-block">
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
+
+            <div class="paper-card-badge">
+                {% if paper.is_preprint %}
+                    <span class="badge badge-pill badge-secondary small">Preprint</span>
+                {% endif %}
+            </div>
+
+            <div class="card-block">
+
+                <h5 class="card-title font-weight-normal">
+                    <a href="{% url "paper" paper.pk %}" class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
+                    {{ request.user|edit_object_link:paper }}
+                    {% if paper.is_similar  %}<i class="small fas fa-circle text-info"></i>{% endif %}
+                </h5>
+
+                <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
+                    <div class="mb-1">
+                        {% if paper.doi|first not in 'arXiv:' %}
+                            <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>
+                        {% else %}
+                            {{ paper.doi }}
+                        {% endif %}
+                        from
+                        <a href="{{ paper.url }}" target="_blank">{{ paper.host.name }}</a>
+                        {% if paper.journal %}
+                            in
+                            {% if paper.journal.url %}
+                                <a href="{{ paper.journal.url }}" target="_blank">{{ paper.journal.displayname }}</a>
+                            {% else %}
+                                {{ paper.journal.displayname.title }}
+                            {% endif %}
+                            {{ request.user|edit_object_link:paper.journal }}
+                        {% endif %}
+                    </div>
+                    <div class="mb-1">
+                        {% if paper.locations %}
+                            {% include "search/partials/paper_card/_locations_badge.html" with locations=paper.ordered_locations %}
+                        {% endif %}
+                        {% if user.is_authenticated and user.is_staff %}
+                            <a href="{% url "add_location" paper.doi %}">[Add location]</a>
+                        {% endif %}
+                    </div>
+                    <i class="fas fa-clock"></i> {{ paper.published_at }}
+                    &nbsp;|&nbsp;
+                    <i class="fas fa-users"></i>
+                    {% for author in paper.highlighted_authors %}
+                        {% if not forloop.first %}
+                            <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                                    &middot;
+                                </span>
+                        {% endif %}
+                        <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
+                                {{ author.display_name|safe }}
+                                {{ request.user|edit_object_link:author }}
+                            </span>
+                    {% endfor %}
+
+                    {% if paper.authors.count > 5 %}
+                        {% with paper.highlighted_authors|length|add:"-5" as remaining_authors %}
+                            <br class="remove-on-show-authors">
+                            <a class="d-inline show-authors" href="#">
+                                show {{ remaining_authors }}
+                                remaining author{% if remaining_authors > 1 %}s{% endif %}
+                            </a>
+                        {% endwith %}
+                    {% endif %}
+                    <br>
+                </h6>
+
+                {% with paper|abstract_preview_size as preview_size %}
+                    {% with paper|abstract_preview_size_mobile as mobile_preview_size %}
+
+                        <div class="abstract-container card-text text-justify">
+
+                            <!-- Mobile version of the abstract with less preview size. -->
+                            <span class="d-md-none d-inline" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= mobile_preview_size %}
+                                        <span class="short">{{ paper|preview_slice:True|safe }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice:True|safe }}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract|safe }}</span>
+                                    {% endif %}
+                                </span>
+
+                            <!-- Desktop version of the abstract with more preview size. -->
+                            <span class="d-md-inline d-none" style="font-size: 0.8em">
+                                    {% if not extended and paper.abstract|length >= preview_size %}
+                                        <span class="short">{{ paper|preview_slice|safe }}</span><span
+                                            class="dots">...</span><span
+                                            class="long"
+                                            style="display: none;">{{ paper|full_text_slice|safe}}</span>
+                                    {% else %}
+                                        <span class="short">{{ paper.abstract|safe }}</span>
+                                    {% endif %}
+                                </span>
+
+                            <div class="mt-1 text-muted">
+
+                                <div class="row">
+
+                                    <div class="col-12 col-sm-4 small text-left">
+                                        {% include "search/partials/paper_card/_categories.html" %}
+                                    </div>
+
+
+                                    <div class="col-12 col-sm-8 text-sm-right small">
+
+                                        {% if paper.abstract|length >= mobile_preview_size %}
+                                            <span class="abstract-controls
+                                                {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
+                                                    <a href="#" class="toggle-description show"
+                                                       style="{% if extended %} display: none; {% endif %}">
+                                                        Expand the abstract
+                                                    </a>
+
+                                                    <a href="#" class="toggle-description hide"
+                                                       style="{% if not extended %} display: none; {% endif %}">
+                                                        Hide the full abstract
+                                                    </a>
+                                                </span>
+                                        {% endif %}
+
+                                        {% if paper.abstract|length >= preview_size %}
+                                            |
+                                        {% endif %}
+
+                                        {% if paper.pdf_url %}
+                                            <a href="{{ paper.pdf_url }}" target="_blank">
+                                                Read the full text
+                                            </a>
+                                            |
+                                        {% endif %}
+
+                                        <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+                    {% endwith %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>

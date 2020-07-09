@@ -6,8 +6,8 @@ PIPELINE = {
         'base': {
             'source_filenames': (
                 'js/jquery.min.js',
-                'js/bootstrap.min.js',
                 'js/popper.min.js',
+                'js/bootstrap.min.js',
                 'js/jquery.ihavecookies.js',
             ),
             'output_filename': 'base.js'
@@ -16,7 +16,6 @@ PIPELINE = {
             'source_filenames': (
                 'js/moment.js',
                 'js/Chart.min.js',
-                'js/popper.min.js',
                 'core/js/collabovid_charts.js',
             ),
             'output_filename': 'charts.js'

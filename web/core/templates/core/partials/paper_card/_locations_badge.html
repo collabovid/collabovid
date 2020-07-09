@@ -1,9 +1,0 @@
-{% spaceless %}
-    {% for location in locations %}
-        <a href="{% url "search" %}?locations={{ location.pk }}">
-            <span class="badge badge-pill {% if location.is_country %}badge-info{% else %}badge-secondary{% endif %} {% if not forloop.first %}ml-1{% endif %}">
-                {{ location.displayname }}
-            </span>
-        </a>
-    {% endfor %}
-{% endspaceless %}

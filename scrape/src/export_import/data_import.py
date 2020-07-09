@@ -11,10 +11,13 @@ from data.models import (
     Category,
     CategoryMembership,
     DataSource,
+    DeleteCandidate,
     GeoCity,
     GeoCountry,
+    GeoLocation,
     GeoLocationMembership,
     GeoNameResolution,
+    IgnoredPaper,
     Journal,
     Paper,
     PaperData,
@@ -24,8 +27,10 @@ from django.utils.timezone import make_aware
 from PIL import Image
 from tasks.colors import Red
 
+
 class ImportMappings:
     """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
+
     def __init__(self):
         self.journal_mapping = {}
         self.paperhost_mapping = {}
@@ -49,6 +54,8 @@ class ImportStatistics:
         self.papers_w_new_location = 0
         self.added_papers = 0
         self.geo_name_resolutions_created = 0
+        self.ignored_papers_created = 0
+        self.delete_candidates_created = 0
 
         self.authors_deleted = 0
         self.journals_deleted = 0
@@ -70,6 +77,8 @@ class ImportStatistics:
         s.append(f"\t{self.countries_created} countries")
         s.append(f"\t{self.cities_created} cities")
         s.append(f"\t{self.geo_name_resolutions_created} geo name resolutions")
+        s.append(f"\t{self.ignored_papers_created} papers to ignore list")
+        s.append(f"\t{self.delete_candidates_created} delete candidates")
         s.append(f"{self.papers_w_new_category} papers' categories were updated")
         s.append(f"{self.papers_w_new_location} papers' locations were updated")
 
@@ -91,6 +100,7 @@ class DataImport:
     def __init__(self, log=print, progress=None):
         self._mappings = ImportMappings()
         self.log = log
+        self.export_version = 0
         self.progress = progress if progress else lambda *args, **kwargs: args[0]
         self.statistics = ImportStatistics()
 
@@ -166,11 +176,11 @@ class DataImport:
 
             for id, country in countries.items():
                 try:
-                    db_country = GeoCountry.objects.get(name=country["name"])
+                    db_country = GeoCountry.objects.get(geonames_id=country["geonames_id"])
                 except GeoCountry.DoesNotExist:
-                    db_country = GeoCountry(name=country["name"], alias=country["alias"],
-                                            latitude=country["latitude"], longitude=country["longitude"],
-                                            alpha_2=country["alpha_2"])
+                    db_country = GeoCountry(geonames_id=country["geonames_id"], name=country["name"],
+                                            alias=country["alias"], latitude=country["latitude"],
+                                            longitude=country["longitude"], alpha_2=country["alpha_2"])
                     self.statistics.countries_created += 1
                     db_country.save()
 
@@ -178,9 +188,9 @@ class DataImport:
 
             for id, city in cities.items():
                 try:
-                    db_city = GeoCity.objects.get(name=city["name"])
+                    db_city = GeoCity.objects.get(geonames_id=city["geonames_id"])
                 except GeoCity.DoesNotExist:
-                    db_city = GeoCity(name=city["name"], alias=city["alias"],
+                    db_city = GeoCity(geonames_id=city["geonames_id"], name=city["name"], alias=city["alias"],
                                       latitude=city["latitude"], longitude=city["longitude"],
                                       country=self._mappings.location_mapping[city["country_id"]])
                     self.statistics.cities_created += 1
@@ -214,9 +224,19 @@ class DataImport:
         for resolution in geo_name_resolutions:
             if not GeoNameResolution.objects.filter(source_name=resolution["source_name"]).exists():
                 resolutions_to_create.append(GeoNameResolution(source_name=resolution["source_name"],
-                                                               target_name=resolution["target_name"]))
+                                                               target_geonames_id=resolution["target_geonames_id"]))
         GeoNameResolution.objects.bulk_create(resolutions_to_create)
         self.statistics.geo_name_resolutions_created = len(resolutions_to_create)
+
+    def _import_paper_ignore_list(self, ignored_papers):
+        """
+        Import a list of dois that shall be ignored.
+        Do not create in bulk, since we want to send post_save signals (to delete ignored papers, if present).
+        """
+        for doi in ignored_papers:
+            ignored_paper, created = IgnoredPaper.objects.get_or_create(doi=doi)
+            if created:
+                self.statistics.ignored_papers_created += 1
 
     def _compute_updatable_papers(self, papers):
         """
@@ -335,6 +355,7 @@ class DataImport:
                 # Set paper locations if they were not set (even on existing papers)
                 if paper["locations"]:
                     self.statistics.papers_w_new_location += 1
+                    db_paper.location_modified = paper["location_modified"]
                 for location in paper["locations"]:
                     membership = GeoLocationMembership(paper=db_paper,
                                                        location=self._mappings.location_mapping[location["id"]],
@@ -353,6 +374,27 @@ class DataImport:
              self._mappings.doi_to_author_mapping.items()
              for author in authors]
         )
+        # recompute counts because post save signals are not triggered on bulk create
+        GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
+
+    def _import_delete_candidates(self, delete_candidates):
+        """
+        Imports the given delete candidates into the database.
+        Should be called, after all papers from export have been imported.
+        """
+        candidates_to_create = []
+        for candidate in delete_candidates:
+            try:
+                paper = Paper.objects.get(doi=candidate["doi"])
+            except Paper.DoesNotExist:
+                continue
+            try:
+                DeleteCandidate.objects.get(paper=paper, type=candidate["type"])
+            except DeleteCandidate.DoesNotExist:
+                candidates_to_create.append(DeleteCandidate(paper=paper, type=candidate["type"],
+                                                            false_positive=candidate["fp"], score=candidate["score"]))
+        DeleteCandidate.objects.bulk_create(candidates_to_create)
+        self.statistics.delete_candidates_created = len(candidates_to_create)
 
     def import_data(self, filepath):
         """Imports database data from .tar.gz archive to database."""
@@ -362,6 +404,13 @@ class DataImport:
         with tarfile.open(filepath) as tar:
             with tar.extractfile("data.json") as f:
                 data = json.load(f)
+
+            self.export_version = data["export_version"] if "export_version" in data else 0
+            if not self.export_version:
+                self.log("Export data does not contain version. Is the export too old? Aborting.")
+                return
+
+            self.log(f"Starting import of version {self.export_version}.")
 
             # Backward compatibility: only import the things that have been exported.
             import_journals = "journals" in data
@@ -397,9 +446,13 @@ class DataImport:
 
             paper_information = self._compute_updatable_papers(data["papers"])
 
-            self._import_paperdata(self.progress(data["papers"], proportion=0.3), paper_information)
-            self._import_papers(self.progress(data["papers"], proportion=0.4), paper_information, data["authors"], import_locations,
-                                import_ml_categories, import_journals, tar)
+            self._import_paperdata(self.progress(data["papers"], proportion=0.2), paper_information)
+            self._import_papers(self.progress(data["papers"], proportion=0.45), paper_information, data["authors"],
+                                import_locations, import_ml_categories, import_journals, tar)
+
+            if self.export_version > 1:
+                self._import_paper_ignore_list(data["ignored_papers"])
+                self._import_delete_candidates(data["delete_candidates"])
 
         self.log("Starting cleanup")
         self._cleanup_models()

@@ -35,6 +35,7 @@
         let elementId = this.attr('id');
         let url = this.data('url');
         let resultKey = this.data('result-key');
+        let externalTagClass = this.data('external-tag-class');
 
         let inputElm = document.getElementById(elementId);
 
@@ -91,6 +92,17 @@
                 tagify.loading(false).dropdown.show.call(tagify, e.detail.value);
             });
         }
+
+        $(document).on('click', '.' + externalTagClass, function (e) {
+            e.preventDefault();
+            let object = $(this).data('object');
+
+            tagify.settings.whitelist.push(object);
+            tagify.addTags([object]);
+
+            $("#"+elementId).closest('form').submit();
+
+        });
 
         tagify.on('input', onInput);
     };

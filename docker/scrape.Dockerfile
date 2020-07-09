@@ -13,6 +13,8 @@ RUN pip install --no-cache requests==2.23.0
 COPY ./${PROJECT_DIR}/requirements.txt /requirements.txt
 RUN pip install --no-cache -r /requirements.txt
 
+ENV TIKA_STARTUP_MAX_RETRY=10
+
 # Downloads tika server jar
 RUN python -c "from tika import tika; tika.checkTikaServer()"
 

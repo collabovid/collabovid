@@ -1,11 +1,13 @@
 from typing import Union
 
+import pycountry
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
 from django.db.models.signals import m2m_changed, post_save, post_delete
 from django.dispatch import receiver
+from itertools import permutations
 
 
 class Topic(models.Model):
@@ -67,19 +69,53 @@ class Journal(models.Model):
     def displayname(self):
         return self.alias if self.alias else self.name
 
+    @property
+    def name_suggest(self):
+        suggestions = [self.name]
+        #suggestions = [' '.join(p) for p in permutations(self.name.split())]
+        #if self.alias:
+        #    suggestions += [' '.join(p) for p in permutations(self.alias.split())]
+        return suggestions
+
     @staticmethod
     def max_length(field: str):
         return Journal._meta.get_field(field).max_length
 
     @staticmethod
     def cleanup():
-        deleted, _ = Journal.objects.filter(papers=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Journal.objects.filter(papers=None).delete()
+        if n_objects_deleted == 0 or 'data.Journal' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Journal']
 
 
 class Author(models.Model):
+
+    def __init__(self, *args, **kwargs):
+        super(Author, self).__init__(*args, **kwargs)
+        self._display_name = None
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
+
+    @property
+    def full_name(self):
+        return "{} {}".format(self.first_name, self.last_name)
+
+    @property
+    def display_name(self):
+        if not self._display_name:
+            self._display_name = self.full_name
+        return self._display_name
+
+    @display_name.setter
+    def display_name(self, value):
+        self._display_name = value
+
+    @property
+    def full_name_suggest(self):
+        return [' '.join(p) for p in permutations(self.full_name.split())]
 
     @staticmethod
     def max_length(field: str):
@@ -87,8 +123,11 @@ class Author(models.Model):
 
     @staticmethod
     def cleanup():
-        deleted, _ = Author.objects.filter(publications=None).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = Author.objects.filter(publications=None).delete()
+        if n_objects_deleted == 0 or 'data.Author' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.Author']
 
 
 class Category(models.Model):
@@ -110,8 +149,11 @@ class PaperData(models.Model):
     @staticmethod
     def cleanup():
         used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        deleted, _ = PaperData.objects.exclude(id__in=used_data_ids).delete()
-        return deleted
+        n_objects_deleted, deleted_objects = PaperData.objects.exclude(id__in=used_data_ids).delete()
+        if n_objects_deleted == 0 or 'data.PaperData' not in deleted_objects:
+            return 0
+        else:
+            return deleted_objects['data.PaperData']
 
 
 class VerificationState(models.IntegerChoices):
@@ -123,27 +165,61 @@ class VerificationState(models.IntegerChoices):
 
 
 class GeoLocation(models.Model):
+    geonames_id = models.IntegerField(unique=True, primary_key=False)
     name = models.CharField(max_length=100, null=False)
-    alias = models.CharField(max_length=40, null=True)
+    alias = models.CharField(max_length=40, null=True, blank=True)
     latitude = models.FloatField(null=False)
     longitude = models.FloatField(null=False)
 
     count = models.IntegerField(default=0)
 
+    @staticmethod
+    def get_or_create_from_geonames_object(geonames_object):
+        try:
+            db_country = GeoCountry.objects.get(alpha_2=geonames_object.country_code)
+            created = False
+        except GeoCountry.DoesNotExist:
+            db_country = GeoCountry.objects.create(
+                geonames_id=geonames_object.country.id,
+                name=geonames_object.country.name,
+                alias=pycountry.countries.get(alpha_2=geonames_object.country.country_code).name,
+                alpha_2=geonames_object.country.country_code,
+                latitude=geonames_object.country.latitude,
+                longitude=geonames_object.country.longitude,
+            )
+            created = True
+
+        if geonames_object.feature_label.startswith('A.PCL'):
+            return db_country, created
+        else:
+            try:
+                return GeoCity.objects.get(geonames_id=geonames_object.id), False
+            except GeoCity.DoesNotExist:
+                db_location = GeoCity.objects.create(
+                    geonames_id=geonames_object.id,
+                    name=geonames_object.name,
+                    country=db_country,
+                    latitude=geonames_object.latitude,
+                    longitude=geonames_object.longitude,
+                )
+                return db_location, created
+
     @property
     def is_city(self):
-        return False
+        return hasattr(self, 'geocity')
+
 
     @property
     def is_country(self):
-        return False
+        return hasattr(self, 'geocountry')
 
     @property
     def displayname(self):
         return self.alias if self.alias else self.name
 
-    def __eq__(self, other):
-        return isinstance(other, GeoLocation) and self.pk == other.pk
+    #
+    # def __eq__(self, other):
+    #     return isinstance(other, GeoLocation) and self.pk == other.pk
 
     @staticmethod
     def recompute_counts(cities, countries):
@@ -163,38 +239,36 @@ class GeoLocation(models.Model):
 
 
 class GeoCountry(GeoLocation):
-    alpha_2 = models.CharField(max_length=2)
+    alpha_2 = models.CharField(max_length=2, unique=True)
 
     @property
     def papers(self):
         return Paper.objects.filter(Q(locations=self) | Q(locations__in=GeoCity.objects.filter(country=self)))
 
-    @property
-    def is_country(self):
-        return True
-
 
 class GeoCity(GeoLocation):
     country = models.ForeignKey(GeoCountry, related_name="cities", on_delete=models.CASCADE)
 
-    @property
-    def is_city(self):
-        return True
-
 
 class GeoNameResolution(models.Model):
-    source_name = models.CharField(max_length=50)
-    target_name = models.CharField(max_length=50, null=True)
+    source_name = models.CharField(unique=True, max_length=50)
+    target_geonames_id = models.IntegerField(null=True, default=None)
 
 
 class Paper(models.Model):
+    MAX_DOI_LENGTH = 100
+
     SORTED_BY_TOPIC_SCORE = 1
     SORTED_BY_NEWEST = 2
     SORTED_BY_SCORE = 3
 
+    def __init__(self, *args, **kwargs):
+        super(Paper, self).__init__(*args, **kwargs)
+        self._highlighted_authors = None
+
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
 
-    doi = models.CharField(max_length=100, primary_key=True)
+    doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications")
@@ -228,6 +302,17 @@ class Paper(models.Model):
     last_scrape = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
+    location_modified = models.BooleanField(default=False)
+
+    @property
+    def highlighted_authors(self):
+        """
+        This attribute is necessary as we want to highlight certain authors.
+        :return:
+        """
+        if not self._highlighted_authors:
+            self._highlighted_authors = [author for author in self.authors.all()]
+        return self._highlighted_authors
 
     @property
     def countries(self):
@@ -256,8 +341,9 @@ class Paper(models.Model):
 
     def add_preview_image(self, pillow_image, save=True):
         img_name = self.doi.replace('/', '_').replace('.', '_').replace(',', '_').replace(':', '_') + '.jpg'
-        self.preview_image.save(img_name, InMemoryUploadedFile(pillow_image, None, img_name,
-                                                               'image/jpeg', pillow_image.tell, None),
+        self.preview_image.save(img_name,
+                                InMemoryUploadedFile(
+                                    pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
                                 save=save)
 
     @staticmethod
@@ -265,11 +351,35 @@ class Paper(models.Model):
         return Paper._meta.get_field(field).max_length
 
 
+class IgnoredPaper(models.Model):
+    doi = models.CharField(max_length=Paper.MAX_DOI_LENGTH, primary_key=True)
+
+
+class DeleteCandidate(models.Model):
+    class Type(models.IntegerChoices):
+        LANGUAGE = 0, gettext_lazy('Language')
+
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    type = models.IntegerField(choices=Type.choices)
+    false_positive = models.BooleanField(default=False)
+    score = models.FloatField(default=1)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'type'], name='Paper and Type')
+        ]
+
+
 class GeoLocationMembership(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     location = models.ForeignKey(GeoLocation, on_delete=models.CASCADE)
-    word = models.CharField(max_length=50)
+    word = models.CharField(max_length=50, null=True, default=None)
     state = models.IntegerField(choices=VerificationState.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['paper', 'location'], name='Paper and Location')
+        ]
 
 
 class CategoryMembership(models.Model):
@@ -307,6 +417,31 @@ def membership_changed(sender, instance, **kwargs):
                           action="post_add", pk_set={}, **kwargs)
 
 
+def paper_deleted(sender, instance, **kwargs):
+    for author in list(instance.authors.all()):
+        if author.publications.count() == 0:
+            author.delete()
+
+    if instance.journal and instance.journal.papers.count() == 0:
+        instance.journal.delete()
+
+    if instance.data:
+        instance.data.delete()
+
+
+def paper_ignored(sender, instance, **kwargs):
+    """
+    Delete associated paper from database, if exists.
+    If the list of ignored papers is loaded as an initial fixture, the 'raw' argument is passed. In that case, the
+    deletion of the papers should be done manually.
+    See https://docs.djangoproject.com/en/dev/ref/signals/#post-save
+    """
+    if not kwargs['raw']:
+        Paper.objects.filter(doi=instance.doi).delete()
+
+
 m2m_changed.connect(locations_changed, sender=Paper.locations.through, dispatch_uid="models.data")
 post_save.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
 post_delete.connect(membership_changed, sender=GeoLocationMembership, dispatch_uid="models.data")
+post_delete.connect(paper_deleted, sender=Paper, dispatch_uid="models.data")
+post_save.connect(paper_ignored, sender=IgnoredPaper, dispatch_uid="models.data")

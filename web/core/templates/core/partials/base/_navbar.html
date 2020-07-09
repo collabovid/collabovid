@@ -1,0 +1,31 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-dark static-top">
+    <div class="container">
+        <img src="{% static "core/img/logo-green.png" %}" class="img-fluid" width="42px">
+        <a class="navbar-brand ml-3" href="{% url 'home' %}">Collabovid</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item {% if request.resolver_match.url_name == "home" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "home" %}">Home</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "search" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "search" %}">Search</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "category-overview" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "category-overview" %}">Categories</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "map" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "map" %}">Map</a>
+                </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "about" %}">About</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+</nav>

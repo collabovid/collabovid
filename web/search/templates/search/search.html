@@ -1,0 +1,275 @@
+{% extends "search/search_base.html" %}
+{% load static %}
+{% block content %}
+    {% include "search/partials/_search_description_combined.html" %}
+    {% include "search/partials/_search_description_keyword.html" %}
+
+    <div class="gradient-header pb-0">
+        <div class="container">
+
+            <div class="row mt-5">
+                <div class="col-12">
+
+                    <form id="paper-search-form" class="search-form" method="post"
+                          action="{% if search_url %}{{ search_url }}{% else %}{% url "search" %}{% endif %}">
+                        <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+
+                        {% for choice in form.TAB_CHOICES %}
+                            <input class="d-none"
+                                   id="{{ choice.0 }}-tab-input"
+                                    {% if form.defaults.tab == choice.0 %}
+                                   data-no-url="true"
+                                    {% else %}
+                                   data-no-url="false"
+                                    {% endif %}
+                                   type="radio"
+                                   name="tab" value="{{ choice.0 }}"
+                                   {% if form.cleaned_data.tab == choice.0 %}checked="checked"{% endif %}/>
+                        {% endfor %}
+
+                        {% for choice in form.RESULT_TYPES %}
+                            <input class="d-none"
+                                   id="{{ choice.0 }}-result-type"
+                                    {% if form.defaults.result_type == choice.0 %}
+                                   data-no-url="true"
+                                    {% else %}
+                                   data-no-url="false"
+                                    {% endif %}
+                                   type="radio"
+                                   name="result_type" value="{{ choice.0 }}"
+                                   {% if form.cleaned_data.result_type == choice.0 %}checked="checked"{% endif %}/>
+                        {% endfor %}
+
+
+                        {% block search_head %}
+                            <!-- For desktop search -->
+
+                            <div class="input-group input-group-lg mb-3">
+                                <div class="input-group-prepend border-right-0">
+                                    <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+
+                                <input type="text" value="{{ form.cleaned_data.query }}" name="query"
+                                       class="border-left-0 form-control"
+                                       placeholder="Find papers by their title or content">
+                                <div class="input-group-append">
+                                    <button class="btn btn-success" type="submit">Search</button>
+                                </div>
+                            </div>
+
+                            <!-- End desktop search -->
+                        {% endblock %}
+
+                    </form>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1">
+            <div class="col-9 col-lg-6">
+                <ul class="nav nav-search-types nav-justified">
+
+                    {% for choice in form.TAB_CHOICES %}
+                        <li class="nav-item">
+                            <label for="{{ choice.0 }}-tab-input"
+                                   class="nav-link {% if form.cleaned_data.tab == choice.0 %}active{% endif %}">
+                                {{ choice.1 }}
+                                <sup class="help-opener">
+                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label" data-toggle="modal"
+                                        data-target="#{{ choice.0 }}-modal"></i></sup>
+                            </label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-3 col-lg-6 text-right">
+                <button class="btn btn-light mt-2 filter-toggle"
+                        id="filter-toggle"
+                        data-toggle="collapse"
+                        data-target="#filter-container"
+                        aria-expanded="false"
+                        aria-controls="filter-container">Filters
+                    <span style="display: none;" class="badge badge-pill badge-danger"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mx-lg-5 mx-md-3 mx-1">
+        <div class="d-flex flex-row">
+
+            <div class="flex-fill" style="min-width: 0;">
+                <div id="paper-result-options-container" style="display: none;">
+                    <div class="d-flex flex-row justify-content-between mt-3">
+                        <div class="flex-grow-0">
+
+                            <div class="d-flex flex-row text-muted">
+                                <div>
+                                    <i class="fas fa-info-circle text-muted"></i>
+                                </div>
+                                <div class="pl-2 pr-0 pt-0 pb-0 text-left">
+                                    We found
+                                    <span class="font-weight-bold" id="result-size-container"></span>
+                                    results that match your query.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex-grow-0 flex-shrink-0 search-info-container text-right">
+                            <form class="search-form">
+                                <div class="form-group mb-0 pb-0 pr-0">
+
+                                    <label id="statistics-label"
+                                           class="mb-1 mb-md-0 pb-0"
+                                           for="{{ form.RESULT_TYPE_STATISTICS }}-result-type">
+                                        <button type="button" class="btn btn-info b-none">
+                                            <i class="fas fa-chart-area"></i> Show Statistics
+                                        </button>
+                                    </label>
+                                    <label for="sorted-by" class="mb-0 pb-0">
+                                        <select class="sort-select form-control" name="sorted_by" id="sorted-by">
+                                            {% for choice in form.SORT_CHOICES %}
+                                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </label>
+
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div id="paper-container"></div>
+
+                <div id="paper-loading-indicator"
+                     class="text-muted text-center fa-5x my-5"
+                     style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+
+                <nav class="mt-5" id="pagination-container"></nav>
+            </div>
+
+            <div>
+                {% include "search/partials/_filter_box.html" with form=form load_default=True categories=categories %}
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+
+            let form = $("#paper-search-form");
+            let indicator = $("#paper-loading-indicator");
+            let paper_container = $("#paper-container");
+            let pagination_container = $("#pagination-container");
+            let filter_toggle_badge = $("#filter-toggle span.badge");
+            let filter_form = $("#filter-form");
+            let result_size_container = $("#result-size-container"); // Contains the amount of papers found.
+            let paper_result_options_container = $("#paper-result-options-container"); // Contains the info and sort
+
+            let searchEngine = form.collabovidSearch({
+                indicator: indicator,
+                paper_container: paper_container,
+                pagination_container: pagination_container
+            });
+
+            $(".help-opener").click(function (e) {
+                e.preventDefault();
+            });
+
+            $("#statistics-label > button").click(function (e) {
+                // When statistics button is clicked
+                e.preventDefault();
+                $(this).parent().click();
+            });
+
+            $("input[name=result_type], select[name=sorted_by]").change(function () {
+                form.submit();
+            });
+
+
+            $("input[name=tab]").change(function (e) {
+                let label = $("label[for='" + $(this).attr('id') + "']");
+
+                if (label.hasClass('disabled')) {
+                    return;
+                }
+
+                $(".nav-search-types .nav-link.active").removeClass("active");
+                label.addClass("active");
+                form.submit();
+            });
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                /**
+                 * We have three types of inputs:
+                 * data-no-url: These inputs will not be pushed to the url
+                 * data-url-manually: These inputs will not be pushed to the url automatically
+                 * other: Input will be submitted and pushed to url
+                 */
+
+                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+
+                // Converting categories=x&categories=y to categories=x,y
+                let checked_categories = $('.search-form input[name=categories]:checked');
+                let categories = $('.search-form input[name=categories]');
+
+                if (checked_categories.length !== categories.length) {
+                    submission_data += "&categories=";
+                    submission_data += checked_categories.map(function () {
+                        return this.value;
+                    }).get().join(',');
+                }
+
+                // Full data must be submitted to the view. Submission data can be saved in the url.
+                let full_data = submission_data + "&" + no_url_submission_data;
+
+                searchEngine.searchQuery(full_data, 1, false, function () {
+
+                    $('.nav-search-types label.nav-link').addClass('disabled');
+                    paper_result_options_container.hide();
+
+                    let active_filter_count = filter_form.find("input[data-count-filter=true][type=text]").filter(function () {
+                            return $(this).val().length !== 0
+                        }).length +
+                        filter_form.find("input[data-count-filter=true][type=radio]:checked").length
+                        + filter_form.find("input[data-count-filter=true][type=checkbox]:checked").length;
+
+                    if (active_filter_count > 0) {
+                        filter_toggle_badge.html(active_filter_count).show();
+                    } else {
+                        filter_toggle_badge.hide();
+                    }
+                }, function () {
+                    $('.nav-search-types label.nav-link').removeClass('disabled');
+
+                    if (window.Pagination.result_size > 0) {
+                        result_size_container.html(window.Pagination.result_size);
+                        paper_result_options_container.show();
+                    }
+
+                    searchEngine.pushToUrl(submission_data);
+                });
+            });
+
+            form.submit();
+        });
+    </script>
+{% endblock %}
