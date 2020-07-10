@@ -278,12 +278,19 @@ const EmbeddingVisualization = function () {
                     }
                 }
                 if (!added) {
+                    let max_distance = 0;
+                    let max_j = 0;
                     for (let j = 0; j < min_indices.length; j++) {
-                        if (min_distances[j] > distance) {
-                            min_distances[j] = distance;
-                            min_indices[j] = i;
-                            break
+                        if (min_distances[j] > max_distance) {
+                            max_distance = min_distances[j];
+                            max_j = j;
                         }
+                    }
+
+                    if(distance < max_distance)
+                    {
+                        min_distances[max_j] = distance;
+                        min_indices[max_j] = i;
                     }
                 }
             }
