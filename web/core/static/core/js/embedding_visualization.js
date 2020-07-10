@@ -181,6 +181,11 @@ const EmbeddingVisualization = function () {
 
                 // gets called when there is a click event
                 function onClick(x, y) {
+                    if(window.visualizationEventRunning)
+                    {
+                        return;
+                    }
+
                     let rect = canvas.getBoundingClientRect();
                     x = x - rect.left;
                     y = y - rect.top;

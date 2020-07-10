@@ -4,6 +4,8 @@
 {% load paper_card_extras %}
 
 {% block content %}
+    {% include "core/partials/embedding/_help.html" %}
+
     <div class="gradient-header pb-0 overflow-hidden">
         <div class="row mx-0 px-0">
             <div class="col-12 px-0">
@@ -28,46 +30,52 @@
 
                     </div>
                     <div class="sidebar">
-                        <div class="badges">
-                            <div class="legend">
-                                <div id="category-legend">
-                                    {% for category in categories %}
-                                        <div class="category-label" data-category="{{ category.name }}">
-                                        <span class="badge badge-primary"
-                                              style="background-color: {{ category.color }}">{{ category.name }}</span>
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                                <div id="topic-legend" style="display: none">
-                                    <div>
-                                        <span id="topic-label" class="badge badge-light"></span>
+                        <div class="mt-2 controls text-white d-none d-md-block">
+                            <div>
+                                <div class="">Zoom Speed</div>
+                                <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
+                                       data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
+                            </div>
+                            <div class="mt-2">
+                                <div class="">Pan Speed</div>
+                                <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
+                                       data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="legend">
+                        <div>
+                            <div id="category-legend">
+                                {% for category in categories %}
+                                    <div class="category-label"
+                                         data-category="{{ category.name }}"
+                                         data-category-id="{{ category.pk }}">
+                                        <span id="{{ category.pk }}-badge" class="category-badge badge"
+                                              data-background-color="{{ category.color }}"
+                                              style="background-color: {{ category.color }}">
+                                            {{ category.name }}
+                                        </span>
                                     </div>
-                                </div>
-                                <div id="paper-selected-legend" style="display: none">
-                                    <div>
-                                    <span class="badge badge-primary"
-                                          style="background-color: #ffc266">
-                                        Selected Paper
-                                    </span>
-                                    </div>
-                                    <div>
-                                    <span class="badge badge-primary"
-                                          style="background-color: #cc7a00">
-                                        Most similar papers
-                                    </span>
-                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div id="topic-legend" style="display: none">
+                                <div>
+                                    <span id="topic-label" class="badge badge-light"></span>
                                 </div>
                             </div>
-                            <div class="mt-2 controls text-white d-none d-md-block">
+                            <div id="paper-selected-legend" style="display: none">
                                 <div>
-                                    <div class="">Zoom Speed</div>
-                                    <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
-                                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
+                                <span class="badge badge-primary"
+                                      style="background-color: #ffc266">
+                                    Selected Paper
+                                </span>
                                 </div>
-                                <div class="mt-2">
-                                    <div class="">Pan Speed</div>
-                                    <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
-                                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                                <div>
+                                <span class="badge badge-primary"
+                                      style="background-color: #cc7a00">
+                                    Most similar papers
+                                </span>
                                 </div>
                             </div>
                         </div>
@@ -82,57 +90,70 @@
          style="display: none;">
         <i class="fas fa-circle-notch fa-spin"></i>
     </div>
-    <div class="container mt-5">
-        <div id="selected-card-container"></div>
+    <div class="container">
+        <div class="mt-3" id="selected-card-container" style="display: none;"></div>
     </div>
     <div class="container">
         <div id="topics-container">
+            <div class="row">
+                <div class="col-12 col-md-3 text-left mt-2">
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            id="help-modal-label"
+                            data-toggle="modal"
+                            data-target="#help-modal">
+                        <i class="fa fa-info-circle"></i>
+                        Show Info
+                    </button>
+                </div>
 
-            <div class="float-left ml-3 position-absolute">
-                {% include "core/partials/embedding/_help.html" %}
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        id="help-modal-label" data-toggle="modal"
-                        data-target="#help-modal">
-                    <i class="fa fa-info-circle"></i>
-                    Show Info
-                </button>
-            </div>
-            <div class="row mr-0 ml-0 justify-content-center">
-                <div class="mb-2 col-md-6" style="max-width: 400px;">
-                    <div class="input-group" style="border-radius: 2rem;">
+                <div class="mb-2 col-12 col-md-6 mt-2">
+                    <div class="input-group mx-auto" style="border-radius: 2rem;">
                         <div class="input-group-prepend">
-                                    <span class="input-group-text" id="filter-prepend"><i
-                                            class="fas fa-search text-body"></i></span>
+                            <span class="input-group-text"
+                                  id="filter-prepend">
+                                <i class="fas fa-search text-body"></i>
+                            </span>
                         </div>
-                        <input type="text" class="form-control" id="topic-filter-input"
-                               placeholder="Filter Topics" aria-describedby="filter-prepend"
+                        <input type="text"
+                               class="form-control"
+                               id="topic-filter-input"
+                               placeholder="Filter Topics"
+                               aria-describedby="filter-prepend"
                                required>
                     </div>
                 </div>
             </div>
 
-            <!--end of col-->
-            <div class="row mr-0 ml-2">
-
-                <ul class="list-group mt-2 w-100">
-
-                    {% for topic in topics %}
-                        <li class="list-group-item topic-card" data-topic-name="{{ topic.name }}"
-                            data-topic="{{ topic.pk }}">
-                            <h6>{{ topic.name }}</h6>
-                            <div class="mt-2 small">
-                                <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">
-                                    View all papers
-                                </a>
-
-                                <div class="text-muted">
-                                    {{ topic.papers.count }} Papers
+            <div class="row mt-2">
+                <div class="col-12">
+                    <ul class="list-group w-100">
+                        {% for topic in topics %}
+                            <li class="list-group-item topic-card" data-topic-name="{{ topic.name }}"
+                                data-topic="{{ topic.pk }}">
+                                <div class="d-flex flex-row align-items-stretch">
+                                    <div>
+                                        <button class="btn btn-success h-100">
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex-fill pl-3">
+                                        <h6>{{ topic.name }}</h6>
+                                        <div class="mt-2 small">
+                                            <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">
+                                                View all papers
+                                            </a>
+                                            <div class="text-muted">
+                                                {{ topic.papers.count }} Papers
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </li>
-                    {% endfor %}
-                </ul>
+
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -141,6 +162,8 @@
 {% block script %}
     {% javascript 'embedding-visualization' %}
     <script>
+        window.visualizationEventRunning = false;
+
         const topics = JSON.parse("{{ topic_dict | escapejs }}");
         const colors = JSON.parse("{{ category_colors | escapejs }}");
 
@@ -194,9 +217,17 @@
         });
 
         function onSelected(idx, paper) {
+            if (window.visualizationEventRunning) {
+                return;
+            }
+
+            window.visualizationEventRunning = true;
             paperLoadingIndicator.show();
             selectedCardContainer.hide();
-            topicsContainer.hide()
+            topicsContainer.hide();
+            categoryLegend.hide();
+            topicLegend.hide();
+
 
             const indices = visualization.computeNeighbors(paper, 10);
             const dois = [paper.doi];
@@ -212,9 +243,8 @@
                 paperLoadingIndicator.hide();
                 selectedCardContainer.show();
                 paperSelectedLegend.show();
-                categoryLegend.hide();
-                topicLegend.hide();
-            })
+                window.visualizationEventRunning = false;
+            });
         }
 
         visualization.renderEmbeddings(canvas, onSelected, {
@@ -227,14 +257,31 @@
         );
 
         visualization.onDeselect(function () {
+            if (window.visualizationEventRunning) {
+                return;
+            }
+
+            window.visualizationEventRunning = true;
             selectedCardContainer.hide();
-            topicsContainer.show()
+            topicsContainer.show();
             categoryLegend.show();
             paperSelectedLegend.hide();
             topicLegend.hide();
+
+            $(".category-badge").each(function () {
+                $(this).removeClass('badge-secondary').css('background-color', $(this).data('background-color'));
+            });
+
+            window.visualizationEventRunning = false;
         });
 
         $('.topic-card').on('click', function (e) {
+            if (window.visualizationEventRunning) {
+                return;
+            }
+
+            window.visualizationEventRunning = true;
+
             const topicCard = $(e.target).closest('.topic-card');
             const topicId = topicCard.data('topic');
             const paperIds = topics[topicId];
@@ -245,21 +292,42 @@
             categoryLegend.hide();
             paperSelectedLegend.hide();
             visualization.selectPapers(paperIds, 0xffffff);
+
+            window.visualizationEventRunning = false;
         });
 
         $('.category-label').on('click', function (e) {
-            let categoryId = $(e.target).closest('.category-label').data('category');
-            let dois = [];
-            visualization.papers.forEach(function (paper) {
-                let category = visualization.getHighestCategoryForPaper(paper)
-                if (category === categoryId) {
-                    dois.push(paper.doi);
-                }
-            });
-            visualization.selectPapers(dois, colors[categoryId]);
-            categoryLegend.show();
-            paperSelectedLegend.hide();
-            topicLegend.hide();
+            console.log(window.visualizationEventRunning);
+
+            if (window.visualizationEventRunning) {
+                return;
+            }
+
+            window.visualizationEventRunning = true;
+            let categoryName = $(this).data('category');
+            let categoryId = $(this).data('category-id');
+            let categroyBadge = $("#" + categoryId + "-badge");
+
+            $(".category-badge:not(#" + categoryId + "-badge)").removeAttr("style").addClass('badge-secondary').stop(true);
+            categroyBadge.removeClass('badge-secondary').css('background-color', categroyBadge.data('background-color')).stop(true);
+
+            setTimeout(function () {
+                let dois = [];
+                visualization.papers.forEach(function (paper) {
+                    let category = visualization.getHighestCategoryForPaper(paper);
+                    if (category === categoryName) {
+                        dois.push(paper.doi);
+                    }
+                });
+                visualization.selectPapers(dois, colors[categoryName]);
+                categoryLegend.show();
+                paperSelectedLegend.hide();
+                topicLegend.hide();
+
+                setTimeout(function () {
+                    window.visualizationEventRunning = false;
+                }, 100);
+            }, 100);
         })
 
     </script>
@@ -268,6 +336,10 @@
 {% block css %}
     {% stylesheet 'embedding_visualization' %}
     <style>
+
+        span.category-badge:not(.badge-secondary) {
+            color: #ffffff;
+        }
 
         div.embedding-visualization-container .canvas-controls {
             position: absolute;
@@ -306,8 +378,7 @@
             z-index: 999;
         }
 
-        div.embedding-visualization-container.full-screen .canvas-controls
-        {
+        div.embedding-visualization-container.full-screen .canvas-controls {
             top: 20px;
         }
 
@@ -322,6 +393,15 @@
 
         .slider .slider-handle {
             background: #abad9f;
+            width: 15px;
+            height: 15px;
+            margin-left: -7.5px;
+            top: 2.5px
+        }
+
+        .slider .slider-track {
+            height: 6px !important;
+            margin-top: -3px !important;
         }
 
         .badge {
@@ -330,53 +410,46 @@
 
         .sidebar {
             position: absolute;
-            bottom: 0;
-            margin-top: 20px;
-            width: 100%;
-            max-width: 100%;
-            left: 0;
+            left: 20px;
+            top: 0;
         }
 
-        .sidebar .badges .legend div {
+        .legend {
+            position: absolute;
+
+            bottom: 3rem;
+            left: 0;
+
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .legend > div {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        @media (max-width: 992px) {
+            .legend {
+                bottom: 0;
+            }
+        }
+
+        .legend > div > div {
+            width: 100%;
+            max-width: 100%;
             display: flex;
             flex-direction: row;
             justify-content: center;
             flex-wrap: wrap;
+            flex-grow: 1;
         }
 
-        .sidebar .badges .legend div div {
-            max-width: 100%;
-        }
-
-        .sidebar .badges .legend div div span.badge {
+        .legend span.badge {
             white-space: normal !important;
             margin: 0.5em;
         }
 
-        @media (min-width: 768px) {
-            .sidebar {
-                left: 0;
-                flex-direction: column;
-                margin-left: 1.5em;
-                margin-top: 0;
-                top: 0;
-                display: flex;
-                width: auto;
-            }
-
-            .sidebar .badges {
-                align-content: flex-end;
-            }
-
-            .sidebar .badges .legend div {
-                display: block;
-
-            }
-
-            .sidebar .badges .legend div div {
-                padding: 0;
-            }
-        }
 
         #selected-card-container {
         }
