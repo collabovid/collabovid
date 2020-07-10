@@ -70,114 +70,119 @@
         <div id="selected-card-container"></div>
     </div>
     <div class="pl-5 pr-5">
-    <div id="topics-container" class="d-flex flex-row">
-        <div>
-            <div id="description-container" class="collapse width position-relative"
-                 style="width: auto; height: auto; overflow: hidden">
-                <div class="card" style="width: 500px;">
-                    <button type="button" class="btn btn-outline-secondary position-absolute mr-2 mt-2"
-                            style="right: 0;" data-toggle="collapse"
+        <div id="topics-container" class="d-flex flex-row">
+            <div>
+                <div id="description-container" class="collapse width position-relative"
+                     style="width: auto; height: auto; overflow: hidden">
+                    <div class="card" style="width: 500px;">
+                        <button type="button" class="btn btn-outline-secondary position-absolute mr-2 mt-2"
+                                style="right: 0;" data-toggle="collapse"
+                                data-target="#description-container"
+                                aria-expanded="true"
+                                aria-controls="description-container">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <div class="card-body">
+                            <h4 class="card-title">Research Landscape Visualization</h4>
+                            <h6 class="card-title">What is shown?</h6>
+                            <p>
+                                The visualization above shows every publication embedded in a 3D space where the
+                                position determines
+                                the topic of the publication. This means that papers that deal with the same topic are
+                                closer together than others.
+                            </p>
+
+                            <h6 class="card-title">How to navigate?</h6>
+                            <p>
+                                It is possible to navigate with the mouse and pan with the arrow keys.
+                                The pan and zoom speed can be adjusted with the controls on the side to allow for more
+                                fine
+                                grained control.
+                                By clicking on a paper, it and its ten closest neighbors are highlighted and displayed
+                                in a
+                                list below ordered by the distance from the selected paper. It is also possible to click
+                                on
+                                a topic
+                                to highlight
+                            </p>
+
+                            <h6 class="card-title">What is the purpose?</h6>
+                            <p></p>
+
+                            <h6 class="card-title">How are the embeddings generated?</h6>
+
+                            <p>We trained a neural network (a BERT transformer model) given a title and an
+                                abstract from a publication to predict if they are from the same publication or not.
+                                By randomly exchanging some title and abstracts during training,
+                                the network has to learn what the papers are about to be good at the prediction.
+                                It can then generate a 512 dimensional encoding of every publication.
+                                To visualize these generated embeddings, we reduced the dimensionality of each vector
+                                with T-SNE to a three dimensional space.
+                            </p>
+
+                            <h6 class="card-title">How are the topics generated?</h6>
+                            <p>To generate the different topics on the left side, we clustered the embeddings and then
+                                assigned a name to the topic that in our opinion best reflects the contents of the
+                                contained
+                                papers.</p>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-fill" style="min-width: 0">
+                <div class="float-left ml-3 position-absolute">
+                    <button id="show-info-btn" type="button"
+                            class="btn btn-outline-secondary"
+                            data-toggle="collapse"
                             data-target="#description-container"
                             aria-expanded="true"
                             aria-controls="description-container">
-                        <i class="fas fa-arrow-left"></i>
+                        <i class="fa fa-info-circle"></i>
+                        Show Info
                     </button>
-                    <div class="card-body">
-                        <h4 class="card-title">Research Landscape Visualization</h4>
-                        <h6 class="card-title">What is shown?</h6>
-                        <p>
-                            The visualization above shows every publication embedded in a 3D space where the
-                            position determines
-                            the topic of the publication. This means that papers that deal with the same topic are
-                            closer together than others.
-                        </p>
-
-                        <h6 class="card-title">How to navigate?</h6>
-                        <p>
-                            It is possible to navigate with the mouse and pan with the arrow keys.
-                            The pan and zoom speed can be adjusted with the controls on the side to allow for more fine
-                            grained control.
-                            By clicking on a paper, it and its ten closest neighbors are highlighted and displayed in a
-                            list below ordered by the distance from the selected paper. It is also possible to click on
-                            a topic
-                            to highlight
-                        </p>
-
-                        <h6 class="card-title">What is the purpose?</h6>
-                        <p></p>
-
-                        <h6 class="card-title">How are the embeddings generated?</h6>
-
-                        <p>We trained a neural network (a BERT transformer model) given a title and an
-                            abstract from a publication to predict if they are from the same publication or not.
-                            By randomly exchanging some title and abstracts during training,
-                            the network has to learn what the papers are about to be good at the prediction.
-                            It can then generate a 512 dimensional encoding of every publication.
-                            To visualize these generated embeddings, we reduced the dimensionality of each vector
-                            with T-SNE to a three dimensional space.
-                        </p>
-
-                        <h6 class="card-title">How are the topics generated?</h6>
-                        <p>To generate the different topics on the left side, we clustered the embeddings and then
-                            assigned a name to the topic that in our opinion best reflects the contents of the contained
-                            papers.</p>
-
-                    </div>
                 </div>
-            </div>
-        </div>
-        <div class="flex-fill" style="min-width: 0">
-            <div class="float-left ml-3 position-absolute">
-                <button id="show-info-btn" type="button"
-                        class="btn btn-outline-secondary"
-                        data-toggle="collapse"
-                        data-target="#description-container"
-                        aria-expanded="true"
-                        aria-controls="description-container">
-                    <i class="fa fa-info-circle"></i>
-                    Show Info
-                </button>
-            </div>
-            <div class="row mr-0 ml-0 justify-content-center">
-                <div class="mb-2 col-md-6" style="max-width: 400px;">
-                    <div class="input-group" style="border-radius: 2rem;">
-                        <div class="input-group-prepend">
+                <div class="row mr-0 ml-0 justify-content-center">
+                    <div class="mb-2 col-md-6" style="max-width: 400px;">
+                        <div class="input-group" style="border-radius: 2rem;">
+                            <div class="input-group-prepend">
                                     <span class="input-group-text" id="filter-prepend"><i
                                             class="fas fa-search text-body"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="topic-filter-input"
+                                   placeholder="Filter Topics" aria-describedby="filter-prepend"
+                                   required>
                         </div>
-                        <input type="text" class="form-control" id="topic-filter-input"
-                               placeholder="Filter Topics" aria-describedby="filter-prepend"
-                               required>
                     </div>
                 </div>
-            </div>
 
-            <!--end of col-->
-            <div class="row mr-0 ml-2">
+                <!--end of col-->
+                <div class="row mr-0 ml-2">
 
-                <ul class="list-group mt-2 w-100">
+                    <ul class="list-group mt-2 w-100">
 
-                    {% for topic in topics %}
-                        <li class="list-group-item topic-card" data-topic-name="{{ topic.name }}"
-                            data-topic="{{ topic.pk }}">
+                        {% for topic in topics %}
+                            <li class="list-group-item topic-card" data-topic-name="{{ topic.name }}"
+                                data-topic="{{ topic.pk }}">
 
 
-                            <h6>{{ topic.name }}</h6>
+                                <h6>{{ topic.name }}</h6>
 
-                            <div class="mt-2 small">
-                                <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">View all
-                                    papers</a>
+                                <div class="mt-2 small">
+                                    <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">View all
+                                        papers</a>
 
-                                <div class="text-muted">
-                                    {{ topic.papers.count }} Papers
+                                    <div class="text-muted">
+                                        {{ topic.papers.count }} Papers
+                                    </div>
+
+
                                 </div>
 
-
-                            </div>
-
-                        </li>
-                    {% endfor %}
-                </ul>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
@@ -336,7 +341,7 @@
             border: none !important;
         }
 
-        @media (min-width:991px) {
+        @media (min-width: 991px) {
             /*#description-container {
                 display: block;
             }*/
