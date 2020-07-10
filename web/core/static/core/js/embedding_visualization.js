@@ -77,6 +77,14 @@ const EmbeddingVisualization = function () {
             return geometry;
         };
 
+        this.refreshSize = function () {
+            const container = document.getElementById('canvas-container');
+            this.camera.aspect = container.offsetWidth / container.offsetHeight;
+            this.camera.updateProjectionMatrix();
+            this.controls.update();
+            this.renderer.setSize(container.offsetWidth, container.offsetHeight);
+        };
+
         this.renderEmbeddings = function (canvas, onSelected, options) {
             let fieldOfView = 75;
             let scope = this;
@@ -147,12 +155,7 @@ const EmbeddingVisualization = function () {
 
                 // handle resize of window
                 window.addEventListener('resize', function () {
-                    camera.aspect = window.innerWidth / canvas.offsetHeight;
-                    camera.updateProjectionMatrix();
-                    controls.update();
-                    const container = document.getElementById('canvas-container');
-
-                    renderer.setSize(container.offsetWidth, container.offsetHeight);
+                    scope.refreshSize();
                 });
 
                 // setup the light
@@ -251,14 +254,6 @@ const EmbeddingVisualization = function () {
             })
         }
         ;
-
-        this.repaintElements = function () {
-            this.geometry.faces[0].color = new THREE.Color(0xcc7a00);
-            this.geometry.colorsNeedUpdate = true;
-            this.geometry.elementsNeedUpdate = true;
-            this.renderer.render(this.scene, this.camera);
-            console.log("CHANGED");
-        };
 
         this.onDeselect = function (callback) {
             this.onDeselectCallback = callback;
