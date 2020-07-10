@@ -91,7 +91,8 @@ const EmbeddingVisualization = function () {
             camera.position.x = 0;
 
             let renderer = new THREE.WebGLRenderer({canvas: canvas, alpha: true});
-            renderer.setSize(canvas.offsetWidth, canvas.offsetHeight);
+            const container = document.getElementById('canvas-container');
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
 
             let scene = new THREE.Scene();
             scene.background = null;
@@ -149,7 +150,9 @@ const EmbeddingVisualization = function () {
                     camera.aspect = window.innerWidth / canvas.offsetHeight;
                     camera.updateProjectionMatrix();
                     controls.update();
-                    renderer.setSize(window.innerWidth, canvas.offsetHeight);
+                    const container = document.getElementById('canvas-container');
+
+                    renderer.setSize(container.offsetWidth, container.offsetHeight);
                 });
 
                 // setup the light
@@ -176,7 +179,7 @@ const EmbeddingVisualization = function () {
                 // gets called when there is a click event
                 function onClick(x, y) {
                     let rect = canvas.getBoundingClientRect();
-                    x =  x - rect.left;
+                    x = x - rect.left;
                     y = y - rect.top;
                     let mouse = new THREE.Vector3();
                     mouse.x = ((x / canvas.clientWidth) * 2) - 1;
@@ -248,6 +251,14 @@ const EmbeddingVisualization = function () {
             })
         }
         ;
+
+        this.repaintElements = function () {
+            this.geometry.faces[0].color = new THREE.Color(0xcc7a00);
+            this.geometry.colorsNeedUpdate = true;
+            this.geometry.elementsNeedUpdate = true;
+            this.renderer.render(this.scene, this.camera);
+            console.log("CHANGED");
+        };
 
         this.onDeselect = function (callback) {
             this.onDeselectCallback = callback;
