@@ -11,9 +11,7 @@ from data.models import DataSource
 from src.updater.data_updater import DataUpdater
 from data.paper_db_insert import SerializableArticleRecord
 
-_ARXIV_DATA_PRIORITY = 2
 _ARXIV_PAPERHOST_NAME = 'arXiv'
-_ARXIV_PAPERHOST_URL = 'https://www.arxiv.org'
 
 
 def _get_arxiv_id_from_url(url):
@@ -79,7 +77,6 @@ class ArxivUpdater(DataUpdater):
                                    abstract=raw_data['summary'].replace('\n', ' '),
                                    is_preprint=True)
         article.paperhost = _ARXIV_PAPERHOST_NAME
-        article.paperhost_url = _ARXIV_PAPERHOST_URL
         article.datasource = DataSource.ARXIV
         article.url = raw_data['id']
         article.publication_date = parse_datetime(raw_data['published']).date()

@@ -14,7 +14,6 @@ _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
 _BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
-_MEDBIORXIV_DATA_PRIORITY = 1
 
 
 class MedrxivUpdater(DataUpdater):
@@ -66,10 +65,10 @@ class MedrxivUpdater(DataUpdater):
         site = raw_data['rel_site']
         if site == "medrxiv":
             article.paperhost = _MEDRXIV_PAPERHOST_NAME
-            article.paperhost_url = _MEDRXIV_PAPERHOST_URL
+            host_url = _MEDRXIV_PAPERHOST_URL
         elif site == "biorxiv":
             article.paperhost = _BIORXIV_PAPERHOST_NAME
-            article.paperhost_url = _BIORXIV_PAPERHOST_URL
+            host_url = _BIORXIV_PAPERHOST_URL
         article.datasource = DataSource.MEDBIORXIV
         article.url = raw_data['rel_link']
         article.publication_date = datetime.strptime(raw_data['rel_date'], "%Y-%m-%d").date()
@@ -87,7 +86,7 @@ class MedrxivUpdater(DataUpdater):
         dl_element = article_soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
         if dl_element and dl_element.has_attr('href'):
             relative_url = dl_element['href']
-            article.pdf_url = article.paperhost_url + relative_url
+            article.pdf_url = host_url + relative_url
 
         article.authors = self._extract_authors(article_soup)
 

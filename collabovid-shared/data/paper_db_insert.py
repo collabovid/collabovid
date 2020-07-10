@@ -34,7 +34,6 @@ class SerializableArticleRecord:
     authors: List[Tuple[str, str]] = field(default_factory=list)
     datasource: Optional[str] = None
     paperhost: Optional[str] = None
-    paperhost_url: Optional[str] = None
     pubmed_id: Optional[str] = None
     publication_date: Optional[date] = None
     url: Optional[str] = None
@@ -166,8 +165,6 @@ class DatabaseUpdate:
             raise DatabaseUpdate.Error("Article not covid related.")
 
         db_article.host, _ = PaperHost.objects.get_or_create(name=datapoint.paperhost)
-        if datapoint.paperhost_url:
-            db_article.host.url = datapoint.paperhost_url
 
         db_article.url = datapoint.url
         db_article.pdf_url = datapoint.pdf_url

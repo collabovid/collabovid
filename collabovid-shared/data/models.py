@@ -19,7 +19,6 @@ class Topic(models.Model):
 
 class PaperHost(models.Model):
     name = models.CharField(max_length=60, unique=True)
-    url = models.URLField(null=True, default=None)
 
 
 class DataSource(models.IntegerChoices):
