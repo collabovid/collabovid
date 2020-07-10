@@ -229,12 +229,11 @@
             const query = topicFilterInput.val();
             $('.topic-card').each(function (i) {
                 const element = $(this);
-                let topicName = element.data('topic-name');
-                let container = element.closest('.topic-card-container');
-                if (topicName.includes(query) || query.trim() === "") {
-                    container.show()
+                let topicName = element.data('topic-name').toLowerCase();
+                if (topicName.includes(query.toLowerCase()) || query.trim() === "") {
+                    element.show()
                 } else {
-                    container.hide()
+                    element.hide()
                 }
             })
         });
@@ -298,7 +297,7 @@
             const paperIds = topics[topicId];
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
-            topicLabel.text(topicCard.data('topic-name'))
+            topicLabel.text(topicCard.data('topic-name'));
             topicLegend.show();
             categoryLegend.hide();
             paperSelectedLegend.hide();
