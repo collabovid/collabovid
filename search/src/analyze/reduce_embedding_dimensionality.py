@@ -5,6 +5,7 @@ from django.conf import settings
 import json
 from collabovid_store.s3_utils import S3BucketClient
 from data.models import Paper, CategoryMembership
+from django.core.serializers.json import DjangoJSONEncoder
 
 
 def scale(X, min=0, max=1):
@@ -48,6 +49,7 @@ class ReduceEmbeddingDimensionality(Runnable):
                     'title': membership.paper.title,
                     'point': points[matrix_index].tolist(),
                     'top_category': category_pk,
+                    'published_at': json.dumps(membership.paper.published_at, cls=DjangoJSONEncoder),
                     'top_category_score': category_score
                 }
             elif result[doi]['top_category_score'] <= category_score:
