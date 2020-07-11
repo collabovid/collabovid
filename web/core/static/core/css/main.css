@@ -179,6 +179,35 @@ a.invisible-link, a.invisible-link:hover {
     }
 }
 
+.wide-modal-dialog {
+    max-width: 470px;
+}
+
+@media (min-width: 576px) {
+    .wide-modal-dialog {
+        max-width: 510px;
+    }
+}
+
+@media (min-width: 768px) {
+    .wide-modal-dialog {
+        max-width: 690px;
+    }
+}
+
+@media (min-width: 992px) {
+    .wide-modal-dialog {
+        max-width: 930px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .wide-modal-dialog {
+        max-width: 1110px;
+    }
+}
+
+
 .button-host {
     color: #00796B;
     border-color: #00796B;

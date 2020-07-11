@@ -38,21 +38,21 @@ class ReduceEmbeddingDimensionality(Runnable):
         for membership in self.progress(category_memberships):
             doi = membership.paper.pk
             matrix_index = id_map[doi]
-            category_info = {
-                'name': membership.category.name,
-                'score': membership.score
-            }
+
+            category_pk = membership.category.pk,
+            category_score = membership.score
+
             if doi not in result:
                 result[doi] = {
                     'doi': doi,
+                    'title': membership.paper.title,
                     'point': points[matrix_index].tolist(),
-                    'categories': [category_info],
-                    'top_category_index': 0
+                    'top_category': category_pk,
+                    'top_category_score': category_score
                 }
-            else:
-                result[doi]['categories'].append(category_info)
-                if result[doi]['categories'][result[doi]['top_category_index']]['score'] <= membership.score:
-                    result[doi]['top_category_index'] = len(result[doi]['categories']) - 1
+            elif result[doi]['top_category_score'] <= category_score:
+                result[doi]['top_category'] = category_pk
+                result[doi]['top_category_score'] = category_score
         output = {
             'papers': list(result.values()),
             'means': points.mean(axis=0).tolist(),
