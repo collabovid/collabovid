@@ -310,7 +310,7 @@
 
             const topicCard = $(e.target).closest('.topic-card');
             const topicId = topicCard.data('topic');
-            const paperIds = topics[topicId];
+            const paperIds = new Set(topics[topicId]);
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
             topicLabel.text(topicCard.data('topic-name'));
@@ -334,26 +334,21 @@
             let categoryId = $(this).data('category-id');
             let categroyBadge = $("#" + categoryId + "-badge");
 
-            $(".category-badge:not(#" + categoryId + "-badge)").removeAttr("style").addClass('badge-secondary').stop(true);
-            categroyBadge.removeClass('badge-secondary').css('background-color', categroyBadge.data('background-color')).stop(true);
+            $(".category-badge:not(#" + categoryId + "-badge)").css('background-color', '#6c757d');
+            categroyBadge.css('background-color', categroyBadge.data('background-color'));
 
-            setTimeout(function () {
-                let dois = [];
-                visualization.papers.forEach(function (paper) {
-                    let category = visualization.getHighestCategoryForPaper(paper);
-                    if (category === categoryName) {
-                        dois.push(paper.doi);
-                    }
-                });
-                visualization.selectPapers(dois, colors[categoryName]);
-                categoryLegend.show();
-                paperSelectedLegend.hide();
-                topicLegend.hide();
-
-                setTimeout(function () {
-                    window.visualizationEventRunning = false;
-                }, 100);
-            }, 100);
+            let dois = new Set();
+            visualization.papers.forEach(function (paper) {
+                let category = visualization.getHighestCategoryForPaper(paper);
+                if (category === categoryName) {
+                    dois.add(paper.doi);
+                }
+            });
+            visualization.selectPapers(dois, colors[categoryName]);
+            categoryLegend.show();
+            paperSelectedLegend.hide();
+            topicLegend.hide();
+            window.visualizationEventRunning = false;
         })
 
     </script>
@@ -375,7 +370,7 @@
             pointer-events: none;
         }
 
-        div.embedding-visualization-container .canvas-controls button, div.embedding-visualization-container .canvas-controls .slider{
+        div.embedding-visualization-container .canvas-controls button, div.embedding-visualization-container .canvas-controls .slider {
             pointer-events: all;
         }
 

@@ -357,7 +357,7 @@ const EmbeddingVisualization = function () {
             }
             this.geometry.colorsNeedUpdate = true;
             this.geometry.elementsNeedUpdate = true;
-            this.renderer.render(this.scene, this.camera);
+            //this.renderer.render(this.scene, this.camera);
         };
 
         this.viewArea = function (x, y, z) {
@@ -375,11 +375,15 @@ const EmbeddingVisualization = function () {
         this.selectPapers = function (dois, selectionColor) {
             let minCoordinates = new Array(3).fill(100000);
             let maxCoordinates = new Array(3).fill(-10000);
+
+            const defaultColor = new THREE.Color(0xffffff);
+            const selectedColor = new THREE.Color(selectionColor);
+
             for (let i = 0; i < this.papers.length; i++) {
-                let color = 0xffffff;
+                let color = defaultColor;
                 let materialIndex = 2;
-                if (dois.includes(this.papers[i].doi)) {
-                    color = selectionColor;
+                if (dois.has(this.papers[i].doi)) {
+                    color = selectedColor;
                     materialIndex = 0;
                     for (let j = 0; j < 3; j++) {
                         minCoordinates[j] = Math.min(this.papers[i].point[j], minCoordinates[j]);
@@ -388,7 +392,7 @@ const EmbeddingVisualization = function () {
                 }
                 let faceStartIndex = i * 2;
                 for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
-                    this.geometry.faces[idx].color = new THREE.Color(color);
+                    this.geometry.faces[idx].color = color;
                     this.geometry.faces[idx].materialIndex = materialIndex
                 }
             }
