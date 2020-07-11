@@ -43,6 +43,10 @@ body {
     padding-top: 360px;
 }
 
+.svg-border-rounded {
+    pointer-events: none;
+}
+
 .svg-border-rounded svg {
     position: absolute;
     bottom: 0;
@@ -469,7 +473,7 @@ label.nav-link {
     flex: 0 0 160px;
 }
 
-.search-info-container label > button , .search-info-container label > select {
+.search-info-container label > button, .search-info-container label > select {
     width: 160px;
 }
 

@@ -158,6 +158,10 @@ const EmbeddingVisualization = function () {
                     scope.refreshSize();
                 });
 
+                window.addEventListener('orientationchange', function () {
+                    scope.refreshSize();
+                });
+
                 // setup the light
                 let light = new THREE.PointLight(0xffffff, 1, 10);
                 light.position.set(1, 1, 10);
