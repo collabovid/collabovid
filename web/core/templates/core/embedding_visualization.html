@@ -19,15 +19,17 @@
                     <div class="canvas-controls">
                         <div class="flex-container d-flex flex-row">
                             <div class="text-white d-none d-md-block mr-2">
-                                <div>
-                                    <div class="">Zoom Speed</div>
-                                    <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
-                                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
-                                </div>
-                                <div class="mt-2">
-                                    <div class="">Pan Speed</div>
-                                    <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
-                                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                                <div id="zoom-pan-controls">
+                                    <div>
+                                        <div class="">Zoom Speed</div>
+                                        <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
+                                               data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="">Pan Speed</div>
+                                        <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
+                                               data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                                    </div>
                                 </div>
                             </div>
 
@@ -152,7 +154,8 @@
                                         </button>
                                     </div>
                                     <div class="flex-fill pl-3">
-                                        <h6 class="show-topic d-inline-block mb-0" style="cursor: pointer;">{{ topic.name }}</h6>
+                                        <h6 class="show-topic d-inline-block mb-0"
+                                            style="cursor: pointer;">{{ topic.name }}</h6>
                                         <div class="mt-1 small">
                                             <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">
                                                 View all papers
@@ -177,6 +180,9 @@
     {% javascript 'embedding-visualization' %}
     <script>
         window.visualizationEventRunning = false;
+        window.justUsedTouchControls = false;
+        window.oldPanSpeed = 0;
+        window.oldZoomSpeed = 0;
 
         const topics = JSON.parse("{{ topic_dict | escapejs }}");
         const colors = JSON.parse("{{ category_colors | escapejs }}");
@@ -197,7 +203,7 @@
         const fullScreenToggleBtn = $(".full-screen-toggle");
         const embeddingVisualizationContainer = $("#embedding-visualization-container");
         const paperSelectedMessage = $("#paper-selected-message");
-
+        const zoomPanControls = $("#zoom-pan-controls");
 
         fullScreenToggleBtn.click(function (e) {
             e.preventDefault();
@@ -243,14 +249,9 @@
             categoryLegend.hide();
             topicLegend.hide();
 
-            //- fade in
             paperSelectedMessage.stop().animate({"opacity": 1}, 500, function () {
-                //- delay for 2000ms
                 paperSelectedMessage.stop().animate({"null": 1}, 4000, function () {
-                    //- fade out
-                    paperSelectedMessage.stop().animate({"opacity": 0}, 500, function () {
-                        //- final callback
-                    });
+                    paperSelectedMessage.stop().animate({"opacity": 0}, 500);
                 });
             });
 
@@ -281,6 +282,32 @@
                 'panSpeed': 0.5
             }
         );
+
+        visualization.onTouch(function () {
+
+            if (!window.justUsedTouchControls) {
+                zoomPanControls.hide();
+
+                window.justUsedTouchControls = true;
+                window.oldPanSpeed = visualization.controls.panSpeed;
+                window.oldZoomSpeed = visualization.controls.zoomSpeed;
+
+                visualization.controls.panSpeed = 0.1;
+                visualization.controls.zoomSpeed = 0.1;
+            }
+
+        });
+
+        visualization.onMouseClick(function () {
+
+            if (window.justUsedTouchControls) {
+                zoomPanControls.show();
+                window.justUsedTouchControls = false;
+
+                visualization.controls.panSpeed = window.oldPanSpeed;
+                visualization.controls.zoomSpeed = window.oldZoomSpeed;
+            }
+        });
 
         visualization.onDeselect(function () {
             if (window.visualizationEventRunning) {

@@ -185,8 +185,7 @@ const EmbeddingVisualization = function () {
 
                 // gets called when there is a click event
                 function onClick(x, y) {
-                    if(window.visualizationEventRunning)
-                    {
+                    if (window.visualizationEventRunning) {
                         return;
                     }
 
@@ -224,6 +223,10 @@ const EmbeddingVisualization = function () {
                 renderer.domElement.addEventListener('mousedown', function (event) {
                     startX = event.pageX;
                     startY = event.pageY;
+
+                    if (scope.onMouseClickCallback) {
+                        scope.onMouseClickCallback();
+                    }
                 });
                 renderer.domElement.addEventListener('mouseup', function (event) {
                     const diffX = Math.abs(event.pageX - startX);
@@ -235,6 +238,10 @@ const EmbeddingVisualization = function () {
                 });
 
                 renderer.domElement.addEventListener('touchstart', function (event) {
+                    if (scope.onTouchCallback) {
+                        scope.onTouchCallback();
+                    }
+
                     startX = event.changedTouches[0].pageX;
                     startY = event.changedTouches[0].pageY;
                 });
@@ -263,6 +270,14 @@ const EmbeddingVisualization = function () {
             })
         }
         ;
+
+        this.onTouch = function (callback) {
+            this.onTouchCallback = callback;
+        };
+
+        this.onMouseClick = function (callback) {
+            this.onMouseClickCallback = callback;
+        };
 
         this.onDeselect = function (callback) {
             this.onDeselectCallback = callback;
@@ -296,8 +311,7 @@ const EmbeddingVisualization = function () {
                         }
                     }
 
-                    if(distance < max_distance)
-                    {
+                    if (distance < max_distance) {
                         min_distances[max_j] = distance;
                         min_indices[max_j] = i;
                     }
