@@ -278,6 +278,11 @@
                     "is_primitive": true
                 }
             ]
+        },
+        "assign-keywords": {
+            "name": "Assign Keywords",
+            "description": "Assigns the most predictive keywords to the topics",
+            "parameters": []
         }
     }
 }

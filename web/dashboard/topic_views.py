@@ -10,7 +10,7 @@ import random
 
 @staff_member_required
 def topics_overview(request):
-    topics = Topic.objects.all()
+    topics = Topic.objects.order_by('name')
     return render(request, 'dashboard/topics/overview.html', {'topics': topics, 'debug': settings.DEBUG})
 
 
@@ -41,5 +41,5 @@ def merge_topics(request):
             return redirect('topics')
         else:
             messages.add_message(request, messages.ERROR, f"Topics not found")
-    topics = Topic.objects.all()
+    topics = Topic.objects.order_by('name')
     return render(request, 'dashboard/topics/merge.html', {'topics': topics, 'debug': settings.DEBUG})
