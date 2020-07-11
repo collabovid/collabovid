@@ -143,17 +143,17 @@
                 <div class="col-12">
                     <ul class="list-group w-100">
                         {% for topic in topics %}
-                            <li class="list-group-item topic-card" data-topic-name="{{ topic.name }}"
+                            <li class="list-group-item topic-item" data-topic-name="{{ topic.name }}"
                                 data-topic="{{ topic.pk }}">
                                 <div class="d-flex flex-row align-items-stretch">
                                     <div>
-                                        <button class="btn btn-success h-100">
-                                            <i class="fas fa-arrow-up"></i>
+                                        <button class="btn btn-info h-100 show-topic">
+                                            <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
                                     <div class="flex-fill pl-3">
-                                        <h6>{{ topic.name }}</h6>
-                                        <div class="mt-2 small">
+                                        <h6 class="show-topic d-inline-block mb-0" style="cursor: pointer;">{{ topic.name }}</h6>
+                                        <div class="mt-1 small">
                                             <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">
                                                 View all papers
                                             </a>
@@ -208,7 +208,7 @@
 
         topicFilterInput.on('input', function (e) {
             const query = topicFilterInput.val();
-            $('.topic-card').each(function (i) {
+            $('.topic-item').each(function (i) {
                 const element = $(this);
                 let topicName = element.data('topic-name').toLowerCase();
                 if (topicName.includes(query.toLowerCase()) || query.trim() === "") {
@@ -301,19 +301,19 @@
             window.visualizationEventRunning = false;
         });
 
-        $('.topic-card').on('click', function (e) {
+        $('.topic-item .show-topic').on('click', function (e) {
             if (window.visualizationEventRunning) {
                 return;
             }
 
             window.visualizationEventRunning = true;
 
-            const topicCard = $(e.target).closest('.topic-card');
-            const topicId = topicCard.data('topic');
+            const topicItem = $(e.target).closest('.topic-item');
+            const topicId = topicItem.data('topic');
             const paperIds = new Set(topics[topicId]);
             document.body.scrollTop = 0;
             document.documentElement.scrollTop = 0;
-            topicLabel.text(topicCard.data('topic-name'));
+            topicLabel.text(topicItem.data('topic-name'));
             topicLegend.show();
             categoryLegend.hide();
             paperSelectedLegend.hide();
@@ -435,7 +435,7 @@
         }
 
 
-        .topic-card {
+        .topic-item {
             user-select: none;
         }
 
