@@ -43,7 +43,7 @@ def paper(request, doi):
     })
 
 
-def embedding_visualization(request):
+def embedding_visualization(request, topic_pk=None, doi=None):
     topics = Topic.objects.order_by('name')
     topic_dict = {}
     for topic in topics:
@@ -51,16 +51,26 @@ def embedding_visualization(request):
     categories = Category.objects.all()
     category_colors = {}
     for category in categories:
-        category_colors[category.name] = category.color
+        category_colors[category.pk] = category.color
 
-    return render(request, "core/embedding_visualization.html", {
+    context = {
         'topics': topics,
         'topic_dict': json.dumps(topic_dict),
         'categories': categories,
         'category_colors': json.dumps(category_colors),
         'atlas_image_url': '/static/img/atlas.jpg',
         'paper_file_url': '/static/embeddings_3d.json'
-    })
+    }
+
+    if topic_pk:
+        topic = get_object_or_404(Topic, pk=topic_pk)
+        context['topic'] = topic
+
+    if doi:
+        paper = get_object_or_404(Paper, pk=doi)
+        context['paper'] = paper
+
+    return render(request, "core/embedding_visualization.html", context)
 
 
 def paper_cards(request):
@@ -100,6 +110,7 @@ def category_overview(request):
     category_statistics = [CategoryStatistics(category) for category in Category.objects.all()]
 
     return render(request, "core/categories_overview.html", {"category_statistics": category_statistics})
+
 
 def world_map(request):
     countries = GeoCountry.objects.all()

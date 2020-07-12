@@ -85,12 +85,14 @@ const EmbeddingVisualization = function () {
             this.renderer.setSize(container.offsetWidth, container.offsetHeight);
         };
 
-        this.renderEmbeddings = function (canvas, onSelected, options) {
+        this.renderEmbeddings = function (canvas, onSelected, options, callback) {
             let fieldOfView = 75;
             let scope = this;
             let aspectRatio = canvas.offsetWidth / canvas.offsetHeight;
             let nearPlane = 0.001;
             let farPlane = 1000;
+
+            scope.colors = options.categoryColors;
 
             let camera = new THREE.PerspectiveCamera(
                 fieldOfView, aspectRatio, nearPlane, farPlane
@@ -200,17 +202,7 @@ const EmbeddingVisualization = function () {
                     if (intersects.length > 0) {
                         let faceIndex = intersects[0].faceIndex;
                         let pointIndex = Math.floor(faceIndex / facesPerPoint);
-                        let faceStartIndex = pointIndex * facesPerPoint;
-                        geometry.faces[faceIndex].color = new THREE.Color(0xDF1544);
-
-                        for (let idx = faceStartIndex; idx < faceStartIndex + facesPerPoint; idx++) {
-                            geometry.faces[idx].color = new THREE.Color(0xDF1544);
-                        }
                         onSelected(pointIndex, papers[pointIndex]);
-
-                        geometry.colorsNeedUpdate = true;
-                        geometry.elementsNeedUpdate = true;
-                        renderer.render(scene, camera);
                     } else {
                         scope.deselectAll();
                     }
@@ -267,6 +259,10 @@ const EmbeddingVisualization = function () {
                 scope.paperData = paperData;
 
                 scope.viewArea(paperData.means[0], paperData.means[1], paperData.means[2] + 2.5)
+
+                if (callback) {
+                    callback();
+                }
             })
         }
         ;
@@ -322,16 +318,13 @@ const EmbeddingVisualization = function () {
 
         this.getColorForPaper = function (paper) {
             let color = 0xffffff;
-            const category = this.getHighestCategoryForPaper(paper);
+            const category = paper.top_category;
             if (category) {
-                color = colors[category]
+                color = this.colors[category]
             }
             return color;
         };
 
-        this.getHighestCategoryForPaper = function (paper) {
-            return paper.categories[paper.top_category_index].name
-        };
 
         this.deselectAll = function () {
             for (let i = 0; i < this.papers.length; i++) {
@@ -350,6 +343,7 @@ const EmbeddingVisualization = function () {
                 this.onDeselectCallback();
             }
         };
+
 
         this.selectPaper = function (paperIndex, neighborIndices) {
             for (let i = 0; i < this.papers.length; i++) {
@@ -371,7 +365,6 @@ const EmbeddingVisualization = function () {
             }
             this.geometry.colorsNeedUpdate = true;
             this.geometry.elementsNeedUpdate = true;
-            //this.renderer.render(this.scene, this.camera);
         };
 
         this.viewArea = function (x, y, z) {
