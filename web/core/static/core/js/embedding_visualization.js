@@ -212,17 +212,20 @@ const EmbeddingVisualization = function () {
                 const delta = 6;
                 let startX;
                 let startY;
+                let mouseDown = false;
                 renderer.domElement.addEventListener('mousedown', function (event) {
                     startX = event.pageX;
                     startY = event.pageY;
+                    mouseDown = true;
 
-                    if (scope.onMouseClickCallback) {
-                        scope.onMouseClickCallback();
+                    if (scope.onMouseOverCallback) {
+                        scope.onMouseOverCallback();
                     }
                 });
                 renderer.domElement.addEventListener('mouseup', function (event) {
                     const diffX = Math.abs(event.pageX - startX);
                     const diffY = Math.abs(event.pageY - startY);
+                    mouseDown = false;
 
                     if (diffX < delta && diffY < delta) {
                         intersectEvent(event.clientX, event.clientY, onSelected, function () {
@@ -232,7 +235,16 @@ const EmbeddingVisualization = function () {
                 });
 
                 renderer.domElement.addEventListener('mousemove', function (event) {
-                    intersectEvent(event.clientX, event.clientY, scope.onHoverCallback, scope.onHoverCallback);
+                    if (mouseDown) {
+                        scope.onHoverCallback();
+                    } else {
+                        intersectEvent(event.clientX, event.clientY, scope.onHoverCallback, scope.onHoverCallback);
+                        if (scope.onMouseOverCallback) {
+                            scope.onMouseOverCallback();
+                        }
+                    }
+                    {
+                    }
                 });
 
                 renderer.domElement.addEventListener('touchstart', function (event) {
@@ -283,8 +295,8 @@ const EmbeddingVisualization = function () {
             this.onTouchCallback = callback;
         };
 
-        this.onMouseClick = function (callback) {
-            this.onMouseClickCallback = callback;
+        this.onMouseOver = function (callback) {
+            this.onMouseOverCallback = callback;
         };
 
         this.onDeselect = function (callback) {

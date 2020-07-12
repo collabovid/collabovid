@@ -1,0 +1,45 @@
+<div class="canvas-controls">
+    <div class="flex-container d-flex flex-row">
+        <div class="text-white d-none d-md-block mr-2">
+            <div id="zoom-pan-controls">
+                <div>
+                    <div class="">Zoom Speed</div>
+                    <input id="zoom-slider" class="slider" type="text" data-slider-min="0.01"
+                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.25"/>
+                </div>
+                <div class="mt-2">
+                    <div class="">Pan Speed</div>
+                    <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
+                           data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
+                </div>
+
+                <div class="bg-light text-dark p-2 rounded mt-2" style="display: none;" id="titleContainer"></div>
+            </div>
+        </div>
+
+        <div class="message-controls flex-fill text-center mr-2">
+            <div id="paper-selected-message"
+                 class="bg-dark p-2 rounded text-white">
+                <div class="full-screen-visible">
+                    Details about the selected paper can be found at the bottom
+                    of the page once you exit the full screen.
+                </div>
+                <div class="full-screen-hidden">The paper is loading and will be shown below.</div>
+            </div>
+        </div>
+
+        <div class="text-right">
+            <button class="btn btn-outline-light"
+                    data-toggle="modal"
+                    data-target="#help-modal">
+                <i class="fas fa-info-circle"></i>
+            </button>
+            <button class="btn btn-outline-light full-screen-toggle">
+                <i class="fas fa-expand-alt"></i>
+            </button>
+            <button class="btn btn-outline-light full-screen-toggle" style="display: none;">
+                <i class="fas fa-compress-alt"></i>
+            </button>
+        </div>
+    </div>
+</div>
