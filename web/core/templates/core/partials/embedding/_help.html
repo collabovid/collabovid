@@ -9,27 +9,34 @@
     <h6>What is shown?</h6>
     <p>
         The visualization above shows every publication embedded in a 3D space where the
-        position determines
-        the topic of the publication. This means that papers that deal with the same topic are
+        position is determined by
+        the topic of the publication. This means that papers that investigate same research area are
         closer together than others.
     </p>
 
     <h6>How to navigate?</h6>
     <p>
-        It is possible to navigate with the mouse and pan with the arrow keys.
-        The pan and zoom speed can be adjusted with the controls on the side to allow for more
-        fine
-        grained control.
-        By clicking on a paper, it and its ten closest neighbors are highlighted and displayed
-        in a
-        list below ordered by the distance from the selected paper. It is also possible to click
-        on
-        a topic
-        to highlight
+        For desktop users it is possible to navigate with the mouse and pan with the arrow keys.
+        The pan and zoom speed can be adjusted with
+        the controls on the side to allow for more fine grained control.
+        Users with a touch screen can navigate through the research as well.
+        A user can switch to full screen mode (top right corner) if desired.
+
+        By clicking on a category the category is highlighted in the publication cloud.
+        When the user clicks on a paper, it and its five closest neighbors are
+        highlighted and displayed in a list below.
+        The papers are ordered by the distance from the selected paper which means
+        that the more closely related paper will be above papers that investigate a different topic.
+        It is also possible to click on a topic (list below) to highlight a specific research area.
     </p>
 
     <h6>What is the purpose?</h6>
-    <p></p>
+    <p>
+        The visualization of the current research provides useful insights on emerging topics.
+        Users can easily navigate through the publications and find correlations between research fields
+        and papers that they did not know before. The topic assignment of the papers are supporting
+        researches to find relevant articles for their specific interests.
+    </p>
 
     <h6>How are the embeddings generated?</h6>
 
@@ -43,8 +50,9 @@
     </p>
 
     <h6>How are the topics generated?</h6>
-    <p>To generate the different topics on the left side, we clustered the embeddings and then
+    <p>
+        To generate the different topics on the left side, we clustered the embeddings and then
         assigned a name to the topic that in our opinion best reflects the contents of the
-        contained
-        papers.</p>
+        contained papers.
+    </p>
 {% endblock %}

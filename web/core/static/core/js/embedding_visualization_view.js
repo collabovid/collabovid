@@ -21,6 +21,7 @@
         window.justUsedTouchControls = false;
         window.oldPanSpeed = 0;
         window.oldZoomSpeed = 0;
+        window.inFullScreen = false;
 
         const topics = plugin.settings.topics;
         const colors = plugin.settings.colors;
@@ -77,7 +78,14 @@
             embeddingVisualizationContainer.toggleClass('full-screen');
             fullScreenToggleBtn.toggle();
             visualization.refreshSize();
+
+            window.inFullScreen = !window.inFullScreen;
         });
+
+        $(document).keyup(function (e) {
+            if (window.inFullScreen && e.keyCode === 27) fullScreenToggleBtn[0].click();
+        });
+
 
         topicFilterInput.on('input', function (e) {
             const query = topicFilterInput.val();
@@ -118,11 +126,14 @@
             categoryLegend.hide();
             topicLegend.hide();
 
-            paperSelectedMessage.stop().animate({"opacity": 1}, 500, function () {
-                paperSelectedMessage.stop().animate({"null": 1}, 4000, function () {
-                    paperSelectedMessage.stop().animate({"opacity": 0}, 500);
+            if (window.inFullScreen) {
+                // Show the info box when user is in full screen and cant see the papers.
+                paperSelectedMessage.stop().animate({"opacity": 1}, 500, function () {
+                    paperSelectedMessage.stop().animate({"null": 1}, 4000, function () {
+                        paperSelectedMessage.stop().animate({"opacity": 0}, 500);
+                    });
                 });
-            });
+            }
 
 
             const indices = visualization.computeNeighbors(paper, 10);
