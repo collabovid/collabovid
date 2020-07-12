@@ -1,12 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
-import json
-from data.models import Paper, Category, GeoCountry, GeoCity
-from django.http import HttpResponseNotFound, JsonResponse
-from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import GeoCity, GeoCountry, Paper, Author, Category, Journal, GeoLocation, Topic
+from data.models import GeoCity, GeoCountry, Paper, Category, Topic
 from statistics import PaperStatistics, CategoryStatistics
-from django.template.loader import render_to_string
 import json
 
 from django.utils.timezone import datetime
@@ -65,8 +60,7 @@ def embedding_visualization(request, topic_pk=None, doi=None):
     if topic_pk:
         topic = get_object_or_404(Topic, pk=topic_pk)
         context['topic'] = topic
-
-    if doi:
+    elif doi:
         paper = get_object_or_404(Paper, pk=doi)
         context['paper'] = paper
 

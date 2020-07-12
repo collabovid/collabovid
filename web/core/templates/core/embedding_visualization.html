@@ -30,6 +30,8 @@
                                         <input id="pan-slider" class="slider" type="text" data-slider-min="0.01"
                                                data-slider-max="1" data-slider-step="0.01" data-slider-value="0.5"/>
                                     </div>
+
+                                    <div class="bg-light text-dark p-2 rounded mt-2" id="titleContainer"></div>
                                 </div>
                             </div>
 
@@ -203,6 +205,39 @@
             const paperSelectedMessage = $("#paper-selected-message");
             const zoomPanControls = $("#zoom-pan-controls");
 
+            const titleContainer = $("#titleContainer");
+
+            function pushToUrl(identifier = null) {
+                let url = window.location.protocol + "//"
+                    + window.location.host +
+                    "{% url "embedding-visualization" %}";
+                if (identifier) {
+                    url += identifier
+                }
+
+                if (url !== window.location.href) {
+                    window.history.pushState({path: url}, '', url);
+
+                }
+            }
+
+            function selectPaper(doi) {
+                visualization.papers.forEach((paper, i) => {
+                    if (paper.doi == doi) {
+                        onSelected(i, paper);
+                    }
+                });
+            }
+
+            function selectTopic(pk) {
+                $(".topic-item[data-topic=" + pk + "] .show-topic:first-of-type").click();
+            }
+
+            function selectCategory(pk)
+            {
+                $(".category-label[data-category-id=" + pk + "]").click();
+            }
+
             fullScreenToggleBtn.click(function (e) {
                 e.preventDefault();
                 embeddingVisualizationContainer.toggleClass('full-screen');
@@ -270,6 +305,7 @@
                     paperLoadingIndicator.hide();
                     selectedCardContainer.show();
                     paperSelectedLegend.show();
+                    pushToUrl(paper.doi);
                     window.visualizationEventRunning = false;
                 });
             }
@@ -283,19 +319,21 @@
                 },
                 function () {
                     {% if paper %}
-                        visualization.papers.forEach((paper, i) => {
-                            if (paper.doi == "{{ paper.doi }}") {
-                                onSelected(i, paper);
-                                console.log("Here1");
-                                console.log(i);
-                                console.log(paper);
-
-                            }
-                        });
-                        console.log("Here2");
+                        selectPaper("{{ paper.doi }}");
+                    {% elif topic %}
+                        selectTopic({{ topic.pk }});
                     {% endif %}
                 }
             );
+
+            visualization.onHover(function(idx=null, paper=null){
+                if(idx && paper)
+                {
+                    titleContainer.show().text(paper.title);
+                } else {
+                    titleContainer.hide();
+                }
+            });
 
 
             visualization.onTouch(function () {
@@ -340,6 +378,8 @@
                     $(this).removeClass('badge-secondary').css('background-color', $(this).data('background-color'));
                 });
 
+                pushToUrl();
+
                 window.visualizationEventRunning = false;
             });
 
@@ -360,13 +400,11 @@
                 categoryLegend.hide();
                 paperSelectedLegend.hide();
                 visualization.selectPapers(paperIds, 0xffffff);
-
+                pushToUrl(topicId);
                 window.visualizationEventRunning = false;
             });
 
             $('.category-label').on('click', function (e) {
-                console.log(window.visualizationEventRunning);
-
                 if (window.visualizationEventRunning) {
                     return;
                 }
@@ -384,11 +422,34 @@
                         dois.add(paper.doi);
                     }
                 });
-                visualization.selectPapers(dois, colors[categoryId]);
+                visualization.selectPapers(dois, visualization.colors[categoryId]);
+
+                pushToUrl();
                 categoryLegend.show();
                 paperSelectedLegend.hide();
                 topicLegend.hide();
                 window.visualizationEventRunning = false;
+            });
+
+            $(document).on("click", ".visualize-link", function (e) {
+                e.preventDefault();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                selectPaper($(this).data('paper-doi'));
+            });
+
+            $(document).on("click", ".category-link", function (e) {
+                e.preventDefault();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                selectCategory($(this).data('category-id'));
+            });
+
+            $(document).on("click", ".topic-link", function (e) {
+                e.preventDefault();
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+                selectTopic($(this).data('topic-id'));
             });
         });
 

@@ -520,3 +520,20 @@ label.nav-link {
 .tooltip-inner {
     max-width: none;
 }
+
+.paper-card-badges-container a, .paper-card-badges-container a:hover
+{
+    line-height: 1;
+    text-decoration: none;
+}
+
+.paper-card-badges-container a span.badge
+{
+    white-space: normal;
+}
+
+.paper-card-badges-container a span.topic-badge
+{
+    background: #007799;
+    color: #ffffff;
+}

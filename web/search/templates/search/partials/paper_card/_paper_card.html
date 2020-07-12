@@ -25,9 +25,10 @@
             <div class="card-block">
 
                 <h5 class="card-title font-weight-normal">
-                    <a href="{% url "paper" paper.pk %}" class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
+                    <a href="{% url "paper" paper.pk %}"
+                       class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
                     {{ request.user|edit_object_link:paper }}
-                    {% if paper.is_similar  %}<i class="small fas fa-circle text-info"></i>{% endif %}
+                    {% if paper.is_similar %}<i class="small fas fa-circle text-info"></i>{% endif %}
                 </h5>
 
                 <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
@@ -107,7 +108,7 @@
                                         <span class="short">{{ paper|preview_slice|safe }}</span><span
                                             class="dots">...</span><span
                                             class="long"
-                                            style="display: none;">{{ paper|full_text_slice|safe}}</span>
+                                            style="display: none;">{{ paper|full_text_slice|safe }}</span>
                                     {% else %}
                                         <span class="short">{{ paper.abstract|safe }}</span>
                                     {% endif %}
@@ -117,8 +118,23 @@
 
                                 <div class="row">
 
-                                    <div class="col-12 col-sm-4 small text-left">
-                                        {% include "search/partials/paper_card/_categories.html" %}
+                                    <div class="col-12 col-sm-4 small text-left paper-card-badges-container">
+
+                                        <div>
+                                            {% if paper.categories %}
+
+                                                {% include "search/partials/paper_card/_categories.html" %}
+
+                                                {% if paper.topic %}
+                                                    |
+                                                {% endif %}
+                                            {% endif %}
+
+                                            {% if paper.topic %}
+                                                {% include "search/partials/paper_card/_topic.html" %}
+                                            {% endif %}
+                                        </div>
+
                                     </div>
 
 
@@ -151,6 +167,14 @@
                                         {% endif %}
 
                                         <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
+                                        |
+                                        <a class="visualize-link"
+                                           data-paper-doi="{{ paper.doi }}"
+                                           href="{% url "embedding-visualization-for-doi" paper.doi %}"
+                                           target="_blank">
+                                            Visualize
+                                        </a>
+
                                     </div>
 
                                 </div>

@@ -185,8 +185,7 @@ const EmbeddingVisualization = function () {
                 let raycaster = new THREE.Raycaster();
                 const facesPerPoint = 2;
 
-                // gets called when there is a click event
-                function onClick(x, y) {
+                function intersectEvent(x, y, callback_intersect = null, callback_no_intersect = null) {
                     if (window.visualizationEventRunning) {
                         return;
                     }
@@ -202,9 +201,10 @@ const EmbeddingVisualization = function () {
                     if (intersects.length > 0) {
                         let faceIndex = intersects[0].faceIndex;
                         let pointIndex = Math.floor(faceIndex / facesPerPoint);
-                        onSelected(pointIndex, papers[pointIndex]);
+
+                        if (callback_intersect) callback_intersect(pointIndex, scope.papers[pointIndex]);
                     } else {
-                        scope.deselectAll();
+                        if (callback_no_intersect) callback_no_intersect();
                     }
                 }
 
@@ -225,8 +225,14 @@ const EmbeddingVisualization = function () {
                     const diffY = Math.abs(event.pageY - startY);
 
                     if (diffX < delta && diffY < delta) {
-                        onClick(event.clientX, event.clientY);
+                        intersectEvent(event.clientX, event.clientY, onSelected, function () {
+                            scope.deselectAll();
+                        });
                     }
+                });
+
+                renderer.domElement.addEventListener('mousemove', function (event) {
+                    intersectEvent(event.clientX, event.clientY, scope.onHoverCallback, scope.onHoverCallback);
                 });
 
                 renderer.domElement.addEventListener('touchstart', function (event) {
@@ -244,7 +250,9 @@ const EmbeddingVisualization = function () {
                     const diffY = Math.abs(event.changedTouches[0].pageY - startY);
 
                     if (diffX < delta && diffY < delta) {
-                        onClick(event.changedTouches[0].clientX, event.changedTouches[0].clientY);
+                        intersectEvent(event.changedTouches[0].clientX, event.changedTouches[0].clientY, onSelected, function () {
+                            scope.deselectAll();
+                        });
                     }
                 });
 
@@ -266,6 +274,10 @@ const EmbeddingVisualization = function () {
             })
         }
         ;
+
+        this.onHover = function (callback) {
+            this.onHoverCallback = callback;
+        };
 
         this.onTouch = function (callback) {
             this.onTouchCallback = callback;
