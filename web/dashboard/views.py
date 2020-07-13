@@ -118,7 +118,7 @@ def delete_all_finished(request):
     if request.method == 'POST':
         days = 1
         date_limit = timezone.now() - timedelta(days=days)
-        query = Task.objects.filter(ended_at__lte=date_limit)
+        query = Task.objects.filter(ended_at__lte=date_limit).defer('log')
         if query.count() > 0:
             query.delete()
             messages.add_message(request, messages.SUCCESS, 'Deleted All Finished Tasks.')

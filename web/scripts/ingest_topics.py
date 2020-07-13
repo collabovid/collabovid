@@ -6,7 +6,6 @@ import django
 django.setup()
 from data.models import Topic, Paper
 import argparse
-from tqdm import tqdm
 import urllib.request
 import json
 
@@ -31,7 +30,7 @@ for topic in Topic.objects.all():
     topic.delete()
 
 print(f'Creating {len(topics)} topics')
-for topic in tqdm(topics):
+for topic in topics:
     new_topic = Topic()
     new_topic.name = topic['name']
     new_topic.keywords = topic['keywords']
@@ -40,7 +39,7 @@ for topic in tqdm(topics):
         paper_topic_dict[doi] = new_topic
 
 print('Assigning Papers to topics')
-for paper in tqdm(list(Paper.objects.all())):
+for paper in list(Paper.objects.all()):
     if paper.doi in paper_topic_dict:
         paper.topic = paper_topic_dict[paper.doi]
     paper.save()

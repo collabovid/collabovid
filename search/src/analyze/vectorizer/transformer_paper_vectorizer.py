@@ -60,7 +60,7 @@ class TransformerPaperVectorizer(PaperVectorizer):
         self._tokenizer = None
 
     def vectorize_query(self, query: str):
-        tokens = self._tokenize([query.lower()])
+        tokens, _ = self._sliding_window_tokenizer.tokenize([query.lower()])
         with torch.no_grad():
             embedding = self._model(tokens)[0].detach().cpu().numpy()
         return embedding
