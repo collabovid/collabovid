@@ -75,9 +75,12 @@ def similar_papers(request):
         #    papers = similar_request.paginator.page(1)
         return render(request, "search/search_similar_papers.html", {
             "query_papers": query_papers,
-            "similar_papers": papers,
             #"error": similar_request.error
         })
+    elif request.method == "POST":
+        papers = Paper.objects.all()[:30]
+
+        return JsonResponse({'dois': list(papers.values_list('doi', flat=True))})
 
 
 

@@ -10,7 +10,7 @@
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
-    <div id="paper-container" class="container mt-3">
+    <div class="container mt-3">
 
         <div class="row mt-3">
             <div class="col-lg-4">
@@ -24,30 +24,34 @@
         <div class="row">
 
             <div class="col-lg-4">
-                <div class="text-muted">
-                    You can find the list of selected papers below. You can enable/disable certain papers
-                    and refresh the results if you like.
-                </div>
-                <ul class="list-group selectable-list-group">
-                    {% for paper in query_papers.all %}
-                        {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True short=True checked=True %}
-                    {% endfor %}
-                </ul>
+                <form id="similar-paper-form" method="post" action="{% url "similar-papers" %}">
+                    {% csrf_token %}
+                    <div class="text-muted">
+                        You can find the list of selected papers below. You can enable/disable certain papers
+                        and refresh the results if you like.
+                    </div>
+                    <ul class="list-group selectable-list-group">
+                        {% for paper in query_papers.all %}
+                            {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True short=True checked=True %}
+                        {% endfor %}
+                    </ul>
+
+                    <div class="text-right mt-2">
+                        <button class="btn btn-success">Refresh</button>
+                    </div>
+
+                </form>
             </div>
             <div class="col-lg-8">
-                {% if error %}
-                    <div class="my-5 text-center text-danger font-weight-bold">We encountered an unexpected
-                        error.
-                    </div>
-                {% else %}
-                    {% for current_paper in similar_papers %}
-                        <div class="mb-5">
-                            {% include 'search/partials/paper_card/_paper_card.html' with paper=current_paper %}
-                        </div>
-                    {% empty %}
-                        <div class="my-5 text-center font-weight-bold">No similar papers found</div>
-                    {% endfor %}
-                {% endif %}
+                <div id="paper-container"></div>
+
+                <div id="paper-loading-indicator"
+                     class="text-muted text-center fa-5x my-5"
+                     style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+
+                <nav class="mt-5" id="pagination-container"></nav>
             </div>
 
         </div>
@@ -58,7 +62,22 @@
 {% endblock %}
 
 {% block script %}
+    {% javascript "similar_papers" %}
+    <script>
+        $(document).ready(function () {
+            const form = $("#similar-paper-form");
+            const paperContainer = $("#paper-container");
+            const indicator = $("#paper-loading-indicator");
+            const paginationContainer = $("#pagination-container");
 
+            form.collabovidSimilarSearch({
+                indicator: indicator,
+                paper_container: paperContainer,
+                pagination_container: paginationContainer,
+                receivePaperUrl: "{% url "receive-papers" %}"
+            });
+        })
+    </script>
 {% endblock %}
 
 {% block css %}

@@ -56,7 +56,15 @@ PIPELINE = {
                 'core/js/embedding_visualization_view.js',
             ),
             'output_filename': 'embedding_visualization.js'
-        }
+        },
+        'similar_papers': {
+            'source_filenames': (
+                'core/js/pagination.js',
+                'search/js/collabovid_similar_search.js'
+
+            ),
+            'output_filename': 'similar_search.js'
+        },
     },
     'STYLESHEETS': {
         'base': {
@@ -84,9 +92,9 @@ PIPELINE = {
         },
         'search': {
             'source_filenames': (
-                'css/bootstrap-select.css',
-                'css/gijgo.min.css',
-                'css/tagify.css',
+                'search/css/bootstrap-select.css',
+                'search/css/gijgo.min.css',
+                'search/css/tagify.css',
             ),
             'output_filename': 'search.css'
         },
