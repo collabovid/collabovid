@@ -14,6 +14,14 @@ def get_vectorizer(type) -> PaperVectorizer:
         vectorizers[type] = TransformerPaperVectorizer(matrix_file_name='transformer_paper_oubiobert_512.pkl',
                                                        transformer_model_name='transformer_paper_oubiobert_512',
                                                        transformer_model_type='bert')
+    elif type == 'transformer-paper-sensitive-512':
+        vectorizers[type] = TransformerPaperVectorizer(matrix_file_name='transformer_paper_sensitive_512.pkl',
+                                                       transformer_model_name='transformer_paper_sensitive_512',
+                                                       transformer_model_type='bert')
+    elif type == 'transformer-paper-no-locations':
+        vectorizers[type] = TransformerPaperVectorizer(matrix_file_name='transformer_paper_no_locations.pkl',
+                                                       transformer_model_name='transformer_paper_no_locations',
+                                                       transformer_model_type='bert')
     else:
         raise ValueError("Unknown type")
     return vectorizers[type]

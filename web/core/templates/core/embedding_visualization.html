@@ -1,0 +1,66 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% load paper_card_extras %}
+
+{% block content %}
+    {% include "core/partials/embedding/_help.html" %}
+
+    <div class="gradient-header pb-0 overflow-hidden">
+        <div class="row mx-0 px-0">
+            <div class="col-12 px-0">
+                <div id="embedding-visualization-container" class="embedding-visualization-container">
+                    <div class="canvas-adaptive-height">
+                        <div id="canvas-container">
+                            <canvas id="visualization-container"></canvas>
+                        </div>
+                    </div>
+
+                    {% include "core/partials/embedding/_controls.html" %}
+                    {% include "core/partials/embedding/_legend.html" %}
+                </div>
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+    <div id="paper-loading-indicator"
+         class="text-muted text-center fa-5x my-5"
+         style="display: none;">
+        <i class="fas fa-circle-notch fa-spin"></i>
+    </div>
+    <div class="container">
+        <div class="mt-3" id="selected-card-container" style="display: none;"></div>
+    </div>
+    <div class="container">
+
+        {% include "core/partials/embedding/_topics_list.html" %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    {% javascript 'embedding-visualization' %}
+    <script>
+
+        $(document).ready(function () {
+            const topics = JSON.parse("{{ topic_dict | escapejs }}");
+            const colors = JSON.parse("{{ category_colors | escapejs }}");
+            const url = "{% url "embedding-visualization" %}";
+
+            $("#visualization-container").buildEmbeddingVisualizationView({
+                topics: topics,
+                colors: colors,
+                url: url,
+                {% if paper %}preSelectedPaper: "{{ paper.doi }}",{% endif %}
+                {% if topic %}preSelectedTopic: {{ topic.pk }},{% endif %}
+                atlasImageUrl: "{{ atlas_image_url }}",
+                paperFileUrl: "{{ paper_file_url }}",
+                receivePaperUrl: "{% url "receive-papers" %}"
+            })
+        });
+
+    </script>
+{% endblock %}
+
+{% block css %}
+    {% stylesheet 'embedding_visualization' %}
+{% endblock %}

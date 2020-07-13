@@ -79,7 +79,7 @@ class PaperVectorizer:
             self._update_remote_paper_matrix()
             print("Paper matrix exported completed")
         else:
-            print("No recomputing of matrix necessary")
+            print("Not pushing matrix")
 
     @property
     def paper_matrix(self):

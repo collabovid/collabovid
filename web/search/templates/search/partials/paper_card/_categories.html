@@ -1,5 +1,7 @@
 {% for category in paper.categories.all %}
-    <a href="{% url "search" %}?categories={{ category.pk }}">
+    <a href="{% url "search" %}?categories={{ category.pk }}"
+        class="category-link"
+        data-category-id="{{ category.pk }}">
         <span class="badge badge-pill text-light"
               style="background-color: {{ category.color }};">
             {{ category.name }}

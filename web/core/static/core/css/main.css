@@ -43,6 +43,10 @@ body {
     padding-top: 360px;
 }
 
+.svg-border-rounded {
+    pointer-events: none;
+}
+
 .svg-border-rounded svg {
     position: absolute;
     bottom: 0;
@@ -174,6 +178,35 @@ a.invisible-link, a.invisible-link:hover {
         padding: 1.25rem;
     }
 }
+
+.wide-modal-dialog {
+    max-width: 470px;
+}
+
+@media (min-width: 576px) {
+    .wide-modal-dialog {
+        max-width: 510px;
+    }
+}
+
+@media (min-width: 768px) {
+    .wide-modal-dialog {
+        max-width: 690px;
+    }
+}
+
+@media (min-width: 992px) {
+    .wide-modal-dialog {
+        max-width: 930px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .wide-modal-dialog {
+        max-width: 1110px;
+    }
+}
+
 
 .button-host {
     color: #00796B;
@@ -469,7 +502,7 @@ label.nav-link {
     flex: 0 0 160px;
 }
 
-.search-info-container label > button , .search-info-container label > select {
+.search-info-container label > button, .search-info-container label > select {
     width: 160px;
 }
 
@@ -486,4 +519,21 @@ label.nav-link {
 
 .tooltip-inner {
     max-width: none;
+}
+
+.paper-card-badges-container a, .paper-card-badges-container a:hover
+{
+    line-height: 1;
+    text-decoration: none;
+}
+
+.paper-card-badges-container a span.badge
+{
+    white-space: normal;
+}
+
+.paper-card-badges-container a span.topic-badge
+{
+    background: #007799;
+    color: #ffffff;
 }

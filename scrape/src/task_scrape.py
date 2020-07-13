@@ -64,6 +64,8 @@ class ScrapeTask(Runnable):
             self.progress(80)
             task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
             self.progress(90)
+            task_launcher.launch_task(name="nearest-neighbor-topic-assignment", config=task_config, block=True)
+            self.progress(100)
             self.log("Finished updating category assigment")
         else:
             self.log("Paper matrix update and topic assignment skipped.")

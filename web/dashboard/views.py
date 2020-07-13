@@ -40,7 +40,7 @@ def queries(request):
 
 @staff_member_required
 def tasks(request):
-    tasks = Task.objects.order_by('-started_at')
+    tasks = Task.objects.order_by('-started_at').defer('log')
     return render(request, 'dashboard/tasks/task_overview.html', {'tasks': tasks, 'debug': settings.DEBUG})
 
 

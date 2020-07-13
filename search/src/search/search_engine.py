@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from django.db.models import Q, F, QuerySet
 from django.conf import settings
-from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry
+from data.models import Paper, Author, Journal, Category, CategoryMembership, GeoCity, GeoCountry, Topic
 
 from src.search.elasticsearch import ElasticsearchRequestHelper
 from src.search.utils import TimerUtilities
@@ -38,6 +38,7 @@ class SearchEngine:
 
         journal_ids = self.form["journals"]
         location_ids = self.form["locations"]
+        topic_ids = self.form["topics"]
 
         article_type_string = self.form["article_type"]
 
@@ -69,6 +70,11 @@ class SearchEngine:
         if journal_ids and len(journal_ids) > 0:
             journals = Journal.objects.filter(pk__in=journal_ids)
             papers = papers.filter(journal__in=journals)
+            filtered = True
+
+        if topic_ids and len(topic_ids) > 0:
+            topics = Topic.objects.filter(pk__in=topic_ids)
+            papers = papers.filter(topic__in=topics)
             filtered = True
 
         if author_ids and len(author_ids) > 0:

@@ -12,9 +12,8 @@ from itertools import permutations
 
 class Topic(models.Model):
     name = models.CharField(default="Unknown", max_length=300)
-    description = models.TextField()
-    description_html = models.TextField()
-    icon_path = models.CharField(max_length=100, default="")
+    keywords = models.TextField()
+    overlapping_paper_count = models.IntegerField(default=0)
 
 
 class PaperHost(models.Model):

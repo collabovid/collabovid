@@ -7,3 +7,6 @@ AWS_S3_PORT = '9090'
 AWS_S3_ENDPOINT_URL = f'{AWS_S3_PROTOCOL}://{AWS_S3_HOST}:{AWS_S3_PORT}'
 
 S3_DB_EXPORT_LOCATION = 'export'
+
+EMBEDDINGS_FILE_URL = '/static/embeddings_3d.json'
+PAPER_ATLAS_IMAGES_FILE_URL = '/static/img/atlas.jpg'
