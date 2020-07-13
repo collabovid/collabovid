@@ -8,6 +8,7 @@ from django.db import transaction
 
 from data.models import (
     Author,
+    AuthorNameResolution,
     Category,
     CategoryMembership,
     DataSource,
@@ -56,6 +57,7 @@ class ImportStatistics:
         self.geo_name_resolutions_created = 0
         self.ignored_papers_created = 0
         self.delete_candidates_created = 0
+        self.author_resolutions_created = 0
 
         self.authors_deleted = 0
         self.journals_deleted = 0
@@ -79,6 +81,7 @@ class ImportStatistics:
         s.append(f"\t{self.geo_name_resolutions_created} geo name resolutions")
         s.append(f"\t{self.ignored_papers_created} papers to ignore list")
         s.append(f"\t{self.delete_candidates_created} delete candidates")
+        s.append(f"\t{self.author_resolutions_created} author name resolutions")
         s.append(f"{self.papers_w_new_category} papers' categories were updated")
         s.append(f"{self.papers_w_new_location} papers' locations were updated")
 
@@ -237,6 +240,14 @@ class DataImport:
             ignored_paper, created = IgnoredPaper.objects.get_or_create(doi=doi)
             if created:
                 self.statistics.ignored_papers_created += 1
+
+    def _import_author_resolutions(self, author_resolutions):
+        for res in author_resolutions:
+            resolution_created, _ = AuthorNameResolution.add(
+                old_first=res["source_fname"], old_last=res["source_lname"],
+                new_first=res["target_fname"], new_last=res["target_lname"]
+            )
+            self.statistics.author_resolutions_created += int(resolution_created)
 
     def _compute_updatable_papers(self, papers):
         """
@@ -453,6 +464,9 @@ class DataImport:
             if self.export_version > 1:
                 self._import_paper_ignore_list(data["ignored_papers"])
                 self._import_delete_candidates(data["delete_candidates"])
+
+            if self.export_version > 2:
+                self._import_author_resolutions(data["author_resolutions"])
 
         self.log("Starting cleanup")
         self._cleanup_models()

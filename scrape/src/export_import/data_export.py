@@ -10,16 +10,17 @@ import requests
 from django.conf import settings
 
 from data.models import (
+    AuthorNameResolution,
     CategoryMembership,
     DeleteCandidate,
     GeoLocationMembership,
     GeoNameResolution,
-    IgnoredPaper
+    IgnoredPaper,
 )
 
 
 class DataExport:
-    EXPORT_VERSION = 2
+    EXPORT_VERSION = 3
 
     @staticmethod
     def download_image(url):
@@ -43,6 +44,12 @@ class DataExport:
         return [{"doi": candidate.paper.doi, "type": candidate.type,
                  "fp": candidate.false_positive, "score": candidate.score}
                 for candidate in DeleteCandidate.objects.all()]
+
+    @staticmethod
+    def _export_author_resolutions():
+        return [{"source_fname": res.source_first_name, "source_lname": res.source_last_name,
+                 "target_fname": res.target_author.first_name, "target_lname": res.target_author.last_name}
+                for res in AuthorNameResolution.objects.all()]
 
     @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
@@ -145,8 +152,9 @@ class DataExport:
                                                   "score": CategoryMembership.objects.get(
                                                       category__model_identifier=c.model_identifier, paper=paper).score}
                                                  for c in paper.categories.all()],
-                        "locations": [{"id": loc.pk, "state": GeoLocationMembership.objects.get(paper=paper,
-                                                                                              location__id=loc.pk).state,
+                        "locations": [{"id": loc.pk,
+                                       "state": GeoLocationMembership.objects.get(paper=paper,
+                                                                                  location__id=loc.pk).state,
                                        "word": GeoLocationMembership.objects.get(paper=paper,
                                                                                  location__id=loc.pk).word}
                                       for loc in paper.locations.all()],
@@ -173,6 +181,7 @@ class DataExport:
                 geo_name_resolutions = DataExport._export_geo_name_resolutions()
                 ignored_papers = DataExport._export_ignored_papers()
                 delete_candidates = DataExport._export_delete_candidates()
+                author_resolutions = DataExport._export_author_resolutions()
 
                 data = {
                     "export_version": DataExport.EXPORT_VERSION,
@@ -185,6 +194,7 @@ class DataExport:
                     "geo_name_resolutions": geo_name_resolutions,
                     "ignored_papers": ignored_papers,
                     "delete_candidates": delete_candidates,
+                    "author_resolutions": author_resolutions
                 }
 
                 with open(json_path, "w") as file:

@@ -158,17 +158,24 @@ class AuthorNameResolution(models.Model):
 
     @staticmethod
     def add(old_first, old_last, new_first, new_last):
+        """
+        Creates an author name resolution from an old author to a new author (with given names).
+        Also maps publications of old author to new author and deletes the old author.
+        Returns (resolution_created, new_author_created).
+        """
         if old_first == new_first and old_last == new_last:
-            return False
+            return False, False
 
-        new_author, created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
+        new_author, new_author_created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
         with transaction.atomic():
-            AuthorNameResolution.objects.get_or_create(source_first_name=old_first, source_last_name=old_last, target_author=new_author)
+            _, resolution_created = AuthorNameResolution.objects.get_or_create(
+                source_first_name=old_first, source_last_name=old_last, target_author=new_author
+            )
             try:
                 old_author = Author.objects.get(first_name=old_first, last_name=old_last)
 
                 if new_author == old_author:
-                    return False
+                    return resolution_created, False
 
                 memberships = Paper.authors.through.objects.filter(author=old_author)
                 for membership in memberships:
@@ -182,7 +189,7 @@ class AuthorNameResolution(models.Model):
                 old_author.delete()
             except Author.DoesNotExist:
                 pass
-        return created
+        return resolution_created, new_author_created
 
     class Meta:
         indexes = [
