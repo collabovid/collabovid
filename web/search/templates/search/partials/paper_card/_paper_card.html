@@ -125,14 +125,17 @@
 
                                                 {% include "search/partials/paper_card/_categories.html" %}
 
+                                                {% comment %}
                                                 {% if paper.topic %}
                                                     |
                                                 {% endif %}
+                                                {% endcomment %}
                                             {% endif %}
-
+                                            {% comment %}
                                             {% if paper.topic %}
                                                 {% include "search/partials/paper_card/_topic.html" %}
                                             {% endif %}
+                                            {% endcomment %}
                                         </div>
 
                                     </div>
