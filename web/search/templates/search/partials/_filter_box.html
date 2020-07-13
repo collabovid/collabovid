@@ -113,6 +113,56 @@
                     </div>
                 </div>
 
+                 <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="topics-input">
+                            <strong>Topics</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input type="text"
+                               id="topics-input"
+                               data-url="{% url "get-topics" %}"
+                               data-result-key="topics"
+                               data-count-filter="true"
+                               name="topics"
+                               class="tagify--outside"
+                               placeholder="Topic name">
+                        <div class="text-muted small">
+                            Topics are more fine-grained than categories and allow for a more detailed search
+                            query. Each topic has several keywords assigned to it which make them easy to find
+                            even if you don't use their correct name.
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <label for="locations-input">
+                            <strong>Locations</strong>
+                        </label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <input type="text"
+                               id="locations-input"
+                               data-url="{% url "get-locations" %}"
+                               data-result-key="locations"
+                               data-count-filter="true"
+                               name="locations"
+                               class="tagify--outside"
+                               placeholder="Location name">
+                        <div class="text-muted small">Locations are countries or cities a paper is referring to. Not
+                            every paper has an associated location. If no location is selected the value defaults to
+                            all.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row mt-3">
                     <div class="col-12">
                         <label for="start-date">
@@ -173,31 +223,6 @@
                 </div>
 
 
-                <div class="row mt-3">
-                    <div class="col-12">
-                        <label for="locations-input">
-                            <strong>Locations</strong>
-                        </label>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-12">
-                        <input type="text"
-                               id="locations-input"
-                               data-url="{% url "get-locations" %}"
-                               data-result-key="locations"
-                               data-count-filter="true"
-                               name="locations"
-                               class="tagify--outside"
-                               placeholder="Location name">
-                        <div class="text-muted small">Locations are countries or cities a paper is referring to. Not
-                            every paper has an associated location. If no location is selected the value defaults to
-                            all.
-                        </div>
-                    </div>
-                </div>
-
-
                 <div class="row mt-3 d-none d-lg-block">
                     <div class="col-12 text-right">
                         <button id="filter-form-submit" type="submit" class="btn btn-success" disabled><i
@@ -222,6 +247,14 @@
 
         $("#authors-input").tagifyAjax({
             initialValues: authorInitialValues,
+            tagifySettings: {}
+        });
+
+
+        let topicsInitialValues = JSON.parse('{{ form.cleaned_data.topics|topics_to_json|escapejs }}');
+
+        $("#topics-input").tagifyAjax({
+            initialValues: topicsInitialValues,
             tagifySettings: {}
         });
 

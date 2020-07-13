@@ -1,0 +1,35 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    {% load paper_card_extras %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Topics</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+        </div>
+    </div>
+    <div class="container">
+        <div class="row pb-5">
+            <form class="form" action="{% url 'topics_merge' %}" method="post">
+                {% csrf_token %}
+                <label class="my-1 mr-2" for="topic1">Topic 1</label>
+                <select class="custom-select my-1 mr-sm-2" id="topic1" name="topic1">
+                    {% for topic in topics %}
+                        <option value="{{ topic.pk }}">{{ topic.name }}</option>
+                    {% endfor %}
+                </select>
+                <label class="my-1 mr-2" for="topic2">Topic 2</label>
+                <select class="custom-select my-1 mr-sm-2" id="topic2" name="topic2">
+                    {% for topic in topics %}
+                        <option value="{{ topic.pk }}">{{ topic.name }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-primary mt-3" type="submit">Merge</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

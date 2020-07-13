@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import Paper
+from data.models import Paper, Category
 from search.suggestions_helper import SuggestionsHelper
 from statistics import PaperStatistics
 
@@ -12,7 +12,7 @@ import rispy
 from search.forms import SearchForm, FindSimilarPapersForm
 from search.tagify.tagify_searchable import *
 
-from data.documents import AuthorDocument, JournalDocument
+from data.documents import AuthorDocument, JournalDocument, TopicDocument
 from django.conf import settings
 import io
 import heapq
@@ -89,7 +89,7 @@ def search(request):
         if form.is_valid():
             pass
 
-        return render(request, "search/search.html", {'form': form})
+        return render(request, "search/search.html", {'form': form, 'categories': Category.objects.all()})
     elif request.method == "POST":
         form = SearchForm(request.POST)
         return render_search_result(request, form)
@@ -148,7 +148,7 @@ def render_search_result(request, form):
         return render(request, "search/ajax/_search_result_error.html",
                       {'message': 'Your request is invalid.' + str(form.errors)})
 
-    search_response_helper = SearchRequestHelper(form)
+    search_response_helper = SearchRequestHelper(form, save_request=not request.user.is_authenticated)
 
     if search_response_helper.error:
         return render(request, "search/ajax/_search_result_error.html",
@@ -170,11 +170,26 @@ def render_search_result(request, form):
             page_obj = None
 
         search_result['papers'] = page_obj
+        search_result['use_paging'] = True
 
         return render(request, "search/ajax/_search_results.html", search_result)
 
     return render(request, "search/ajax/_search_result_error.html",
                   {'message': 'Your request uses an invalid result type.'})
+
+
+def list_topics(request):
+    query = request.GET.get('query', '')
+
+    if settings.USING_ELASTICSEARCH:
+        topics = SuggestionsHelper.compute_elasticsearch_suggestions(model=Topic,
+                                                                     search=TopicDocument.search(),
+                                                                     query=query, fields=['topic_name_suggest',
+                                                                                          'topic_keyword_suggest'])
+    else:
+        topics = SuggestionsHelper.compute_postgres_suggestions(model=Topic, query=query)
+
+    return JsonResponse({"topics": TopicSearchable(topics=topics).dict})
 
 
 def list_authors(request):
@@ -183,7 +198,7 @@ def list_authors(request):
     if settings.USING_ELASTICSEARCH:
         authors = SuggestionsHelper.compute_elasticsearch_suggestions(model=Author,
                                                                       search=AuthorDocument.search(),
-                                                                      query=query, field='full_name_suggest')
+                                                                      query=query, fields=['full_name_suggest'])
     else:
         authors = SuggestionsHelper.compute_postgres_suggestions(model=Author, query=query)
 
@@ -196,7 +211,7 @@ def list_journals(request):
     if settings.USING_ELASTICSEARCH:
         journals = SuggestionsHelper.compute_elasticsearch_suggestions(model=Journal,
                                                                        search=JournalDocument.search(),
-                                                                       query=query, field='name_suggest').annotate(
+                                                                       query=query, fields=['name_suggest']).annotate(
             paper_count=Count('papers'))
     else:
         journals = SuggestionsHelper.compute_postgres_suggestions(model=Journal, query=query)

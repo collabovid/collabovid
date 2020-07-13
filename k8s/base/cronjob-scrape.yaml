@@ -24,8 +24,13 @@ spec:
               volumeMounts:
                 - name: resources
                   mountPath: /resources
+                - name: models
+                  mountPath: /models
           restartPolicy: Never
           volumes:
             - name: resources
               hostPath:
                 path: /opt/resources
+            - name: models
+              hostPath:
+                path: /models

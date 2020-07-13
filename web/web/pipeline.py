@@ -45,6 +45,18 @@ PIPELINE = {
             ),
             'output_filename': 'map.js'
         },
+        'embedding-visualization': {
+            'source_filenames': (
+                'js/three.js',
+                'js/OrbitControls.js',
+                'js/math.min.js',
+                'js/bootstrap-slider.min.js',
+                'js/tween.umd.js',
+                'core/js/embedding_visualization.js',
+                'core/js/embedding_visualization_view.js',
+            ),
+            'output_filename': 'embedding_visualization.js'
+        }
     },
     'STYLESHEETS': {
         'base': {
@@ -95,6 +107,13 @@ PIPELINE = {
                 'css/jquery-jvectormap-2.0.5.css',
             ),
             'output_filename': 'map.css',
-        }
+        },
+        'embedding_visualization': {
+            'source_filenames': (
+                'css/bootstrap-slider.css',
+                'core/css/embedding.css',
+            ),
+            'output_filename': 'embedding_visualization.css',
+        },
     },
 }

@@ -1,0 +1,7 @@
+<a href="{% url "embedding-visualization-for-topic" paper.topic.pk %}"
+   class="topic-link"
+   data-topic-id="{{ paper.topic.pk }}">
+    <span class="badge topic-badge">
+        {{ paper.topic.name }}
+    </span>
+</a>

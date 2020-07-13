@@ -4,14 +4,14 @@ import logging
 from data.models import Paper, Author
 
 from search.forms import SearchForm
+from search.models import SearchQuery
 from search.paginator import FakePaginator, ScoreSortPaginator
 from search.tagify.tagify_searchable import AuthorSearchable
 import json
-
-
+from django.conf import settings
 class SearchRequestHelper:
 
-    def __init__(self, form: SearchForm):
+    def __init__(self, form: SearchForm, save_request: bool = False):
         logger = logging.getLogger(__name__)
 
         self._response = None
@@ -37,6 +37,8 @@ class SearchRequestHelper:
 
         if self._response is None:
             self._error = True
+        elif settings.SAVE_SEARCH_QUERIES and save_request and form.interesting:
+            SearchQuery.objects.create(query=form.to_dict())
 
     @property
     def error(self):

@@ -1,9 +1,10 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from .models import Author, Journal, Paper
+from .models import Author, Journal, Paper, Topic
 
 from elasticsearch_dsl import analyzer
 from elasticsearch_dsl.analysis import token_filter
+from itertools import permutations
 
 edge_ngram_completion_filter = token_filter(
     'edge_ngram_completion_filter',
@@ -78,3 +79,25 @@ class PaperDocument(Document):
         """
         if isinstance(related_instance, Author):
             return related_instance.publications.all()
+
+
+@registry.register_document
+class TopicDocument(Document):
+
+    class Index:
+        name = 'topics'
+        settings = {'number_of_shards': 1,
+                    'number_of_replicas': 0}
+
+    topic_name_suggest = fields.CompletionField()
+    topic_keyword_suggest = fields.CompletionField()
+
+    def prepare_topic_name_suggest(self, instance: Topic):
+        return [' '.join(p) for p in permutations(instance.name.split())]
+
+    def prepare_topic_keyword_suggest(self, instance: Topic):
+        return [p.strip() for p in instance.keywords.split()]
+
+    class Django:
+        model = Topic
+

@@ -146,7 +146,10 @@
             <h3 class="text-muted d-md-inline-block">Similar Papers</h3>
         </div>
         {% if error %}
-            <div class="my-5 text-center text-danger font-weight-bold">We encountered an unexpected error.</div>
+            <div class="my-5 text-center text-danger font-weight-bold">
+                This paper was just added to our dataset. Please give us a few minutes so that we can
+                compute which papers are similar.
+            </div>
         {% else %}
             {% for current_paper in similar_papers %}
                 <div class="my-5">

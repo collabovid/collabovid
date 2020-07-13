@@ -6,7 +6,7 @@
       "name": "General",
       "description": "General information and news",
       "model_identifier": "general",
-      "color": "#007799"
+      "color": "#ef9556"
     }
   },
   {
@@ -26,7 +26,7 @@
       "name": "Transmission",
       "description": "Characteristics and modes of covid-19 transmissions, such as human-to-human",
       "model_identifier": "transmission",
-      "color": "#bc5090"
+      "color": "#ffa49c"
     }
   },
   {
@@ -46,7 +46,7 @@
       "name": "Treatment",
       "description": "Treatment strategies, therapeutic procedures, and vaccine development",
       "model_identifier": "treatment",
-      "color": "#ffa49c"
+      "color": "#828166"
     }
   },
   {
@@ -56,7 +56,7 @@
       "name": "Prevention",
       "description": "Prevention, control, response and management strategies",
       "model_identifier": "prevention",
-      "color": "#ef9556"
+      "color": "#bc5090"
     }
   },
   {
@@ -66,7 +66,7 @@
       "name": "Case Report",
       "description": "Descriptions of specific patient cases",
       "model_identifier": "case-report",
-      "color": "#009692"
+      "color": "#3c5f4a"
     }
   },
   {

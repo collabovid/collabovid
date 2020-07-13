@@ -9,4 +9,5 @@ urlpatterns = [
     path('authors', list_authors, name='get-authors'),
     path('journals', list_journals, name='get-journals'),
     path('locations', list_locations, name='get-locations'),
+    path('topics', list_topics, name='get-topics'),
 ]

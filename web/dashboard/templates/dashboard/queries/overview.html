@@ -1,0 +1,20 @@
+{% extends "dashboard/base.html" %}
+{% load humanize %}
+
+{% block content %}
+
+    <h2>Latest {{ search_queries.count }}/{{ total }} Queries</h2>
+    
+    <table class="table table-striped w-100 mt-3">
+
+        {% for search_query in search_queries %}
+
+            <tr>
+                <td>{{ search_query.query }}</td>
+                <td class="text-muted w-25">{{ search_query.created_at|naturaltime }}</td>
+            </tr>
+
+        {% endfor %}
+
+    </table>
+{% endblock %}

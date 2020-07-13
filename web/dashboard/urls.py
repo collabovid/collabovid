@@ -1,10 +1,12 @@
 from django.urls import path, include
 from django.shortcuts import redirect
 from .views import *
+from .topic_views import *
 
 urlpatterns = [
     path('', lambda request: redirect('tasks', permanent=False), name='dashboard'),
     path('tasks', tasks, name='tasks'),
+    path('queries', queries, name='queries'),
     path('tasks/detail/<int:id>', task_detail, name='task_detail'),
     path('tasks/create/', select_task, name='task_select'),
     path('tasks/create/<str:task_id>', create_task, name='task_create'),
@@ -20,4 +22,7 @@ urlpatterns = [
     path('locations/edit/<int:location_id>', edit_location, name='edit_location'),
     path('locations/add/<path:doi>', add_location, name='add_location'),
     path('language-detection', language_detection, name='language-detection'),
+    path('topics', topics_overview, name='topics'),
+    path('topic/<int:topic_id>', papers_for_topic, name='topic_papers'),
+    path('topics-merge', merge_topics, name='topics_merge')
 ]
