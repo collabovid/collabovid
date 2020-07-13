@@ -51,7 +51,7 @@
                 colors: colors,
                 url: url,
                 {% if paper %}preSelectedPaper: "{{ paper.doi }}",{% endif %}
-                {% if topic %}preSelectedTopic: "{{ topic.pk }}",{% endif %}
+                {% if topic %}preSelectedTopic: {{ topic.pk }},{% endif %}
                 atlasImageUrl: "{{ atlas_image_url }}",
                 paperFileUrl: "{{ paper_file_url }}",
                 receivePaperUrl: "{% url "receive-papers" %}"

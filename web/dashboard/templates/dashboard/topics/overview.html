@@ -5,11 +5,17 @@
     {% load paper_card_extras %}
 
     <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-        <h1 class="h2">Topics</h1>
+        <h1 class="h2">Topics ({{ topics | length }})</h1>
         <div class="btn-toolbar mb-2 mb-md-0">
             <a href="{% url 'topics_merge' %}" class="btn btn-sm btn-outline-secondary">
                 Merge Topics
             </a>
+            <form action="{% url 'topics_merge_generated' %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-sm ml-2 btn-outline-secondary">
+                    Merge Generated
+                </button>
+            </form>
         </div>
     </div>
     <div class="container">

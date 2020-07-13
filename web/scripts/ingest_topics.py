@@ -27,6 +27,9 @@ elif args.url:
 
 paper_topic_dict = {}
 
+for topic in Topic.objects.all():
+    topic.delete()
+
 print(f'Creating {len(topics)} topics')
 for topic in tqdm(topics):
     new_topic = Topic()

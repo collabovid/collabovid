@@ -53,8 +53,8 @@ def embedding_visualization(request, topic_pk=None, doi=None):
         'topic_dict': json.dumps(topic_dict),
         'categories': categories,
         'category_colors': json.dumps(category_colors),
-        'atlas_image_url': '/static/img/atlas.jpg',
-        'paper_file_url': '/static/embeddings_3d.json'
+        'atlas_image_url': settings.PAPER_ATLAS_IMAGES_FILE_URL,
+        'paper_file_url': settings.EMBEDDINGS_FILE_URL
     }
 
     if topic_pk:

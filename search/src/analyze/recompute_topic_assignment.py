@@ -1,11 +1,12 @@
 from tasks.definitions import Runnable, register_task
 from . import get_vectorizer
 from data.models import Paper, Topic
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 import numpy as np
 from .utils import get_predictive_words
 import joblib
 from collections import defaultdict
+from . import EMBEDDING_VECTORIZER
 
 
 @register_task
@@ -19,17 +20,26 @@ class RecomputeTopicAssignment(Runnable):
     def description():
         return "Computes a full clustering of the paper embeddings and assigns all papers to newly created topics."
 
-    def __init__(self, n_clusters: int = 48, vectorizer_name: str = 'transformer-paper-nearest-512', *args, **kwargs):
+    def __init__(self, n_clusters: int = 48, vectorizer_name: str = EMBEDDING_VECTORIZER,
+                 cluster_algorithm: str = 'kmeans', *args, **kwargs):
         super(RecomputeTopicAssignment, self).__init__(*args, **kwargs)
         self._vectorizer_name = vectorizer_name
         self.n_clusters = n_clusters
+        self._cluster_algorithm = cluster_algorithm
 
     def run(self):
         self.log("Starting RecomputeTopicAssignment")
         vectorizer = get_vectorizer(self._vectorizer_name)
         paper_matrix = vectorizer.paper_matrix
         X = 0.5 * paper_matrix['abstract'] + 0.5 * paper_matrix['title']
-        clustering = KMeans(n_clusters=self.n_clusters).fit(X)
+
+        if self._cluster_algorithm == 'kmeans':
+            clustering = KMeans(n_clusters=self.n_clusters).fit(X)
+        elif self._cluster_algorithm == 'agglomerative':
+            clustering = AgglomerativeClustering(n_clusters=self.n_clusters).fit(X)
+        else:
+            raise ValueError("Unknown clustering algorithm.")
+
         clusters = clustering.labels_
         id_map = paper_matrix['id_map']
 

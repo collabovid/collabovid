@@ -18,9 +18,26 @@ def topics_overview(request):
 def papers_for_topic(request, topic_id):
     topic = get_object_or_404(Topic, pk=topic_id)
     papers = list(topic.papers.all())
-    random.sample(papers, 20)
     return render(request, 'dashboard/topics/topic_papers.html',
                   {'topic': topic, 'papers': papers, 'debug': settings.DEBUG})
+
+
+@staff_member_required
+def merge_generated(request):
+    if request.method == 'POST':
+        new_topic = Topic()
+        new_topic.save()
+        for topic in Topic.objects.all():
+            if topic.name.startswith('Generated:'):
+                for paper in topic.papers.all():
+                    paper.topic = new_topic
+                    paper.save()
+                topic.delete()
+        new_topic.name = 'Generated Merged'
+        new_topic.save()
+        messages.add_message(request, messages.SUCCESS, f"Merged Topics")
+        return redirect('topics')
+    return 404
 
 
 @staff_member_required
