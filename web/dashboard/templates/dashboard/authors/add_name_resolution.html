@@ -17,6 +17,20 @@
                     <button type="submit" class="btn btn-outline-success mt-2">Add</button>
                 </form>
             </div>
+            <div>
+                <h4 class="mt-4">Papers:</h4>
+                {% for paper in author.publications.all %}
+                    <form method="POST" action="{% url "swap_all_author_names" paper.doi %}">
+                        {% csrf_token %}
+                        <div class="d-inline">{{ paper.title }}
+                            ({% for paper_author in paper.authors.all %}{{ paper_author.last_name }}, {{ paper_author.first_name }}{% if not forloop.last %} | {% endif %}{% endfor %})
+                        </div>
+                        <button type="submit" id="swap_btn" class="btn btn-sm btn-outline-primary ml-2">
+                            Swap first and last for all authors
+                        </button>
+                    </form>
+                {% endfor %}
+            </div>
         </div>
     </div>
 {% endblock %}

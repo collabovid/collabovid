@@ -408,3 +408,18 @@ def add_author_name_resolution(request, author_id):
         AuthorNameResolution.add(author.first_name, author.last_name,
                                  request.POST.get('first_name'), request.POST.get('last_name'))
         return HttpResponse('Success')
+
+
+@staff_member_required
+def swap_all_author_names(request, doi):
+    if request.method == 'POST':
+        try:
+            paper = Paper.objects.get(doi=doi)
+            for author in paper.authors.all():
+                AuthorNameResolution.add(author.first_name, author.last_name, author.last_name, author.first_name)
+            return redirect('paper', doi=doi)
+        except Paper.DoesNotExist:
+            return HttpResponseNotFound(f"Unknown Paper {doi}")
+    else:
+        return HttpResponseNotFound()
+
