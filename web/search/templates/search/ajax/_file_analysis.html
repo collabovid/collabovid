@@ -1,0 +1,84 @@
+<h3 class="text-muted">Literature Analysis</h3>
+
+{% if file_analyzer.ignored_papers|length > 0 %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        We were unable to parse {{ file_analyzer.ignored_papers|length }} literature entries. A reason might be that the
+        entry is missing
+        a doi or a title.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endif %}
+We analyzed your file and found {{ file_analyzer.papers.count }} papers that are in our database and {{ file_analyzer.missing_entries|length }}
+that we don't have in our database. You can review the results below. To continue to the similar paper select between
+two and ten papers that you want to analyze.
+
+
+<form id="similar-paper-form" method="get" action="{% url "similar-papers" %}">
+    {% if file_analyzer.papers %}
+        <h4 class="text-muted mt-3">
+            Found Papers
+            <span class="selected-count-label float-right small">Selected <span>0</span>/10</span>
+        </h4>
+        <ul class="list-group selectable-list-group w-100">
+            {% for paper in file_analyzer.papers.all %}
+                {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if file_analyzer.missing_entries %}
+        <h4 class="text-muted mt-3">Missing Papers</h4>
+        <ul class="list-group w-100">
+            {% for paper in file_analyzer.missing_entries %}
+                <li class="list-group-item text-danger">
+                    {{ paper.title }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if file_analyzer.papers %}
+
+        <div class="text-right mt-3">
+        <span id="similar-paper-form-disabled-button" data-toggle="tooltip" title="Disabled tooltip">
+            <button class="btn btn-success" disabled="disabled">Continue</button>
+        </span>
+
+            <span id="similar-paper-form-enabled-button" style="display: none;">
+            <button class="btn btn-success">Continue</button>
+        </span>
+        </div>
+
+    {% endif %}
+</form>
+
+<script>
+    $(document).ready(function (e) {
+
+        let form = $("#similar-paper-form");
+        let disabled_button = $("#similar-paper-form-disabled-button");
+        let enabled_button = $("#similar-paper-form-enabled-button");
+
+
+        form.find("input[name=dois]").change(function () {
+
+            let total = form.find("input[name=dois]").length;
+            let selected = form.find("input[name=dois]:checked").length;
+
+            if (selected >= 2) {
+                disabled_button.hide();
+                enabled_button.show();
+            } else {
+                disabled_button.show();
+                enabled_button.hide();
+            }
+
+            $(".selected-count-label span").html(selected)
+
+        });
+
+    })
+</script>

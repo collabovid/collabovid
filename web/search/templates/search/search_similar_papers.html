@@ -5,44 +5,64 @@
 
     <div class="gradient-header">
         <div class="container mt-4">
-            <h2 class="text-white">Find similar papers</h2>
+            <h1 class="text-white display-4 font-weight-light">Search for similar research</h1>
+            <div class="muted-white">
+                For a given list of papers, you can find papers that are closely related to your search query.
+                In order to obtain the desired results we recommend using fewer papers which are very similar
+                to each other rather than a lot of papers with varying topic.
+                You can find the list of selected papers below. You can enable/disable certain papers
+                and refresh the results if you like.
+            </div>
         </div>
         {% include 'core/partials/_rounded_bottom.html' %}
     </div>
 
     <div class="container mt-3">
 
-        <div class="row mt-3">
+        <div class="row d-none d-lg-flex">
             <div class="col-lg-4">
-                <h4 class="text-muted font-weight-light">Your papers</h4>
+                <h4 class="text-muted font-weight-light mb-0">Select/Deselect Papers</h4>
             </div>
+
             <div class="col-lg-8">
-                <h3 class="text-muted">Similar papers</h3>
+                <h3 class="text-muted mb-0">Similar papers</h3>
             </div>
         </div>
 
+
         <div class="row">
 
-            <div class="col-lg-4">
+            <div class="col-12 col-lg-4">
+                <h3 class="text-muted font-weight-light d-lg-none">Select/Deselect Papers</h3>
+
                 <form id="similar-paper-form" method="post" action="{% url "similar-papers" %}">
                     {% csrf_token %}
-                    <div class="text-muted">
-                        You can find the list of selected papers below. You can enable/disable certain papers
-                        and refresh the results if you like.
-                    </div>
-                    <ul class="list-group selectable-list-group">
+
+                    <ul class="list-group selectable-list-group mt-3">
                         {% for paper in query_papers.all %}
                             {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True short=True checked=True %}
                         {% endfor %}
                     </ul>
 
-                    <div class="text-right mt-2">
-                        <button class="btn btn-success">Refresh</button>
+                    <div class="d-flex mt-2">
+                        <div class="text-left text-muted">
+                            <a id="clear-button" href="#">Deselect all</a> &middot;
+                            <a id="select-all-button" href="#">Select All</a>
+                        </div>
+
+                        <div class="text-right flex-fill">
+                            <button class="btn btn-success">
+                                <i class="fas fa-sync"></i>
+                                Refresh
+                            </button>
+                        </div>
                     </div>
 
                 </form>
             </div>
-            <div class="col-lg-8">
+            <div class="col-12 col-lg-8">
+                <h3 class="text-muted d-lg-none">Similar papers</h3>
+
                 <div id="paper-container"></div>
 
                 <div id="paper-loading-indicator"
@@ -75,6 +95,17 @@
                 paper_container: paperContainer,
                 pagination_container: paginationContainer,
                 receivePaperUrl: "{% url "receive-papers" %}"
+            });
+            form.submit();
+
+            $("#clear-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", false);
+            });
+
+            $("#select-all-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", true);
             });
         })
     </script>

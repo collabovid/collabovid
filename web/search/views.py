@@ -1,13 +1,14 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from data.models import Paper, Category
+from search.literature_utils.literature_file_analyzer import RisFileAnalyzer
+from search.literature_utils.literature_file_exporter import RisFileExporter, BibTeXFileExporter
+
 from search.suggestions_helper import SuggestionsHelper
 from statistics import PaperStatistics
 
 from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
-
-import rispy
 
 from search.forms import SearchForm, FindSimilarPapersForm
 from search.tagify.tagify_searchable import *
@@ -15,9 +16,9 @@ from search.tagify.tagify_searchable import *
 from data.documents import AuthorDocument, JournalDocument, TopicDocument
 from django.conf import settings
 import io
-import heapq
 
 MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
+
 
 def upload_ris(request):
     if request.method == "GET":
@@ -31,58 +32,35 @@ def upload_ris(request):
 
             print(file_handle.size)
             if file_handle.size < MAX_UPLOAD_FILE_SIZE:
+                file_analyzer = RisFileAnalyzer(file_handle.read().decode('UTF-8'))
 
-                entries = rispy.loads(file_handle.read().decode('UTF-8'))
-
-                file_papers = []
-
-                for entry in entries:
-                    if "doi" in entry:
-                        file_papers.append({"doi": entry["doi"], "title": entry["primary_title"]})
-
-                found_papers = Paper.objects.filter(pk__in=[entry['doi'] for entry in file_papers])
-
-                found_paper_dois = set(found_papers.values_list('doi', flat=True))
-
-                ignored_papers = []
-
-                for paper in file_papers:
-                    if paper['doi'] not in found_paper_dois:
-                        ignored_papers.append(paper)
-
-                return render(request, "search/ajax/_ris_file_analysis.html", {
-                    "found_papers": found_papers,
-                    "ignored_papers": ignored_papers
+                return render(request, "search/ajax/_file_analysis.html", {
+                    "file_analyzer": file_analyzer,
                 })
 
-        return HttpResponse("nas jsadasndoij oijsdoij")
+        return HttpResponseNotFound()
 
 
 def similar_papers(request):
-
     if request.method == "GET":
-
         dois = request.GET.getlist('dois')
-
         query_papers = Paper.objects.filter(pk__in=dois).all()
 
-        #similar_request = SimilarPaperRequestHelper(list(query_papers.values_list('doi', flat=True)),
-        #                                            total_papers=20,
-        #                                            papers_per_page=20)
-        papers = list(Paper.objects.all()[:2])
-
-        #if not similar_request.error:
-        #    papers = similar_request.paginator.page(1)
         return render(request, "search/search_similar_papers.html", {
             "query_papers": query_papers,
-            #"error": similar_request.error
         })
     elif request.method == "POST":
-        papers = Paper.objects.all()[:30]
 
-        return JsonResponse({'dois': list(papers.values_list('doi', flat=True))})
+        dois = request.POST.getlist('dois')
+        query_papers = Paper.objects.filter(pk__in=dois).all()
 
+        similar_request = SimilarPaperRequestHelper(list(query_papers.values_list('doi', flat=True)),
+                                                    total_papers=30)
 
+        return JsonResponse({
+            'dois': similar_request.dois,
+            'result_size': len(similar_request.dois)
+        })
 
 
 def search(request):
@@ -109,41 +87,26 @@ def export_search_result(request):
 
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()
+                exporter = RisFileExporter(papers=search_result['paginator'].page(1))
+                return exporter.build_response()
 
-                # Open StringIO to grab in-memory file contents
-                file = io.StringIO()
+    return HttpResponseNotFound()
 
-                entries = []
 
-                for paper in search_result['paginator'].page(search_result['paginator'].fixed_page):
-                    entry = {
-                        'primary_title': paper.title,
-                        'first_authors': [", ".join([author.last_name, author.first_name]) for author in paper.authors.all()],
-                        'abstract': paper.abstract,
-                        'doi': paper.doi,
-                        'publication_year': paper.published_at.year,
-                        'publisher': paper.host.name
-                    }
+def export_paper(request, export_type, doi):
+    if request.method == "GET":
+        get_object_or_404(Paper, pk=doi)
 
-                    if paper.pdf_url:
-                        entry['url'] = paper.pdf_url
+        if export_type == 'ris':
+            exporter = RisFileExporter(papers=Paper.objects.filter(pk=doi))
+        elif export_type == 'bibtex':
+            exporter = BibTeXFileExporter(papers=Paper.objects.filter(pk=doi))
+        else:
+            return HttpResponseNotFound()
 
-                    if paper.journal:
-                        entry['journal_name'] = paper.journal.displayname
-                        entry['type_of_reference'] = 'JOUR'
-                    else:
-                        entry['type_of_reference'] = 'GEN'
+        return exporter.build_response()
 
-                    entries.append(entry)
-
-                rispy.dump(entries, file)
-
-                response = HttpResponse(file.getvalue(), content_type='application/x-research-info-systems')
-                response['Content-Disposition'] = 'attachment; filename=collabovid-export.ris'
-
-                return response
-
-        return HttpResponseNotFound()
+    return HttpResponseNotFound()
 
 
 def render_search_result(request, form):

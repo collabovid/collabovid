@@ -11,6 +11,7 @@ from src.search.virtual_paginator import VirtualPaginator
 from collections import defaultdict
 import heapq
 
+
 def wait_until(condition, interval=0.1, timeout=10):
     start = time.time()
     while not condition() and time.time() - start < timeout:
@@ -54,9 +55,6 @@ def similar(request):
         limit = int(request.GET.get('limit'))
 
         dois = list(Paper.objects.filter(pk__in=dois).values_list('doi', flat=True))
-
-        print(dois)
-
         doi_scores = defaultdict(int)
         for doi in dois:
             similar_paper = paper_finder.similar(doi)
@@ -66,14 +64,12 @@ def similar(request):
         result = []
 
         flattened_score_dict = list(doi_scores.items())
-        print(flattened_score_dict)
 
         for doi, score in heapq.nlargest(limit, flattened_score_dict, key=lambda x: x[1]):
             result.append({
                 'doi': doi,
                 'score': score
             })
-            print(doi, score)
 
         return JsonResponse({'similar': result})
     return HttpResponseBadRequest("Only Get is allowed here")

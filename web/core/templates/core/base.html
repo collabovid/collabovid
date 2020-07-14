@@ -61,6 +61,9 @@
                 <li class="nav-item {% if request.resolver_match.url_name == "embedding-visualization" %}active{% endif %}">
                     <a class="nav-link" href="{% url "embedding-visualization" %}">Research Visualization</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "upload" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "upload" %}">Upload</a>
+                </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
                     <a class="nav-link" href="{% url "about" %}">About</a>
                 </li>
