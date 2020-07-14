@@ -281,7 +281,7 @@
                     "name": "n_neighbors",
                     "required": false,
                     "type": "int",
-                    "default": 20,
+                    "default": 15,
                     "is_primitive": true
                 }
             ]
