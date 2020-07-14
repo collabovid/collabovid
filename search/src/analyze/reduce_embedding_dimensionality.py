@@ -73,4 +73,6 @@ class ReduceEmbeddingDimensionality(Runnable):
                                               bucket=settings.AWS_STORAGE_BUCKET_NAME)
             s3_bucket_client.upload_as_json(settings.AWS_EMBEDDINGS_FILE_PATH, output)
 
+        Paper.objects.all().update(visualized=True)
+
         self.log("ReduceEmbeddingDimensionality finished")

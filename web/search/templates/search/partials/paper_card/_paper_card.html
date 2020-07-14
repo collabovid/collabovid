@@ -170,13 +170,15 @@
                                         {% endif %}
 
                                         <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
-                                        |
-                                        <a class="visualize-link"
-                                           data-paper-doi="{{ paper.doi }}"
-                                           href="{% url "embedding-visualization-for-doi" paper.doi %}"
-                                           target="_blank">
-                                            Visualize
-                                        </a>
+                                        {% if paper.visualized %}
+                                            |
+                                            <a class="visualize-link"
+                                               data-paper-doi="{{ paper.doi }}"
+                                               href="{% url "embedding-visualization-for-doi" paper.doi %}"
+                                               target="_blank">
+                                                Visualize
+                                            </a>
+                                        {% endif %}
 
                                     </div>
 

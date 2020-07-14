@@ -1,6 +1,7 @@
 from tasks.definitions import Runnable, register_task
 from . import get_vectorizer, get_used_vectorizers
 import time
+from data.models import Paper
 
 
 def wait_until(condition, interval=0.1, timeout=10):
@@ -50,5 +51,7 @@ class SetupVectorizer(Runnable):
             # cleanup models
             if not model_loaded:
                 vectorizer.cleanup_models()
+
+        Paper.objects.all().update(vectorized=True)
 
         self.log("Preprocessing finished")

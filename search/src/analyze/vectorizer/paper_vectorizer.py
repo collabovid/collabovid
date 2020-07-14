@@ -144,7 +144,7 @@ class PaperVectorizer:
 
         # determines if a paper needs an update
         def needs_update(paper):
-            return force_recompute
+            return force_recompute or not paper.vectorized
 
         # papers that need to be recomputed
         filtered_papers = []
@@ -152,6 +152,7 @@ class PaperVectorizer:
         # represents the index where the paper should be inserted in the final matrix
         new_matrix_idx = len(id_map)
         newly_added = 0
+        updated = 0
         for p in papers:
             if p.doi not in id_map:
                 # paper was not in existing matrix, it needs recomputation and we will append the result
@@ -162,6 +163,10 @@ class PaperVectorizer:
             elif needs_update(p):
                 # paper is in existing matrix, so just mark it for recomputing. An index is already saved in the id_map.
                 filtered_papers.append(p)
+                updated += 1
+
+        print(f'Newly added papers: {newly_added}')
+        print(f'Paper that need an update: {updated}')
 
         if len(filtered_papers) > 0:
             # construct index array based on id map
@@ -183,7 +188,7 @@ class PaperVectorizer:
 
                 if old_paper_matrix and not force_recompute:
                     # extend old matrix with dimensions of newly computed values
-                    matrix = np.append(old_paper_matrix[key], computed_matrix, axis=0)
+                    matrix = np.append(old_paper_matrix[key], matrix, axis=0)
 
                 for i, paper in enumerate(filtered_papers):
                     # get the matrix index for the computed value from the id map
@@ -195,5 +200,3 @@ class PaperVectorizer:
             return paper_matrix
         else:
             return old_paper_matrix
-
-

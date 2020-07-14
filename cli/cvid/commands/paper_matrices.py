@@ -24,7 +24,7 @@ class PaperMatricesCommand(S3SyncCommand):
 
     @property
     def name_choices(self):
-        return ['title_sentence_vectorizer', 'transformer_paper_oubiobert_512', 'transformer_paper_no_locations']
+        return ['transformer_paper_oubiobert_512', 'transformer_paper_no_locations', 'transformer_paper_sensitive_512']
 
     def help(self):
         return "Upload/download paper matrices to s3"
