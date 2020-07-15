@@ -1,4 +1,5 @@
 import os
+import re
 
 from .abstract.s3_command import S3Command
 
@@ -15,21 +16,28 @@ class ImportCommand(S3Command):
         return [os.path.basename(archive_path) for archive_path in reversed(archives) if
                            archive_path.endswith('.tar.gz')]
 
+    def _get_filename(self, idx):
+        archives = self._get_s3_archives()
+        if len(archives) <= idx:
+            print("No S3 archive to download")
+            return
+        return archives[idx]
+
     def run(self, args):
         if args.list:
             archives = self._get_s3_archives()
             for i, archive in enumerate(archives):
-                print(f"{i + 1}. {archive}")
+                print(f"{i}. {archive}")
         else:
             if args.filename:
-                print(f"Download {args.filename} from S3")
-                filename = args.filename
+                match = re.match(r'(\d+)\.?', args.filename)
+                if match:
+                    filename = self._get_filename(idx=int(match.group(1)))
+                else:
+                    filename = args.filename
+                print(f"Download {filename} from S3")
             else:
-                archives = self._get_s3_archives()
-                if len(archives) == 0:
-                    print("No S3 archive to download")
-                    return
-                filename = archives[0]
+                filename = self._get_filename(idx=0)
                 print(f"Download newest archive from S3: {filename}")
 
             local_dir = self.config['local-export-dir']
