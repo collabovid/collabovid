@@ -59,14 +59,21 @@ class ScrapeTask(Runnable):
                 'parameters': [],
                 'started_by': self._task.started_by
             }
-
             task_launcher.launch_task(name="setup-vectorizer", config=task_config, block=True)
-            self.progress(80)
+            self.progress(70)
+            self.log("Finished setup-vectorizer")
+
             task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
-            self.progress(90)
-            task_launcher.launch_task(name="nearest-neighbor-topic-assignment", config=task_config, block=True)
-            self.progress(100)
+            self.progress(80)
             self.log("Finished updating category assigment")
+
+            task_launcher.launch_task(name="nearest-neighbor-topic-assignment", config=task_config, block=True)
+            self.progress(90)
+            self.log("Finished nearest-neighbor-topic-assignment")
+
+            task_launcher.launch_task(name="reduce-embedding-dimensionality", config=task_config, block=True)
+            self.log("Finished reduce-embedding-dimensionality")
+            self.progress(95)
         else:
             self.log("Paper matrix update and topic assignment skipped.")
 
