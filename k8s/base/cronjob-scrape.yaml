@@ -33,4 +33,4 @@ spec:
                 path: /opt/resources
             - name: models
               hostPath:
-                path: /models
+                path: /opt/models
