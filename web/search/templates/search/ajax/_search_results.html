@@ -29,9 +29,8 @@
     <div class="my-5 text-center font-weight-bold">No results were found for your query.</div>
 {% endfor %}
 
-{% if use_paging %}
     <script type="text/javascript">
-
+        {% if use_paging %}
         window.Pagination.result_size = {{ result_size }};
 
         {% if papers.has_previous or papers.has_next %}
@@ -58,5 +57,8 @@
         {% endif %}
 
         $(".need-tooltip").tooltip();
+        {% endif %}
+
+        _altmetric_embed_init();
     </script>
-{% endif %}
+

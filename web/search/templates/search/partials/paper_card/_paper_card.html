@@ -16,9 +16,10 @@
 
         <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
-            <div class="paper-card-badge">
+            <div class="paper-card-badge text-right">
+                <div data-badge-type="4" data-badge-popover="right" data-doi="{{paper.doi}}" data-hide-no-mentions="true" class="altmetric-embed"></div>
                 {% if paper.is_preprint %}
-                    <span class="badge badge-pill badge-secondary small">Preprint</span>
+                    <span class="badge  badge-secondary small">Preprint</span>
                 {% endif %}
             </div>
 
