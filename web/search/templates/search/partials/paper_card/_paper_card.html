@@ -1,5 +1,6 @@
 {% load static %}
 {% load paper_card_extras %}
+{% load doi_utils %}
 <div class="card p-4 rounded shadow">
 
     <div class="row d-flex flex-wrap">
@@ -17,7 +18,13 @@
         <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
             <div class="paper-card-badge text-right">
-                <div data-badge-type="4" data-badge-popover="left" data-doi="{{paper.doi}}" data-hide-no-mentions="true" class="altmetric-embed"></div>
+                    <div data-badge-type="4" data-badge-popover="left"
+                         {% if not paper|is_arxiv %}
+                        data-doi="{{paper.doi}}"
+                        {% else %}
+                        data-arxiv-id={{paper.doi|extract_arxiv_id}}
+                        {% endif %}
+                         data-hide-no-mentions="true" class="altmetric-embed"></div>
                 {% if paper.is_preprint %}
                     <span class="badge  badge-secondary small">Preprint</span>
                 {% endif %}
@@ -34,7 +41,7 @@
 
                 <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
                     <div class="mb-1">
-                        {% if paper.doi|first not in 'arXiv:' %}
+                        {% if not paper|is_arxiv %}
                             <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>
                         {% else %}
                             {{ paper.doi }}
