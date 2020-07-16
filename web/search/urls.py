@@ -3,9 +3,9 @@ from .views import *
 
 urlpatterns = [
     path('search', search, name='search'),
-    path('export/search', export_search_result, name='search-export'),
+    path('export/search/<str:export_type>', export_search_result, name='search-export'),
     path('export/<str:export_type>/<path:doi>', export_paper, name='export-paper'),
-    path('upload', upload_ris, name='upload'),
+    path('upload', upload, name='upload'),
     path('similar', similar_papers, name='similar-papers'),
     path('authors', list_authors, name='get-authors'),
     path('journals', list_journals, name='get-journals'),

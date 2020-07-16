@@ -20,7 +20,7 @@ import io
 MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
 
 
-def upload_ris(request):
+def upload(request):
     if request.method == "GET":
         return render(request, "search/similar_papers_upload.html")
     if request.method == "POST":
@@ -31,13 +31,10 @@ def upload_ris(request):
             file_handle = request.FILES['file']
 
             if file_handle.size < MAX_UPLOAD_FILE_SIZE:
-                #try:
                 file_analyzer = BibFileAnalyzer(file_handle.read().decode('UTF-8'))
                 return render(request, "search/ajax/_file_analysis.html", {
                     "file_analyzer": file_analyzer,
                 })
-                #except Exception:
-                    #return HttpResponseNotFound()
 
         return HttpResponseNotFound()
 
@@ -45,11 +42,12 @@ def upload_ris(request):
 def similar_papers(request):
     if request.method == "GET":
         dois = request.GET.getlist('dois')
-        query_papers = Paper.objects.filter(pk__in=dois).all()
+        query_papers = Paper.objects.filter(pk__in=dois).all()[:10]
 
-        return render(request, "search/search_similar_papers.html", {
-            "query_papers": query_papers,
-        })
+        if query_papers.count() > 0:
+            return render(request, "search/search_similar_papers.html", {
+                "query_papers": query_papers,
+            })
     elif request.method == "POST":
 
         dois = request.POST.getlist('dois')
@@ -62,6 +60,8 @@ def similar_papers(request):
             'dois': similar_request.dois,
             'result_size': len(similar_request.dois)
         })
+
+    return HttpResponseNotFound()
 
 
 def search(request):
@@ -79,7 +79,7 @@ def search(request):
     return HttpResponseNotFound()
 
 
-def export_search_result(request):
+def export_search_result(request, export_type):
     if request.method == "GET":
         form = SearchForm(request.GET)
 
@@ -88,7 +88,14 @@ def export_search_result(request):
 
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()
-                exporter = RisFileExporter(papers=search_result['paginator'].page(1))
+
+                if export_type == 'ris':
+                    exporter = RisFileExporter(papers=search_result['paginator'].page(1))
+                elif export_type == 'bibtex':
+                    exporter = BibTeXFileExporter(papers=search_result['paginator'].page(1))
+                else:
+                    return HttpResponseNotFound()
+
                 return exporter.build_response()
 
     return HttpResponseNotFound()

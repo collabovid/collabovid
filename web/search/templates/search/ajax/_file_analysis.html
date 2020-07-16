@@ -16,7 +16,7 @@
     We analyzed your file and found {{ file_analyzer.papers.count }} {{ file_analyzer.papers.count|pluralize:"paper,papers" }}
     that {{ file_analyzer.papers.count|pluralize:"is,are" }} in our database{% if file_analyzer.missing_entries %} and {{ file_analyzer.missing_entries|length }} that we don't have in our database{% endif %}.
     You can review the results below.
-    To continue to the similar paper select between two and ten papers that you want to analyze.
+    To continue to the similar paper select between one and ten papers that you want to analyze.
 
 
     <form id="similar-paper-form" method="get" action="{% url "similar-papers" %}">
@@ -58,10 +58,6 @@
                 <button id="similar-paper-form-enabled-button" style="display: none;" class="btn btn-success">
                     Continue
                 </button>
-
-                <sup data-toggle="tooltip" title="Disabled tooltip">
-                    <i class="fas fa-question-circle"></i>
-                </sup>
             </div>
         </div>
 

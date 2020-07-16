@@ -10,7 +10,7 @@
             <div class="row mt-5">
                 <div class="col-12">
 
-                    <form id="paper-search-form" class="search-form" method="post"
+                    <form id="paper-search-form" class="search-form mb-3" method="post"
                           action="{% if search_url %}{{ search_url }}{% else %}{% url "search" %}{% endif %}">
                         <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
@@ -45,7 +45,7 @@
                         {% block search_head %}
                             <!-- For desktop search -->
 
-                            <div class="input-group input-group-lg mb-3">
+                            <div class="input-group input-group-lg">
                                 <div class="input-group-prepend border-right-0">
                                     <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
                                         <i class="fas fa-search"></i>
@@ -61,7 +61,15 @@
                             </div>
 
                             <!-- End desktop search -->
+                            <div class="muted-white float-right">
+                                You can also
+                                <a href="{% url "upload" %}" class="muted-white">
+                                    analyze to your literature
+                                </a>
+                            </div>
+
                         {% endblock %}
+
 
                     </form>
 
@@ -82,8 +90,9 @@
                                    class="nav-link {% if form.cleaned_data.tab == choice.0 %}active{% endif %}">
                                 {{ choice.1 }}
                                 <sup class="help-opener">
-                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label" data-toggle="modal"
-                                        data-target="#{{ choice.0 }}-modal"></i></sup>
+                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label"
+                                       data-toggle="modal"
+                                       data-target="#{{ choice.0 }}-modal"></i></sup>
                             </label>
                         </li>
                     {% endfor %}
@@ -91,10 +100,25 @@
             </div>
 
             <div class="col-3 col-lg-6 text-right">
-                <a id="download-button" class="btn btn-light mt-2"
-                   href="{% url "search-export" %}">
-                    <i class="fas fa-download"></i> Download Page
-                </a>
+
+                <div class="dropdown d-inline">
+                    <a type="button" id="citeDropdown" class="btn btn-light mt-2"
+                       data-toggle="dropdown" href="#">
+                        <i class="fas fa-download"></i> Download Page
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right"
+                         aria-labelledby="citeDropdown">
+                        <h6 class="dropdown-header">Export file format</h6>
+                        <a class="dropdown-item search-download-button"
+                           href="{% url "search-export" "ris" %}">
+                            Research Information System Format (.ris)
+                        </a>
+                        <a class="dropdown-item search-download-button"
+                           href="{% url "search-export" "bibtex" %}">
+                            BibTeX (.bib)
+                        </a>
+                    </div>
+                </div>
 
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
@@ -186,7 +210,7 @@
             let result_size_container = $("#result-size-container"); // Contains the amount of papers found.
             let paper_result_options_container = $("#paper-result-options-container"); // Contains the info and sort
 
-            let download_button = $("#download-button");
+            let download_button = $(".search-download-button");
 
             let searchEngine = form.collabovidSearch({
                 indicator: indicator,
@@ -221,8 +245,7 @@
                 form.submit();
             });
 
-            function generate_submission_data()
-            {
+            function generate_submission_data() {
                 let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
 
                 // Converting categories=x&categories=y to categories=x,y
@@ -248,7 +271,7 @@
                 // Full data must be submitted to the view. Submission data can be saved in the url.
                 let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
 
-                window.open($(this).attr('href')+ "?" + full_data , '_blank');
+                window.open($(this).attr('href') + "?" + full_data, '_blank');
 
             });
 

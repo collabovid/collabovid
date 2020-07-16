@@ -7,5 +7,4 @@ def extract_arxiv_id(value):
 
 @register.filter()
 def is_arxiv(paper):
-    print(paper.host.name)
     return paper.host.name == 'arXiv'
