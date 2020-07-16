@@ -6,8 +6,10 @@ from data.documents import PaperDocument
 from data.models import Paper
 import bibtexparser
 from bibtexparser.customization import *
-
-
+from bibtexparser.bibdatabase import STANDARD_TYPES as BIBTEX_STANDARD_TYPES
+import re
+from django.conf import settings
+from django.utils.crypto import get_random_string
 class LiteratureEntry:
 
     """
@@ -40,47 +42,56 @@ class LiteratureFileAnalyzer:
         search = PaperDocument.search()
 
         dois_for_entry = list()
-
         for entry in entries:
-            query = None
 
-            # Try to find record using its doi or full title
+            if settings.USING_ELASTICSEARCH:
+                query = None
 
-            if entry.doi:
-                query = QEs({
-                    "match": {
-                        "_id": entry.doi
-                    }
-                })
-            elif entry.title:
-                query = QEs({
-                    "match_phrase": {
-                        "title": entry.title
-                    }
-                })
+                # Try to find record using its doi or full title
 
-            search = search.source(excludes=['*'])
-            results = search.query(query).execute()
-
-            if results:
-                dois_for_entry += [(result.meta.id, entry) for result in results]
-                entry.result_found = True
-            elif entry.title:
-
-                # If not found try to find the entry by its title using match.
-                results = PaperDocument.search().query(QEs({
-                    'match': {
-                        'title': {
-                            'query': entry.title,
-                            'minimum_should_match': "90%"
+                if entry.doi:
+                    query = QEs({
+                        "match": {
+                            "_id": entry.doi
                         }
-                    }
-                })).execute()
+                    })
+                elif entry.title:
+                    query = QEs({
+                        "match_phrase": {
+                            "title": entry.title
+                        }
+                    })
+
+                search = search.source(excludes=['*'])
+                results = search.query(query).execute()
 
                 if results:
-                    dois_for_entry.append((results[0].meta.id, entry))
+                    dois_for_entry += [(result.meta.id, entry) for result in results]
                     entry.result_found = True
-                    entry.inexact_result_found = True
+                elif entry.title:
+
+                    # If not found try to find the entry by its title using match.
+                    results = PaperDocument.search().query(QEs({
+                        'match': {
+                            'title': {
+                                'query': entry.title,
+                                'minimum_should_match': "90%"
+                            }
+                        }
+                    })).execute()
+
+                    if results:
+                        dois_for_entry.append((results[0].meta.id, entry))
+                        entry.result_found = True
+                        entry.inexact_result_found = True
+            else:
+                print(entry.title, entry.doi)
+                papers = Paper.objects.filter(Q(pk=entry.doi) | Q(title=entry.title))
+                print(papers.count())
+
+                if papers.count() > 0:
+                    dois_for_entry.append((papers.first().doi, entry))
+                    entry.result_found = True
 
         whens = []
         for doi, entry in dois_for_entry:
@@ -108,6 +119,18 @@ class BibFileAnalyzer(LiteratureFileAnalyzer):
     """
     Implements a bib file analyzer.
     """
+
+    @staticmethod
+    def fix_missing_cite_keys(raw_file):
+
+        def random_key(matchobj):
+            return matchobj.group(1) + matchobj.group(2) + get_random_string(length=8) + matchobj.group(3)
+
+        for bibtex_type in BIBTEX_STANDARD_TYPES:
+            raw_file = re.sub(rf"(@{bibtex_type})" + r"({)\s*(,)", random_key, raw_file)
+
+        return raw_file
+
     def __init__(self, file):
 
         def customizations(record):
@@ -116,12 +139,14 @@ class BibFileAnalyzer(LiteratureFileAnalyzer):
             :param record: a record
             :returns: -- customized record
             """
+            record = convert_to_unicode(record)
             record = add_plaintext_fields(record)  # Removes {} etc. from a entry and puts them into plain_[entry]
             return record
 
         parser = BibTexParser()
+        parser.homogenize_fields = True
         parser.customization = customizations
-        bib_database = bibtexparser.loads(file, parser)
+        bib_database = bibtexparser.loads(self.fix_missing_cite_keys(file), parser)
 
         file_papers = []
         self._ignored_raw_entries = list()
