@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
 from data.models import Paper, Category
-from search.literature_utils.literature_file_analyzer import RisFileAnalyzer
+from search.literature_utils.literature_file_analyzer import BibFileAnalyzer
 from search.literature_utils.literature_file_exporter import RisFileExporter, BibTeXFileExporter
 
 from search.suggestions_helper import SuggestionsHelper
@@ -30,13 +30,14 @@ def upload_ris(request):
         if form.is_valid():
             file_handle = request.FILES['file']
 
-            print(file_handle.size)
             if file_handle.size < MAX_UPLOAD_FILE_SIZE:
-                file_analyzer = RisFileAnalyzer(file_handle.read().decode('UTF-8'))
-
+                #try:
+                file_analyzer = BibFileAnalyzer(file_handle.read().decode('UTF-8'))
                 return render(request, "search/ajax/_file_analysis.html", {
                     "file_analyzer": file_analyzer,
                 })
+                #except Exception:
+                    #return HttpResponseNotFound()
 
         return HttpResponseNotFound()
 

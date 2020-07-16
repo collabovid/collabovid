@@ -1,84 +1,119 @@
-<h3 class="text-muted">Literature Analysis</h3>
+{% if file_analyzer.papers %}
+    <h3 class="text-muted">Your analysis</h3>
 
-{% if file_analyzer.ignored_papers|length > 0 %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i>
-        We were unable to parse {{ file_analyzer.ignored_papers|length }} literature entries. A reason might be that the
-        entry is missing
-        a doi or a title.
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-{% endif %}
-We analyzed your file and found {{ file_analyzer.papers.count }} papers that are in our database and {{ file_analyzer.missing_entries|length }}
-that we don't have in our database. You can review the results below. To continue to the similar paper select between
-two and ten papers that you want to analyze.
+    {% if file_analyzer.ignored_raw_entries|length > 0 %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            We were unable to parse {{ file_analyzer.ignored_raw_entries|length }} literature
+            {{ file_analyzer.ignored_raw_entries|length|pluralize:"entry,entries" }}.
+            A reason might be that the {{ file_analyzer.ignored_raw_entries|length|pluralize:"entry is,entries are" }}
+            missing a doi and a title.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endif %}
+    We analyzed your file and found {{ file_analyzer.papers.count }} {{ file_analyzer.papers.count|pluralize:"paper,papers" }}
+    that {{ file_analyzer.papers.count|pluralize:"is,are" }} in our database{% if file_analyzer.missing_entries %} and {{ file_analyzer.missing_entries|length }} that we don't have in our database{% endif %}.
+    You can review the results below.
+    To continue to the similar paper select between two and ten papers that you want to analyze.
 
 
-<form id="similar-paper-form" method="get" action="{% url "similar-papers" %}">
-    {% if file_analyzer.papers %}
+    <form id="similar-paper-form" method="get" action="{% url "similar-papers" %}">
+
         <h4 class="text-muted mt-3">
             Found Papers
-            <span class="selected-count-label float-right small">Selected <span>0</span>/10</span>
+            <span class="selected-count-label float-right small text-danger">Selected <span>0</span>/10</span>
         </h4>
         <ul class="list-group selectable-list-group w-100">
             {% for paper in file_analyzer.papers.all %}
                 {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True %}
             {% endfor %}
         </ul>
-    {% endif %}
 
-    {% if file_analyzer.missing_entries %}
-        <h4 class="text-muted mt-3">Missing Papers</h4>
-        <ul class="list-group w-100">
-            {% for paper in file_analyzer.missing_entries %}
-                <li class="list-group-item text-danger">
-                    {{ paper.title }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% endif %}
 
-    {% if file_analyzer.papers %}
+        {% if file_analyzer.missing_entries %}
+            <h4 class="text-muted mt-3">Missing Papers</h4>
+            <ul class="list-group w-100">
+                {% for paper in file_analyzer.missing_entries %}
+                    <li class="list-group-item text-danger">
+                        {{ paper.title }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
 
-        <div class="text-right mt-3">
-        <span id="similar-paper-form-disabled-button" data-toggle="tooltip" title="Disabled tooltip">
-            <button class="btn btn-success" disabled="disabled">Continue</button>
-        </span>
+        <div class="d-flex mt-3">
 
-            <span id="similar-paper-form-enabled-button" style="display: none;">
-            <button class="btn btn-success">Continue</button>
-        </span>
+            <div class="text-left text-muted">
+                <a id="clear-button" href="#">Deselect all</a> &middot;
+                <a id="select-all-button" href="#">Select All</a>
+            </div>
+
+            <div class="text-right flex-fill">
+                <button id="similar-paper-form-disabled-button" class="btn btn-success"
+                        disabled="disabled">Continue
+                </button>
+
+                <button id="similar-paper-form-enabled-button" style="display: none;" class="btn btn-success">
+                    Continue
+                </button>
+
+                <sup data-toggle="tooltip" title="Disabled tooltip">
+                    <i class="fas fa-question-circle"></i>
+                </sup>
+            </div>
         </div>
 
-    {% endif %}
-</form>
+    </form>
 
-<script>
-    $(document).ready(function (e) {
+    <script>
+        $(document).ready(function (e) {
 
-        let form = $("#similar-paper-form");
-        let disabled_button = $("#similar-paper-form-disabled-button");
-        let enabled_button = $("#similar-paper-form-enabled-button");
+            let form = $("#similar-paper-form");
+            let disabled_button = $("#similar-paper-form-disabled-button");
+            let enabled_button = $("#similar-paper-form-enabled-button");
 
+            disabled_button.tooltip();
 
-        form.find("input[name=dois]").change(function () {
+            $("#clear-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", false).change();
+            });
 
-            let total = form.find("input[name=dois]").length;
-            let selected = form.find("input[name=dois]:checked").length;
+            $("#select-all-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", true).change();
+            });
 
-            if (selected >= 2) {
-                disabled_button.hide();
-                enabled_button.show();
-            } else {
-                disabled_button.show();
-                enabled_button.hide();
-            }
+            form.find("input[name=dois]").change(function () {
 
-            $(".selected-count-label span").html(selected)
+                let total = form.find("input[name=dois]").length;
+                let selected = form.find("input[name=dois]:checked").length;
 
-        });
+                if (selected >= 1 && selected <= 10) {
+                    disabled_button.hide();
+                    enabled_button.show();
+                    $(".selected-count-label").removeClass('text-danger');
+                } else {
+                    disabled_button.show();
+                    enabled_button.hide();
+                    $(".selected-count-label").addClass('text-danger');
+                }
 
-    })
-</script>
+                $(".selected-count-label span").html(selected)
+
+            });
+
+        })
+    </script>
+
+{% else %}
+
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        Unfortunately we were unable find any literature in your file that is present in our database. The reason
+        might be that your .bib file is malformed or that the papers are not directly related to COVID-19/SARS-CoV-2.
+    </div>
+
+{% endif %}

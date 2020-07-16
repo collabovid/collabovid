@@ -5,7 +5,6 @@ import io
 from django.db.models import QuerySet
 from django.http import HttpResponse
 
-
 class LiteratureFileExporter:
     CONTENT_TYPE = None
     EXTENSION = None

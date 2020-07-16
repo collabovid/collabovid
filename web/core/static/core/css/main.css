@@ -574,6 +574,10 @@ label.nav-link {
     color: #1c1c1c;
 }
 
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item a {
+    color: #0275d8;
+}
+
 .list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item .selector:before {
     color: inherit;
 }

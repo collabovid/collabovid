@@ -17,7 +17,7 @@
                         will be deleted permanently from our servers.
                         For the articles which are in our database, we provide a similarity search function that
                         allows you find similar articles for your query. Upload your literature as a
-                        <strong>.ris</strong> file and try it out!
+                        <strong>.bib</strong> file and try it out!
                     </div>
 
                     <form class="mt-5 mr-5 ml-5" id="upload-form" action="{% url "upload" %}" method="post"
@@ -39,13 +39,17 @@
                             <div class="icon success" style="display: none;">
                                 <i class="fas fa-4x fa-check-circle"></i>
                             </div>
+                            <div class="icon error" style="display: none;">
+                                <i class="fas fa-4x fa-exclamation-circle"></i>
+                            </div>
                             <h4 class="font-weight-light text-center"
-                                data-text-default="Upload your file"
+                                data-text-default="Upload your .bib file"
                                 data-text-dragging="Drag here"
                                 data-text-dragover="Drop it!"
                                 data-text-uploading="Uploading..."
                                 data-text-success="Your file was analyzed. Check the results below."
-                            >Upload your file</h4>
+                                data-text-error="We were unable to parse your file. It might be malformed or too large."
+                            >Upload your .bib file</h4>
                         </div>
 
                     </form>
@@ -71,6 +75,7 @@
 
     <script>
         $(document).ready(function () {
+            let analysisSucceeded = false;
             let html = $("html");
             let upload_form = $("#upload-form");
             let upload_area = $(".upload-area");
@@ -80,6 +85,7 @@
             let default_icon = $(".upload-area .icon.default");
             let indicator_icon = $(".upload-area .icon.indicator");
             let success_icon = $(".upload-area .icon.success");
+            let error_icon = $(".upload-area .icon.error");
 
             let icons = $(".upload-area .icon");
             let file_field = $("#literature-file");
@@ -91,6 +97,11 @@
             html.on("dragover", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if (analysisSucceeded) {
+                    return;
+                }
+
                 upload_area_text.text(upload_area_text.data('text-dragging'));
                 icons.hide();
                 drag_icon.show();
@@ -99,6 +110,10 @@
             html.on("drop", function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+
+                if (analysisSucceeded) {
+                    return;
+                }
 
                 upload_area_text.text(upload_area_text.data('text-default'));
                 icons.hide();
@@ -109,6 +124,11 @@
             upload_area.on('dragenter', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
+
+                if (analysisSucceeded) {
+                    return;
+                }
+
                 upload_area_text.text(upload_area_text.data('text-dragover'));
             });
 
@@ -116,6 +136,11 @@
             upload_area.on('dragover', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
+
+                if (analysisSucceeded) {
+                    return;
+                }
+
                 upload_area_text.text(upload_area_text.data('text-dragover'));
             });
 
@@ -123,6 +148,10 @@
             upload_area.on('drop', function (e) {
                 e.stopPropagation();
                 e.preventDefault();
+
+                if (analysisSucceeded) {
+                    return;
+                }
 
 
                 file_field.prop('files', e.originalEvent.dataTransfer.files);
@@ -133,10 +162,19 @@
 
             upload_area.click(function (e) {
                 e.preventDefault();
+
+                if (analysisSucceeded) {
+                    return;
+                }
+
                 file_field.click();
             });
 
             file_field.change(function (e) {
+                if (analysisSucceeded) {
+                    return;
+                }
+
                 uploadData(file_field.prop('files')[0]);
             });
 
@@ -165,16 +203,19 @@
                     processData: false,
                     success: function (data) {
                         analysis_container.html(data);
-                        console.log("here");
-
                         icons.hide();
                         success_icon.show();
                         upload_area_text.text(upload_area_text.data('text-success'));
-
+                        analysisSucceeded = true;
                     },
                     error: function (request, error) {
                         console.log("Request: " + JSON.stringify(request));
                         console.log("Error: " + error);
+
+                        icons.hide();
+                        error_icon.show();
+                        upload_area_text.text(upload_area_text.data('text-error'));
+                        upload_area.removeClass('uploaded');
                     }
                 });
             }

@@ -9,7 +9,7 @@
             <div class="muted-white">
                 For a given list of papers, you can find papers that are closely related to your search query.
                 In order to obtain the desired results we recommend using fewer papers which are very similar
-                to each other rather than a lot of papers with varying topic.
+                to each other rather than a lot of papers with varying topics.
                 You can find the list of selected papers below. You can enable/disable certain papers
                 and refresh the results if you like.
             </div>
@@ -98,14 +98,23 @@
             });
             form.submit();
 
+            form.find("input").change(function(e){
+                if(form.find("input:checked").length > 0)
+                {
+                    form.find('button').prop('disabled', false);
+                } else {
+                    form.find('button').prop('disabled', true);
+                }
+            });
+
             $("#clear-button").click(function (e) {
                 e.preventDefault();
-                form.find("input").prop("checked", false);
+                form.find("input").prop("checked", false).change();
             });
 
             $("#select-all-button").click(function (e) {
                 e.preventDefault();
-                form.find("input").prop("checked", true);
+                form.find("input").prop("checked", true).change();
             });
         })
     </script>

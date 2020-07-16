@@ -60,8 +60,8 @@ PIPELINE = {
         'similar_papers': {
             'source_filenames': (
                 'core/js/pagination.js',
-                'search/js/collabovid_similar_search.js'
-
+                'search/js/collabovid_similar_search.js',
+                'core/js/paper_cards.js'
             ),
             'output_filename': 'similar_search.js'
         },
