@@ -605,3 +605,10 @@ label.nav-link {
     background: #007799;
     color: #ffffff;
 }
+
+@media (max-width: 420px) {
+    .mobile-dropdown a {
+        white-space: normal;
+        word-break: break-word;
+    }
+}

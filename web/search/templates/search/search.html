@@ -80,7 +80,7 @@
 
         </div>
 
-        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1">
+        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1 align-items-end">
             <div class="col-9 col-lg-6">
                 <ul class="nav nav-search-types nav-justified">
 
@@ -99,14 +99,14 @@
                 </ul>
             </div>
 
-            <div class="col-3 col-lg-6 text-right">
+            <div class="col-3 col-lg-6 text-right pb-2">
 
-                <div class="dropdown d-inline">
+                <div class="dropdown d-inline-block">
                     <a type="button" id="citeDropdown" class="btn btn-light mt-2"
                        data-toggle="dropdown" href="#">
-                        <i class="fas fa-download"></i> Export Page
+                        <i class="fas fa-download"></i><span class="d-none d-md-inline"> Export Page</span>
                     </a>
-                    <div class="dropdown-menu dropdown-menu-right"
+                    <div class="dropdown-menu dropdown-menu-right mobile-dropdown"
                          aria-labelledby="citeDropdown">
                         <h6 class="dropdown-header">Export file format</h6>
                         <a class="dropdown-item search-download-button"
@@ -125,7 +125,8 @@
                         data-toggle="collapse"
                         data-target="#filter-container"
                         aria-expanded="false"
-                        aria-controls="filter-container">Filters
+                        aria-controls="filter-container">
+                    <i class="fas fa-filter"></i><span class="d-none d-md-inline"> Filters</span>
                     <span style="display: none;" class="badge badge-pill badge-danger"></span>
                 </button>
             </div>
