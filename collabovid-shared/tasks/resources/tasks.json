@@ -214,7 +214,7 @@
                     "name": "vectorizer_name",
                     "required": false,
                     "type": "str",
-                    "default": "transformer-paper-oubiobert-512",
+                    "default": "transformer-paper-no-locations",
                     "is_primitive": true
                 }
             ]
@@ -234,7 +234,14 @@
                     "name": "vectorizer_name",
                     "required": false,
                     "type": "str",
-                    "default": "transformer-paper-nearest-512",
+                    "default": "transformer-paper-no-locations",
+                    "is_primitive": true
+                },
+                {
+                    "name": "cluster_algorithm",
+                    "required": false,
+                    "type": "str",
+                    "default": "kmeans",
                     "is_primitive": true
                 }
             ]
@@ -254,7 +261,7 @@
                     "name": "vectorizer_name",
                     "required": false,
                     "type": "str",
-                    "default": "transformer-paper-nearest-512",
+                    "default": "transformer-paper-no-locations",
                     "is_primitive": true
                 },
                 {
@@ -274,7 +281,7 @@
                     "name": "n_neighbors",
                     "required": false,
                     "type": "int",
-                    "default": 20,
+                    "default": 15,
                     "is_primitive": true
                 }
             ]

@@ -6,6 +6,7 @@ import json
 from collabovid_store.s3_utils import S3BucketClient
 from data.models import Paper, CategoryMembership
 from django.core.serializers.json import DjangoJSONEncoder
+from . import EMBEDDING_VECTORIZER
 
 
 def scale(X, min=0, max=1):
@@ -21,7 +22,7 @@ class ReduceEmbeddingDimensionality(Runnable):
     def task_name():
         return "reduce-embedding-dimensionality"
 
-    def __init__(self, vectorizer_name: str = 'transformer-paper-oubiobert-512', *args, **kwargs):
+    def __init__(self, vectorizer_name: str = EMBEDDING_VECTORIZER, *args, **kwargs):
         super(ReduceEmbeddingDimensionality, self).__init__(*args, **kwargs)
         self._vectorizer_name = vectorizer_name
 
@@ -30,6 +31,7 @@ class ReduceEmbeddingDimensionality(Runnable):
         vectorizer = get_vectorizer(self._vectorizer_name)
         paper_matrix = vectorizer.paper_matrix
         X = 0.5 * paper_matrix['abstract'] + 0.5 * paper_matrix['title']
+        self.log(X.shape)
         points = TSNE(n_components=3, verbose=True).fit_transform(X)
         points = scale(points)
         dois = paper_matrix['index_arr']
@@ -40,7 +42,7 @@ class ReduceEmbeddingDimensionality(Runnable):
             doi = membership.paper.pk
             matrix_index = id_map[doi]
 
-            category_pk = membership.category.pk,
+            category_pk = membership.category.pk
             category_score = membership.score
 
             if doi not in result:
@@ -69,6 +71,8 @@ class ReduceEmbeddingDimensionality(Runnable):
                                               aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
                                               endpoint_url=settings.AWS_S3_ENDPOINT_URL,
                                               bucket=settings.AWS_STORAGE_BUCKET_NAME)
-            s3_bucket_client.upload_as_json('embeddings/embeddings_3d.json', output)
+            s3_bucket_client.upload_as_json(settings.AWS_EMBEDDINGS_FILE_PATH, output)
+
+        Paper.objects.all().update(visualized=True)
 
         self.log("ReduceEmbeddingDimensionality finished")

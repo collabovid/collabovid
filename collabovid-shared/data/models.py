@@ -296,6 +296,9 @@ class Paper(models.Model):
     published_at = models.DateField(null=True, default=None)
     journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
 
+    vectorized = models.BooleanField(default=False)
+    visualized = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)

@@ -58,6 +58,7 @@
         }
 
         function selectPaper(doi) {
+            console.log(doi)
             visualization.papers.forEach((paper, i) => {
                 if (paper.doi == doi) {
                     onSelected(i, paper);
@@ -164,10 +165,10 @@
             },
             function () {
                 if (plugin.settings.preSelectedPaper) {
-                    selectPaper(plugin.settings.paper);
+                    selectPaper(plugin.settings.preSelectedPaper);
 
                 } else if (plugin.settings.preSelectedTopic) {
-                    selectPaper(plugin.settings.preSelectedPaper);
+                    selectTopic(plugin.settings.preSelectedTopic);
                 }
             }
         );

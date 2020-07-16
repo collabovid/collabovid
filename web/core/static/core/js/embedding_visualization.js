@@ -343,7 +343,7 @@ const EmbeddingVisualization = function () {
         this.getColorForPaper = function (paper) {
             let color = 0xffffff;
             const category = paper.top_category;
-            if (category) {
+            if (category !== undefined) {
                 color = this.colors[category]
             }
             return color;

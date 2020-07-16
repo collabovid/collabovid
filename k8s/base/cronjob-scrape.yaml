@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: scrape-cron
 spec:
-  schedule: "50 * * * *"
+  schedule: "50 */2 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -33,4 +33,4 @@ spec:
                 path: /opt/resources
             - name: models
               hostPath:
-                path: /models
+                path: /opt/models

@@ -15,7 +15,7 @@ class NearestNeighborTopicAssignment(Runnable):
     def description():
         return "Assigns all unassigned papers to a topic through a majority vote of the nearest neighbors."
 
-    def __init__(self, n_neighbors: int = 20, *args, **kwargs):
+    def __init__(self, n_neighbors: int = 15, *args, **kwargs):
         super(NearestNeighborTopicAssignment, self).__init__(*args, **kwargs)
         self._n_neighbors = n_neighbors
 

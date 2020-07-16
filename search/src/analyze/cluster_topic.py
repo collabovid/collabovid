@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans, AgglomerativeClustering
 import numpy as np
 from .utils import get_top_n_words, get_predictive_words
 import joblib
+from . import EMBEDDING_VECTORIZER
 
 
 @register_task
@@ -18,7 +19,7 @@ class ClusterTopic(Runnable):
     def description():
         return "Splits up a topic through clustering in n_clusters new topics."
 
-    def __init__(self, topic_id: int, vectorizer_name: str = 'transformer-paper-nearest-512', n_clusters: int = 2,
+    def __init__(self, topic_id: int, vectorizer_name: str = EMBEDDING_VECTORIZER, n_clusters: int = 2,
                  *args,
                  **kwargs):
         super(ClusterTopic, self).__init__(*args, **kwargs)

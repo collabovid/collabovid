@@ -412,6 +412,12 @@ div.filter-card.collapsing {
     }
 }
 
+@media (max-width: 420px) {
+    div[id^=_altmetric_popover_el].altmetric-embed div#_altmetric_container.altmetric_container div#_altmetric_popover_inner.altmetric-popover-inner.altmetric-floating {
+        width: 180px !important;
+    }
+}
+
 
 div.paper-cover {
     position: absolute;
@@ -431,7 +437,6 @@ div.score-helper {
 div.paper-card-badge {
     float: right;
     margin-top: -15px;
-    margin-right: -15px;
     padding-left: 10px;
 }
 

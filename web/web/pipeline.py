@@ -54,6 +54,7 @@ PIPELINE = {
                 'js/tween.umd.js',
                 'core/js/embedding_visualization.js',
                 'core/js/embedding_visualization_view.js',
+                'core/js/paper_cards.js'
             ),
             'output_filename': 'embedding_visualization.js'
         },

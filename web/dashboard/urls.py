@@ -12,7 +12,7 @@ urlpatterns = [
     path('tasks/create/<str:task_id>', create_task, name='task_create'),
     path('tasks/delete/', delete_task, name='task_delete'),
     path('tasks/delete-all/', delete_all_finished, name='task_delete_all'),
-    #path('data-sanitizing', data_sanitizing, name='data-sanitizing'),
+    # path('data-sanitizing', data_sanitizing, name='data-sanitizing'),
     path('data-import', data_import, name='data_import'),
     path('data-import/delete-archive/<path:archive_path>', delete_archive, name='delete_archive'),
     path('locations', locations, name='locations'),
@@ -24,5 +24,6 @@ urlpatterns = [
     path('language-detection', language_detection, name='language-detection'),
     path('topics', topics_overview, name='topics'),
     path('topic/<int:topic_id>', papers_for_topic, name='topic_papers'),
-    path('topics-merge', merge_topics, name='topics_merge')
+    path('topics-merge', merge_topics, name='topics_merge'),
+    path('topics-merge-generated', merge_generated, name='topics_merge_generated')
 ]
