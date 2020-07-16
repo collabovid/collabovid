@@ -6,3 +6,4 @@ markdown==3.2.1
 Pillow==7.0.0
 django-pipeline==1.7.0
 bibtexparser==1.2.0
+rispy==0.5.0
