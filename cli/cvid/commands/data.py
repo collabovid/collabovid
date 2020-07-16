@@ -17,10 +17,13 @@ class DataCommand(S3Command):
                 if archive_path.endswith('.tar.gz')]
 
     def _get_filename(self, source, idx):
+        """
+        Returns the filename of the file with index idx.
+        Taken from local archives if source == 'local' or from S3 if source == 's3'.
+        """
         archives = self._get_s3_archives() if source == 's3' else self._get_local_archives()
         if len(archives) <= idx:
-            print("No S3 archive to download")
-            return
+            raise IndexError()
         return archives[idx]
 
     def _get_local_archives(self):
@@ -45,17 +48,25 @@ class DataCommand(S3Command):
         for i, archive in enumerate(local_archives):
             print(f"{i}. {archive}")
 
+    def _get_filename_from_arg(self, arg, source):
+        match = re.match(r'(\d+)\.?', arg)
+        if match:
+            filename = self._get_filename(source=source, idx=int(match.group(1)))
+        else:
+            filename = arg
+        return filename
+
     def run(self, args):
         if args.command == 'download':
             if args.list:
                 self._print_remote_archives()
             else:
                 if args.filename:
-                    match = re.match(r'(\d+)\.?', args.filename)
-                    if match:
-                        filename = self._get_filename(source='s3', idx=int(match.group(1)))
-                    else:
-                        filename = args.filename
+                    try:
+                        filename = self._get_filename_from_arg(arg=args.filename, source='s3')
+                    except IndexError:
+                        print(f"Invalid filename {args.filename}")
+                        return
                     print(f"Download {filename} from S3")
                 else:
                     filename = self._get_filename(source='s3', idx=0)
@@ -75,11 +86,11 @@ class DataCommand(S3Command):
                 self._print_local_archives()
             else:
                 if args.filename:
-                    match = re.match(r'(\d+)\.?', args.filename)
-                    if match:
-                        filename = self._get_filename(source='local', idx=int(match.group(1)))
-                    else:
-                        filename = args.filename
+                    try:
+                        filename = self._get_filename_from_arg(args.filename, source='local')
+                    except IndexError:
+                        print(f"Invalid local filename {args.filename}")
+                        return
                     print(f"Upload {filename} to S3")
                 else:
                     archives = self._get_local_archives()
@@ -101,11 +112,11 @@ class DataCommand(S3Command):
             if not args.filename:
                 self._print_remote_archives()
             else:
-                match = re.match(r'(\d+)\.?', args.filename)
-                if match:
-                    filename = self._get_filename(source='s3', idx=int(match.group(1)))
-                else:
-                    filename = args.filename
+                try:
+                    filename = self._get_filename_from_arg(arg=args.filename, source='s3')
+                except IndexError:
+                    print(f"Invalid filename {args.filename}")
+                    return
                 print(f"Delete {filename} from S3")
                 if not self.s3_bucket_client:
                     self.s3_bucket_client = self.setup_s3_bucket_client()
