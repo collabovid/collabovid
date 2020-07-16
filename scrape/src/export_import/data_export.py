@@ -68,7 +68,7 @@ class DataExport:
             os.makedirs(out_dir)
 
         time = datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M")
-        filename = f"export_{getpass.getuser()}_{time}.tar.gz"
+        filename = f"export_{time}_{getpass.getuser()}.tar.gz"
         path = f"{out_dir}/{filename}"
         json_path = f"{out_dir}/data.json"
 
