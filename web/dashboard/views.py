@@ -396,17 +396,36 @@ def scrape_conflict(request):
 
 
 @staff_member_required
-def add_author_name_resolution(request, author_id):
+def change_author_name(request, author_id, doi=None):
     author = Author.objects.get(pk=author_id)
+
+    if doi:
+        current_paper = Paper.objects.get(doi=doi)
+    else:
+        current_paper = None
+
     if request.method == 'GET':
         return render(
             request,
             'dashboard/authors/add_name_resolution.html',
-            {'author': author, 'debug': settings.DEBUG}
+            {'author': author, 'current_paper': current_paper, 'debug': settings.DEBUG}
         )
     elif request.method == 'POST':
-        AuthorNameResolution.add(author.first_name, author.last_name,
-                                 request.POST.get('first_name'), request.POST.get('last_name'))
+        action = request.POST.get('action')
+        if action == 'save_all':
+            AuthorNameResolution.add(author.first_name, author.last_name,
+                                     request.POST.get('first_name'), request.POST.get('last_name'))
+        elif action == 'delete_all':
+            AuthorNameResolution.ignore(author.first_name, author.last_name)
+        elif action == 'delete_current':
+            current_paper.authors.remove(author)
+            current_paper.manually_modified = True
+            current_paper.save()
+        else:
+            return HttpResponseNotFound()
+        print(action)
+        #AuthorNameResolution.add(author.first_name, author.last_name,
+        #                         request.POST.get('first_name'), request.POST.get('last_name'))
         return HttpResponse('Success')
 
 

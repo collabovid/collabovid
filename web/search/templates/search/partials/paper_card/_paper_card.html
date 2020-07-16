@@ -69,7 +69,7 @@
                         <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
                                 {{ author.display_name|safe }}
                                 {% if user.is_authenticated and user.is_staff %}
-                                    <a target="_blank" href="{% url "add_author_name_resolution" author.pk %}">[Edit]</a>
+                                    <a target="_blank" href="{% url "change_author_name" author.pk paper.doi %}">[Edit]</a>
                                 {% endif %}
                             </span>
                     {% endfor %}

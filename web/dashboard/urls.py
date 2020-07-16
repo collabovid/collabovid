@@ -21,6 +21,8 @@ urlpatterns = [
     path('locations/add/<path:doi>', add_location, name='add_location'),
     path('language-detection', language_detection, name='language-detection'),
     path('scrape-conflict', scrape_conflict, name='scrape_conflict'),
-    path('author-name-resolutions/add/<int:author_id>', add_author_name_resolution, name='add_author_name_resolution'),
+    path('author-name-resolutions/add/<int:author_id>', change_author_name, name='change_author_name'),
+    path('author-name-resolutions/add/<int:author_id>/<path:doi>', change_author_name,
+         name='change_author_name'),
     path('author-name-resolutions/swap-all/<path:doi>', swap_all_author_names, name='swap_all_author_names'),
 ]

@@ -3,7 +3,16 @@ import re
 from django.db import transaction
 from django.utils import timezone
 
-from data.models import Author, DataSource, IgnoredPaper, Journal, Paper, PaperHost, ScrapeConflict
+from data.models import (
+    Author,
+    AuthorNameResolution,
+    DataSource,
+    IgnoredPaper,
+    Journal,
+    Paper,
+    PaperHost,
+    ScrapeConflict,
+)
 
 import json
 from dataclasses import dataclass, field
@@ -133,9 +142,8 @@ class DatabaseUpdate:
             error = "Missing abstract"
         elif not datapoint.publication_date:
             error = "Missing publication date"
-        elif len(datapoint.authors) == 0:
-            error = "No authors"
 
+        author_count = 0
         for author in datapoint.authors:
             if (
                     (author[1] and len(author[1]) > Author.max_length("first_name")) or
@@ -143,6 +151,13 @@ class DatabaseUpdate:
             ):
                 error = "Author name too long"
                 error_msg = error + f": {author[0]}, {author[1]}"
+            if not AuthorNameResolution.objects.filter(
+                    source_first_name=author[1], source_last_name=author[0], target_author=None).exists():
+                # Count only authors that are not on the author ignore list
+                author_count += 1
+
+        if author_count == 0:
+            error = "No authors"
 
         if error:
             if not error_msg:
@@ -178,7 +193,8 @@ class DatabaseUpdate:
                 first_name=author[1].replace(';', '').replace(',', ''),
                 last_name=author[0].replace(';', '').replace(',', ''),
             )
-            db_article.authors.add(db_author)
+            if db_author is not None:
+                db_article.authors.add(db_author)
 
         if datapoint.journal:
             db_article.journal, _ = Journal.objects.get_or_create(

@@ -154,7 +154,24 @@ class Author(models.Model):
 class AuthorNameResolution(models.Model):
     source_first_name = models.TextField(max_length=Author.MAX_LENGTH_FIRST_NAME)
     source_last_name = models.TextField(max_length=Author.MAX_LENGTH_LAST_NAME)
-    target_author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    target_author = models.ForeignKey(Author, null=True, on_delete=models.CASCADE)
+
+    @staticmethod
+    def ignore(first, last):
+        with transaction.atomic():
+            AuthorNameResolution.objects.get_or_create(source_first_name=first, source_last_name=last,
+                                                       target_author=None)
+            try:
+                old_author = Author.objects.get(first_name=first, last_name=last)
+                Paper.authors.through.objects.filter(author=old_author).delete()
+
+                for resolution in AuthorNameResolution.objects.filter(target_author=old_author):
+                    resolution.target_author = None
+                    resolution.save()
+
+                old_author.delete()
+            except Author.DoesNotExist:
+                pass
 
     @staticmethod
     def add(old_first, old_last, new_first, new_last):
