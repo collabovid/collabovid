@@ -20,3 +20,5 @@ resources:
   - elasticsearch.yaml
   - job-elasticsearch-setup-index.yaml
   - job-non-english-papers-init.yaml
+  - job-ingest-topics.yaml
+  - job-change-category-colors.yaml

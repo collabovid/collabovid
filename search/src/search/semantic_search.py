@@ -20,7 +20,7 @@ class SemanticSearch:
         #  In case of a filtered result, we want to show at least the best result (and some other) when they are not
         #  worse than .2
         max_score = similar_papers[0][1]
-        score_min = min(0.6, floor(max_score * 10) / 10)
+        score_min = min(0.55, floor(max_score * 10) / 10)
 
         if score_min >= 0.2:
             for doi, score in similar_papers:

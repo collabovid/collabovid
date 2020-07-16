@@ -1,0 +1,125 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="gradient-header">
+        <div class="container mt-4">
+            <h1 class="text-white display-4 font-weight-light">Search for similar research</h1>
+            <div class="muted-white">
+                For a given list of papers, you can find papers that are closely related to your search query.
+                In order to obtain the desired results, we recommend using fewer papers which are very similar
+                to each other rather than a lot of papers with varying topics.
+                You can find the list of selected papers below. You can enable/disable certain papers
+                and refresh the results if you like.
+            </div>
+        </div>
+        {% include 'core/partials/_rounded_bottom.html' %}
+    </div>
+
+    <div class="mx-lg-5 mx-md-3 mx-1 mt-3">
+
+        <div class="row d-none d-lg-flex">
+            <div class="col-lg-4">
+                <h4 class="text-muted font-weight-light mb-0">Select/Deselect Papers</h4>
+            </div>
+
+            <div class="col-lg-8">
+                <h3 class="text-muted mb-0">Similar papers</h3>
+            </div>
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-12 col-lg-4">
+                <h3 class="text-muted font-weight-light d-lg-none">Select/Deselect Papers</h3>
+
+                <form id="similar-paper-form" method="post" action="{% url "similar-papers" %}">
+                    {% csrf_token %}
+
+                    <ul class="list-group selectable-list-group mt-3">
+                        {% for paper in query_papers.all %}
+                            {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True short=True checked=True %}
+                        {% endfor %}
+                    </ul>
+
+                    <div class="d-flex mt-2">
+                        <div class="text-left text-muted">
+                            <a id="clear-button" href="#">Deselect all</a> &middot;
+                            <a id="select-all-button" href="#">Select All</a>
+                        </div>
+
+                        <div class="text-right flex-fill">
+                            <button class="btn btn-success">
+                                <i class="fas fa-sync"></i>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="col-12 col-lg-8">
+                <h3 class="text-muted d-lg-none">Similar papers</h3>
+
+                <div id="paper-container"></div>
+
+                <div id="paper-loading-indicator"
+                     class="text-muted text-center fa-5x my-5"
+                     style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                </div>
+
+                <nav class="mt-5" id="pagination-container"></nav>
+            </div>
+
+        </div>
+    </div>
+
+
+
+{% endblock %}
+
+{% block script %}
+    {% javascript "similar_papers" %}
+    <script>
+        $(document).ready(function () {
+            const form = $("#similar-paper-form");
+            const paperContainer = $("#paper-container");
+            const indicator = $("#paper-loading-indicator");
+            const paginationContainer = $("#pagination-container");
+
+            form.collabovidSimilarSearch({
+                indicator: indicator,
+                paper_container: paperContainer,
+                pagination_container: paginationContainer,
+                receivePaperUrl: "{% url "receive-papers" %}"
+            });
+            form.submit();
+
+            form.find("input").change(function(e){
+                if(form.find("input:checked").length > 0)
+                {
+                    form.find('button').prop('disabled', false);
+                } else {
+                    form.find('button').prop('disabled', true);
+                }
+            });
+
+            $("#clear-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", false).change();
+            });
+
+            $("#select-all-button").click(function (e) {
+                e.preventDefault();
+                form.find("input").prop("checked", true).change();
+            });
+        })
+    </script>
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}

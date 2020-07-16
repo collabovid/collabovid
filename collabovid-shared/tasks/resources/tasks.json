@@ -25,6 +25,11 @@
             "description": "No description provided.",
             "parameters": []
         },
+        "parse-geo-locations": {
+            "name": "Parse Geo Locations",
+            "description": "",
+            "parameters": []
+        },
         "update-arxiv": {
             "name": "Update Arxiv",
             "description": "No description provided.",
@@ -154,14 +159,9 @@
                 }
             ]
         },
-        "parse-geo-locations": {
-            "name": "Parse Geo Locations",
-            "description": "",
-            "parameters": []
-        },
         "detect-non-english-papers": {
             "name": "Detect Non English Papers",
-            "description": "Determines papers with titles or abstract not in english",
+            "description": "Determine papers with titles or abstract not in english",
             "parameters": []
         }
     },
@@ -205,6 +205,91 @@
                     "is_primitive": false
                 }
             ]
+        },
+        "reduce-embedding-dimensionality": {
+            "name": "Reduce Embedding Dimensionality",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-no-locations",
+                    "is_primitive": true
+                }
+            ]
+        },
+        "recompute-topic-assignment": {
+            "name": "Recompute Topic Assignment",
+            "description": "Computes a full clustering of the paper embeddings and assigns all papers to newly created topics.",
+            "parameters": [
+                {
+                    "name": "n_clusters",
+                    "required": false,
+                    "type": "int",
+                    "default": 48,
+                    "is_primitive": true
+                },
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-no-locations",
+                    "is_primitive": true
+                },
+                {
+                    "name": "cluster_algorithm",
+                    "required": false,
+                    "type": "str",
+                    "default": "kmeans",
+                    "is_primitive": true
+                }
+            ]
+        },
+        "cluster-topic": {
+            "name": "Cluster Topic",
+            "description": "Splits up a topic through clustering in n_clusters new topics.",
+            "parameters": [
+                {
+                    "name": "topic_id",
+                    "required": true,
+                    "type": "int",
+                    "default": null,
+                    "is_primitive": true
+                },
+                {
+                    "name": "vectorizer_name",
+                    "required": false,
+                    "type": "str",
+                    "default": "transformer-paper-no-locations",
+                    "is_primitive": true
+                },
+                {
+                    "name": "n_clusters",
+                    "required": false,
+                    "type": "int",
+                    "default": 2,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "nearest-neighbor-topic-assignment": {
+            "name": "Nearest Neighbor Topic Assignment",
+            "description": "Assigns all unassigned papers to a topic through a majority vote of the nearest neighbors.",
+            "parameters": [
+                {
+                    "name": "n_neighbors",
+                    "required": false,
+                    "type": "int",
+                    "default": 15,
+                    "is_primitive": true
+                }
+            ]
+        },
+        "assign-keywords": {
+            "name": "Assign Keywords",
+            "description": "Assigns the most predictive keywords to the topics",
+            "parameters": []
         }
     }
 }

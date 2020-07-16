@@ -10,7 +10,7 @@
             <div class="row mt-5">
                 <div class="col-12">
 
-                    <form id="paper-search-form" class="search-form" method="post"
+                    <form id="paper-search-form" class="search-form mb-3" method="post"
                           action="{% if search_url %}{{ search_url }}{% else %}{% url "search" %}{% endif %}">
                         <input data-no-url="true" type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
@@ -45,7 +45,7 @@
                         {% block search_head %}
                             <!-- For desktop search -->
 
-                            <div class="input-group input-group-lg mb-3">
+                            <div class="input-group input-group-lg">
                                 <div class="input-group-prepend border-right-0">
                                     <div class="input-group-text bg-white border-right-0 d-none d-lg-flex">
                                         <i class="fas fa-search"></i>
@@ -61,7 +61,15 @@
                             </div>
 
                             <!-- End desktop search -->
+                            <div class="muted-white float-right mt-1">
+                                You can also
+                                <a href="{% url "upload" %}" class="muted-white">
+                                    analyze your literature
+                                </a>
+                            </div>
+
                         {% endblock %}
+
 
                     </form>
 
@@ -72,7 +80,7 @@
 
         </div>
 
-        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1">
+        <div class="row mt-3 mx-lg-5 mx-md-3 mx-1 align-items-end">
             <div class="col-9 col-lg-6">
                 <ul class="nav nav-search-types nav-justified">
 
@@ -82,21 +90,43 @@
                                    class="nav-link {% if form.cleaned_data.tab == choice.0 %}active{% endif %}">
                                 {{ choice.1 }}
                                 <sup class="help-opener">
-                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label" data-toggle="modal"
-                                        data-target="#{{ choice.0 }}-modal"></i></sup>
+                                    <i class="fas fa-question-circle" id="{{ choice.0 }}-modal-label"
+                                       data-toggle="modal"
+                                       data-target="#{{ choice.0 }}-modal"></i></sup>
                             </label>
                         </li>
                     {% endfor %}
                 </ul>
             </div>
 
-            <div class="col-3 col-lg-6 text-right">
+            <div class="col-3 col-lg-6 text-right pb-2">
+
+                <div class="dropdown d-inline-block">
+                    <a type="button" id="citeDropdown" class="btn btn-light mt-2"
+                       data-toggle="dropdown" href="#">
+                        <i class="fas fa-download"></i><span class="d-none d-md-inline"> Export Page</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right mobile-dropdown"
+                         aria-labelledby="citeDropdown">
+                        <h6 class="dropdown-header">Export file format</h6>
+                        <a class="dropdown-item search-download-button"
+                           href="{% url "search-export" "ris" %}">
+                            Research Information System Format (.ris)
+                        </a>
+                        <a class="dropdown-item search-download-button"
+                           href="{% url "search-export" "bibtex" %}">
+                            BibTeX (.bib)
+                        </a>
+                    </div>
+                </div>
+
                 <button class="btn btn-light mt-2 filter-toggle"
                         id="filter-toggle"
                         data-toggle="collapse"
                         data-target="#filter-container"
                         aria-expanded="false"
-                        aria-controls="filter-container">Filters
+                        aria-controls="filter-container">
+                    <i class="fas fa-filter"></i><span class="d-none d-md-inline"> Filters</span>
                     <span style="display: none;" class="badge badge-pill badge-danger"></span>
                 </button>
             </div>
@@ -181,6 +211,8 @@
             let result_size_container = $("#result-size-container"); // Contains the amount of papers found.
             let paper_result_options_container = $("#paper-result-options-container"); // Contains the info and sort
 
+            let download_button = $(".search-download-button");
+
             let searchEngine = form.collabovidSearch({
                 indicator: indicator,
                 paper_container: paper_container,
@@ -214,18 +246,8 @@
                 form.submit();
             });
 
-            form.submit(function (e) {
-                e.preventDefault();
-
-                /**
-                 * We have three types of inputs:
-                 * data-no-url: These inputs will not be pushed to the url
-                 * data-url-manually: These inputs will not be pushed to the url automatically
-                 * other: Input will be submitted and pushed to url
-                 */
-
+            function generate_submission_data() {
                 let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
-                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
 
                 // Converting categories=x&categories=y to categories=x,y
                 let checked_categories = $('.search-form input[name=categories]:checked');
@@ -237,6 +259,35 @@
                         return this.value;
                     }).get().join(',');
                 }
+
+                return submission_data;
+            }
+
+            download_button.click(function (e) {
+                e.preventDefault();
+
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+                let submission_data = generate_submission_data();
+
+                // Full data must be submitted to the view. Submission data can be saved in the url.
+                let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
+
+                window.open($(this).attr('href') + "?" + full_data, '_blank');
+
+            });
+
+            form.submit(function (e) {
+                e.preventDefault();
+
+                /**
+                 * We have three types of inputs:
+                 * data-no-url: These inputs will not be pushed to the url
+                 * data-url-manually: These inputs will not be pushed to the url automatically
+                 * other: Input will be submitted and pushed to url
+                 */
+
+                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+                let submission_data = generate_submission_data();
 
                 // Full data must be submitted to the view. Submission data can be saved in the url.
                 let full_data = submission_data + "&" + no_url_submission_data;

@@ -1,0 +1,42 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    {% load paper_card_extras %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Topics ({{ topics | length }})</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <a href="{% url 'topics_merge' %}" class="btn btn-sm btn-outline-secondary">
+                Merge Topics
+            </a>
+            <form action="{% url 'topics_merge_generated' %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-sm ml-2 btn-outline-secondary">
+                    Merge Generated
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row pb-5">
+            {% for topic in topics %}
+                <div class="col-md-3 p-2">
+                    <div class="topic-card h-100 card" data-topic="{{ topic.pk }}">
+                        <div class="card-body  d-flex flex-column">
+                            {{ topic.name }} ({{ topic.papers.count }})
+                            <div>overlapping: {{ topic.overlapping_paper_count }}</div>
+                            <div>{{ request.user|edit_object_link:topic }}</div>
+                            <div class="mt-auto">
+                                <a href="{% url 'topic_papers' topic_id=topic.pk %}" class="card-link">View Papers</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+{% endblock %}

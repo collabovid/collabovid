@@ -9,10 +9,12 @@ from . import PaperVectorizer
 from django.conf import settings
 from .exceptions import CouldNotLoadModel
 from tqdm import tqdm
+from .utils.sliding_window_tokenizer import SlidingWindowTokenizer
 
 
 class TransformerPaperVectorizer(PaperVectorizer):
-    def __init__(self, matrix_file_name, device='cpu', transformer_model_name='transformer_paper_oubiobert_512', transformer_model_type='bert', max_token_length=512, batch_size=8, *args, **kwargs):
+    def __init__(self, matrix_file_name, device='cpu', transformer_model_name='transformer_paper_oubiobert_512',
+                 transformer_model_type='bert', max_token_length=512, batch_size=8, *args, **kwargs):
         super(TransformerPaperVectorizer, self).__init__(matrix_file_name=matrix_file_name,
                                                          similarity_computer=EuclideanSimilarity(), *args, **kwargs)
 
@@ -46,6 +48,10 @@ class TransformerPaperVectorizer(PaperVectorizer):
             raise CouldNotLoadModel("Could not load model from {}".format(model_path))
         self._model = PaperEmbeddingModel(model_path=model_path, model_type=self._transformer_model_type)
         self._tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self._sliding_window_tokenizer = SlidingWindowTokenizer(tokenizer=self._tokenizer,
+                                                                device=self._device,
+                                                                max_length=512,
+                                                                overlap=64)
         self._model.to(self._device)
         self._model.eval()
 
@@ -54,20 +60,45 @@ class TransformerPaperVectorizer(PaperVectorizer):
         self._tokenizer = None
 
     def vectorize_query(self, query: str):
-        tokens = self._tokenize([query.lower()])
+        tokens, _ = self._sliding_window_tokenizer.tokenize([query.lower()])
         with torch.no_grad():
             embedding = self._model(tokens)[0].detach().cpu().numpy()
         return embedding
+
+    def _generate_embeddings(self, features):
+        new_features = []
+        for key in features.keys():
+            for i, batch in enumerate(features[key].split(self._batch_size)):
+                if i >= len(new_features):
+                    new_features.append({})
+                new_features[i][key] = batch
+        result = []
+        for batch in new_features:
+            result.append(self._model(batch))
+        embeddings = torch.cat(result, dim=0)
+        return embeddings
+
+    def _pool_embeddings(self, representations, end_index_array):
+        i = 0
+        result = []
+        for end_index in end_index_array:
+            result.append(torch.mean(representations[i:end_index], dim=0))
+            i = end_index
+        return torch.stack(result)
 
     def _compute_paper_matrix_contents(self, papers):
         title_matrix = None
         abstract_matrix = None
         for paper_batch in tqdm(batch_iterator(papers, batch_size=self._batch_size)):
-            title_tokens = self._tokenize([paper.title.lower() for paper in paper_batch])
-            abstract_tokens = self._tokenize([paper.abstract.lower() for paper in paper_batch])
+            title_tokens, title_index_array = self._sliding_window_tokenizer.tokenize(
+                [paper.title.lower() for paper in paper_batch])
+            abstract_tokens, abstracts_index_array = self._sliding_window_tokenizer.tokenize(
+                [paper.abstract.lower() for paper in paper_batch])
             with torch.no_grad():
-                title_embeddings, abstract_embeddings = [self._model(tokens).detach().cpu().numpy() for tokens in
-                                                         [title_tokens, abstract_tokens]]
+                title_embeddings, abstract_embeddings = [
+                    self._pool_embeddings(self._generate_embeddings(features), end_index_array).detach().cpu().numpy()
+                    for features, end_index_array in
+                    [(title_tokens, title_index_array), (abstract_tokens, abstracts_index_array)]]
 
             title_matrix = np.concatenate((title_matrix, title_embeddings),
                                           axis=0) if title_matrix is not None else title_embeddings
@@ -101,11 +132,3 @@ class TransformerPaperVectorizer(PaperVectorizer):
         combined_scores = self._title_importance * title_similarity_scores + (
                 1 - self._title_importance) * abstract_similarity_scores
         return self.paper_matrix['index_arr'], combined_scores.tolist()
-
-    def _tokenize(self, items):
-        tokens = self._tokenizer.batch_encode_plus(items, add_special_tokens=True, return_tensors='pt',
-                                                   pad_to_max_length=True, return_attention_masks=True,
-                                                   max_length=self._max_token_length)
-        for key in list(tokens.keys()):
-            tokens[key] = tokens[key].to(self._device)
-        return tokens

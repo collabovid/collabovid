@@ -43,6 +43,10 @@ body {
     padding-top: 360px;
 }
 
+.svg-border-rounded {
+    pointer-events: none;
+}
+
 .svg-border-rounded svg {
     position: absolute;
     bottom: 0;
@@ -174,6 +178,35 @@ a.invisible-link, a.invisible-link:hover {
         padding: 1.25rem;
     }
 }
+
+.wide-modal-dialog {
+    max-width: 470px;
+}
+
+@media (min-width: 576px) {
+    .wide-modal-dialog {
+        max-width: 510px;
+    }
+}
+
+@media (min-width: 768px) {
+    .wide-modal-dialog {
+        max-width: 690px;
+    }
+}
+
+@media (min-width: 992px) {
+    .wide-modal-dialog {
+        max-width: 930px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .wide-modal-dialog {
+        max-width: 1110px;
+    }
+}
+
 
 .button-host {
     color: #00796B;
@@ -379,6 +412,12 @@ div.filter-card.collapsing {
     }
 }
 
+@media (max-width: 420px) {
+    div[id^=_altmetric_popover_el].altmetric-embed div#_altmetric_container.altmetric_container div#_altmetric_popover_inner.altmetric-popover-inner.altmetric-floating {
+        width: 180px !important;
+    }
+}
+
 
 div.paper-cover {
     position: absolute;
@@ -398,7 +437,6 @@ div.score-helper {
 div.paper-card-badge {
     float: right;
     margin-top: -15px;
-    margin-right: -15px;
     padding-left: 10px;
 }
 
@@ -469,7 +507,7 @@ label.nav-link {
     flex: 0 0 160px;
 }
 
-.search-info-container label > button , .search-info-container label > select {
+.search-info-container label > button, .search-info-container label > select {
     width: 160px;
 }
 
@@ -486,4 +524,91 @@ label.nav-link {
 
 .tooltip-inner {
     max-width: none;
+}
+
+
+/** Selectable List Group **/
+
+.selectable-list-group {
+    background-color: #c2c2c2;
+    background-image: linear-gradient(45deg, #ababab 25%, #a09fa1 25%, #a09fa1 50%, #ababab 50%, #ababab 75%, #a09fa1 75%, #a09fa1 100%);
+    background-size: 28.28px 28.28px;
+}
+
+.selectable-list-group .list-group-item {
+    user-select: none;
+    margin-bottom: -1px !important;
+}
+
+.selectable-list-group .list-group-item:first-of-type {
+    border-top-left-radius: .25rem;
+    border-top-right-radius: .25rem;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] {
+    display: none;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item {
+    cursor: pointer;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item .selector:before {
+    content: "\2713";
+    color: transparent;
+    font-weight: bold;
+    margin-right: 1em;
+    font-size: x-large;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:not(:checked) + .list-group-item div.text-muted {
+    color: #e9e9e9 !important;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item a {
+    color: #fff;
+}
+
+.list-group.selectable-list-group input[type="checkbox"] + .list-group-item {
+    color: #fff;
+    background: transparent;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item {
+    background-color: #fff;
+    color: #1c1c1c;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item a {
+    color: #0275d8;
+}
+
+.list-group.selectable-list-group input[type="checkbox"]:checked + .list-group-item .selector:before {
+    color: inherit;
+}
+
+/** Selectable List Group End */
+
+.paper-card-badges-container a, .paper-card-badges-container a:hover
+{
+    line-height: 1;
+    text-decoration: none;
+}
+
+.paper-card-badges-container a span.badge
+{
+    white-space: normal;
+}
+
+.paper-card-badges-container a span.topic-badge
+{
+    background: #007799;
+    color: #ffffff;
+}
+
+@media (max-width: 420px) {
+    .mobile-dropdown a {
+        white-space: normal;
+        word-break: break-word;
+    }
 }

@@ -27,6 +27,7 @@
     {% if using_analytics %}
         <script async defer data-domain="collabovid.org" src="https://plausible.io/js/plausible.js"></script>
     {% endif %}
+    <script type='text/javascript' data-domain="collabovid.org" src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
 
     {% block css %}
     {% endblock %}
@@ -37,7 +38,7 @@
 {% include "core/partials/base/_leave_feedback.html" %}
 
 <nav class="navbar navbar-expand-lg navbar-dark static-top">
-    <div class="container">
+    <div class="container" style="z-index:3;">
         <img src="{% static "core/img/logo-green.png" %}" class="img-fluid" width="42px">
         <a class="navbar-brand ml-3" href="{% url 'home' %}">Collabovid</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
@@ -58,9 +59,19 @@
                 <li class="nav-item {% if request.resolver_match.url_name == "map" %}active{% endif %}">
                     <a class="nav-link" href="{% url "map" %}">Map</a>
                 </li>
-                <li class="nav-item {% if request.resolver_match.url_name == "about" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "about" %}">About</a>
+                <li class="nav-item {% if request.resolver_match.url_name == "embedding-visualization" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "embedding-visualization" %}">Visualization</a>
                 </li>
+                <li class="nav-item {% if request.resolver_match.url_name == "upload" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "upload" %}">Literature Analysis</a>
+                </li>
+               <li class="nav-item ml-2 d-none d-md-none d-lg-block">
+                    <a class="nav-link" href="https://twitter.com/collabovid"><img src="{% static "core/img/social/Twitter_Logo_WhiteOnImage.png" %}" class="img-fluid" width="15px"></a>
+                </li>
+                <li class="nav-item d-none d-md-none d-lg-block">
+                    <a class="nav-link" href="https://github.com/michip/collabovid"><img src="{% static "core/img/social/GitHub-Mark-Light-64px.png" %}" class="img-fluid" width="16px"></a>
+                </li>
+
 
             </ul>
         </div>
@@ -77,15 +88,15 @@
 <footer class="py-3 w-100 bg-white footer">
     <div class="container">
         <div class="row">
-            <div class="col-4">
+            <div class="col-6">
                 <img src="{% static "core/img/favicon/favicon-32x32.png" %}" class="img-fluid" width="16px">
                 <small class="d-inline text-muted">
                     Collabovid &middot; <a href="{% url "imprint" %}">Imprint</a> &middot; <a
-                        href="{% url "privacy" %}">Data Protection Declaration</a>
+                        href="{% url "privacy" %}">Data Protection Declaration</a> &middot; <a href="{% url "about" %}">About</a>
                 </small>
 
             </div>
-            <div class="col-8 text-right">
+            <div class="col-6 text-right">
                 <div class="small text-muted">
                     <div>
                         Vectors created by freepik - <a class=""

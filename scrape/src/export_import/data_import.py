@@ -391,7 +391,7 @@ class DataImport:
             try:
                 DeleteCandidate.objects.get(paper=paper, type=candidate["type"])
             except DeleteCandidate.DoesNotExist:
-                candidates_to_create.append(DeleteCandidate(paper=paper, type=candidate["doi"],
+                candidates_to_create.append(DeleteCandidate(paper=paper, type=candidate["type"],
                                                             false_positive=candidate["fp"], score=candidate["score"]))
         DeleteCandidate.objects.bulk_create(candidates_to_create)
         self.statistics.delete_candidates_created = len(candidates_to_create)

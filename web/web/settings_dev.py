@@ -8,5 +8,7 @@ from collabovid_settings.development.volumes_settings import *
 from collabovid_settings.development.elasticsearch_settings import *
 
 SECRET_KEY = '$bi4%atjzaoj720b0d58&y6&=vfu)0*-!h4xwpgzfsrkvlt))y'
-ALLOWED_HOSTS += [WEB_SERVICE_HOST]
+ALLOWED_HOSTS += ['*']
 DEBUG = True
+
+SAVE_SEARCH_QUERIES = False

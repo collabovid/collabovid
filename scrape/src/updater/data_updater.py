@@ -261,6 +261,10 @@ class ArticleDataPoint(object):
                 self.update_pdf_data(db_article, extract_image=pdf_image, extract_content=pdf_content)
             db_article.version = self.version
 
+            if not created:
+                # Set fields to false for already existing papers to indicate the need of recomputing vectorizers
+                db_article.visualized = False
+                db_article.vectorized = False
             db_article.last_scrape = timezone.now()
 
             db_article.categories.clear()

@@ -29,33 +29,36 @@
     <div class="my-5 text-center font-weight-bold">No results were found for your query.</div>
 {% endfor %}
 
+    <script type="text/javascript">
+        {% if use_paging %}
+        window.Pagination.result_size = {{ result_size }};
 
-<script type="text/javascript">
+        {% if papers.has_previous or papers.has_next %}
+            window.Pagination.pagination_needed = true;
 
-    window.Pagination.result_size = {{ result_size }};
+            window.Pagination.first_page = 1;
+            window.Pagination.current_page = {{ papers.number }};
 
-    {% if papers.has_previous or papers.has_next %}
-        window.Pagination.pagination_needed = true;
+            {% if papers.has_previous %}
+                window.Pagination.previous_page = {{ papers.previous_page_number }};
+            {% else %}
+                window.Pagination.previous_page = -1;
+            {% endif %}
 
-        window.Pagination.first_page = 1;
-        window.Pagination.current_page = {{ papers.number }};
+            {% if papers.has_next %}
+                window.Pagination.next_page = {{ papers.next_page_number }};
+                window.Pagination.last_page = {{ papers.paginator.num_pages }};
+            {% else %}
+                window.Pagination.next_page = -1;
+            {% endif %}
 
-        {% if papers.has_previous %}
-            window.Pagination.previous_page = {{ papers.previous_page_number }};
         {% else %}
-            window.Pagination.previous_page = -1;
+            window.Pagination.pagination_needed = false;
         {% endif %}
 
-        {% if papers.has_next %}
-            window.Pagination.next_page = {{ papers.next_page_number }};
-            window.Pagination.last_page = {{ papers.paginator.num_pages }};
-        {% else %}
-            window.Pagination.next_page = -1;
+        $(".need-tooltip").tooltip();
         {% endif %}
 
-    {% else %}
-        window.Pagination.pagination_needed = false;
-    {% endif %}
+        _altmetric_embed_init();
+    </script>
 
-    $(".need-tooltip").tooltip();
-</script>

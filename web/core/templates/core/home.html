@@ -172,16 +172,7 @@
                     <div class="card w-100 shadow rounded bg-white">
                         <ul class="list-group">
                             {% for paper in most_recent_papers|slice:":5" %}
-                                <li class="list-group-item">
-                                    {{ paper.title }}
-                                    <div class="text-muted small mt-2">
-                                        {{ paper.published_at }} &middot; {{ paper.host.name }}
-                                        &middot; Added {{ paper.created_at|naturaltime }}
-                                        <a href="{{ paper.url }}" class="float-right">
-                                            Read more
-                                        </a>
-                                    </div>
-                                </li>
+                                {% include "core/partials/_paper_list_item.html" with paper=paper %}
                             {% endfor %}
                         </ul>
                     </div>

@@ -102,6 +102,7 @@ class SearchForm(forms.Form):
     authors = CommaSeparatedIntegerField(required=False)
     journals = CommaSeparatedIntegerField(required=False)
     locations = CommaSeparatedIntegerField(required=False)
+    topics = CommaSeparatedIntegerField(required=False)
 
     categories = CommaSeparatedIntegerField(required=False)
 
@@ -144,6 +145,7 @@ class SearchForm(forms.Form):
                 'tab': self.cleaned_data['tab'],
                 'sorted_by': self.cleaned_data['sorted_by'],
                 'authors': self.cleaned_data['authors'],
+                'topics': self.cleaned_data['topics'],
                 'authors_connection': self.cleaned_data['authors_connection'],
                 'categories': self.cleaned_data['categories'],
                 'article_type': self.cleaned_data['article_type'],
@@ -161,6 +163,15 @@ class SearchForm(forms.Form):
         return json.dumps(self.to_dict(), cls=DjangoJSONEncoder)
 
     @property
+    def interesting(self):
+        return self.cleaned_data['query'].strip() or self.cleaned_data['authors'] or self.cleaned_data['categories'] or \
+               self.cleaned_data['journals'] or self.cleaned_data['locations'] or self.cleaned_data[
+                   'published_at_start'] or self.cleaned_data['published_at_end']
+
+    @property
     def url(self):
         return settings.SEARCH_SERVICE_URL + "/search"
 
+
+class FindSimilarPapersForm(forms.Form):
+    file = forms.FileField()
