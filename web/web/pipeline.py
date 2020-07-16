@@ -93,9 +93,9 @@ PIPELINE = {
         },
         'search': {
             'source_filenames': (
-                'search/css/bootstrap-select.css',
-                'search/css/gijgo.min.css',
-                'search/css/tagify.css',
+                'css/bootstrap-select.css',
+                'css/gijgo.min.css',
+                'css/tagify.css',
             ),
             'output_filename': 'search.css'
         },
