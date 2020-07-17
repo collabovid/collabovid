@@ -404,20 +404,30 @@ def change_author_name(request, author_id, doi=None):
     else:
         current_paper = None
 
-    if request.method == 'GET':
+    def redirect_():
         return render(
             request,
             'dashboard/authors/add_name_resolution.html',
             {'author': author, 'current_paper': current_paper, 'debug': settings.DEBUG}
         )
+
+    if request.method == 'GET':
+        return redirect_()
     elif request.method == 'POST':
         action = request.POST.get('action')
         if action == 'save_all':
             AuthorNameResolution.add(author.first_name, author.last_name,
                                      request.POST.get('first_name'), request.POST.get('last_name'))
         elif action == 'delete_all':
+            for paper in Paper.objects.filter(authors=author).all():
+                if paper.authors.count() == 1:
+                    messages.add_message(request, messages.ERROR, f"Cannot remove the only author of the paper \"{paper.title}\"")
+                    return redirect_()
             AuthorNameResolution.ignore(author.first_name, author.last_name)
         elif action == 'delete_current':
+            if current_paper.authors.count() == 1:
+                messages.add_message(request, messages.ERROR, "Cannot remove the only author of this paper")
+                return redirect_()
             current_paper.authors.remove(author)
             current_paper.manually_modified = True
             current_paper.save()
