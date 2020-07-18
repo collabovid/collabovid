@@ -144,13 +144,14 @@
                     <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
                         <img src="{% static "core/img/features/search.png" %}" class="img-fluid mb-3 px-3">
 
-                        <h5 class="mb-0">Find relevant research</h5>
+                        <h5 class="mb-0">Find Relevant Research</h5>
                         <div class="text-muted mb-5">
                             Collabovid uses advanced machine learning techniques to analyze the content of every
-                            publication. The algorithms allow users to find relevant publications more easily.
+                            publication. We provide a semantic search that does not only look for exact keyword matches,
+                            but also extracts semantic information from the query to find more relevant publications.
                         </div>
                         <div class="feature-card-footer">
-                            <a href="{% url "search" %}">Find out more</a>
+                            <a href="{% url "search" %}">Search for publications</a>
                         </div>
                     </div>
                 </div>
@@ -162,12 +163,11 @@
 
                         <h5 class="mb-0">Map</h5>
                         <div class="text-muted mb-5">
-                            A lot of publications investigate certain areas.
-                            On a world map, you can find all the cities, regions and countries and the papers,
-                            related to them.
+                            A lot of publications are location-specific. We extract these locations and provide a
+                            world map where you can find all the named cities, regions and countries with their related papers.
                         </div>
                         <div class="feature-card-footer">
-                            <a href="{% url "map" %}">Find out more</a>
+                            <a href="{% url "map" %}">Go to the map</a>
                         </div>
                     </div>
                 </div>
@@ -175,14 +175,14 @@
                     <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
                         <img src="{% static "core/img/features/visualize.png" %}" class="img-fluid mb-3">
 
-                        <h5 class="mb-0">Visualize current research</h5>
+                        <h5 class="mb-0">Visual Exploration</h5>
                         <div class="text-muted mb-5">
                             The visualization shows every publication embedded in a 3D space where the
-                            position is determined by
-                            the topic of the publication.
+                            position is determined by the publication's topic. Through interactive exploration
+                            in this space, we want to help researchers to identify connections between different articles and subjects.
                         </div>
                         <div class="feature-card-footer">
-                            <a href="{% url "embedding-visualization" %}">Find out more</a>
+                            <a href="{% url "embedding-visualization" %}">Explore the visualization</a>
                         </div>
                     </div>
                 </div>
@@ -192,10 +192,11 @@
                     <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
                         <img src="{% static "core/img/features/topics.png" %}" class="img-fluid px-5 mb-3">
 
-                        <h5 class="mb-0">Extracting topics from data</h5>
+                        <h5 class="mb-0">Topic Extraction</h5>
                         <div class="text-muted mb-5">
-                            Advanced clustering algorithms were able to automatically extract certain research fields from
-                            the publications. Moreover, all papers are classified into eight distinct categories.
+                            We automatically classify the papers into eight broad categories and into
+                            {{ topic_count }} more fine grained topics. Filter by individual topics and
+                            explore which research fields emerge over time.
                         </div>
                         <div class="feature-card-footer">
                             <a href="{% url "category-overview" %}">Find out more</a>
@@ -207,13 +208,13 @@
                     <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
                         <img src="{% static "core/img/features/literature.png" %}" class="img-fluid px-2 mb-3">
 
-                        <h5 class="mb-0">Analyze your literature</h5>
+                        <h5 class="mb-0">Analyze your Literature</h5>
                         <div class="text-muted mb-5">
                             Upload an existing literature list from Zotero, Mendeley, EndNote and others to Collabovid.
                             Afterwards you can find similar research to the given list of interesting papers.
                         </div>
                         <div class="feature-card-footer">
-                            <a href="{% url "upload" %}">Find out more</a>
+                            <a href="{% url "upload" %}">Upload your literature</a>
                         </div>
                     </div>
                 </div>
@@ -223,7 +224,7 @@
                     <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
                         <img src="{% static "core/img/features/collaborate.png" %}" class="img-fluid px-5 mb-3">
 
-                        <h5 class="mb-0">Are you an expert?</h5>
+                        <h5 class="mb-0">Are you an Expert?</h5>
                         <div class="text-muted mb-5">
                             We are looking for medical researchers or other people that are currently working on
                             COVID-19
