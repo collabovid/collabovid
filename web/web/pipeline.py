@@ -28,7 +28,8 @@ PIPELINE = {
                 'core/js/pagination.js',
                 'core/js/collabovid_search.js',
                 'core/js/filter_utils.js',
-                'core/js/paper_cards.js'
+                'core/js/paper_cards.js',
+                'search/js/export_confirm.js'
             ),
             'output_filename': 'search.js'
         },
@@ -54,7 +55,8 @@ PIPELINE = {
                 'js/tween.umd.js',
                 'core/js/embedding_visualization.js',
                 'core/js/embedding_visualization_view.js',
-                'core/js/paper_cards.js'
+                'core/js/paper_cards.js',
+                'search/js/export_confirm.js'
             ),
             'output_filename': 'embedding_visualization.js'
         },
@@ -62,7 +64,8 @@ PIPELINE = {
             'source_filenames': (
                 'core/js/pagination.js',
                 'search/js/collabovid_similar_search.js',
-                'core/js/paper_cards.js'
+                'core/js/paper_cards.js',
+                'search/js/export_confirm.js'
             ),
             'output_filename': 'similar_search.js'
         },

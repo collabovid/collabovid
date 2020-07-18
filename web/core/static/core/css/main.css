@@ -612,3 +612,14 @@ label.nav-link {
         word-break: break-word;
     }
 }
+
+div.feature-card-footer
+{
+    position: absolute;
+    padding-bottom: .5em;
+    padding-right: 1em;
+    bottom: 0;
+    text-align: right;
+    left: 0;
+    right: 0;
+}

@@ -15,14 +15,14 @@ from django.shortcuts import get_object_or_404
 def home(request):
     if request.method == "GET":
         statistics = PaperStatistics(Paper.objects.all())
-
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
-
+        topic_count = Topic.objects.count()
         most_recent_papers = Paper.objects.filter(published_at=latest_date)
         return render(request, "core/home.html", {'statistics': statistics,
                                                   'most_recent_papers': most_recent_papers.order_by('-created_at'),
                                                   'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
-                                                  'most_recent_paper_date': latest_date})
+                                                  'most_recent_paper_date': latest_date,
+                                                  'topic_count': topic_count})
 
 
 def paper(request, doi):
