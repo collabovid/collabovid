@@ -368,9 +368,9 @@ def scrape_conflict(request):
                     try:
                         form.save()
                         if request.POST.get('manually_modified') == 'on':
-                            manually_modified = True
+                            paper.manually_modified = True
                         else:
-                            manually_modified = False
+                            paper.manually_modified = False
 
                         authors = []
                         for author in request.POST.get('author_list').split(';'):
@@ -386,7 +386,7 @@ def scrape_conflict(request):
                             journal = None
                         paper.journal = journal
                         paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
-                        paper.save(set_manually_modified=manually_modified)
+                        paper.save(set_manually_modified=False)
                         conflict.delete()
                         messages.add_message(request, messages.SUCCESS, "Successfully saved the changes.")
                     except IntegrityError:

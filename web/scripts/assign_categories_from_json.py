@@ -45,7 +45,7 @@ if __name__ == '__main__':
                         'score': (score - args.threshold) * 2
                     })
 
-            paper.save()
+            paper.save(set_manually_modified=False)
 
         except Paper.DoesNotExist:
             print("Skipping", data["doi"])

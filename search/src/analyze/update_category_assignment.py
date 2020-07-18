@@ -49,7 +49,7 @@ class UpdateCategoryAssignment(Runnable):
                         paper.categories.add(Category.objects.get(model_identifier=category), through_defaults={
                             'score': (score - self._category_threshold) * 2
                         })
-                        paper.save()
+                        paper.save(set_manually_modified=False)
 
                 if not found_matching_category:
                     best_matching_category, score = max(result.items(), key=lambda x: x[1])
@@ -60,6 +60,6 @@ class UpdateCategoryAssignment(Runnable):
                     paper.categories.add(Category.objects.get(model_identifier=best_matching_category), through_defaults={
                         'score': 0
                     })
-                    paper.save()
+                    paper.save(set_manually_modified=False)
 
         self.log("Finished updating category assignment")
