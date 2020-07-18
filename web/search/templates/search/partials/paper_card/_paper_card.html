@@ -152,11 +152,9 @@
                                     <div class="col-12 col-sm-8 text-sm-right small">
 
                                         <div class="dropdown d-inline">
-                                            <a type="button" id="citeDropdown{{ paper.doi }}"
-                                               data-toggle="dropdown" href="#">
-                                                <i class="fas fa-quote-right"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right mobile-dropdown"
+                                            <a id="citeDropdown{{ paper.doi }}"
+                                               data-toggle="dropdown" href="#"><i class="fas fa-quote-right"></i></a>
+                                            <div class="dropdown-menu dropdown-menu-right mobile-dropdown export-dropdown"
                                                  aria-labelledby="citeDropdown{{ paper.doi }}">
                                                 <h6 class="dropdown-header">Export file format</h6>
                                                 <a class="dropdown-item"
@@ -169,6 +167,7 @@
                                                 </a>
                                             </div>
                                         </div>
+
                                         |
 
                                         {% if paper.abstract|length >= mobile_preview_size %}
