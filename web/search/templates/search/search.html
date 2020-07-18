@@ -266,7 +266,7 @@
             download_button.click(function (e) {
                 e.preventDefault();
 
-                if (show_confirm_export_dialog()) {
+                if (window.show_confirm_export_dialog()) {
                     let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
                     let submission_data = generate_submission_data();
 
