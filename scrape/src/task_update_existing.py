@@ -26,13 +26,13 @@ class UpdateExistingTask(Runnable):
                             started_by=self._task.started_by)
         self.log("Finished updating medRxiv/bioRxiv articles...")
 
-        self.progress(20)
+        self.progress(15)
 
         self.log("Updating arXiv articles...")
         TaskRunner.run_task(ArxivUpdateTask,
                             started_by=self._task.started_by)
 
-        self.progress(40)
+        self.progress(30)
 
         self.log("Finished updating arXiv articles...")
 
@@ -41,14 +41,14 @@ class UpdateExistingTask(Runnable):
                             started_by=self._task.started_by)
         self.log("Finished updating Elsevier articles...")
 
-        self.progress(60)
+        self.progress(45)
 
         self.log("Updating Pubmed articles...")
         TaskRunner.run_task(PubmedUpdateTask,
                             started_by=self._task.started_by)
         self.log("Finished updating Pubmed articles...")
 
-        self.progress(70)
+        self.progress(60)
 
         if settings.UPDATE_VECTORIZER:
             self.log("Updating Topic assigment...")
@@ -59,12 +59,21 @@ class UpdateExistingTask(Runnable):
                 'parameters': [],
                 'started_by': self._task.started_by
             }
-
             task_launcher.launch_task(name="setup-vectorizer", config=task_config, block=True)
-            self.progress(80)
+            self.progress(70)
+            self.log("Finished setup-vectorizer")
+
             task_launcher.launch_task(name="update-category-assignment", config=task_config, block=True)
-            self.progress(90)
+            self.progress(80)
             self.log("Finished updating category assigment")
+
+            task_launcher.launch_task(name="nearest-neighbor-topic-assignment", config=task_config, block=True)
+            self.progress(90)
+            self.log("Finished nearest-neighbor-topic-assignment")
+
+            task_launcher.launch_task(name="reduce-embedding-dimensionality", config=task_config, block=True)
+            self.log("Finished reduce-embedding-dimensionality")
+            self.progress(95)
         else:
             self.log("Paper matrix update and topic assignment skipped.")
 
