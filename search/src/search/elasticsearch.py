@@ -94,8 +94,7 @@ class ElasticsearchRequestHelper:
         must_match.append(ElasticsearchRequestHelper._get_ids_match(list(score_table.keys())))
         should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
                             ElasticsearchRequestHelper._get_title_match(
-                                query=ElasticsearchQueryHelper.remove_common_words(query)
-                            ) | ElasticsearchRequestHelper._get_doi_match(query))
+                                query=ElasticsearchQueryHelper.remove_common_words(query)))
 
         search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
 
