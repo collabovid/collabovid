@@ -4,4 +4,4 @@ wheel
 -e collabovid-store
 -r web/requirements.txt
 -r scrape/requirements.txt
--r search-requirements.txt
+-r search/requirements.txt

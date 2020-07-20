@@ -50,7 +50,8 @@ class MedrxivUpdater(DataUpdater):
             try:
                 firstname = author_webelement.find('span', attrs={'class': 'nlm-given-names'}).text
                 lastname = author_webelement.find('span', attrs={'class': 'nlm-surname'}).text
-                authors.append((lastname, firstname))
+                if firstname or lastname:
+                    authors.append((lastname, firstname))
             except AttributeError:
                 # Ignore collaboration groups, listed in authors list
                 continue
