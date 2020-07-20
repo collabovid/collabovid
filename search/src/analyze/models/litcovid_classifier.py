@@ -38,7 +38,7 @@ class LitcovidMultiLabelClassifier():
         :return: the tokens
         """
         tokens = self.tokenizer.batch_encode_plus(inputs, add_special_tokens=True, return_tensors='pt',
-                                                  pad_to_max_length=True, return_attention_masks=True,
+                                                  pad_to_max_length=True, truncation=True,
                                                   max_length=self.max_sequence_length)
         for key in list(tokens.keys()):
             tokens[key] = tokens[key].to(self.device)
