@@ -15,7 +15,7 @@ from data.models import (
     GeoNameResolution,
     IgnoredPaper,
     Paper,
-)
+    Topic, TopicNameSuggestion)
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
 from tasks.models import Task
@@ -344,3 +344,25 @@ def language_detection(request):
             json.dumps({'status': 'success'}),
             content_type="application/json"
         )
+
+
+@staff_member_required
+def set_topic_name(request, topic_id):
+
+    if request.method == "POST":
+
+        name_suggestion = request.POST.get('suggestion_pk')
+        name = request.POST.get('name')
+        topic = get_object_or_404(Topic, pk=topic_id)
+
+        if name:
+            topic.name = name
+            topic.save()
+        else:
+            topic_name_suggestion = get_object_or_404(TopicNameSuggestion, pk=name_suggestion)
+
+            topic.name = topic_name_suggestion.name
+            topic.name_suggestions.all().delete()
+            topic.save()
+
+    return redirect('topics')

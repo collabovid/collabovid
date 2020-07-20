@@ -25,5 +25,6 @@ urlpatterns = [
     path('topics', topics_overview, name='topics'),
     path('topic/<int:topic_id>', papers_for_topic, name='topic_papers'),
     path('topics-merge', merge_topics, name='topics_merge'),
-    path('topics-merge-generated', merge_generated, name='topics_merge_generated')
+    path('topics-merge-generated', merge_generated, name='topics_merge_generated'),
+    path('topic/<int:topic_id>/set-name', set_topic_name, name='set-topic-name'),
 ]

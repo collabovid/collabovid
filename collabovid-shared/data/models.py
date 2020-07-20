@@ -16,6 +16,12 @@ class Topic(models.Model):
     overlapping_paper_count = models.IntegerField(default=0)
 
 
+class TopicNameSuggestion(models.Model):
+    name = models.CharField(max_length=300)
+    score = models.FloatField()
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name="name_suggestions")
+
+
 class PaperHost(models.Model):
     name = models.CharField(max_length=60, unique=True)
     url = models.URLField(null=True, default=None)
