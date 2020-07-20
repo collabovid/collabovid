@@ -40,7 +40,7 @@ class DataUpdater(object):
             try:
                 db_article = Paper.objects.get(doi=datapoint.doi)
                 db_article.last_scrape = timezone.now()
-                db_article.save()
+                db_article.save(set_manually_modified=False)
             except Paper.DoesNotExist:
                 pass
 

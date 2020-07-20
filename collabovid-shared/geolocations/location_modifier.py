@@ -66,7 +66,7 @@ class LocationModifier:
             GeoLocationMembership.objects.create(location=location, paper=article,
                                                  word=None, state=VerificationState.ACCEPTED)
             article.location_modified = True
-            article.save()
+            article.save(set_manually_modified=False)
         except IntegrityError:
             pass
         return location
@@ -79,7 +79,7 @@ class LocationModifier:
                 membership.delete()
                 article = Paper.objects.get(doi=article_id)
                 article.location_modified = True
-                article.save()
+                article.save(set_manually_modified=False)
                 location = GeoLocation.objects.get(pk=location_id)
                 if location.count == 0:
                     if location.is_city and location.geocity.country.count == 0:

@@ -430,7 +430,11 @@ class Paper(models.Model):
         self.preview_image.save(img_name,
                                 InMemoryUploadedFile(
                                     pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
-                                save=save)
+                                save=False)
+        # save=True in preview_image.save would call paper.save with default args (set_manually_modified=True)!
+
+        if save:
+            self.save(set_manually_modified=False)
 
     @staticmethod
     def max_length(field: str):
