@@ -37,7 +37,8 @@ class ElsevierUpdater(DataUpdater):
                     human_name = HumanName(author['$'])
                     first_name = f'{human_name.first} {human_name.middle}'.strip()
                     last_name = human_name.last
-                    authors.append((last_name, first_name))
+                    if first_name or last_name:
+                        authors.append((last_name, first_name))
         return authors
 
     def _create_serializable_record(self, article_info):
