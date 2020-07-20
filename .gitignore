@@ -13,6 +13,8 @@ set_test_config.sh
 set_prod_config.sh
 config_scripts
 
+tmp
+
 # Created by .ignore support plugin (hsz.mobi)
 ### Python template
 # Byte-compiled / optimized / DLL files

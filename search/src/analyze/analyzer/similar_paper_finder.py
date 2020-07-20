@@ -19,7 +19,7 @@ class EmbeddingSimilarPaperFinder(SimilarPaperFinder):
         results = list(zip(indices, scores))
         if top is None:
             top = len(results) - 1
-        results = heapq.nlargest(top, results)
+        results = heapq.nlargest(top, results, key=lambda x: x[1])
         return results
 
     def is_ready(self):

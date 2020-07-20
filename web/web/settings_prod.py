@@ -40,3 +40,4 @@ SECURE_REDIRECT_EXEMPT = [r'^system-health/$']
 
 
 USING_ANALYTICS = True
+SAVE_SEARCH_QUERIES = True

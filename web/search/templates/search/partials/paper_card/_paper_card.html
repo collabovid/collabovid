@@ -1,5 +1,6 @@
 {% load static %}
 {% load paper_card_extras %}
+{% load doi_utils %}
 <div class="card p-4 rounded shadow">
 
     <div class="row d-flex flex-wrap">
@@ -16,23 +17,31 @@
 
         <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
-            <div class="paper-card-badge">
+            <div class="paper-card-badge text-right">
+                    <div data-badge-type="4" data-badge-popover="left"
+                         {% if not paper|is_arxiv %}
+                        data-doi="{{paper.doi}}"
+                        {% else %}
+                        data-arxiv-id={{paper.doi|extract_arxiv_id}}
+                        {% endif %}
+                         data-hide-no-mentions="true" class="altmetric-embed"></div>
                 {% if paper.is_preprint %}
-                    <span class="badge badge-pill badge-secondary small">Preprint</span>
+                    <span class="badge  badge-secondary small">Preprint</span>
                 {% endif %}
             </div>
 
             <div class="card-block">
 
                 <h5 class="card-title font-weight-normal">
-                    <a href="{% url "paper" paper.pk %}" class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
+                    <a href="{% url "paper" paper.pk %}"
+                       class="text-dark text-decoration-none paper-title">{{ paper.title|safe }}</a>
                     {{ request.user|edit_object_link:paper }}
-                    {% if paper.is_similar  %}<i class="small fas fa-circle text-info"></i>{% endif %}
+                    {% if paper.is_similar %}<i class="small fas fa-circle text-info"></i>{% endif %}
                 </h5>
 
                 <h6 class="card-subtitle mb-1 pb-0 text-muted small text-justify">
                     <div class="mb-1">
-                        {% if paper.doi|first not in 'arXiv:' %}
+                        {% if not paper|is_arxiv %}
                             <a href="https://doi.org/{{ paper.doi }}" target="_blank">{{ paper.doi }}</a>
                         {% else %}
                             {{ paper.doi }}
@@ -109,7 +118,7 @@
                                         <span class="short">{{ paper|preview_slice|safe }}</span><span
                                             class="dots">...</span><span
                                             class="long"
-                                            style="display: none;">{{ paper|full_text_slice|safe}}</span>
+                                            style="display: none;">{{ paper|full_text_slice|safe }}</span>
                                     {% else %}
                                         <span class="short">{{ paper.abstract|safe }}</span>
                                     {% endif %}
@@ -119,12 +128,49 @@
 
                                 <div class="row">
 
-                                    <div class="col-12 col-sm-4 small text-left">
-                                        {% include "search/partials/paper_card/_categories.html" %}
+                                    <div class="col-12 col-sm-4 small text-left paper-card-badges-container">
+
+                                        <div>
+                                            {% if paper.categories %}
+
+                                                {% include "search/partials/paper_card/_categories.html" %}
+
+                                                {% comment %}
+                                                {% if paper.topic %}
+                                                    |
+                                                {% endif %}
+                                                {% endcomment %}
+                                            {% endif %}
+                                            {% comment %}
+                                            {% if paper.topic %}
+                                                {% include "search/partials/paper_card/_topic.html" %}
+                                            {% endif %}
+                                            {% endcomment %}
+                                        </div>
+
                                     </div>
 
 
                                     <div class="col-12 col-sm-8 text-sm-right small">
+
+                                        <div class="dropdown d-inline">
+                                            <a id="citeDropdown{{ paper.doi }}"
+                                               data-toggle="dropdown" href="#"><i class="fas fa-quote-right"></i></a>
+                                            <div class="dropdown-menu dropdown-menu-right mobile-dropdown export-dropdown"
+                                                 aria-labelledby="citeDropdown{{ paper.doi }}">
+                                                <h6 class="dropdown-header">Export file format</h6>
+                                                <a class="dropdown-item"
+                                                   href="{% url "export-paper" "ris" paper.doi %}">
+                                                    Research Information System Format (RIS)
+                                                </a>
+                                                <a class="dropdown-item"
+                                                   href="{% url "export-paper" "bibtex" paper.doi %}">
+                                                    BibTeX
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        |
 
                                         {% if paper.abstract|length >= mobile_preview_size %}
                                             <span class="abstract-controls
@@ -153,6 +199,16 @@
                                         {% endif %}
 
                                         <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
+                                        {% if paper.visualized %}
+                                            |
+                                            <a class="visualize-link"
+                                               data-paper-doi="{{ paper.doi }}"
+                                               href="{% url "embedding-visualization-for-doi" paper.doi %}"
+                                               target="_blank">
+                                                Visualize
+                                            </a>
+                                        {% endif %}
+
                                     </div>
 
                                 </div>

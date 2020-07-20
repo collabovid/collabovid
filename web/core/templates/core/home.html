@@ -3,6 +3,8 @@
 {% load pipeline %}
 {% load humanize %}
 
+{% block body_class %}bg-white{% endblock %}
+
 {% block content %}
 
     <div class="gradient-header">
@@ -131,25 +133,119 @@
                 </div>
             </div>
 
-            <div class="row align-items-center">
-                <div class="col-lg-6 order-2 order-lg-1 col-12">
-                    <h2 class="font-weight-light">Are you an expert?</h2>
-                    <p class="font-italic text-muted mb-4">
-                        We are looking for medical researchers or other people that are currently working on COVID-19
-                        publications to
-                        improve Collabovid and gain insights into your workflow. If you want to help us, please leave us
-                        a <a href="mailto:info@collabovid.org">message</a>.
-                    </p>
-                </div>
-                <div class="col-lg-4 mx-auto order-1 order-lg-2 col-md-6 col-8">
-                    <img src="{% static 'core/img/collaborate.png' %}" class="img-fluid">
-                </div>
-            </div>
 
         </div>
     </div>
 
-    <div>
+    <div class="bg-light">
+        <div class="container py-5">
+            <div class="row">
+                <div class="col-12 col-sm-8 offset-sm-2 offset-md-0 col-md-6 col-lg-4">
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/search.png" %}" class="img-fluid mb-3 px-3">
+
+                        <h5 class="mb-0">Find Relevant Research</h5>
+                        <div class="text-muted mb-5">
+                            Collabovid uses advanced machine learning techniques to analyze the content of every
+                            publication. We provide a semantic search that does not only look for exact keyword matches,
+                            but also extracts semantic information from the query to find more relevant publications.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="{% url "search" %}">Search for publications</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-8 offset-sm-2 mt-4 mt-md-0 offset-md-0 col-md-6 col-lg-4">
+
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/map-full.png" %}" class="img-fluid mb-3">
+
+                        <h5 class="mb-0">Map</h5>
+                        <div class="text-muted mb-5">
+                            A lot of publications are location-specific. We extract these locations and provide a
+                            world map where you can find all the named cities, regions and countries with their related papers.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="{% url "map" %}">Go to the map</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-sm-8 offset-sm-2 mt-4 mt-lg-0 offset-md-0 col-md-6 col-lg-4">
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/visualize.png" %}" class="img-fluid mb-3">
+
+                        <h5 class="mb-0">Visual Exploration</h5>
+                        <div class="text-muted mb-5">
+                            The visualization shows every publication embedded in a 3D space where the
+                            position is determined by the publication's topic. Through interactive exploration
+                            in this space, we want to help researchers to identify connections between different articles and subjects.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="{% url "embedding-visualization" %}">Explore the visualization</a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-sm-8 offset-sm-2 mt-4 offset-md-0 col-md-6 col-lg-4">
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/topics.png" %}" class="img-fluid px-5 mb-3">
+
+                        <h5 class="mb-0">Topic Extraction</h5>
+                        <div class="text-muted mb-5">
+                            We automatically classify the papers into eight broad categories and into
+                            {{ topic_count }} more fine grained topics. Filter by individual topics and
+                            explore which research fields emerge over time.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="{% url "category-overview" %}">Find out more</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-sm-8 offset-sm-2 mt-4 offset-md-0 col-md-6 col-lg-4">
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/literature.png" %}" class="img-fluid px-2 mb-3">
+
+                        <h5 class="mb-0">Analyze your Literature</h5>
+                        <div class="text-muted mb-5">
+                            Upload an existing literature list from Zotero, Mendeley, EndNote and others to Collabovid.
+                            Afterwards you can find similar research to the given list of interesting papers.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="{% url "upload" %}">Upload your literature</a>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="col-12 col-sm-8 offset-sm-2 mt-4 offset-md-0 col-md-6 col-lg-4">
+                    <div class="bg-white rounded shadow-sm pt-3 pb-2 px-4 h-100 position-relative">
+                        <img src="{% static "core/img/features/collaborate.png" %}" class="img-fluid px-5 mb-3">
+
+                        <h5 class="mb-0">Are you an Expert?</h5>
+                        <div class="text-muted mb-5">
+                            We are looking for medical researchers or other people that are currently working on
+                            COVID-19
+                            publications to
+                            improve Collabovid and gain insights into your workflow. If you want to help us, please
+                            leave us
+                            a message.
+                        </div>
+                        <div class="feature-card-footer">
+                            <a href="mailto:info@collabovid.org">Contact us</a>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-light">
+
         <div class="container py-5">
             <div class="row align-items-end">
                 <div class="col-lg-7 col-12">
@@ -172,16 +268,7 @@
                     <div class="card w-100 shadow rounded bg-white">
                         <ul class="list-group">
                             {% for paper in most_recent_papers|slice:":5" %}
-                                <li class="list-group-item">
-                                    {{ paper.title }}
-                                    <div class="text-muted small mt-2">
-                                        {{ paper.published_at }} &middot; {{ paper.host.name }}
-                                        &middot; Added {{ paper.created_at|naturaltime }}
-                                        <a href="{{ paper.url }}" class="float-right">
-                                            Read more
-                                        </a>
-                                    </div>
-                                </li>
+                                {% include "core/partials/_paper_list_item.html" with paper=paper %}
                             {% endfor %}
                         </ul>
                     </div>
@@ -197,7 +284,7 @@
         </div>
     </div>
 
-    <div>
+    <div class="bg-white">
         <div class="container pt-5">
             <div class="row">
                 <div class="col-12">

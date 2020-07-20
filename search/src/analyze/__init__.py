@@ -4,8 +4,9 @@ from src.analyze.vectorizer.exceptions import *
 from src.analyze.vectorizer import get_vectorizer
 from threading import Thread
 
-SEARCH_VECTORIZER = 'transformer-paper-oubiobert-512'
-SIMILAR_VECTORIZER = 'transformer-paper-oubiobert-512'
+SEARCH_VECTORIZER = 'transformer-paper-sensitive-512'
+SIMILAR_VECTORIZER = 'transformer-paper-sensitive-512'
+EMBEDDING_VECTORIZER = 'transformer-paper-no-locations'
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 semantic_paper_search = None
@@ -13,7 +14,7 @@ similar_paper_finder = None
 
 
 def get_used_vectorizers():
-    names = list({SEARCH_VECTORIZER, SIMILAR_VECTORIZER})
+    names = list({SEARCH_VECTORIZER, SIMILAR_VECTORIZER, EMBEDDING_VECTORIZER})
     return names
 
 

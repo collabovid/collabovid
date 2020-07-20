@@ -32,9 +32,9 @@ class DataUpdater(object):
     @staticmethod
     def set_last_scrape(datapoint):
         """
-            Set the current time as last_scrape time.
-            Needs to be done if articles should be updated and now contain data errors.
-            Otherwise, we would try to update these articles over and over.
+        Set the current time as last_scrape time.
+        Needs to be done if articles should be updated and now contain data errors.
+        Otherwise, we would try to update these articles over and over.
         """
         if datapoint.doi:
             try:

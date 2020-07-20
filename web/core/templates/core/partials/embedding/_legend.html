@@ -1,0 +1,36 @@
+<div class="legend">
+    <div>
+        <div id="category-legend">
+            {% for category in categories %}
+                <div class="category-label"
+                     data-category-id="{{ category.pk }}">
+
+                    <span id="{{ category.pk }}-badge" role="button" class="category-badge badge"
+                          data-background-color="{{ category.color }}"
+                          style="background-color: {{ category.color }}">
+                        {{ category.name }}
+                    </span>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="topic-legend" style="display: none">
+            <div>
+                <span id="topic-label" class="badge badge-light"></span>
+            </div>
+        </div>
+        <div id="paper-selected-legend" style="display: none">
+            <div>
+                                <span class="badge badge-primary"
+                                      style="background-color: #ffc266">
+                                    Selected Paper
+                                </span>
+            </div>
+            <div>
+                                <span class="badge badge-primary"
+                                      style="background-color: #cc7a00">
+                                    Most similar papers
+                                </span>
+            </div>
+        </div>
+    </div>
+</div>

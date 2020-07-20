@@ -39,6 +39,14 @@ class ElasticsearchRequestHelper:
         })
 
     @staticmethod
+    def _get_doi_match(query: str, boost=10):
+
+        return QEs({'ids': {'values': query.split(),
+                            'boost': boost
+                            }
+                    })
+
+    @staticmethod
     def _get_title_match(query: str, boost=0.8):
         return QEs('match', title={'query': query,
                                    'fuzziness': 'AUTO',
@@ -86,8 +94,7 @@ class ElasticsearchRequestHelper:
         must_match.append(ElasticsearchRequestHelper._get_ids_match(list(score_table.keys())))
         should_match.append(ElasticsearchRequestHelper._get_title_exact_match(query) |
                             ElasticsearchRequestHelper._get_title_match(
-                                query=ElasticsearchQueryHelper.remove_common_words(query)
-                            ))
+                                query=ElasticsearchQueryHelper.remove_common_words(query)))
 
         search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
 
@@ -114,7 +121,7 @@ class ElasticsearchRequestHelper:
                             ElasticsearchRequestHelper._get_title_match(query) |
                             ElasticsearchRequestHelper._get_author_match(
                                 ElasticsearchQueryHelper.remove_common_words(query))
-                            )
+                            | ElasticsearchRequestHelper._get_doi_match(query))
 
         search = ElasticsearchRequestHelper._build_search_request(must_match, should_match)
         total = search.count()

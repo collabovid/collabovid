@@ -148,3 +148,6 @@ STATICFILES_DIRS = (
 )
 # noinspection PyUnresolvedReferences
 from web.pipeline import *
+
+
+SAVE_SEARCH_QUERIES=False
