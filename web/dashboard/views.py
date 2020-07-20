@@ -397,6 +397,10 @@ def scrape_conflict(request):
                         else:
                             journal = None
                         paper.journal = journal
+
+                        paper.visualized = False
+                        paper.vectorized = False
+
                         paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
                         paper.save(set_manually_modified=False)
                         conflict.delete()
