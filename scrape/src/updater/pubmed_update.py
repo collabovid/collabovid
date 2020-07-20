@@ -20,7 +20,7 @@ class PubmedUpdater(DataUpdater):
     def _load_query_result(self):
         if not self._query_result:
             pubmed = PubMed(tool='Collabovid', email='info@collabovid.org')
-            self._query_result = list(pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=2000))
+            self._query_result = list(pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=30000))
 
     def _count(self):
         self._load_query_result()
