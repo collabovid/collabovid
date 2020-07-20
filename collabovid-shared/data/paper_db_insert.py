@@ -143,6 +143,9 @@ class DatabaseUpdate:
         elif not datapoint.publication_date:
             error = "Missing publication date"
 
+        if datapoint.doi and '\n' in datapoint.doi:
+            error = "DOI has line breaks"
+
         author_count = 0
         for author in datapoint.authors:
             if (
@@ -191,10 +194,7 @@ class DatabaseUpdate:
 
         db_article.authors.clear()
         for author in datapoint.authors:
-            db_author, _ = Author.get_or_create_by_name(
-                first_name=author[1].replace(';', '').replace(',', ''),
-                last_name=author[0].replace(';', '').replace(',', ''),
-            )
+            db_author, _ = Author.get_or_create_by_name(first_name=author[1], last_name=author[0])
             if db_author is not None:
                 db_article.authors.add(db_author)
 

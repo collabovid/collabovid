@@ -48,8 +48,12 @@ class MedrxivUpdater(DataUpdater):
         authors = []
         for author_webelement in author_webelements:
             try:
-                firstname = author_webelement.find('span', attrs={'class': 'nlm-given-names'}).text
-                lastname = author_webelement.find('span', attrs={'class': 'nlm-surname'}).text
+                firstname = author_webelement.find(
+                    'span', attrs={'class': 'nlm-given-names'}
+                ).text.replace(';', '').replace(',', '').strip()
+                lastname = author_webelement.find(
+                    'span', attrs={'class': 'nlm-surname'}
+                ).text.replace(';', '').replace(',', '').strip()
                 if firstname or lastname:
                     authors.append((lastname, firstname))
             except AttributeError:

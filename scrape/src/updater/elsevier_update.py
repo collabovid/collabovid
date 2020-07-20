@@ -35,8 +35,8 @@ class ElsevierUpdater(DataUpdater):
             for author in coredata['dc:creator']:
                 if '$' in author:
                     human_name = HumanName(author['$'])
-                    first_name = f'{human_name.first} {human_name.middle}'.strip()
-                    last_name = human_name.last
+                    first_name = f'{human_name.first} {human_name.middle}'.replace(';', '').replace(',', '').strip()
+                    last_name = human_name.last.replace(';', '').replace(',', '').strip()
                     if first_name or last_name:
                         authors.append((last_name, first_name))
         return authors

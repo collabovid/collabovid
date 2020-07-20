@@ -20,7 +20,7 @@ class PubmedUpdater(DataUpdater):
     def _load_query_result(self):
         if not self._query_result:
             pubmed = PubMed(tool='Collabovid', email='info@collabovid.org')
-            self._query_result = list(pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=30000))
+            self._query_result = list(pubmed.query(query=self._PUBMED_SEARCH_QUERY, max_results=2000))
 
     def _count(self):
         self._load_query_result()
@@ -29,8 +29,10 @@ class PubmedUpdater(DataUpdater):
     def _create_serializable_record(self, pubmed_article):
         """ Construct a serializable record from a given pubmed article (return value of pymed's query) """
 
-        article = SerializableArticleRecord(doi=pubmed_article.doi, title=pubmed_article.title,
+        article = SerializableArticleRecord(title=pubmed_article.title,
                                             abstract=pubmed_article.abstract, is_preprint=False)
+        if pubmed_article.doi:
+            article.doi = pubmed_article.doi.strip()
         article.paperhost = "PubMed"
         article.datasource = DataSource.PUBMED
         publication_date = pubmed_article.publication_date
@@ -47,19 +49,29 @@ class PubmedUpdater(DataUpdater):
             # Journal field is missing sometimes (e.g. pubmed ID 32479040). This is a book without DOI and won't get
             # added anyway.
             article.journal = None
-        article.authors = [(a['lastname'], a['firstname']) for a in pubmed_article.authors
-                           if a['lastname'] or a['firstname']]
+
+        authors = []
+        for author in pubmed_article.authors:
+            lastname = ''
+            firstname = ''
+            if author['lastname']:
+                lastname = author['lastname'].replace(';', '').replace(',', '')
+            if author['firstname']:
+                firstname = author['firstname'].replace(';', '').replace(',', '')
+            if lastname or firstname:
+                authors.append((lastname, firstname))
+        article.authors = authors
 
         return article
 
     def _get_data_points(self):
         self._load_query_result()
         for pubmed_article in self._query_result:
-            yield SerializableArticleRecord(pubmed_article)
+            yield self._create_serializable_record(pubmed_article)
 
     def _get_data_point(self, doi):
         self._load_query_result()
         try:
-            return SerializableArticleRecord(next(x for x in self._query_result if x.doi == doi))
+            return self._create_serializable_record(next(x for x in self._query_result if x.doi == doi))
         except StopIteration:
             return None
