@@ -321,6 +321,10 @@ class DataImport:
                 db_paper.data = self._mappings.paperdata_mapping[
                     db_paper.doi] if db_paper.doi in self._mappings.paperdata_mapping else None
 
+                if self.export_version >= 4:
+                    db_paper.visualized = paper["visualized"]
+                    db_paper.vectorized = paper["vectorized"]
+
                 img_path = paper["image"]
                 if img_path:
                     with tar.extractfile(img_path) as img_file:
