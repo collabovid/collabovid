@@ -22,7 +22,7 @@ from data.models import (
     Journal,
     Paper,
     PaperData,
-    PaperHost
+    PaperHost, AuthorPaperMembership
 )
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -337,6 +337,7 @@ class DataImport:
                 self.statistics.added_papers += 1
 
                 self._mappings.doi_to_author_mapping[db_paper.doi] = []  # maps doi to a list of its db_authors
+                rank = 0
                 for author_id in paper["author_ids"]:
                     author = authors[author_id]
                     author_tuple = (author["firstname"][:author_firstname_max_len],
@@ -383,12 +384,11 @@ class DataImport:
         CategoryMembership.objects.bulk_create(category_memberships_to_create)
         GeoLocationMembership.objects.bulk_create(location_memberships_to_create)
 
-        ThroughModel = Paper.authors.through
-        ThroughModel.objects.bulk_create(
-            [ThroughModel(paper_id=doi, author_id=author.pk) for doi, authors in
-             self._mappings.doi_to_author_mapping.items()
-             for author in authors]
-        )
+        author_paper_memberships = []
+        for doi, authors in self._mappings.doi_to_author_mapping:
+            author_paper_memberships += [AuthorPaperMembership(paper_id=doi, author_id=author.pk, rank=i)
+                                         for i, author in enumerate(authors)]
+        AuthorPaperMembership.objects.bulk_create(author_paper_memberships)
         # recompute counts because post save signals are not triggered on bulk create
         GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
 
