@@ -385,7 +385,7 @@ class DataImport:
         GeoLocationMembership.objects.bulk_create(location_memberships_to_create)
 
         author_paper_memberships = []
-        for doi, authors in self._mappings.doi_to_author_mapping:
+        for doi, authors in self._mappings.doi_to_author_mapping.items():
             author_paper_memberships += [AuthorPaperMembership(paper_id=doi, author_id=author.pk, rank=i)
                                          for i, author in enumerate(authors)]
         AuthorPaperMembership.objects.bulk_create(author_paper_memberships)
