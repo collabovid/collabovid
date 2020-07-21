@@ -6,7 +6,7 @@ from django.utils import timezone
 from data.models import (
     Author,
     AuthorNameResolution,
-    DataSource,
+    AuthorPaperMembership, DataSource,
     IgnoredPaper,
     Journal,
     Paper,
@@ -61,7 +61,6 @@ class SerializableArticleRecord:
         return self._md5
 
     def json(self):
-        self.authors = sorted(self.authors)
         return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
 
 
@@ -188,11 +187,13 @@ class DatabaseUpdate:
         db_article.vectorized = False
         db_article.save(set_manually_modified=False)
 
-        db_article.authors.clear()
+        AuthorPaperMembership.objects.filter(paper=db_article).delete()
+        rank = 0
         for author in datapoint.authors:
             db_author, _ = Author.get_or_create_by_name(first_name=author[1], last_name=author[0])
             if db_author is not None:
-                db_article.authors.add(db_author)
+                AuthorPaperMembership.objects.create(paper=db_article, author=db_author, rank=rank)
+                rank += 1
 
         if datapoint.journal:
             db_article.journal, _ = Journal.objects.get_or_create(
