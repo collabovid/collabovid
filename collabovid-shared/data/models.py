@@ -363,7 +363,7 @@ class Paper(models.Model):
 
     data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', blank=True, on_delete=models.SET_NULL)
 
-    pubmed_id = models.CharField(max_length=20, unique=True, null=True, blank=True, default=None)
+    pubmed_id = models.CharField(max_length=20, null=True, blank=True, default=None)
 
     topic = models.ForeignKey(Topic,
                               related_name="papers",

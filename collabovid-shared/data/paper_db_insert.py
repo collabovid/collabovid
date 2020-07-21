@@ -184,10 +184,6 @@ class DatabaseUpdate:
 
         db_article.host, _ = PaperHost.objects.get_or_create(name=datapoint.paperhost)
 
-        db_article.url = datapoint.url
-        db_article.pdf_url = datapoint.pdf_url
-        db_article.is_preprint = datapoint.is_preprint
-        db_article.pubmed_id = datapoint.pubmed_id
         db_article.visualized = False
         db_article.vectorized = False
         db_article.save(set_manually_modified=False)
