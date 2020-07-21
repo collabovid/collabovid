@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: scrape-cron
 spec:
-  schedule: "50 */2 * * *"
+  schedule: "55 */3 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -15,7 +15,7 @@ spec:
             - name: scrape
               image: scrape
               command: ["bash","-c"]
-              args: ["export PYTHONPATH=/app:$PYTHONPATH && python run_task.py -u cron scrape"]
+              args: ["export PYTHONPATH=/app:$PYTHONPATH && python run_task.py -u cron scrape && python run_task.py -u cron update-existing-articles"]
               envFrom:
                 - secretRef:
                     name: scrape-latest
