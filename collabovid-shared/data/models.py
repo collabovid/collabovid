@@ -404,7 +404,7 @@ class Paper(models.Model):
         :return:
         """
         if not self._highlighted_authors:
-            self._highlighted_authors = [author for author in self.authors.all()]
+            self._highlighted_authors = self.ranked_authors
         return self._highlighted_authors
 
     @property
