@@ -8,7 +8,7 @@
                     "name": "count",
                     "required": false,
                     "type": "int",
-                    "default": 20,
+                    "default": 50,
                     "is_primitive": true
                 },
                 {
@@ -16,6 +16,13 @@
                     "required": false,
                     "type": "bool",
                     "default": true,
+                    "is_primitive": true
+                },
+                {
+                    "name": "force_update",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
                     "is_primitive": true
                 }
             ]
@@ -38,7 +45,7 @@
                     "name": "count",
                     "required": false,
                     "type": "int",
-                    "default": 20,
+                    "default": 50,
                     "is_primitive": true
                 },
                 {
@@ -46,6 +53,13 @@
                     "required": false,
                     "type": "bool",
                     "default": true,
+                    "is_primitive": true
+                },
+                {
+                    "name": "force_update",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
                     "is_primitive": true
                 }
             ]
@@ -72,6 +86,13 @@
                     "type": "bool",
                     "default": true,
                     "is_primitive": true
+                },
+                {
+                    "name": "force_update",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
                 }
             ]
         },
@@ -97,6 +118,13 @@
                     "type": "bool",
                     "default": true,
                     "is_primitive": true
+                },
+                {
+                    "name": "force_update",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
                 }
             ]
         },
@@ -113,7 +141,43 @@
         "update-existing-articles": {
             "name": "Update Existing Articles",
             "description": "No description provided.",
-            "parameters": []
+            "parameters": [
+                {
+                    "name": "force_update",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                },
+                {
+                    "name": "medrxiv_count",
+                    "required": false,
+                    "type": "int",
+                    "default": 50,
+                    "is_primitive": true
+                },
+                {
+                    "name": "arxiv_count",
+                    "required": false,
+                    "type": "int",
+                    "default": 50,
+                    "is_primitive": true
+                },
+                {
+                    "name": "pubmed_count",
+                    "required": false,
+                    "type": "int",
+                    "default": 100,
+                    "is_primitive": true
+                },
+                {
+                    "name": "elsevier_count",
+                    "required": false,
+                    "type": "int",
+                    "default": 100,
+                    "is_primitive": true
+                }
+            ]
         },
         "download-pdf-images": {
             "name": "Download Pdf Images",

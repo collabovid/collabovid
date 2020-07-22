@@ -78,9 +78,10 @@ class DatabaseUpdate:
     class SkipArticle(UpdateException):
         pass
 
-    def __init__(self, datasource, update_existing=False):
+    def __init__(self, datasource, update_existing=False, force_update=False):
         self.datasource = datasource
         self.update_existing = update_existing
+        self.force_update = force_update
 
     def insert(self, datapoint: SerializableArticleRecord):
         self._validate_integrity_constraints(datapoint)
@@ -103,13 +104,13 @@ class DatabaseUpdate:
                     if datasource_comparison > 0:
                         datasource_name = DataSource(db_article.data_source_value).name
                         raise DatabaseUpdate.SkipArticle(f"Article already tracked by {datasource_name}")
-                    elif not self.update_existing and datasource_comparison == 0:
+                    elif not self.force_update and not self.update_existing and datasource_comparison == 0:
                         raise DatabaseUpdate.SkipArticle("Article already in database")
 
                     changed_externally = db_article.scrape_hash != datapoint.md5
                     changed_internally = db_article.manually_modified
 
-                    if not changed_externally:
+                    if not self.force_update and not changed_externally:
                         db_article.last_scrape = timezone.now()
                         db_article.save(set_manually_modified=False)
                         return db_article, False, False  # Article was neither created, nor updated

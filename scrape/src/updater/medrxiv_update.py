@@ -23,8 +23,9 @@ class MedrxivUpdater(DataUpdater):
     def data_source(self):
         return DataSource.MEDBIORXIV
 
-    def __init__(self, log=print, pdf_image=False, pdf_content=False, update_existing=False):
-        super().__init__(log, pdf_image=pdf_image, pdf_content=pdf_content, update_existing=update_existing)
+    def __init__(self, log=print, pdf_image=False, pdf_content=False, update_existing=False, force_update=False):
+        super().__init__(log, pdf_image=pdf_image, pdf_content=pdf_content,
+                         update_existing=update_existing, force_update=force_update)
         self._article_json = None
 
     def _get_article_json(self):

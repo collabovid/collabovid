@@ -27,8 +27,9 @@ class ArxivUpdater(DataUpdater):
     _ARXIV_SEARCH_QUERY = 'title:"COVID 19" OR title:"SARS-CoV-2" OR title:"coronavirus" ' \
                           'OR abs:"COVID 19" OR abs:"SARS-CoV-2" OR abs:"coronavirus"'
 
-    def __init__(self, log=print, pdf_image=False, pdf_content=False, update_existing=False):
-        super().__init__(log, pdf_image=pdf_image, pdf_content=pdf_content, update_existing=update_existing)
+    def __init__(self, log=print, pdf_image=False, pdf_content=False, update_existing=False, force_update=False):
+        super().__init__(log, pdf_image=pdf_image, pdf_content=pdf_content,
+                         update_existing=update_existing, force_update=force_update)
         self._query_result = None
 
     @property
