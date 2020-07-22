@@ -20,7 +20,7 @@ from data.models import (
 
 
 class DataExport:
-    EXPORT_VERSION = 4
+    EXPORT_VERSION = 5
 
     @staticmethod
     def download_image(url):
@@ -157,6 +157,7 @@ class DataExport:
                                                                                  location__id=loc.pk).word}
                                       for loc in paper.locations.all()],
                         "location_modified": paper.location_modified,
+                        "scrape_hash": paper.scrape_hash,
                         "visualized": paper.visualized,
                         "vectorized": paper.vectorized
                     }

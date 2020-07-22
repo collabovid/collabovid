@@ -311,6 +311,8 @@ class DataImport:
                     datetime.strptime(paper["last_scrape"], "%Y-%m-%d %H:%M:%S")
                 ) if paper["last_scrape"] else None
 
+                if self.export_version > 4:
+                    paper.scrape_hash = paper["scrape_hash"]
                 db_paper.host = self._mappings.paperhost_mapping[paper["paperhost_id"]] if paper[
                     "paperhost_id"] else None
                 db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None
@@ -337,7 +339,7 @@ class DataImport:
                 self.statistics.added_papers += 1
 
                 self._mappings.doi_to_author_mapping[db_paper.doi] = []  # maps doi to a list of its db_authors
-                rank = 0
+
                 for author_id in paper["author_ids"]:
                     author = authors[author_id]
                     author_tuple = (author["firstname"][:author_firstname_max_len],
