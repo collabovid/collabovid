@@ -30,23 +30,26 @@
                             </div>
                             <h5>{{ topic.name }}</h5>
                             <div>overlapping: {{ topic.overlapping_paper_count }}</div>
-                            {% if topic.name_suggestions.exists %}
+                            {% if topic.name_suggestions.count > 0 %}
                                 <div>
-                                    <strong>Suggestions:</strong><br>
+                                    <strong class="suggestions-label">Suggestions:</strong><br>
                                     {% for suggestion in topic.name_suggestions.all %}
-                                        <div class="d-flex flex-row align-items-center mt-1">
-                                            <div class="flex-fill"><i>{{ suggestion.name }} ({{ suggestion.score }})</i>
-                                            </div>
-                                            <div>
-                                                <form class="d-inline"
-                                                      action="{% url "set-topic-name" topic.pk %}" method="post">
-                                                    {% csrf_token %}
-                                                    <input type="hidden" name="suggestion_pk"
-                                                           value="{{ suggestion.pk }}">
-                                                    <button class="btn btn-outline-info" type="submit">
-                                                        <i class="fas fa-check"></i>
-                                                    </button>
-                                                </form>
+                                        <div class="suggestions" style="display: none;">
+                                            <div class="d-flex flex-row align-items-center mt-1">
+                                                <div class="flex-fill"><i>{{ suggestion.name }}
+                                                    ({{ suggestion.score }})</i>
+                                                </div>
+                                                <div>
+                                                    <form class="d-inline"
+                                                          action="{% url "set-topic-name" topic.pk %}" method="post">
+                                                        {% csrf_token %}
+                                                        <input type="hidden" name="suggestion_pk"
+                                                               value="{{ suggestion.pk }}">
+                                                        <button class="btn btn-outline-info" type="submit">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -70,4 +73,10 @@
 {% endblock %}
 
 {% block script %}
+    <script>
+
+        $(".suggestions-label").click(function () {
+            $(this).closest('div').find('.suggestions').slideToggle();
+        });
+    </script>
 {% endblock %}

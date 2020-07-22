@@ -310,6 +310,11 @@
                     "is_primitive": false
                 }
             ]
+        },
+        "extract-topics": {
+            "name": "Extract Topics",
+            "description": "No description provided.",
+            "parameters": []
         }
     }
 }

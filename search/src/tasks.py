@@ -6,3 +6,4 @@ from src.analyze.cluster_topic import *
 from src.analyze.nearest_neighbor_topic_assignment import *
 from src.analyze.assign_keywords import *
 from src.analyze.suggest_topic_names import SuggestTopicNames
+from src.analyze.extract_topics import ExtractTopics
