@@ -243,10 +243,14 @@ class DataImport:
 
     def _import_author_resolutions(self, author_resolutions):
         for res in author_resolutions:
-            resolution_created, _ = AuthorNameResolution.add(
-                old_first=res["source_fname"], old_last=res["source_lname"],
-                new_first=res["target_fname"], new_last=res["target_lname"]
-            )
+            if not res["target_lname"] and not res["target_fname"]:
+                AuthorNameResolution.ignore(first=res["source_fname"], last=res["source_lname"])
+                resolution_created = True
+            else:
+                resolution_created, _ = AuthorNameResolution.add(
+                    old_first=res["source_fname"], old_last=res["source_lname"],
+                    new_first=res["target_fname"], new_last=res["target_lname"]
+                )
             self.statistics.author_resolutions_created += int(resolution_created)
 
     def _compute_updatable_papers(self, papers):
@@ -312,7 +316,7 @@ class DataImport:
                 ) if paper["last_scrape"] else None
 
                 if self.export_version > 4:
-                    paper.scrape_hash = paper["scrape_hash"]
+                    db_paper.scrape_hash = paper["scrape_hash"]
                 db_paper.host = self._mappings.paperhost_mapping[paper["paperhost_id"]] if paper[
                     "paperhost_id"] else None
                 db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None

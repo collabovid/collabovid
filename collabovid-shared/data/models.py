@@ -394,7 +394,7 @@ class Paper(models.Model):
 
     @property
     def ranked_authors(self):
-        memberships = AuthorPaperMembership.objects.filter(paper=self).ordered_by('rank')
+        memberships = AuthorPaperMembership.objects.filter(paper=self).order_by('rank')
         return [m.author for m in memberships]
 
     @property
