@@ -83,14 +83,13 @@ class ElsevierUpdater(DataUpdater):
         except KeyError:
             return None
 
-    @staticmethod
-    def update_pdf_data(db_article, extract_image=True, extract_content=True):
-        if not extract_image and not extract_content:
+    def _update_pdf_data(self, db_article):
+        if not self.pdf_image:
             return
         with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
             pdf = elsevier.get_pdf(db_article.doi)
 
-        if extract_image and pdf:
+        if pdf:
             # The first page of all Elsevier PDFs is a Corona and license disclaimer
             image = PdfFromBytesExtractor.image_from_bytes(pdf, page=2)
             if image:
