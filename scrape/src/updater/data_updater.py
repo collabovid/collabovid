@@ -15,7 +15,7 @@ class DataUpdater(object):
         self.pdf_image = pdf_image
         self.pdf_content = pdf_content
         self.force_update = force_update
-        self.db_updater = DatabaseUpdate(self.data_source, update_existing)
+        self.db_updater = DatabaseUpdate(self.data_source, update_existing=update_existing, force_update=force_update)
 
     @property
     def data_source(self):
