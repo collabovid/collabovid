@@ -9,10 +9,11 @@ class ArxivUpdateTask(Runnable):
     def task_name():
         return "update-arxiv"
 
-    def __init__(self, count: int = 20, update_pdf_image: bool = True, *args, **kwargs):
+    def __init__(self, count: int = 50, update_pdf_image: bool = True, force_update: bool = False, *args, **kwargs):
         super(ArxivUpdateTask, self).__init__(*args, **kwargs)
         self.count = count
         self.update_pdf_image = update_pdf_image
+        self.force_update = force_update
 
     def run(self):
         if not settings.ALLOW_IMAGE_SCRAPING:
@@ -21,7 +22,8 @@ class ArxivUpdateTask(Runnable):
         else:
             pdf_image = self.update_pdf_image
 
-        updater = ArxivUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False, update_existing=True)
+        updater = ArxivUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False,
+                               update_existing=True, force_update=self.force_update)
         updater.update_existing_data(count=self.count, progress=self.progress)
 
 

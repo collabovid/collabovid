@@ -20,7 +20,7 @@ from data.models import (
 
 
 class DataExport:
-    EXPORT_VERSION = 4
+    EXPORT_VERSION = 5
 
     @staticmethod
     def download_image(url):
@@ -47,9 +47,13 @@ class DataExport:
 
     @staticmethod
     def _export_author_resolutions():
-        return [{"source_fname": res.source_first_name, "source_lname": res.source_last_name,
-                 "target_fname": res.target_author.first_name, "target_lname": res.target_author.last_name}
-                for res in AuthorNameResolution.objects.all()]
+        resolutions = []
+        for res in AuthorNameResolution.objects.all():
+            target_fname = res.target_author.first_name if res.target_author else None
+            target_lname = res.target_author.last_name if res.target_author else None
+            resolutions.append({"source_fname": res.source_first_name, "source_lname": res.source_last_name,
+                                "target_fname": target_fname, "target_lname": target_lname})
+        return resolutions
 
     @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
@@ -126,9 +130,7 @@ class DataExport:
                         "doi": paper.doi,
                         "title": paper.title,
                         "abstract": paper.abstract,
-                        "author_ids": [author.pk for author in paper.authors.all()]
-                        if paper.authors
-                        else None,
+                        "author_ids": [author.pk for author in paper.ranked_authors],
                         "content": paper.data.content if paper.data else None,
                         "published_at": datetime.strftime(paper.published_at, "%Y-%m-%d")
                         if paper.published_at
@@ -159,6 +161,7 @@ class DataExport:
                                                                                  location__id=loc.pk).word}
                                       for loc in paper.locations.all()],
                         "location_modified": paper.location_modified,
+                        "scrape_hash": paper.scrape_hash,
                         "visualized": paper.visualized,
                         "vectorized": paper.vectorized
                     }
@@ -224,6 +227,7 @@ class DataExport:
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{len(geo_name_resolutions)} geo name resolutions")
+        log(f"\t{len(author_resolutions)} author name resolutions")
         log(f"\t{len(ignored_papers)} ignored papers")
         log(f"\t{len(delete_candidates)} delete candidates")
         log(f"\t{image_id_counter} images")

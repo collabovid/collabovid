@@ -6,7 +6,7 @@ from django.utils import timezone
 from data.models import (
     Author,
     AuthorNameResolution,
-    DataSource,
+    AuthorPaperMembership, DataSource,
     IgnoredPaper,
     Journal,
     Paper,
@@ -61,7 +61,6 @@ class SerializableArticleRecord:
         return self._md5
 
     def json(self):
-        self.authors = sorted(self.authors)
         return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
 
 
@@ -79,9 +78,10 @@ class DatabaseUpdate:
     class SkipArticle(UpdateException):
         pass
 
-    def __init__(self, datasource, update_existing=False):
+    def __init__(self, datasource, update_existing=False, force_update=False):
         self.datasource = datasource
         self.update_existing = update_existing
+        self.force_update = force_update
 
     def insert(self, datapoint: SerializableArticleRecord):
         self._validate_integrity_constraints(datapoint)
@@ -104,13 +104,13 @@ class DatabaseUpdate:
                     if datasource_comparison > 0:
                         datasource_name = DataSource(db_article.data_source_value).name
                         raise DatabaseUpdate.SkipArticle(f"Article already tracked by {datasource_name}")
-                    elif not self.update_existing and datasource_comparison == 0:
+                    elif not self.force_update and not self.update_existing and datasource_comparison == 0:
                         raise DatabaseUpdate.SkipArticle("Article already in database")
 
                     changed_externally = db_article.scrape_hash != datapoint.md5
                     changed_internally = db_article.manually_modified
 
-                    if not changed_externally:
+                    if not self.force_update and not changed_externally:
                         db_article.last_scrape = timezone.now()
                         db_article.save(set_manually_modified=False)
                         return db_article, False, False  # Article was neither created, nor updated
@@ -188,11 +188,13 @@ class DatabaseUpdate:
         db_article.vectorized = False
         db_article.save(set_manually_modified=False)
 
-        db_article.authors.clear()
+        AuthorPaperMembership.objects.filter(paper=db_article).delete()
+        rank = 0
         for author in datapoint.authors:
             db_author, _ = Author.get_or_create_by_name(first_name=author[1], last_name=author[0])
             if db_author is not None:
-                db_article.authors.add(db_author)
+                AuthorPaperMembership.objects.create(paper=db_article, author=db_author, rank=rank)
+                rank += 1
 
         if datapoint.journal:
             db_article.journal, _ = Journal.objects.get_or_create(

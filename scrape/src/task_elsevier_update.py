@@ -10,10 +10,11 @@ class ElsevierUpdateTask(Runnable):
     def task_name():
         return "update-elsevier"
 
-    def __init__(self, count: int = 100, update_pdf_image: bool = True, *args, **kwargs):
+    def __init__(self, count: int = 100, update_pdf_image: bool = True, force_update: bool = False, *args, **kwargs):
         super(ElsevierUpdateTask, self).__init__(*args, **kwargs)
         self.count = count
         self.update_pdf_image = update_pdf_image
+        self.force_update = force_update
 
     def run(self):
         if not settings.ALLOW_IMAGE_SCRAPING:
@@ -22,7 +23,8 @@ class ElsevierUpdateTask(Runnable):
         else:
             pdf_image = self.update_pdf_image
 
-        updater = ElsevierUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False, update_existing=True)
+        updater = ElsevierUpdater(log=self.log, pdf_image=pdf_image, pdf_content=False,
+                                  update_existing=True, force_update=self.force_update)
         updater.update_existing_data(count=self.count, progress=self.progress)
 
 

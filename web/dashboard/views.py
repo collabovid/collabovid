@@ -11,7 +11,7 @@ from dashboard.forms import PaperForm
 from data.models import (
     Author,
     AuthorNameResolution,
-    DeleteCandidate,
+    AuthorPaperMembership, DeleteCandidate,
     GeoCity,
     GeoLocation,
     GeoCountry,
@@ -384,12 +384,13 @@ def scrape_conflict(request):
                         else:
                             paper.manually_modified = False
 
-                        authors = []
+                        AuthorPaperMembership.objects.filter(paper=paper).delete()
+                        rank = 0
                         for author in request.POST.get('author_list').split(';'):
                             author, _ = Author.get_or_create_by_name(author.split(',')[1], author.split(',')[0])
-                            authors.append(author)
-                        paper.authors.clear()
-                        paper.authors.add(*authors)
+                            if author is not None:
+                                AuthorPaperMembership.objects.create(paper=paper, author=author, rank=rank)
+                                rank += 1
 
                         journal_name = request.POST.get('journal_name', None)
                         if journal_name:

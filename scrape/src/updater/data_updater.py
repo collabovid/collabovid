@@ -9,11 +9,12 @@ from src.updater.update_statistics import UpdateStatistics
 
 
 class DataUpdater(object):
-    def __init__(self, log=print, pdf_content=False, pdf_image=False, update_existing=False):
+    def __init__(self, log=print, pdf_content=False, pdf_image=False, update_existing=False, force_update=False):
         self.log = log
         self.update_existing = update_existing
         self.pdf_image = pdf_image
         self.pdf_content = pdf_content
+        self.force_update = force_update
         self.db_updater = DatabaseUpdate(self.data_source, update_existing)
 
     @property
@@ -100,6 +101,8 @@ class DataUpdater(object):
             count = total
 
         self.log(f"Update {count} existing articles")
+        if self.force_update:
+            self.log("Force updating articles")
 
         filtered_articles = Paper.objects.all().filter(data_source_value=self.data_source).order_by(
             F('last_scrape').asc(nulls_first=True)
@@ -108,7 +111,7 @@ class DataUpdater(object):
         iterator = ArticleDatapointIterator(filtered_articles, count, self._get_data_point)
 
         for article, data_point in progress(iterator, length=count):
-            if data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
+            if not self.force_update and data_point.update_timestamp and article.last_scrape > data_point.update_timestamp:
                 DataUpdater.set_last_scrape(data_point)
                 continue
             self.get_or_create_db_article(data_point)

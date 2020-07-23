@@ -355,7 +355,7 @@ class Paper(models.Model):
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
-    authors = models.ManyToManyField(Author, related_name="publications")
+    authors = models.ManyToManyField(Author, related_name="publications", through='AuthorPaperMembership')
     categories = models.ManyToManyField(Category, related_name="papers", through='CategoryMembership')
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source_value = models.IntegerField(choices=DataSource.choices)
@@ -393,13 +393,18 @@ class Paper(models.Model):
     location_modified = models.BooleanField(default=False)
 
     @property
+    def ranked_authors(self):
+        memberships = AuthorPaperMembership.objects.filter(paper=self).order_by('rank')
+        return [m.author for m in memberships]
+
+    @property
     def highlighted_authors(self):
         """
         This attribute is necessary as we want to highlight certain authors.
         :return:
         """
         if not self._highlighted_authors:
-            self._highlighted_authors = [author for author in self.authors.all()]
+            self._highlighted_authors = self.ranked_authors
         return self._highlighted_authors
 
     @property
@@ -488,6 +493,12 @@ class CategoryMembership(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     score = models.FloatField(default=0.0)
+
+
+class AuthorPaperMembership(models.Model):
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    rank = models.IntegerField(null=True, default=None)
 
 
 def locations_changed(instance, reverse, pk_set, action, **kwargs):
