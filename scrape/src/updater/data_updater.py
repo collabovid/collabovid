@@ -116,7 +116,7 @@ class DataUpdater(object):
                 continue
             self.get_or_create_db_article(data_point)
 
-        self.log(f"Missing Data Points: {iterator.missing_dois}")
+        self.log(f"{len(iterator.missing_dois)} missing Data Points: {iterator.missing_dois}")
         self.statistics.n_missing_datapoints = len(iterator.missing_dois)
         self.log("Delete orphaned authors and journals")
         self.statistics.authors_deleted = Author.cleanup()

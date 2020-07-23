@@ -184,8 +184,9 @@ class DatabaseUpdate:
 
         db_article.host, _ = PaperHost.objects.get_or_create(name=datapoint.paperhost)
 
-        db_article.visualized = False
-        db_article.vectorized = False
+        # temporarily disabled for release!
+        #db_article.visualized = False
+        #db_article.vectorized = False
         db_article.save(set_manually_modified=False)
 
         AuthorPaperMembership.objects.filter(paper=db_article).delete()
@@ -204,7 +205,8 @@ class DatabaseUpdate:
         db_article.version = datapoint.version
         db_article.last_scrape = timezone.now()
 
-        db_article.categories.clear()
+        # temporarily disabled for release!
+        #db_article.categories.clear()
         db_article.scrape_hash = datapoint.md5
         db_article.save(set_manually_modified=False)
 
