@@ -1,0 +1,116 @@
+{
+  "topics": [
+    "immune response",
+    "renin-angiotensin system",
+    "psychology and mental health",
+    "dysfunction in sensory processing",
+    "telemedicine",
+    "vaccinology",
+    "challenges for other healthcare sectors",
+    "infoveillance, misinformation and social media analysis",
+    "smoking",
+    "nanotechnology",
+    "mobility and transmission routes",
+    "transmission dynamics",
+    "natural and traditional chinese medicine",
+    "impact of lockdown on physical activity and eating behaviour",
+    "radiology",
+    "spike protein",
+    "other biomedical research",
+    "containment strategies",
+    "thrombosis and blood science",
+    "convalescent plasma therapy",
+    "cardiology",
+    "gastroenterology",
+    "ophthalmology",
+    "serology and antibody tests",
+    "geriatrics",
+    "icu and healthcare management",
+    "healthcare workers",
+    "ventilation and oxygenation",
+    "rheumatology",
+    "liver and kidneys",
+    "fatality rates and risk factors",
+    "diabetes and nutrition",
+    "neurological complications",
+    "sports",
+    "animals",
+    "children",
+    "genomics and evolution",
+    "treatment & drugs (general)",
+    "pregnancy",
+    "clinical characteristics",
+    "laboratory diagnosis",
+    "oncology",
+    "tracheostomy",
+    "clinical trials",
+    "palliative care",
+    "contact tracing and digital tools",
+    "surgery",
+    "education",
+    "hematology",
+    "scientific publishing",
+    "face masks and personal protective equipment",
+    "cell therapy",
+    "treatment drugs",
+    "economics",
+    "perception of the community",
+    "pollution and air quality",
+    "HIV",
+    "kawasaki syndrome",
+    "pharmacy",
+    "treatment & drugs (biochemistry)",
+    "climatic effects",
+    "rehabilitation",
+    "epidemiological modeling",
+    "other",
+    "ethnic and socioeconomic disparities",
+    "pathology"
+  ],
+  "examples": [
+    {
+      "title": "Molecular Detection of Gamma Coronaviruses in Bird Parks of Iran.",
+      "incorrect_topics": [
+        "45: birds",
+        "60: coronavirus"
+      ],
+      "topic": "animals"
+    },
+    {
+      "title": "AI Chatbot Design during an Epidemic Like the Novel Coronavirus.",
+      "incorrect_topics": [
+        "45: chatbot"
+      ],
+      "topic": "contact tracing and digital tools"
+    },
+    {
+      "title": "A national consensus management pathway for Paediatric Inflammatory Multisystem Syndrome - Temporally associated with SARS-CoV-2 (PIMS-TS): The results of a national Delphi process",
+      "topic": "children"
+    },
+    {
+      "title": "Dealing with Corona virus anxiety and OCD",
+      "incorrect_topics": [
+        "2: mental health",
+        "20: psychology and mental"
+      ],
+      "topic": "psychology and mental health"
+    },
+    {
+      "title": "The potential insights of Traditional Chinese Medicine on treatment of COVID-19.",
+      "incorrect_topics": [
+        "49: traditional chinese medicine",
+        "10: alternative medicine",
+        "13: natural and traditional chinese medicine"
+      ],
+      "topic": "natural and traditional chinese medicine"
+    },
+    {
+      "title": "National Smoking Rates Correlate Inversely with COVID-19 Mortality",
+      "topic": "smoking"
+    },
+    {
+      "title": "Use of Telemedicine and Virtual Care for Remote Treatment in Response to COVID-19 Pandemic.",
+      "topic": "telemedicine"
+    }
+  ]
+}

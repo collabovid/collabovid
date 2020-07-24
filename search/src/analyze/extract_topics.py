@@ -4,7 +4,7 @@ import os
 from tasks.definitions import Runnable, register_task
 from django.conf import settings
 from src.analyze.openai_utils.prompts import *
-from src.analyze.openai_utils.requests import PaperTopicSuggestionCalculator
+from src.analyze.openai_utils.requests import PaperTopicSuggestionCalculator, ClassificationCalculator
 
 
 @register_task
@@ -20,16 +20,16 @@ class ExtractTopics(Runnable):
     def run(self):
         self.log("Topic extraction started")
 
-        examples_prompt = FileTopic(file_name=os.path.join(settings.BASE_DIR, "resources/topic_sample.json"))
+        examples_prompt = ClassificationPrompt(file_name=os.path.join(settings.BASE_DIR, "resources/classify.json"))
 
         Topic.objects.all().delete()
 
         for paper in self.progress(Paper.objects.all()[:5000]):
             self.log("Calculating suggestions for", paper.title)
 
-            paper_topic_suggestion_calculator = PaperTopicSuggestionCalculator(paper=paper, example=examples_prompt)
+            paper_topic_suggestion_calculator = ClassificationCalculator(examples=examples_prompt)
 
-            topic_suggestions = paper_topic_suggestion_calculator.suggest_topic()
+            topic_suggestions = paper_topic_suggestion_calculator.classify(paper)
 
             topic, _ = Topic.objects.get_or_create(name=topic_suggestions[0].lower())
             paper.topic = topic
