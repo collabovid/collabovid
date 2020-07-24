@@ -95,6 +95,26 @@
 
                 <div class="row mt-3">
                     <div class="col-12">
+                        <strong>Data Source</strong>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 text-dark pt-1">
+                        {% for host in paper_hosts.all %}
+                            <label class="mb-0 d-lg-block">
+                                <input data-url-manually="true" data-no-url="true" data-count-filter="true" class="mr-1" type="checkbox"
+                                       {% if host.pk in form.cleaned_data.paper_hosts %}checked="checked"{% endif %}
+                                       name="paper_hosts"
+                                       value="{{ host.pk }}">
+                                {{ host.name }} <span class="small text-muted">({{ host.papers.count }})</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
                         <strong>Categories</strong>
                     </div>
                 </div>
@@ -112,6 +132,8 @@
                         {% endfor %}
                     </div>
                 </div>
+
+
 
                  <div class="row mt-3">
                     <div class="col-12">

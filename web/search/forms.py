@@ -105,6 +105,7 @@ class SearchForm(forms.Form):
     topics = CommaSeparatedIntegerField(required=False)
 
     categories = CommaSeparatedIntegerField(required=False)
+    paper_hosts = CommaSeparatedIntegerField(required=False)
 
     published_at_start = forms.DateField(required=False)
     published_at_end = forms.DateField(required=False)
@@ -150,6 +151,7 @@ class SearchForm(forms.Form):
                 'categories': self.cleaned_data['categories'],
                 'article_type': self.cleaned_data['article_type'],
                 'journals': self.cleaned_data['journals'],
+                'paper_hosts': self.cleaned_data['paper_hosts'],
                 'locations': self.cleaned_data['locations'],
                 'result_type': self.cleaned_data['result_type'],
                 'page': self.cleaned_data['page']}
