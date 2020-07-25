@@ -103,7 +103,7 @@
 
                 <div class="dropdown d-inline-block">
                     <button type="button" id="citeDropdown" class="btn btn-light mt-2"
-                       data-toggle="dropdown">
+                            data-toggle="dropdown">
                         <i class="fas fa-download"></i><span class="d-none d-md-inline"> Export Page</span>
                     </button>
                     <div class="dropdown-menu dropdown-menu-right mobile-dropdown"
@@ -246,19 +246,28 @@
                 form.submit();
             });
 
-            function generate_submission_data() {
-                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
-
+            function convert_checkboxes(name) {
                 // Converting categories=x&categories=y to categories=x,y
-                let checked_categories = $('.search-form input[name=categories]:checked');
-                let categories = $('.search-form input[name=categories]');
+                let checked = $('.search-form input[name=' + name + ']:checked');
+                let all = $('.search-form input[name=' + name + ']');
 
-                if (checked_categories.length !== categories.length) {
-                    submission_data += "&categories=";
-                    submission_data += checked_categories.map(function () {
+                let submission_data = "";
+
+                if (checked.length !== all.length) {
+                    submission_data += "&" + name + "=";
+                    submission_data += checked.map(function () {
                         return this.value;
                     }).get().join(',');
                 }
+
+                return submission_data
+            }
+
+            function generate_submission_data() {
+                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
+
+                submission_data += convert_checkboxes("categories");
+                submission_data += convert_checkboxes("paper_hosts");
 
                 return submission_data;
             }
