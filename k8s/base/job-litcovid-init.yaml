@@ -9,7 +9,7 @@ spec:
         - name: web
           image: web
           command: ["bash","-c"]
-          args: ["export PYTHONPATH=/app:$PYTHONPATH && python manage.py loaddata lit-covid-categories && python scripts/assign_categories_from_json.py -f resources/assignments.json"]
+          args: ["export PYTHONPATH=/app:$PYTHONPATH && python manage.py loaddata lit-covid-categories && python scripts/assign_categories_from_json.py -f resources/assignments_25072020.json --from-db"]
           envFrom:
             - secretRef:
                 name: web
