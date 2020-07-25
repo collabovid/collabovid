@@ -114,7 +114,7 @@ class WebTaskLauncher(TaskLauncher):
 
             task = Task.objects.get(pk=response['task'])
 
-            timeout = 1200
+            timeout = os.getenv('TASK_MAX_RUNTIME', 3600)
 
             timeout_start = time.time()
 

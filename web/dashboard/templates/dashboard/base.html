@@ -27,14 +27,14 @@
 
 <body>
 
-<nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+<nav class="navbar navbar-dark bg-dark flex-md-nowrap p-0">
     <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">Collabovid</a>
 </nav>
 
 <div class="container-fluid">
     <div class="row">
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-            <div class="sidebar-sticky">
+            <div>
                 <ul class="nav flex-column">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'tasks' %}">
@@ -60,11 +60,16 @@
                             Locations
                         </a>
                     </li>
-
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'language-detection' %}">
                             <i class="fa fa-flag-usa"></i>
                             Language Detection
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'scrape_conflict' %}">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            Scrape Conflicts
                         </a>
                     </li>
                      <li class="nav-item">

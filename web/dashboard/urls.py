@@ -25,5 +25,10 @@ urlpatterns = [
     path('topics', topics_overview, name='topics'),
     path('topic/<int:topic_id>', papers_for_topic, name='topic_papers'),
     path('topics-merge', merge_topics, name='topics_merge'),
-    path('topics-merge-generated', merge_generated, name='topics_merge_generated')
+    path('topics-merge-generated', merge_generated, name='topics_merge_generated'),
+    path('scrape-conflict', scrape_conflict, name='scrape_conflict'),
+    path('author-name-resolutions/add/<int:author_id>', change_author_name, name='change_author_name'),
+    path('author-name-resolutions/add/<int:author_id>/<path:doi>', change_author_name,
+         name='change_author_name'),
+    path('author-name-resolutions/swap-all/<path:doi>', swap_all_author_names, name='swap_all_author_names'),
 ]

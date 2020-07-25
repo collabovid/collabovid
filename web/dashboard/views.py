@@ -1,27 +1,33 @@
 import json
+from time import strftime
 
 from django.conf import settings
-from django.db import transaction
-from django.http import HttpResponseNotFound, HttpResponse
+from django.db import transaction, IntegrityError
+from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
+from dashboard.forms import PaperForm
 from data.models import (
-    DeleteCandidate,
+    Author,
+    AuthorNameResolution,
+    AuthorPaperMembership, DeleteCandidate,
     GeoCity,
     GeoLocation,
     GeoCountry,
     GeoLocationMembership,
     GeoNameResolution,
     IgnoredPaper,
+    Journal,
     Paper,
+    ScrapeConflict,
 )
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from tasks.launcher.task_launcher import get_task_launcher
 
@@ -340,7 +346,126 @@ def language_detection(request):
         else:
             return HttpResponseNotFound()
 
-        return HttpResponse(
-            json.dumps({'status': 'success'}),
-            content_type="application/json"
+        return JsonResponse({'status': 'success'})
+
+
+@staff_member_required
+def scrape_conflict(request):
+    if request.method == 'GET':
+        errors = []
+        for error in ScrapeConflict.objects.all():
+            datapoint = json.loads(error.datapoint)
+            form = PaperForm(instance=error.paper)
+            comparison = {
+                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
+                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
+                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint['journal'],
+            }
+            errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
+
+        return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
+                      {'errors': errors, 'debug': settings.DEBUG})
+
+    elif request.method == 'POST':
+        doi = request.POST.get('doi')
+        paper = Paper.objects.get(doi=doi)
+        conflict = ScrapeConflict.objects.get(paper=paper)
+
+        if 'accept-button' in request.POST:
+            form = PaperForm(request.POST, instance=paper)
+            if not form.is_valid():
+                messages.add_message(request, messages.ERROR, f"{form.errors}")
+            else:
+                with transaction.atomic():
+                    try:
+                        form.save()
+                        if request.POST.get('manually_modified') == 'on':
+                            paper.manually_modified = True
+                        else:
+                            paper.manually_modified = False
+
+                        AuthorPaperMembership.objects.filter(paper=paper).delete()
+                        rank = 0
+                        for author in request.POST.get('author_list').split(';'):
+                            author, _ = Author.get_or_create_by_name(author.split(',')[1], author.split(',')[0])
+                            if author is not None:
+                                AuthorPaperMembership.objects.create(paper=paper, author=author, rank=rank)
+                                rank += 1
+
+                        journal_name = request.POST.get('journal_name', None)
+                        if journal_name:
+                            journal = Journal.objects.get_or_create(name=journal_name)
+                        else:
+                            journal = None
+                        paper.journal = journal
+
+                        paper.visualized = False
+                        paper.vectorized = False
+
+                        paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
+                        paper.save(set_manually_modified=False)
+                        conflict.delete()
+                        messages.add_message(request, messages.SUCCESS, "Successfully saved the changes.")
+                    except IntegrityError:
+                        messages.add_message(request, messages.ERROR, "Integrity error.")
+
+        return redirect('scrape_conflict')
+
+
+@staff_member_required
+def change_author_name(request, author_id, doi=None):
+    author = Author.objects.get(pk=author_id)
+
+    if doi:
+        current_paper = Paper.objects.get(doi=doi)
+    else:
+        current_paper = None
+
+    def redirect_():
+        return render(
+            request,
+            'dashboard/authors/add_name_resolution.html',
+            {'author': author, 'current_paper': current_paper, 'debug': settings.DEBUG}
         )
+
+    if request.method == 'GET':
+        return redirect_()
+    elif request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'save_all':
+            AuthorNameResolution.add(author.first_name, author.last_name,
+                                     request.POST.get('first_name'), request.POST.get('last_name'))
+        elif action == 'delete_all':
+            for paper in Paper.objects.filter(authors=author).all():
+                if paper.authors.count() == 1:
+                    messages.add_message(request, messages.ERROR, f"Cannot remove the only author of the paper \"{paper.title}\"")
+                    return redirect_()
+            AuthorNameResolution.ignore(author.first_name, author.last_name)
+        elif action == 'delete_current':
+            if current_paper.authors.count() == 1:
+                messages.add_message(request, messages.ERROR, "Cannot remove the only author of this paper")
+                return redirect_()
+            current_paper.authors.remove(author)
+            current_paper.manually_modified = True
+            current_paper.save()
+        else:
+            return HttpResponseNotFound()
+        print(action)
+        #AuthorNameResolution.add(author.first_name, author.last_name,
+        #                         request.POST.get('first_name'), request.POST.get('last_name'))
+        return HttpResponse('Success')
+
+
+@staff_member_required
+def swap_all_author_names(request, doi):
+    if request.method == 'POST':
+        try:
+            paper = Paper.objects.get(doi=doi)
+            for author in paper.authors.all():
+                AuthorNameResolution.add(author.first_name, author.last_name, author.last_name, author.first_name)
+            return redirect('paper', doi=doi)
+        except Paper.DoesNotExist:
+            return HttpResponseNotFound(f"Unknown Paper {doi}")
+    else:
+        return HttpResponseNotFound()
+

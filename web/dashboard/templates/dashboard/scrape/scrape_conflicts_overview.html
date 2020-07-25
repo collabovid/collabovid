@@ -1,0 +1,22 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% load dashboard_utils %}
+
+{% block content %}
+
+    <div class="container">
+
+        <div class="tab-content" id="locationTabContent">
+            <div class="tab-pane fade show active" id="error-list" role="tabpanel">
+                <div class="row">
+                    {% for error in errors %}
+                        <div class="col-12 p-2">
+                            {% include 'dashboard/scrape/partials/_conflict_card.html' with error=error %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

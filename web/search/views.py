@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
-from data.models import Paper, Category
+from data.models import Paper, Category, PaperHost
 from search.literature_utils.literature_file_analyzer import BibFileAnalyzer
 from search.literature_utils.literature_file_exporter import RisFileExporter, BibTeXFileExporter
 
@@ -71,7 +71,9 @@ def search(request):
         if form.is_valid():
             pass
 
-        return render(request, "search/search.html", {'form': form, 'categories': Category.objects.all()})
+        return render(request, "search/search.html", {'form': form,
+                                                      'categories': Category.objects.all(),
+                                                      'paper_hosts': PaperHost.objects.order_by('name')})
     elif request.method == "POST":
         form = SearchForm(request.POST)
         return render_search_result(request, form)

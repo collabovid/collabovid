@@ -54,7 +54,11 @@ def abstract_preview_size_mobile(paper):
 
 @register.filter
 def abstract_preview_size(paper):
-    return get_next_preview_size(paper, 420) if paper.preview_image and len(paper.preview_image) > 0 else get_next_preview_size(paper, 900)
+    try:
+        return get_next_preview_size(paper, 420) if paper.preview_image and len(
+            paper.preview_image) > 0 else get_next_preview_size(paper, 900)
+    except FileNotFoundError:
+        return get_next_preview_size(paper, 900)
 
 
 @register.filter

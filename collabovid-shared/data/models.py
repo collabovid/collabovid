@@ -1,12 +1,12 @@
 from typing import Union
 
 import pycountry
+from django.contrib.postgres.fields import JSONField
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from django.db import models
+from django.db import models, transaction
 from django.utils.translation import gettext_lazy
 from django.db.models import Q, Subquery, OuterRef, Value, Count
-from django.db.models.signals import m2m_changed, post_save, post_delete
-from django.dispatch import receiver
+from django.db.models.signals import m2m_changed, post_save, post_delete, pre_save
 from itertools import permutations
 
 
@@ -18,7 +18,6 @@ class Topic(models.Model):
 
 class PaperHost(models.Model):
     name = models.CharField(max_length=60, unique=True)
-    url = models.URLField(null=True, default=None)
 
 
 class DataSource(models.IntegerChoices):
@@ -90,13 +89,15 @@ class Journal(models.Model):
 
 
 class Author(models.Model):
+    MAX_LENGTH_FIRST_NAME = 50
+    MAX_LENGTH_LAST_NAME = MAX_LENGTH_FIRST_NAME
 
     def __init__(self, *args, **kwargs):
         super(Author, self).__init__(*args, **kwargs)
         self._display_name = None
 
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
+    first_name = models.CharField(max_length=MAX_LENGTH_FIRST_NAME)
+    last_name = models.CharField(max_length=MAX_LENGTH_LAST_NAME)
 
     @property
     def full_name(self):
@@ -127,6 +128,89 @@ class Author(models.Model):
             return 0
         else:
             return deleted_objects['data.Author']
+
+    @staticmethod
+    def get_by_name(first_name, last_name):
+        try:
+            name_resolution = AuthorNameResolution.objects.get(source_first_name=first_name, source_last_name=last_name)
+            return name_resolution.target_author
+        except AuthorNameResolution.DoesNotExist:
+            return Author.objects.get(first_name=first_name, last_name=last_name)
+
+    @staticmethod
+    def get_or_create_by_name(first_name, last_name):
+        try:
+            return Author.get_by_name(first_name=first_name, last_name=last_name), False
+        except Author.DoesNotExist:
+            return Author.objects.create(first_name=first_name, last_name=last_name), True
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['last_name', 'first_name']),
+        ]
+
+
+class AuthorNameResolution(models.Model):
+    source_first_name = models.TextField(max_length=Author.MAX_LENGTH_FIRST_NAME)
+    source_last_name = models.TextField(max_length=Author.MAX_LENGTH_LAST_NAME)
+    target_author = models.ForeignKey(Author, null=True, on_delete=models.CASCADE)
+
+    @staticmethod
+    def ignore(first, last):
+        with transaction.atomic():
+            AuthorNameResolution.objects.get_or_create(source_first_name=first, source_last_name=last,
+                                                       target_author=None)
+            try:
+                old_author = Author.objects.get(first_name=first, last_name=last)
+                Paper.authors.through.objects.filter(author=old_author).delete()
+
+                for resolution in AuthorNameResolution.objects.filter(target_author=old_author):
+                    resolution.target_author = None
+                    resolution.save()
+
+                old_author.delete()
+            except Author.DoesNotExist:
+                pass
+
+    @staticmethod
+    def add(old_first, old_last, new_first, new_last):
+        """
+        Creates an author name resolution from an old author to a new author (with given names).
+        Also maps publications of old author to new author and deletes the old author.
+        Returns (resolution_created, new_author_created).
+        """
+        if old_first == new_first and old_last == new_last:
+            return False, False
+
+        new_author, new_author_created = Author.objects.get_or_create(first_name=new_first, last_name=new_last)
+        with transaction.atomic():
+            _, resolution_created = AuthorNameResolution.objects.get_or_create(
+                source_first_name=old_first, source_last_name=old_last, target_author=new_author
+            )
+            try:
+                old_author = Author.objects.get(first_name=old_first, last_name=old_last)
+
+                if new_author == old_author:
+                    return resolution_created, False
+
+                memberships = Paper.authors.through.objects.filter(author=old_author)
+                for membership in memberships:
+                    membership.author = new_author
+                    membership.save()
+
+                for resolution in AuthorNameResolution.objects.filter(target_author=old_author):
+                    resolution.target_author = new_author
+                    resolution.save()
+
+                old_author.delete()
+            except Author.DoesNotExist:
+                pass
+        return resolution_created, new_author_created
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['source_last_name', 'source_first_name']),
+        ]
 
 
 class Category(models.Model):
@@ -265,36 +349,38 @@ class Paper(models.Model):
         super(Paper, self).__init__(*args, **kwargs)
         self._highlighted_authors = None
 
-    preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None)
-
+    preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None, blank=True)
+    scrape_hash = models.CharField(max_length=22, null=True, default=None)
+    manually_modified = models.BooleanField(default=False)
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
 
     title = models.CharField(max_length=300)
-    authors = models.ManyToManyField(Author, related_name="publications")
+    authors = models.ManyToManyField(Author, related_name="publications", through='AuthorPaperMembership')
     categories = models.ManyToManyField(Category, related_name="papers", through='CategoryMembership')
     host = models.ForeignKey(PaperHost, related_name="papers", on_delete=models.CASCADE)
     data_source_value = models.IntegerField(choices=DataSource.choices)
-    version = models.CharField(max_length=40, null=True, default=None)
+    version = models.CharField(max_length=40, null=True, blank=True, default=None)
 
-    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', on_delete=models.SET_NULL)
+    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', blank=True, on_delete=models.SET_NULL)
 
-    pubmed_id = models.CharField(max_length=20, unique=True, null=True, default=None)
+    pubmed_id = models.CharField(max_length=20, null=True, blank=True, default=None)
 
     topic = models.ForeignKey(Topic,
                               related_name="papers",
                               null=True,
                               default=None,
+                              blank=True,
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
     topic_score = models.FloatField(default=0.0)
     abstract = models.TextField()
 
-    url = models.URLField(null=True, default=None)
-    pdf_url = models.URLField(null=True, default=None)
+    url = models.URLField(null=True, blank=True, default=None)
+    pdf_url = models.URLField(null=True, blank=True, default=None)
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField(null=True, default=None)
-    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, default=None)
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, blank=True, default=None)
 
     vectorized = models.BooleanField(default=False)
     visualized = models.BooleanField(default=False)
@@ -307,13 +393,18 @@ class Paper(models.Model):
     location_modified = models.BooleanField(default=False)
 
     @property
+    def ranked_authors(self):
+        memberships = AuthorPaperMembership.objects.filter(paper=self).order_by('rank')
+        return [m.author for m in memberships]
+
+    @property
     def highlighted_authors(self):
         """
         This attribute is necessary as we want to highlight certain authors.
         :return:
         """
         if not self._highlighted_authors:
-            self._highlighted_authors = [author for author in self.authors.all()]
+            self._highlighted_authors = self.ranked_authors
         return self._highlighted_authors
 
     @property
@@ -346,11 +437,25 @@ class Paper(models.Model):
         self.preview_image.save(img_name,
                                 InMemoryUploadedFile(
                                     pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
-                                save=save)
+                                save=False)
+        # save=True in preview_image.save would call paper.save with default args (set_manually_modified=True)!
+
+        if save:
+            self.save(set_manually_modified=False)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+    def save(self, set_manually_modified=True, *args, **kwargs):
+        if set_manually_modified:
+            self.manually_modified = True
+        super(Paper, self).save(*args, **kwargs)
+
+
+class ScrapeConflict(models.Model):
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    datapoint = JSONField()
 
 
 class IgnoredPaper(models.Model):
@@ -388,6 +493,12 @@ class CategoryMembership(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
     score = models.FloatField(default=0.0)
+
+
+class AuthorPaperMembership(models.Model):
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
+    rank = models.IntegerField(null=True, default=None)
 
 
 def locations_changed(instance, reverse, pk_set, action, **kwargs):

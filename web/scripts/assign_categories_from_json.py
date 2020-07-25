@@ -15,6 +15,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--file', required=True)
     parser.add_argument('--clear', action='store_true',)
+    parser.add_argument('--from-db', action='store_true',)
     parser.add_argument('--threshold', type=float, default=0.5)
 
     args = parser.parse_args()
@@ -35,17 +36,22 @@ if __name__ == '__main__':
 
         try:
             paper = Paper.objects.get(doi=data["doi"])
-
             paper.categories.clear()
 
             for category, score in data["result"].items():
-                if score > args.threshold:
+                if args.from_db:
                     paper.categories.add(Category.objects.get(model_identifier=category),
                                          through_defaults={
-                        'score': (score - args.threshold) * 2
-                    })
+                                             'score': score
+                                         })
+                else:
+                    if score > args.threshold:
+                        paper.categories.add(Category.objects.get(model_identifier=category),
+                                             through_defaults={
+                            'score': (score - args.threshold) * 2
+                        })
 
-            paper.save()
+            paper.save(set_manually_modified=False)
 
         except Paper.DoesNotExist:
             print("Skipping", data["doi"])

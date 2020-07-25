@@ -39,7 +39,7 @@ class NearestNeighborTopicAssignment(Runnable):
                         topic_occurrences[topic_id] += score
                 topic_id, occurrences = max(list(topic_occurrences.items()), key=lambda x: x[1])
                 paper.topic = Topic.objects.get(pk=topic_id)
-                paper.save()
+                paper.save(set_manually_modified=False)
                 self.log(f"Assigned {paper.title} to topic: {paper.topic.name}")
 
         print('NearestNeighborTopicAssignment Finished')

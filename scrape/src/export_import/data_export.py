@@ -10,16 +10,17 @@ import requests
 from django.conf import settings
 
 from data.models import (
+    AuthorNameResolution,
     CategoryMembership,
     DeleteCandidate,
     GeoLocationMembership,
     GeoNameResolution,
-    IgnoredPaper
+    IgnoredPaper,
 )
 
 
 class DataExport:
-    EXPORT_VERSION = 2
+    EXPORT_VERSION = 5
 
     @staticmethod
     def download_image(url):
@@ -45,6 +46,16 @@ class DataExport:
                 for candidate in DeleteCandidate.objects.all()]
 
     @staticmethod
+    def _export_author_resolutions():
+        resolutions = []
+        for res in AuthorNameResolution.objects.all():
+            target_fname = res.target_author.first_name if res.target_author else None
+            target_lname = res.target_author.last_name if res.target_author else None
+            resolutions.append({"source_fname": res.source_first_name, "source_lname": res.source_last_name,
+                                "target_fname": target_fname, "target_lname": target_lname})
+        return resolutions
+
+    @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
         """Exports database data in json format and preview images to a tar.gz archive.
         Returns the path to the newly created archive."""
@@ -61,7 +72,7 @@ class DataExport:
             os.makedirs(out_dir)
 
         time = datetime.strftime(datetime.now(), "%Y-%m-%d-%H%M")
-        filename = f"export_{getpass.getuser()}_{time}.tar.gz"
+        filename = f"export_{time}_{getpass.getuser()}.tar.gz"
         path = f"{out_dir}/{filename}"
         json_path = f"{out_dir}/data.json"
 
@@ -119,9 +130,7 @@ class DataExport:
                         "doi": paper.doi,
                         "title": paper.title,
                         "abstract": paper.abstract,
-                        "author_ids": [author.pk for author in paper.authors.all()]
-                        if paper.authors
-                        else None,
+                        "author_ids": [author.pk for author in paper.ranked_authors],
                         "content": paper.data.content if paper.data else None,
                         "published_at": datetime.strftime(paper.published_at, "%Y-%m-%d")
                         if paper.published_at
@@ -145,12 +154,16 @@ class DataExport:
                                                   "score": CategoryMembership.objects.get(
                                                       category__model_identifier=c.model_identifier, paper=paper).score}
                                                  for c in paper.categories.all()],
-                        "locations": [{"id": loc.pk, "state": GeoLocationMembership.objects.get(paper=paper,
-                                                                                              location__id=loc.pk).state,
+                        "locations": [{"id": loc.pk,
+                                       "state": GeoLocationMembership.objects.get(paper=paper,
+                                                                                  location__id=loc.pk).state,
                                        "word": GeoLocationMembership.objects.get(paper=paper,
                                                                                  location__id=loc.pk).word}
                                       for loc in paper.locations.all()],
                         "location_modified": paper.location_modified,
+                        "scrape_hash": paper.scrape_hash,
+                        "visualized": paper.visualized,
+                        "vectorized": paper.vectorized
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
@@ -173,6 +186,7 @@ class DataExport:
                 geo_name_resolutions = DataExport._export_geo_name_resolutions()
                 ignored_papers = DataExport._export_ignored_papers()
                 delete_candidates = DataExport._export_delete_candidates()
+                author_resolutions = DataExport._export_author_resolutions()
 
                 data = {
                     "export_version": DataExport.EXPORT_VERSION,
@@ -185,6 +199,7 @@ class DataExport:
                     "geo_name_resolutions": geo_name_resolutions,
                     "ignored_papers": ignored_papers,
                     "delete_candidates": delete_candidates,
+                    "author_resolutions": author_resolutions
                 }
 
                 with open(json_path, "w") as file:
@@ -212,6 +227,7 @@ class DataExport:
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'country'})} countries")
         log(f"\t{len({id: l for id, l in locations.items() if l['type'] == 'city'})} cities")
         log(f"\t{len(geo_name_resolutions)} geo name resolutions")
+        log(f"\t{len(author_resolutions)} author name resolutions")
         log(f"\t{len(ignored_papers)} ignored papers")
         log(f"\t{len(delete_candidates)} delete candidates")
         log(f"\t{image_id_counter} images")

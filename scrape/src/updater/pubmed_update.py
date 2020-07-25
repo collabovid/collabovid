@@ -1,76 +1,9 @@
+from datetime import date
 from pymed import PubMed
 
 from data.models import DataSource
-from src.updater.data_updater import ArticleDataPoint, DataUpdater
-
-
-class PubMedDatapoint(ArticleDataPoint):
-    def __init__(self, raw_article):
-        super().__init__()
-        self.pubmed_article = raw_article
-
-    @property
-    def doi(self):
-        return self.pubmed_article.doi
-
-    @property
-    def title(self):
-        return self.pubmed_article.title
-
-    @property
-    def abstract(self):
-        return self.pubmed_article.abstract
-
-    def extract_authors(self):
-        return [(a['lastname'], a['firstname']) for a in self.pubmed_article.authors if a['lastname'] or a['firstname']]
-
-    @property
-    def data_source(self):
-        return DataSource.PUBMED
-
-    @property
-    def paperhost_name(self):
-        return "PubMed"
-
-    @property
-    def pubmed_id(self):
-        return self.pubmed_article.pubmed_id
-
-    @property
-    def paperhost_url(self):
-        return None
-
-    @property
-    def published_at(self):
-        return self.pubmed_article.publication_date
-
-    @property
-    def url(self):
-        pmid = self.pubmed_id
-        if pmid:
-            return f"https://www.ncbi.nlm.nih.gov/pubmed/{pmid}"
-        else:
-            return None
-
-    @property
-    def pdf_url(self):
-        return None
-
-    @property
-    def version(self):
-        return None
-
-    @property
-    def is_preprint(self):
-        return False
-
-    @property
-    def journal(self):
-        return self.pubmed_article.journal
-
-    @staticmethod
-    def update_pdf_data(db_article, extract_image=True, extract_content=True):
-        return
+from src.updater.data_updater import DataUpdater
+from data.paper_db_insert import SerializableArticleRecord
 
 
 class PubmedUpdater(DataUpdater):
@@ -80,8 +13,9 @@ class PubmedUpdater(DataUpdater):
     def data_source(self):
         return DataSource.PUBMED
 
-    def __init__(self, log=print):
-        super().__init__(log)
+    def __init__(self, log=print, pdf_image=False, pdf_content=False, update_existing=False, force_update=False):
+        super().__init__(log, pdf_image=pdf_image, pdf_content=pdf_content,
+                         update_existing=update_existing, force_update=force_update)
         self._query_result = None
 
     def _load_query_result(self):
@@ -93,14 +27,52 @@ class PubmedUpdater(DataUpdater):
         self._load_query_result()
         return len(self._query_result)
 
+    def _create_serializable_record(self, pubmed_article):
+        """ Construct a serializable record from a given pubmed article (return value of pymed's query) """
+
+        article = SerializableArticleRecord(title=pubmed_article.title,
+                                            abstract=pubmed_article.abstract, is_preprint=False)
+        if pubmed_article.doi:
+            article.doi = pubmed_article.doi.strip()
+        article.paperhost = "PubMed"
+        article.datasource = DataSource.PUBMED
+        publication_date = pubmed_article.publication_date
+        if isinstance(publication_date, date):
+            article.publication_date = pubmed_article.publication_date
+        article.pubmed_id = pubmed_article.pubmed_id
+
+        if article.pubmed_id:
+            article.url = f"https://www.ncbi.nlm.nih.gov/pubmed/{article.pubmed_id}"
+
+        try:
+            article.journal = pubmed_article.journal
+        except AttributeError:
+            # Journal field is missing sometimes (e.g. pubmed ID 32479040). This is a book without DOI and won't get
+            # added anyway.
+            article.journal = None
+
+        authors = []
+        for author in pubmed_article.authors:
+            lastname = ''
+            firstname = ''
+            if author['lastname']:
+                lastname = author['lastname'].replace(';', '').replace(',', '')
+            if author['firstname']:
+                firstname = author['firstname'].replace(';', '').replace(',', '')
+            if lastname or firstname:
+                authors.append((lastname, firstname))
+        article.authors = authors
+
+        return article
+
     def _get_data_points(self):
         self._load_query_result()
         for pubmed_article in self._query_result:
-            yield PubMedDatapoint(pubmed_article)
+            yield self._create_serializable_record(pubmed_article)
 
     def _get_data_point(self, doi):
         self._load_query_result()
         try:
-            return PubMedDatapoint(next(x for x in self._query_result if x.doi == doi))
+            return self._create_serializable_record(next(x for x in self._query_result if x.doi == doi))
         except StopIteration:
             return None

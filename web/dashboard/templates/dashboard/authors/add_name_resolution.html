@@ -1,0 +1,53 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+    <div class="container">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+            <h1>Add name resolution</h1>
+        </div>
+        <div class="mt-3">
+            {% if current_paper %}
+                <div>Current paper: {{ current_paper.title }}</div>
+            {% endif %}
+            <div class="mb-2">Map the author name {{ author.first_name }} {{ author.last_name }} to another author:</div>
+            <form method="POST" action="{% url "change_author_name" author.pk current_paper.doi %}">
+                {% csrf_token %}
+                <label class="mr-3" for="first_name">First name:</label><input type="text" name="first_name" id="first_name" value="{{ author.first_name }}"><br>
+                <label class="mr-3" for="last_name">Last name:</label><input type="text" name="last_name" id="last_name" value="{{ author.last_name }}"><br>
+                <button type="button" id="swap_btn" class="btn btn-outline-primary mt-2">Swap first and last</button>
+                <button type="submit" name="action" value="save_all" class="btn btn-outline-success mt-2">Save for all papers</button>
+                <button type="submit" name="action" value="delete_all" class="btn btn-outline-danger mt-2">Delete for all papers</button>
+                <button type="submit" name="action" value="delete_current" class="btn btn-outline-danger mt-2">Delete for current paper</button>
+            </form>
+        </div>
+        <div>
+            <h4 class="mt-4">Papers:</h4>
+            {% for paper in author.publications.all %}
+                <form method="POST" action="{% url "swap_all_author_names" paper.doi %}">
+                    {% csrf_token %}
+                    <div class="d-inline">{{ paper.title }}
+                        ({% for paper_author in paper.authors.all %}{{ paper_author.last_name }}, {{ paper_author.first_name }}{% if not forloop.last %} | {% endif %}{% endfor %})
+                    </div>
+                    <button type="submit" id="swap_btn" class="btn btn-sm btn-outline-primary ml-2">
+                        Swap first and last for all authors
+                    </button>
+                </form>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            $('#swap_btn').on("click", function(e) {
+                finput = $("#first_name");
+                linput = $("#last_name");
+                let tmp = finput.val();
+                finput.val(linput.val());
+                linput.val(tmp);
+	            e.preventDefault();
+            });
+        });
+    </script>
+{% endblock %}

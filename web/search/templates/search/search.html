@@ -102,10 +102,10 @@
             <div class="col-3 col-lg-6 text-right pb-2">
 
                 <div class="dropdown d-inline-block">
-                    <a type="button" id="citeDropdown" class="btn btn-light mt-2"
-                       data-toggle="dropdown" href="#">
+                    <button type="button" id="citeDropdown" class="btn btn-light mt-2"
+                            data-toggle="dropdown">
                         <i class="fas fa-download"></i><span class="d-none d-md-inline"> Export Page</span>
-                    </a>
+                    </button>
                     <div class="dropdown-menu dropdown-menu-right mobile-dropdown"
                          aria-labelledby="citeDropdown">
                         <h6 class="dropdown-header">Export file format</h6>
@@ -246,19 +246,28 @@
                 form.submit();
             });
 
-            function generate_submission_data() {
-                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
-
+            function convert_checkboxes(name) {
                 // Converting categories=x&categories=y to categories=x,y
-                let checked_categories = $('.search-form input[name=categories]:checked');
-                let categories = $('.search-form input[name=categories]');
+                let checked = $('.search-form input[name=' + name + ']:checked');
+                let all = $('.search-form input[name=' + name + ']');
 
-                if (checked_categories.length !== categories.length) {
-                    submission_data += "&categories=";
-                    submission_data += checked_categories.map(function () {
+                let submission_data = "";
+
+                if (checked.length !== all.length) {
+                    submission_data += "&" + name + "=";
+                    submission_data += checked.map(function () {
                         return this.value;
                     }).get().join(',');
                 }
+
+                return submission_data
+            }
+
+            function generate_submission_data() {
+                let submission_data = $(".search-form input[data-no-url!=true], .search-form select").serialize();
+
+                submission_data += convert_checkboxes("categories");
+                submission_data += convert_checkboxes("paper_hosts");
 
                 return submission_data;
             }
@@ -266,13 +275,16 @@
             download_button.click(function (e) {
                 e.preventDefault();
 
-                let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
-                let submission_data = generate_submission_data();
+                if (window.show_confirm_export_dialog()) {
+                    let no_url_submission_data = $('.search-form input[data-no-url=true][data-url-manually!=true]').serialize();
+                    let submission_data = generate_submission_data();
 
-                // Full data must be submitted to the view. Submission data can be saved in the url.
-                let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
+                    // Full data must be submitted to the view. Submission data can be saved in the url.
+                    let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
 
-                window.open($(this).attr('href') + "?" + full_data, '_blank');
+                    window.open($(this).attr('href') + "?" + full_data, '_blank');
+
+                }
 
             });
 
