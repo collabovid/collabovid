@@ -49,7 +49,7 @@ class DataUpdater(object):
         try:
             db_article, created, updated = self.db_updater.insert(datapoint)
             if updated:
-                self._update_pdf_data(db_article)
+                self.update_pdf_data(db_article)
                 if created:
                     self.statistics.n_created += int(created)
                 else:
@@ -125,7 +125,7 @@ class DataUpdater(object):
         self.statistics.stop()
         self.log(self.statistics)
 
-    def _update_pdf_data(self, db_article):
+    def update_pdf_data(self, db_article):
         if not self.pdf_image and not self.pdf_content:
             return
         if not db_article.pdf_url:

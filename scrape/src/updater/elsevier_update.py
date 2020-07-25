@@ -83,7 +83,7 @@ class ElsevierUpdater(DataUpdater):
         except KeyError:
             return None
 
-    def _update_pdf_data(self, db_article):
+    def update_pdf_data(self, db_article):
         if not self.pdf_image:
             return
         with ElsevierCache(path=f"{settings.RESOURCES_DIR}/cache/elsevier") as elsevier:
