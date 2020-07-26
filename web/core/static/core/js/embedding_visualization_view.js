@@ -17,11 +17,16 @@
 
         plugin.init();
 
+        window.visualizationInitialized = false;
         window.visualizationEventRunning = false;
         window.justUsedTouchControls = false;
         window.oldPanSpeed = 0;
         window.oldZoomSpeed = 0;
         window.inFullScreen = false;
+
+        const TOPIC_COLORS_BADGE = ["#c6759c", "#7ad895", "#cba174", "#ad71b9", "#cf3759", "#93003a"];
+        const TOPIC_COLORS_VISUALIZATION = [0xc6759c, 0x7ad895, 0xcba174, 0xad71b9, 0xcf3759, 0x93003a];
+
 
         const topics = plugin.settings.topics;
         const colors = plugin.settings.colors;
@@ -32,7 +37,6 @@
         const topicsContainer = $('#topics-container');
         const paperLoadingIndicator = $('#paper-loading-indicator');
         const topicLegend = $('#topic-legend');
-        const topicLabel = $('#topic-label');
         const categoryLegend = $('#category-legend');
         const paperSelectedLegend = $('#paper-selected-legend');
         const topicFilterInput = $('#topic-filter-input');
@@ -42,6 +46,9 @@
         const zoomPanControls = $("#zoom-pan-controls");
 
         const titleContainer = $("#titleContainer");
+
+        let currentColorIndex = 0;
+
 
         function pushToUrl(identifier = null) {
             let url = window.location.protocol + "//"
@@ -58,7 +65,6 @@
         }
 
         function selectPaper(doi) {
-            console.log(doi)
             visualization.papers.forEach((paper, i) => {
                 if (paper.doi == doi) {
                     onSelected(i, paper);
@@ -170,6 +176,8 @@
                 } else if (plugin.settings.preSelectedTopic) {
                     selectTopic(plugin.settings.preSelectedTopic);
                 }
+
+                window.visualizationInitialized = true;
             }
         );
 
@@ -209,7 +217,7 @@
         });
 
         visualization.onDeselect(function () {
-            if (window.visualizationEventRunning) {
+            if (window.visualizationEventRunning || !window.visualizationInitialized) {
                 return;
             }
 
@@ -218,7 +226,8 @@
             topicsContainer.show();
             categoryLegend.show();
             paperSelectedLegend.hide();
-            topicLegend.hide();
+            topicLegend.html("").hide();
+            currentColorIndex = 0;
 
             $(".category-badge").each(function () {
                 $(this).removeClass('badge-secondary').css('background-color', $(this).data('background-color'));
@@ -229,29 +238,82 @@
             window.visualizationEventRunning = false;
         });
 
+        function highlightTopics() {
+
+            const badges = topicLegend.find('span.badge');
+            if (badges.length <= 0) {
+                visualization.deselectAll();
+            } else {
+                let is_first = true;
+
+                badges.each(function () {
+                    const paperIds = new Set(topics[$(this).data('id')]);
+                    visualization.selectPapers(paperIds, $(this).data('color'), is_first, is_first);
+                    is_first = false;
+                });
+
+                document.body.scrollTop = 0;
+                document.documentElement.scrollTop = 0;
+
+                topicLegend.show();
+                categoryLegend.hide();
+                paperSelectedLegend.hide();
+            }
+        }
+
+        $(document).on('click', '#topic-legend span.badge > span', function (e) {
+            e.preventDefault();
+
+            $(this).closest('span.badge').remove();
+            highlightTopics();
+        });
+
         $('.topic-item .show-topic').on('click', function (e) {
-            if (window.visualizationEventRunning) {
+            if (window.visualizationEventRunning || !window.visualizationInitialized) {
+                return;
+            }
+
+            const topicItem = $(e.target).closest('.topic-item');
+            const topicId = topicItem.data('topic');
+
+
+            if (topicLegend.find('span.badge[data-id=' + topicId + "]").length > 0) {
                 return;
             }
 
             window.visualizationEventRunning = true;
 
-            const topicItem = $(e.target).closest('.topic-item');
-            const topicId = topicItem.data('topic');
-            const paperIds = new Set(topics[topicId]);
-            document.body.scrollTop = 0;
-            document.documentElement.scrollTop = 0;
-            topicLabel.text(topicItem.data('topic-name'));
-            topicLegend.show();
-            categoryLegend.hide();
-            paperSelectedLegend.hide();
-            visualization.selectPapers(paperIds, 0xffffff);
+            if (topicLegend.find('span.badge').length >= TOPIC_COLORS_BADGE.length) {
+                topicLegend.find("div:last-of-type").remove();
+            }
+
+            const topicBadgeTemplate = '<div><span id="topic-label" ' +
+                'style="background-color:{color};" ' +
+                'data-id="{id}" ' +
+                'data-color="{color-js}" ' +
+                'class="badge text-white">{name} <span role="button">&cross;</span></span></div>';
+
+            currentColorIndex = (currentColorIndex + 1) % TOPIC_COLORS_BADGE.length;
+
+            const index = currentColorIndex;
+            const badgeColor = TOPIC_COLORS_BADGE[index];
+            const visualizationColor = TOPIC_COLORS_VISUALIZATION[index];
+            const topicName = topicItem.data('topic-name');
+            const topicBadge = topicBadgeTemplate.replace("{name}", topicName)
+                .replace("{color}", badgeColor).replace("{id}", topicId)
+                .replace("{color-js}", visualizationColor);
+
+            topicLegend.prepend(topicBadge);
+
+            highlightTopics();
+
+
             pushToUrl(topicId);
             window.visualizationEventRunning = false;
         });
 
         $('.category-label').on('click', function (e) {
-            if (window.visualizationEventRunning) {
+            if (window.visualizationEventRunning || !window.visualizationInitialized) {
                 return;
             }
 

@@ -403,7 +403,7 @@ const EmbeddingVisualization = function () {
             this.camera.updateProjectionMatrix();
         };
 
-        this.selectPapers = function (dois, selectionColor) {
+        this.selectPapers = function (dois, selectionColor, recolorNonSelectedExisting, focusOnNewLocation) {
             let minCoordinates = new Array(3).fill(100000);
             let maxCoordinates = new Array(3).fill(-10000);
 
@@ -423,31 +423,35 @@ const EmbeddingVisualization = function () {
                 }
                 let faceStartIndex = i * 2;
                 for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
-                    this.geometry.faces[idx].color = color;
-                    this.geometry.faces[idx].materialIndex = materialIndex
+                    if (recolorNonSelectedExisting || color !== defaultColor) {
+                        this.geometry.faces[idx].color = color;
+                        this.geometry.faces[idx].materialIndex = materialIndex
+                    }
                 }
             }
             this.geometry.colorsNeedUpdate = true;
             this.geometry.elementsNeedUpdate = true;
 
-            let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0;
-            let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0;
-            let newZ = maxCoordinates[2] + 2;
+            if (focusOnNewLocation) {
+                let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0;
+                let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0;
+                let newZ = maxCoordinates[2] + 2;
 
-            const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z};
-            this.animating = true;
-            const tween = new TWEEN.Tween(coords)
-                .to({
-                    x: newX,
-                    y: newY,
-                    z: newZ
-                }, 1200)
-                .easing(TWEEN.Easing.Quadratic.Out)
-                .onUpdate(() => {
-                    this.viewArea(coords.x, coords.y, coords.z)
-                }).onComplete(() => {
-                    this.animating = false;
-                }).start()
+                const coords = {x: this.camera.position.x, y: this.camera.position.y, z: this.camera.position.z};
+                this.animating = true;
+                const tween = new TWEEN.Tween(coords)
+                    .to({
+                        x: newX,
+                        y: newY,
+                        z: newZ
+                    }, 1200)
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .onUpdate(() => {
+                        this.viewArea(coords.x, coords.y, coords.z)
+                    }).onComplete(() => {
+                        this.animating = false;
+                    }).start();
+            }
         }
     }
 ;
