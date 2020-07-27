@@ -38,6 +38,7 @@
         const paperLoadingIndicator = $('#paper-loading-indicator');
         const topicLegend = $('#topic-legend');
         const categoryLegend = $('#category-legend');
+        const legend = $('.legend');
         const paperSelectedLegend = $('#paper-selected-legend');
         const topicFilterInput = $('#topic-filter-input');
         const fullScreenToggleBtn = $(".full-screen-toggle");
@@ -129,6 +130,7 @@
 
             paperLoadingIndicator.show();
             selectedCardContainer.hide();
+            legend.hide();
             topicsContainer.hide();
             categoryLegend.hide();
             topicLegend.hide();
@@ -156,6 +158,7 @@
                 selectedCardContainer.html(data);
                 paperLoadingIndicator.hide();
                 selectedCardContainer.show();
+                legend.show();
                 paperSelectedLegend.show();
                 pushToUrl(paper.doi);
                 window.visualizationEventRunning = false;
@@ -170,14 +173,15 @@
                 'panSpeed': 0.5
             },
             function () {
+                window.visualizationInitialized = true;
+
                 if (plugin.settings.preSelectedPaper) {
                     selectPaper(plugin.settings.preSelectedPaper);
 
                 } else if (plugin.settings.preSelectedTopic) {
                     selectTopic(plugin.settings.preSelectedTopic);
+                    console.log("selected topic");
                 }
-
-                window.visualizationInitialized = true;
             }
         );
 
@@ -225,6 +229,7 @@
             selectedCardContainer.hide();
             topicsContainer.show();
             categoryLegend.show();
+            legend.show();
             paperSelectedLegend.hide();
             topicLegend.html("").hide();
             currentColorIndex = 0;
@@ -257,6 +262,7 @@
 
                 topicLegend.show();
                 categoryLegend.hide();
+                legend.show();
                 paperSelectedLegend.hide();
             }
         }
@@ -337,6 +343,14 @@
             paperSelectedLegend.hide();
             topicLegend.hide();
             window.visualizationEventRunning = false;
+        });
+
+        $(".rotation-button").click(function (e) {
+            e.preventDefault();
+
+            visualization.rotate($(this).hasClass('left'));
+            $("#rotation-label span.deg").text(visualization.currentRotationStep * (360 / visualization.rotationMaxSteps))
+
         });
 
         $(document).on("click", ".visualize-link", function (e) {

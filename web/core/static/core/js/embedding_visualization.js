@@ -2,12 +2,15 @@ const EmbeddingVisualization = function () {
 
         const paperProperties = {width: 0.005, height: 0.005, depth: 0.005, color: 0x5475a1};
         const atlasImage = {cols: 10, rows: 10};
+        const mod = function mod(n, m) {
+            return ((n % m) + m) % m;
+        };
         atlasImage.width = paperProperties.width * atlasImage.cols;
         atlasImage.height = paperProperties.height * atlasImage.rows;
 
-
-        this.buildGeometry = function (papers) {
+        this.buildGeometry = function (papers, yRadians) {
             const geometry = new THREE.Geometry();
+
             for (let i = 0; i < papers.length; i++) {
                 let paper = papers[i];
 
@@ -24,14 +27,14 @@ const EmbeddingVisualization = function () {
                         coords.z
                     ),
                     new THREE.Vector3(
-                        coords.x + paperProperties.width,
+                        coords.x + paperProperties.width * Math.cos(yRadians),
                         coords.y,
-                        coords.z
+                        coords.z + paperProperties.width * Math.sin(yRadians)
                     ),
                     new THREE.Vector3(
-                        coords.x + paperProperties.width,
+                        coords.x + paperProperties.width * Math.cos(yRadians),
                         coords.y + paperProperties.height,
-                        coords.z
+                        coords.z + paperProperties.width * Math.sin(yRadians)
                     ),
                     new THREE.Vector3(
                         coords.x,
@@ -74,6 +77,9 @@ const EmbeddingVisualization = function () {
                 ]);
 
             }
+
+            //geometry.center();
+
             return geometry;
         };
 
@@ -111,7 +117,7 @@ const EmbeddingVisualization = function () {
             loader.load(options.fileUrl, function (data) {
                 let paperData = JSON.parse(data);
                 let papers = paperData.papers;
-                let geometry = scope.buildGeometry(papers);
+                let geometry = scope.buildGeometry(papers, 0);
                 let loader = new THREE.TextureLoader();
                 let url = options.imageUrl;
 
@@ -135,7 +141,6 @@ const EmbeddingVisualization = function () {
                 });
                 let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial]);
                 let mesh = new THREE.Mesh(geometry, material);
-                //mesh.position.set(-paperData.means[0], -paperData.means[1] / 4, -paperData.means[2])
                 scene.add(mesh);
 
                 let controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -277,8 +282,17 @@ const EmbeddingVisualization = function () {
                 scope.material = material;
                 scope.camera = camera;
                 scope.paperData = paperData;
+                scope.currentRotationStep = 0;
+                scope.rotationMaxSteps = 8;
 
-                scope.viewArea(paperData.means[0], paperData.means[1], paperData.means[2] + 2.5)
+                const bbox = new THREE.Box3().setFromObject(scope.scene);
+                const offset = new THREE.Vector3();
+                bbox.getCenter(offset).negate();
+
+                scope.geometryOffset = offset;
+                scope.geometry.center();
+
+                scope.viewArea(paperData.means[0] + scope.geometryOffset.x, paperData.means[1] + scope.geometryOffset.y, paperData.means[2] + scope.geometryOffset.z + 2.5);
 
                 if (callback) {
                     callback();
@@ -403,6 +417,25 @@ const EmbeddingVisualization = function () {
             this.camera.updateProjectionMatrix();
         };
 
+        this.rotate = function (left) {
+
+            if (left)
+                this.currentRotationStep = mod(this.currentRotationStep + 1, this.rotationMaxSteps);
+            else
+                this.currentRotationStep = mod(this.currentRotationStep - 1, this.rotationMaxSteps);
+
+            const yRotation = (this.currentRotationStep / this.rotationMaxSteps) * 2 * Math.PI;
+
+            const geometry = this.buildGeometry(this.papers, yRotation);
+            geometry.center();
+
+            this.geometry.vertices = geometry.vertices;
+            this.geometry.rotateY(yRotation);
+            this.geometry.colorsNeedUpdate = true;
+            this.geometry.elementsNeedUpdate = true;
+        };
+
+
         this.selectPapers = function (dois, selectionColor, recolorNonSelectedExisting, focusOnNewLocation) {
             let minCoordinates = new Array(3).fill(100000);
             let maxCoordinates = new Array(3).fill(-10000);
@@ -418,7 +451,7 @@ const EmbeddingVisualization = function () {
                     materialIndex = 0;
                     for (let j = 0; j < 3; j++) {
                         minCoordinates[j] = Math.min(this.papers[i].point[j], minCoordinates[j]);
-                        maxCoordinates[j] = Math.max(this.papers[i].point[j], maxCoordinates[j])
+                        maxCoordinates[j] = Math.max(this.papers[i].point[j], maxCoordinates[j]);
                     }
                 }
                 let faceStartIndex = i * 2;
@@ -433,6 +466,12 @@ const EmbeddingVisualization = function () {
             this.geometry.elementsNeedUpdate = true;
 
             if (focusOnNewLocation) {
+
+                for (let i = 0; i < 3; i++) {
+                    minCoordinates[i] = minCoordinates[i] + this.geometryOffset.getComponent(i);
+                    maxCoordinates[i] = maxCoordinates[i] + this.geometryOffset.getComponent(i);
+                }
+
                 let newX = minCoordinates[0] + (maxCoordinates[0] - minCoordinates[0]) / 2.0;
                 let newY = minCoordinates[1] + (maxCoordinates[1] - minCoordinates[1]) / 2.0;
                 let newZ = maxCoordinates[2] + 2;
