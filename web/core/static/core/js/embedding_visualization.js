@@ -283,7 +283,7 @@ const EmbeddingVisualization = function () {
                 scope.camera = camera;
                 scope.paperData = paperData;
                 scope.currentRotationStep = 0;
-                scope.rotationMaxSteps = 8;
+                scope.rotationMaxSteps = 32;
 
                 const bbox = new THREE.Box3().setFromObject(scope.scene);
                 const offset = new THREE.Vector3();

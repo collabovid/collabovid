@@ -48,6 +48,8 @@
 
         const titleContainer = $("#titleContainer");
 
+        let rotationTimeoutId = 0;
+
         let currentColorIndex = 0;
 
 
@@ -336,7 +338,7 @@
                     dois.add(paper.doi);
                 }
             });
-            visualization.selectPapers(dois, visualization.colors[categoryId]);
+            visualization.selectPapers(dois, visualization.colors[categoryId], true, true);
 
             pushToUrl();
             categoryLegend.show();
@@ -345,12 +347,24 @@
             window.visualizationEventRunning = false;
         });
 
-        $(".rotation-button").click(function (e) {
+
+        $(".rotation-button").on('mousedown touchstart', function (e) {
             e.preventDefault();
 
-            visualization.rotate($(this).hasClass('left'));
-            $("#rotation-label span.deg").text(visualization.currentRotationStep * (360 / visualization.rotationMaxSteps))
+            let isLeft = $(this).hasClass('left');
 
+            let updateRotation = function(){
+                 visualization.rotate(isLeft);
+                $("#rotation-label span.deg")
+                    .text(visualization.currentRotationStep * (360 / visualization.rotationMaxSteps));
+
+                rotationTimeoutId = setTimeout(updateRotation, 100);
+            };
+
+            rotationTimeoutId = setTimeout(updateRotation, 0);
+        }).on('mouseup mouseleave touchend', function (e) {
+            e.preventDefault();
+            clearTimeout(rotationTimeoutId);
         });
 
         $(document).on("click", ".visualize-link", function (e) {
