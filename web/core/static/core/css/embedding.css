@@ -139,6 +139,11 @@ div.embedding-visualization-container.full-screen div.canvas-adaptive-height {
     margin: 0.5em;
 }
 
+.legend #rotation-label
+{
+    width: 80px;
+}
+
 
 #selected-card-container {
 }
