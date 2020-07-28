@@ -80,15 +80,26 @@ class CommaSeparatedIntegerField(forms.Field):
 
 class SearchForm(forms.Form):
     TAB_CHOICES = [('combined', 'Semantic Search'), ('keyword', 'Keyword Search')]
+    TRENDING_CHOICES = {
+        'trending_d': {
+            'description': 'past day',
+            'value': lambda paper: paper.altmetric_data.score_d,
+        },
+        'trending_w': {
+            'description': 'past week',
+            'value': lambda paper: paper.altmetric_data.score_w,
+        },
+        'trending_m': {
+            'description': 'past month',
+            'value': lambda paper: paper.altmetric_data.score_1m,
+        },
+    }
     SORT_CHOICES = [
         ('top', 'Relevance'),
         ('newest', 'Newest'),
-        ('trending_d', 'Trending (last day)'),
-        ('trending_w', 'Trending (last week)'),
-        ('trending_1m', 'Trending (last month)'),
-        ('trending_3m', 'Trending (last 3 months)'),
-        ('trending_6m', 'Trending (last 6 months)'),
-        ('trending_y', 'Trending (last year)'),
+    ] + [
+        (k, f'Trending ({v["description"]})') for k, v in TRENDING_CHOICES.items()
+    ] + [
         ('popularity', 'Trending (all time)'),
     ]
 

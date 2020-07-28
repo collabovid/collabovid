@@ -358,6 +358,8 @@ class Paper(models.Model):
     def __init__(self, *args, **kwargs):
         super(Paper, self).__init__(*args, **kwargs)
         self._highlighted_authors = None
+        self._trend = None
+        self._trend_description = None
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None, blank=True)
     scrape_hash = models.CharField(max_length=22, null=True, default=None)
@@ -425,6 +427,22 @@ class Paper(models.Model):
         if not self._highlighted_authors:
             self._highlighted_authors = self.ranked_authors
         return self._highlighted_authors
+
+    @property
+    def trend(self):
+        return self._trend
+
+    @trend.setter
+    def trend(self, value):
+        self._trend = value
+
+    @property
+    def trend_description(self):
+        return self._trend_description
+
+    @trend_description.setter
+    def trend_description(self, value):
+        self._trend_description = value
 
     @property
     def countries(self):
