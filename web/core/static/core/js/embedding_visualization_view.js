@@ -12,6 +12,7 @@
                 atlasImageUrl: null,
                 paperFileUrl: null,
                 receivePaperUrl: null,
+                allWeeks: null,
             }, options);
         };
 
@@ -120,6 +121,51 @@
         panSlider.on('slide', function (e) {
             visualization.controls.panSpeed = e.value;
             visualization.controls.update();
+        });
+
+        const weekSlider = $("#week-slider").slider({
+            //ticks: Array.from(Array(plugin.settings.allWeeks.length).keys()),
+            formatter: function (value) {
+                return (new Date(plugin.settings.allWeeks[value])).toISOString().substring(0, 10);
+            },
+            step: 1,
+            tooltip_position: 'left',
+            orientation: 'vertical',
+            reversed: true,
+            value: plugin.settings.allWeeks.length - 1,
+            min: 0,
+            max: plugin.settings.allWeeks.length - 1
+        });
+
+        weekSlider.on('change', function (e) {
+            let dois = [];
+
+            $.each(visualization.papers, function (index, paper) {
+                if (plugin.settings.allWeeks[e.value.newValue] <= paper.published_at) {
+                    dois.push(paper.doi)
+                }
+
+            });
+
+            let doi_set = new Set(dois);
+
+            $.each(topics, function (index, paper_ids) {
+                let count = 0;
+                for (let i = 0; i < paper_ids.length; ++i) {
+                    if(!doi_set.has(paper_ids[i]))
+                    {
+                        count++;
+                    }
+                }
+                $(".topic-item[data-topic="+index+"]").find(".paper-count").text(count);
+            });
+
+            visualization.hidePapers(doi_set);
+        });
+
+
+        $(".toggle-date-slider").click(function () {
+            $(".exchangeable-controls").toggle();
         });
 
         function onSelected(idx, paper) {
@@ -353,8 +399,8 @@
 
             let isLeft = $(this).hasClass('left');
 
-            let updateRotation = function(){
-                 visualization.rotate(isLeft);
+            let updateRotation = function () {
+                visualization.rotate(isLeft);
                 $("#rotation-label span.deg")
                     .text(visualization.currentRotationStep * (360 / visualization.rotationMaxSteps));
 

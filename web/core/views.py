@@ -1,5 +1,8 @@
+from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
+
+from core.date_utils import DateUtils
 from data.models import GeoCity, GeoCountry, Paper, Category, Topic
 from statistics import PaperStatistics, CategoryStatistics
 import json
@@ -48,13 +51,16 @@ def embedding_visualization(request, topic_pk=None, doi=None):
     for category in categories:
         category_colors[category.pk] = category.color
 
+
+
     context = {
         'topics': topics,
         'topic_dict': json.dumps(topic_dict),
         'categories': categories,
         'category_colors': json.dumps(category_colors),
         'atlas_image_url': settings.PAPER_ATLAS_IMAGES_FILE_URL,
-        'paper_file_url': settings.EMBEDDINGS_FILE_URL
+        'paper_file_url': settings.EMBEDDINGS_FILE_URL,
+        'all_sundays': json.dumps(list(DateUtils.all_sundays(2020)), cls=DjangoJSONEncoder)
     }
 
     if topic_pk:

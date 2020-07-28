@@ -80,12 +80,12 @@ div.embedding-visualization-container.full-screen div.canvas-adaptive-height {
     user-select: none;
 }
 
-.slider.slider.slider-horizontal {
+.slider.slider-horizontal {
     width: 180px;
     max-width: 100%;
 }
 
-.slider .slider-handle {
+.slider.slider-horizontal .slider-handle {
     background: #abad9f;
     width: 15px;
     height: 15px;
@@ -93,11 +93,37 @@ div.embedding-visualization-container.full-screen div.canvas-adaptive-height {
     top: 2.5px
 }
 
-.slider .slider-track {
+.slider.slider-vertical .slider-handle {
+    background: #abad9f;
+    width: 15px;
+    height: 15px;
+    margin-left: -2.5px;
+    margin-top: -7.5px;
+    top: 10px;
+}
+
+.slider.slider-vertical .slider-track
+{
+    width: 6px !important;
+    margin-left: -3px !important;
+}
+
+.slider.slider-horizontal .slider-track {
     height: 6px !important;
     margin-top: -3px !important;
 }
 
+.slider.slider-horizontal .slider-tick
+{
+    width: 0;
+    height:0;
+}
+
+
+.exchangeable-controls .slider-container > div:first-of-type
+{
+    height: 240px;
+}
 
 .badge {
     user-select: none;
