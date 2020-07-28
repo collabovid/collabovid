@@ -18,7 +18,7 @@
         <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
             <div class="paper-card-badge text-right">
-                    <div data-badge-type="4" data-badge-popover="left"
+                    <div data-badge-type="4" data-badge-popover="left" data-link-target="_blank"
                          {% if not paper|is_arxiv %}
                         data-doi="{{paper.doi}}"
                         {% else %}
