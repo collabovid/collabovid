@@ -1,4 +1,6 @@
 import os
+
+from src.altmetric.task_get_altmetric_data import AltmetricUpdateTask
 from tasks.task_runner import TaskRunner
 from src.geo.task_geo_parser import GeoParserTask
 from src.task_medrxiv_update import MedBiorxivNewArticlesTask
@@ -76,6 +78,10 @@ class ScrapeTask(Runnable):
             self.progress(95)
         else:
             self.log("Paper matrix update and topic assignment skipped.")
+
+        self.log("Update Altmetric data of new papers")
+        TaskRunner.run_task(AltmetricUpdateTask, started_by=self._task.started_by, update_all=True, only_new=True)
+        self.log("Finished updating Altmetric data of new papers")
 
         self.log("Extract locations from papers...")
         TaskRunner.run_task(GeoParserTask,
