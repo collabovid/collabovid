@@ -56,6 +56,7 @@ const EmbeddingVisualization = function () {
                     );
                     face.color = new THREE.Color(color);
                     face.materialIndex = 0;
+                    face.origMaterialIndex = 0;
                     geometry.faces.push(face);
                 }
 
@@ -139,7 +140,15 @@ const EmbeddingVisualization = function () {
                     map: loader.load(url),
                     vertexColors: THREE.VertexColors
                 });
-                let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial]);
+                let hiddenMaterial = new THREE.MeshBasicMaterial({
+                    transparent: true,
+                    opacity: 0.0,
+                    map: loader.load(url),
+                    vertexColors: THREE.VertexColors
+                });
+                let material = new THREE.MultiMaterial([solidMaterial, halfOpacMaterial, opacMaterial, hiddenMaterial]);
+                scope.hiddenMaterialIndex = 3;
+
                 let mesh = new THREE.Mesh(geometry, material);
                 scene.add(mesh);
 
@@ -204,13 +213,21 @@ const EmbeddingVisualization = function () {
                     raycaster.setFromCamera(mouse, camera);
                     let intersects = raycaster.intersectObjects(scene.children);
                     if (intersects.length > 0) {
-                        let faceIndex = intersects[0].faceIndex;
-                        let pointIndex = Math.floor(faceIndex / facesPerPoint);
 
-                        if (callback_intersect) callback_intersect(pointIndex, scope.papers[pointIndex]);
-                    } else {
-                        if (callback_no_intersect) callback_no_intersect();
+                        for (let i = 0; i < intersects.length; i++) {
+                            let faceIndex = intersects[i].faceIndex;
+
+                            if (scope.geometry.faces[faceIndex].materialIndex !== scope.hiddenMaterialIndex) {
+                                let pointIndex = Math.floor(faceIndex / facesPerPoint);
+
+                                if (callback_intersect) callback_intersect(pointIndex, scope.papers[pointIndex]);
+                                return;
+                            }
+                        }
+
                     }
+
+                    if (callback_no_intersect) callback_no_intersect();
                 }
 
                 // setup listener that only fires on a single click event (no dragging etc.)
@@ -273,6 +290,11 @@ const EmbeddingVisualization = function () {
                     }
                 });
 
+                for (let i=0; i<papers.length;i++)
+                {
+                    papers[i].published_at = moment(papers[i].published_at, "YYYY-MM-DD")
+                }
+
 
                 scope.geometry = geometry;
                 scope.renderer = renderer;
@@ -324,6 +346,13 @@ const EmbeddingVisualization = function () {
                 if (paper === this.papers[i]) {
                     continue;
                 }
+                let isHidden = false;
+                let faceStartIndex = i * 2;
+                if (this.geometry.faces[faceStartIndex].materialIndex === this.hiddenMaterialIndex)
+                {
+                    continue;
+                }
+
                 let other = this.papers[i];
                 let distance = math.distance(paper.point, other.point);
                 let added = false;
@@ -371,7 +400,12 @@ const EmbeddingVisualization = function () {
                 let faceStartIndex = i * 2;
                 for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
                     this.geometry.faces[idx].color = new THREE.Color(color);
-                    this.geometry.faces[idx].materialIndex = materialIndex
+                    this.geometry.faces[idx].origMaterialIndex = materialIndex;
+
+                    if (this.geometry.faces[idx].materialIndex !== this.hiddenMaterialIndex) {
+                        this.geometry.faces[idx].materialIndex = materialIndex;
+                    }
+
                 }
             }
             this.geometry.colorsNeedUpdate = true;
@@ -398,7 +432,10 @@ const EmbeddingVisualization = function () {
                 let faceStartIndex = i * 2;
                 for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
                     this.geometry.faces[idx].color = new THREE.Color(color);
-                    this.geometry.faces[idx].materialIndex = materialIndex
+                    this.geometry.faces[idx].origMaterialIndex = materialIndex;
+                    if (this.geometry.faces[idx].materialIndex !== this.hiddenMaterialIndex) {
+                        this.geometry.faces[idx].materialIndex = materialIndex;
+                    }
                 }
             }
             this.geometry.colorsNeedUpdate = true;
@@ -436,6 +473,26 @@ const EmbeddingVisualization = function () {
         };
 
 
+        this.hidePapers = function (dois) {
+            for (let i = 0; i < this.papers.length; i++) {
+
+                const isHidden = dois.has(this.papers[i].doi);
+
+                let faceStartIndex = i * 2;
+                for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
+                    if (isHidden) {
+                        this.geometry.faces[idx].materialIndex = this.hiddenMaterialIndex; // Hide
+                    } else {
+                        this.geometry.faces[idx].materialIndex = this.geometry.faces[idx].origMaterialIndex
+                    }
+                }
+            }
+
+            this.geometry.colorsNeedUpdate = true;
+            this.geometry.elementsNeedUpdate = true;
+        };
+
+
         this.selectPapers = function (dois, selectionColor, recolorNonSelectedExisting, focusOnNewLocation) {
             let minCoordinates = new Array(3).fill(100000);
             let maxCoordinates = new Array(3).fill(-10000);
@@ -458,7 +515,10 @@ const EmbeddingVisualization = function () {
                 for (let idx = faceStartIndex; idx < faceStartIndex + 2; idx++) {
                     if (recolorNonSelectedExisting || color !== defaultColor) {
                         this.geometry.faces[idx].color = color;
-                        this.geometry.faces[idx].materialIndex = materialIndex
+                        this.geometry.faces[idx].origMaterialIndex = materialIndex;
+                        if (this.geometry.faces[idx].materialIndex !== this.hiddenMaterialIndex) {
+                            this.geometry.faces[idx].materialIndex = materialIndex;
+                        }
                     }
                 }
             }
