@@ -9,6 +9,8 @@ from tasks.definitions import register_task, Runnable
 
 @register_task
 class AltmetricUpdateTask(Runnable):
+    MAX_ERRORS = 50
+
     @staticmethod
     def task_name():
         return "get-altmetric-data"
@@ -33,8 +35,15 @@ class AltmetricUpdateTask(Runnable):
         else:
             self.log("Update Altmetric data of all articles")
 
+        n_errors = 0
         for paper in self.progress(papers):
             try:
                 altmetric_update.update(paper)
             except (AltmetricException, AltmetricHTTPException) as ex:
                 self.log(f"Error at paper {paper.doi}: {ex}")
+                n_errors += 1
+            if n_errors >= self.MAX_ERRORS:
+                break
+
+        if n_errors > 0:
+            raise Exception("Failed to update all Altmetric scores")
