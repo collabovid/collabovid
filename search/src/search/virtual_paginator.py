@@ -1,4 +1,4 @@
-from django.db.models import QuerySet
+from django.db.models import F, QuerySet
 
 from data.models import Paper
 from math import ceil
@@ -19,11 +19,23 @@ class VirtualPaginator:
 
         self._form = form
 
-        if form['sorted_by'] == 'newest' or not form['query'].strip(): # If no query is given we sort by newest.
-            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",
-                                                                                           "-created_at")
+        if form['sorted_by'] == 'newest' or (form['sorted_by'] == 'top' and not form['query'].strip()):
+            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",                                                                              "-created_at")
         elif form['sorted_by'] == 'top':
             self.sorted_dois = sorted(search_results.keys(), key=lambda x: search_results[x], reverse=True)
+        elif form['sorted_by'] == 'popularity':
+            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by(
+                F('altmetric_data__score').desc(nulls_last=True)
+            )
+        elif form['sorted_by'].startswith('trending'):
+            span = form['sorted_by'][9:]
+            if span not in ('d', 'w', '1m', '3m', '6m', 'y'):
+                raise ValueError("Sorted by has unknown value" + str(form['sorted_by']))
+
+            sort_key = f'altmetric_data__score_{span}'
+            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by(
+                F(sort_key).desc(nulls_last=True)
+            )
         else:
             raise ValueError("Sorted by has unknown value" + str(form['sorted_by']))
 

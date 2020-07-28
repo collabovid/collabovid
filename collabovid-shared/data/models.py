@@ -338,6 +338,16 @@ class GeoNameResolution(models.Model):
     target_geonames_id = models.IntegerField(null=True, default=None)
 
 
+class AltmetricData(models.Model):
+    score = models.FloatField(default=0)
+    score_d = models.FloatField(default=0)
+    score_w = models.FloatField(default=0)
+    score_1m = models.FloatField(default=0)
+    score_3m = models.FloatField(default=0)
+    score_6m = models.FloatField(default=0)
+    score_y = models.FloatField(default=0)
+
+
 class Paper(models.Model):
     MAX_DOI_LENGTH = 100
 
@@ -353,6 +363,14 @@ class Paper(models.Model):
     scrape_hash = models.CharField(max_length=22, null=True, default=None)
     manually_modified = models.BooleanField(default=False)
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
+    altmetric_data = models.OneToOneField(
+        AltmetricData,
+        default=None,
+        related_name='paper',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications", through='AuthorPaperMembership')
@@ -388,6 +406,7 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
+    last_altmetric_update = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
     location_modified = models.BooleanField(default=False)

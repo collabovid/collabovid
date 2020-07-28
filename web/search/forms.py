@@ -80,7 +80,17 @@ class CommaSeparatedIntegerField(forms.Field):
 
 class SearchForm(forms.Form):
     TAB_CHOICES = [('combined', 'Semantic Search'), ('keyword', 'Keyword Search')]
-    SORT_CHOICES = [('top', 'Relevance'), ('newest', 'Newest')]
+    SORT_CHOICES = [
+        ('top', 'Relevance'),
+        ('newest', 'Newest'),
+        ('trending_d', 'Trending (last day)'),
+        ('trending_w', 'Trending (last week)'),
+        ('trending_1m', 'Trending (last month)'),
+        ('trending_3m', 'Trending (last 3 months)'),
+        ('trending_6m', 'Trending (last 6 months)'),
+        ('trending_y', 'Trending (last year)'),
+        ('popularity', 'Trending (all time)'),
+    ]
 
     AUTHOR_CONNECTION_CHOICES = [('one', 'One matching'), ('all', 'All matching')]
     ARTICLE_TYPES = [('all', 'All'), ('reviewed', 'Reviewed'), ('preprints', 'Preprints')]

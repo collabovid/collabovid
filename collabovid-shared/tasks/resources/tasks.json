@@ -222,6 +222,26 @@
             "name": "Detect Non English Papers",
             "description": "Determine papers with titles or abstract not in english",
             "parameters": []
+        },
+        "get-altmetric-data": {
+            "name": "Get Altmetric Data",
+            "description": "No description provided.",
+            "parameters": [
+                {
+                    "name": "update_all",
+                    "required": false,
+                    "type": "bool",
+                    "default": false,
+                    "is_primitive": true
+                },
+                {
+                    "name": "max_count",
+                    "required": false,
+                    "type": "int",
+                    "default": 50,
+                    "is_primitive": true
+                }
+            ]
         }
     },
     "search": {
