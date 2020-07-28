@@ -21,7 +21,7 @@
                 {% if paper.is_preprint %}
                     <span class="badge  badge-secondary small">Preprint</span>
                 {% endif %}
-                <div data-badge-type="4" data-badge-popover="left"
+                <div data-badge-type="4" data-badge-popover="left" data-link-target="_blank"
                         {% if not paper|is_arxiv %}
                         data-doi="{{paper.doi}}"
                         {% else %}
