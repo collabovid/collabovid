@@ -166,7 +166,7 @@
                                     <label for="sorted-by" class="mb-0 pb-0">
                                         <select class="sort-select form-control" name="sorted_by" id="sorted-by">
                                             {% for choice in form.SORT_CHOICES %}
-                                                <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                                                <option value="{{ choice.0 }}" {% if form.cleaned_data.sorted_by == choice.0 %}selected="selected"{% endif %}>{{ choice.1 }}</option>
                                             {% endfor %}
                                         </select>
                                     </label>
