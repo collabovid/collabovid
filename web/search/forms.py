@@ -89,7 +89,7 @@ class SearchForm(forms.Form):
             'description': 'past week',
             'value': lambda paper: paper.altmetric_data.score_w,
         },
-        'trending_m': {
+        'trending_1m': {
             'description': 'past month',
             'value': lambda paper: paper.altmetric_data.score_1m,
         },
