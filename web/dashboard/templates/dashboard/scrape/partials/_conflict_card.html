@@ -76,10 +76,8 @@
                             <textarea type="text" class="edit-field" name="author_list" >{% for author in paper.authors.all %}{{ author.last_name }},{{ author.first_name }}{% if not forloop.last %};{% endif %}{% endfor %}</textarea>
                         </td>
                         <td class="col-differences">
-{#                            {{ paper.authors }} <br>#}
-{#                            {{ datapoint.authors }} <br>#}
                             {% if not comparison.authors %}
-                                {{ datapoint.authors }}
+                                {% for author in datapoint.authors %}{{ author.0 }},{{ author.1 }}{% if not forloop.last %};{% endif %}{% endfor %}
                             {% endif %}
                         </td>
                     </tr>
