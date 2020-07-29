@@ -22,22 +22,30 @@ def home(request):
 
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
         topic_count = Topic.objects.count()
-        most_recent_papers = Paper.objects.filter(published_at=latest_date).order_by('-created_at')
+        most_recent_papers = Paper.objects.filter(published_at=latest_date)
 
         trending_day_papers_ids = Paper.objects.order_by(F('altmetric_data__score_d').desc(nulls_last=True))[
                                   :50].values_list('doi', flat=True)
-        trending_day_papers = Paper.objects.filter(pk__in=trending_day_papers_ids).order_by(
-            F('altmetric_data__score_d').desc(nulls_last=True))
+        trending_day_papers = Paper.objects.filter(pk__in=trending_day_papers_ids)
 
         popular_paper_ids = Paper.objects.order_by(F('altmetric_data__score').desc(nulls_last=True))[:50].values_list(
             'doi', flat=True)
-        popular_papers = Paper.objects.filter(pk__in=popular_paper_ids).order_by(
-            F('altmetric_data__score').desc(nulls_last=True))
+        popular_papers = Paper.objects.filter(pk__in=popular_paper_ids)
 
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
-                                                  'trending_paper_statistics': PaperStatistics(trending_day_papers),
-                                                  'most_popular_paper_statistics': PaperStatistics(popular_papers),
+                                                  'most_recent_paper_statistics':
+                                                      PaperStatistics(papers=most_recent_papers,
+                                                                      ordered_papers=most_recent_papers.order_by(
+                                                                          '-created_at')),
+                                                  'trending_paper_statistics':
+                                                      PaperStatistics(papers=trending_day_papers,
+                                                                      ordered_papers=trending_day_papers.order_by(
+                                                                          F('altmetric_data__score_d').desc(
+                                                                              nulls_last=True))),
+                                                  'most_popular_paper_statistics': PaperStatistics(
+                                                      papers=popular_papers,
+                                                      ordered_papers=popular_papers.order_by(
+                                                          F('altmetric_data__score').desc(nulls_last=True))),
                                                   'topic_count': topic_count})
 
 

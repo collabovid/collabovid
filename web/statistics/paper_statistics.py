@@ -9,8 +9,9 @@ from django.utils.timezone import datetime, timedelta
 
 class PaperStatistics:
 
-    def __init__(self, papers: QuerySet):
+    def __init__(self, papers: QuerySet, ordered_papers: QuerySet = None):
         self._papers = papers
+        self._ordered_papers = ordered_papers
         self._published_at_plot_data = None
         self._paper_host_data = None
         self._category_data = None
@@ -20,6 +21,9 @@ class PaperStatistics:
 
     @property
     def papers(self):
+        if self._ordered_papers:
+            return self._ordered_papers
+
         return self._papers
 
     @property
