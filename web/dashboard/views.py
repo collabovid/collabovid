@@ -394,7 +394,7 @@ def scrape_conflict(request):
 
                         journal_name = request.POST.get('journal_name', None)
                         if journal_name:
-                            journal = Journal.objects.get_or_create(name=journal_name)
+                            journal, _ = Journal.objects.get_or_create(name=journal_name)
                         else:
                             journal = None
                         paper.journal = journal
