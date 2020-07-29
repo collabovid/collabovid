@@ -359,7 +359,7 @@ def scrape_conflict(request):
             comparison = {
                 'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
                 'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
-                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint['journal'],
+                'journal': error.paper.journal.name == datapoint['journal'] if error.paper.journal else datapoint['journal'],
             }
             errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
 
