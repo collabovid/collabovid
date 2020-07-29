@@ -474,15 +474,12 @@ class Paper(models.Model):
         self.preview_image.save(img_name,
                                 InMemoryUploadedFile(
                                     pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
-                                save=False)
-        # save=True in preview_image.save would call paper.save with default args (set_manually_modified=True)!
-
-        if save:
-            self.save()
+                                save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
 
 class ScrapeConflict(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
