@@ -9,14 +9,26 @@ from django.utils.timezone import datetime, timedelta
 
 class PaperStatistics:
 
-    def __init__(self, papers: QuerySet):
+    def __init__(self, papers: QuerySet, ordered_papers: QuerySet = None):
         self._papers = papers
+        self._ordered_papers = ordered_papers
         self._published_at_plot_data = None
         self._paper_host_data = None
         self._category_data = None
         self._topic_data = None
 
         self._available = self._papers.count() > 0
+
+    @property
+    def papers(self):
+        if self._ordered_papers:
+            return self._ordered_papers
+
+        return self._papers
+
+    @property
+    def latest_date(self):
+        return self._papers.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
 
     @property
     def available(self):

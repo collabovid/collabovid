@@ -338,6 +338,16 @@ class GeoNameResolution(models.Model):
     target_geonames_id = models.IntegerField(null=True, default=None)
 
 
+class AltmetricData(models.Model):
+    score = models.FloatField(default=0)
+    score_d = models.FloatField(default=0)
+    score_w = models.FloatField(default=0)
+    score_1m = models.FloatField(default=0)
+    score_3m = models.FloatField(default=0)
+    score_6m = models.FloatField(default=0)
+    score_y = models.FloatField(default=0)
+
+
 class Paper(models.Model):
     MAX_DOI_LENGTH = 100
 
@@ -348,11 +358,21 @@ class Paper(models.Model):
     def __init__(self, *args, **kwargs):
         super(Paper, self).__init__(*args, **kwargs)
         self._highlighted_authors = None
+        self._trend = None
+        self._trend_description = None
 
     preview_image = models.ImageField(upload_to="pdf_images", null=True, default=None, blank=True)
     scrape_hash = models.CharField(max_length=22, null=True, default=None)
     manually_modified = models.BooleanField(default=False)
     doi = models.CharField(max_length=MAX_DOI_LENGTH, primary_key=True)
+    altmetric_data = models.OneToOneField(
+        AltmetricData,
+        default=None,
+        related_name='paper',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
 
     title = models.CharField(max_length=300)
     authors = models.ManyToManyField(Author, related_name="publications", through='AuthorPaperMembership')
@@ -388,6 +408,7 @@ class Paper(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_scrape = models.DateTimeField(null=True, default=None)
+    last_altmetric_update = models.DateTimeField(null=True, default=None)
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
     location_modified = models.BooleanField(default=False)
@@ -406,6 +427,22 @@ class Paper(models.Model):
         if not self._highlighted_authors:
             self._highlighted_authors = self.ranked_authors
         return self._highlighted_authors
+
+    @property
+    def trend(self):
+        return self._trend
+
+    @trend.setter
+    def trend(self, value):
+        self._trend = value
+
+    @property
+    def trend_description(self):
+        return self._trend_description
+
+    @trend_description.setter
+    def trend_description(self, value):
+        self._trend_description = value
 
     @property
     def countries(self):
@@ -437,20 +474,11 @@ class Paper(models.Model):
         self.preview_image.save(img_name,
                                 InMemoryUploadedFile(
                                     pillow_image, None, img_name, 'image/jpeg', pillow_image.tell, None),
-                                save=False)
-        # save=True in preview_image.save would call paper.save with default args (set_manually_modified=True)!
-
-        if save:
-            self.save(set_manually_modified=False)
+                                save=save)
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
-
-    def save(self, set_manually_modified=True, *args, **kwargs):
-        if set_manually_modified:
-            self.manually_modified = True
-        super(Paper, self).save(*args, **kwargs)
 
 
 class ScrapeConflict(models.Model):

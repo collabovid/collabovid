@@ -17,6 +17,7 @@
                             <div class="col-10 pl-1">
                                 <h5>
                                     {{ candidate.paper.title }}
+                                    <small><a href="{% url "paper" candidate.paper.doi %}" target="_blank">(More)</a></small>
                                 </h5>
                                 <p>
                                     {{ candidate.paper.abstract|truncatechars:200 }}

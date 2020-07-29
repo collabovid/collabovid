@@ -26,3 +26,5 @@ USE_TZ = True
 
 UPDATE_VECTORIZER = True
 
+ALTMETRIC_KEY = os.getenv('ALTMETRIC_KEY', None)
+

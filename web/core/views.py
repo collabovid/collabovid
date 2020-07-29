@@ -1,5 +1,9 @@
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import F
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
+
+from core.date_utils import DateUtils
 from data.models import GeoCity, GeoCountry, Paper, Category, Topic
 from statistics import PaperStatistics, CategoryStatistics
 import json
@@ -15,13 +19,33 @@ from django.shortcuts import get_object_or_404
 def home(request):
     if request.method == "GET":
         statistics = PaperStatistics(Paper.objects.all())
+
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
         topic_count = Topic.objects.count()
         most_recent_papers = Paper.objects.filter(published_at=latest_date)
+
+        trending_day_papers_ids = Paper.objects.order_by(F('altmetric_data__score_d').desc(nulls_last=True))[
+                                  :50].values_list('doi', flat=True)
+        trending_day_papers = Paper.objects.filter(pk__in=trending_day_papers_ids)
+
+        popular_paper_ids = Paper.objects.order_by(F('altmetric_data__score').desc(nulls_last=True))[:50].values_list(
+            'doi', flat=True)
+        popular_papers = Paper.objects.filter(pk__in=popular_paper_ids)
+
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_papers': most_recent_papers.order_by('-created_at'),
-                                                  'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
-                                                  'most_recent_paper_date': latest_date,
+                                                  'most_recent_paper_statistics':
+                                                      PaperStatistics(papers=most_recent_papers,
+                                                                      ordered_papers=most_recent_papers.order_by(
+                                                                          '-created_at')),
+                                                  'trending_paper_statistics':
+                                                      PaperStatistics(papers=trending_day_papers,
+                                                                      ordered_papers=trending_day_papers.order_by(
+                                                                          F('altmetric_data__score_d').desc(
+                                                                              nulls_last=True))),
+                                                  'most_popular_paper_statistics': PaperStatistics(
+                                                      papers=popular_papers,
+                                                      ordered_papers=popular_papers.order_by(
+                                                          F('altmetric_data__score').desc(nulls_last=True))),
                                                   'topic_count': topic_count})
 
 
@@ -54,7 +78,8 @@ def embedding_visualization(request, topic_pk=None, doi=None):
         'categories': categories,
         'category_colors': json.dumps(category_colors),
         'atlas_image_url': settings.PAPER_ATLAS_IMAGES_FILE_URL,
-        'paper_file_url': settings.EMBEDDINGS_FILE_URL
+        'paper_file_url': settings.EMBEDDINGS_FILE_URL,
+        'all_sundays': json.dumps(list(DateUtils.all_sundays(2020)), cls=DjangoJSONEncoder)
     }
 
     if topic_pk:

@@ -18,15 +18,31 @@
         <div class="{% if paper.preview_image %}col-lg-10{% else %}col-lg-12{% endif %}">
 
             <div class="paper-card-badge text-right">
-                    <div data-badge-type="4" data-badge-popover="left"
-                         {% if not paper|is_arxiv %}
+                {% if paper.is_preprint %}
+                    <span class="badge  badge-secondary small">Preprint</span>
+                {% endif %}
+                <div data-badge-type="4" data-badge-popover="left" data-link-target="_blank"
+                        {% if not paper|is_arxiv %}
                         data-doi="{{paper.doi}}"
                         {% else %}
                         data-arxiv-id={{paper.doi|extract_arxiv_id}}
                         {% endif %}
-                         data-hide-no-mentions="true" class="altmetric-embed"></div>
-                {% if paper.is_preprint %}
-                    <span class="badge  badge-secondary small">Preprint</span>
+                        data-hide-no-mentions="true" class="altmetric-embed d-inline">
+                </div>
+                {% if paper.trend %}
+                    <span class="small ml-1">
+                            <span class="small">
+                            {% spaceless %}
+                            {% if paper.trend > 0.0 %}
+                                <span class="text-success" style="margin-right: 2px">↑</span>
+                            {% else %}
+                                <span class="text-danger" style="margin-right: 2px">↓</span>
+                            {% endif %}
+                            <span>{{ paper.trend }}</span>
+                            {% endspaceless %}
+                            <span class="small text-muted">{{ paper.trend_description }}</span>
+                        </span>
+                    </span>
                 {% endif %}
             </div>
 

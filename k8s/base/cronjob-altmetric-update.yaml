@@ -1,9 +1,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: scrape-cron
+  name: altmetric-update-cron
 spec:
-  schedule: "55 */3 * * *"
+  schedule: "30 11 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   concurrencyPolicy: Forbid
@@ -15,7 +15,7 @@ spec:
             - name: scrape
               image: scrape
               command: ["bash","-c"]
-              args: ["export PYTHONPATH=/app:$PYTHONPATH && python run_task.py -u cron scrape"]
+              args: ["export PYTHONPATH=/app:$PYTHONPATH && python run_task.py -u cron get-altmetric-data --update_all"]
               envFrom:
                 - secretRef:
                     name: scrape-latest

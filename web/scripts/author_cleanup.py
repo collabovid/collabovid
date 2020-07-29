@@ -27,7 +27,7 @@ def sanitize_author_duplicates():
                 else:
                     min_pk_author = author
                 paper.authors.add(min_pk_author)
-            paper.save(set_manually_modified=False)
+            paper.save()
 
 
 def delete_unused_authors():

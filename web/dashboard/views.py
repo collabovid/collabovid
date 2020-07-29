@@ -359,7 +359,7 @@ def scrape_conflict(request):
             comparison = {
                 'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
                 'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
-                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint['journal'],
+                'journal': error.paper.journal.name == datapoint['journal'] if error.paper.journal else datapoint['journal'],
             }
             errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
 
@@ -394,7 +394,7 @@ def scrape_conflict(request):
 
                         journal_name = request.POST.get('journal_name', None)
                         if journal_name:
-                            journal = Journal.objects.get_or_create(name=journal_name)
+                            journal, _ = Journal.objects.get_or_create(name=journal_name)
                         else:
                             journal = None
                         paper.journal = journal
@@ -403,7 +403,7 @@ def scrape_conflict(request):
                         paper.vectorized = False
 
                         paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
-                        paper.save(set_manually_modified=False)
+                        paper.save()
                         conflict.delete()
                         messages.add_message(request, messages.SUCCESS, "Successfully saved the changes.")
                     except IntegrityError:
@@ -445,14 +445,12 @@ def change_author_name(request, author_id, doi=None):
             if current_paper.authors.count() == 1:
                 messages.add_message(request, messages.ERROR, "Cannot remove the only author of this paper")
                 return redirect_()
-            current_paper.authors.remove(author)
+            AuthorPaperMembership.objects.get(author=author, paper=current_paper).delete()
             current_paper.manually_modified = True
             current_paper.save()
         else:
             return HttpResponseNotFound()
-        print(action)
-        #AuthorNameResolution.add(author.first_name, author.last_name,
-        #                         request.POST.get('first_name'), request.POST.get('last_name'))
+
         return HttpResponse('Success')
 
 

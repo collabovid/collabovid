@@ -54,7 +54,7 @@ class ClusterTopic(Runnable):
                 if clusters[i] == cluster:
                     titles.append(paper.title)
                     paper.topic = topic
-                    paper.save(set_manually_modified=False)
+                    paper.save()
             topics.append(topic)
             self.log(f'Added new Topic with {len(titles)} papers')
             titles_list.append(titles)

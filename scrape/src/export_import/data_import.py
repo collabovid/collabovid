@@ -317,6 +317,8 @@ class DataImport:
 
                 if self.export_version > 4:
                     db_paper.scrape_hash = paper["scrape_hash"]
+                if self.export_version > 5:
+                    db_paper.manually_modified = paper["manually_modified"]
                 db_paper.host = self._mappings.paperhost_mapping[paper["paperhost_id"]] if paper[
                     "paperhost_id"] else None
                 db_paper.pubmed_id = paper["pubmed_id"] if "pubmed_id" in paper else None

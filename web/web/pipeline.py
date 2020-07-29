@@ -53,6 +53,7 @@ PIPELINE = {
                 'js/math.min.js',
                 'js/bootstrap-slider.min.js',
                 'js/tween.umd.js',
+                'js/moment.js',
                 'core/js/embedding_visualization.js',
                 'core/js/embedding_visualization_view.js',
                 'core/js/paper_cards.js',

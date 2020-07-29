@@ -31,7 +31,7 @@ def merge_generated(request):
             if topic.name.startswith('Generated:'):
                 for paper in topic.papers.all():
                     paper.topic = new_topic
-                    paper.save(set_manually_modified=False)
+                    paper.save()
                 topic.delete()
         new_topic.name = 'Generated Merged'
         new_topic.save()
@@ -50,7 +50,7 @@ def merge_topics(request):
             # we put all papers from topic 2 into topic 1 and delete topic2
             for paper in topic2.papers.all():
                 paper.topic = topic1
-                paper.save(set_manually_modified=False)
+                paper.save()
             topic1.keywords += ', ' + topic2.keywords
             topic1.save()
             topic2.delete()

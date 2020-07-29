@@ -7,7 +7,7 @@
     <div class="card-body d-flex flex-column">
         <div class="card-text mb-2 text-muted">
             {% with paper=error.paper datapoint=error.datapoint form=error.form comparison=error.comparison%}
-            <form data-doi="{{ paper.doi }}" target="{% url "scrape_conflict" %}" method="POST">
+            <form data-doi="{{ paper.doi }}" method="POST">
             {% csrf_token %}
             <input type="hidden" name="action">
             <input type="hidden" name="doi" value="{{ paper.doi }}">
@@ -76,10 +76,8 @@
                             <textarea type="text" class="edit-field" name="author_list" >{% for author in paper.authors.all %}{{ author.last_name }},{{ author.first_name }}{% if not forloop.last %};{% endif %}{% endfor %}</textarea>
                         </td>
                         <td class="col-differences">
-{#                            {{ paper.authors }} <br>#}
-{#                            {{ datapoint.authors }} <br>#}
                             {% if not comparison.authors %}
-                                {{ datapoint.authors }}
+                                {% for author in datapoint.authors %}{{ author.0 }},{{ author.1 }}{% if not forloop.last %};{% endif %}{% endfor %}
                             {% endif %}
                         </td>
                     </tr>
@@ -130,7 +128,7 @@
                     <tr>
                         <th>Journal name:</th>
                         <td>
-                            <input type="text" class="edit-field" name="journal_name" value="{% if datapoint.journal %}{{ datapoint.journal }}{% else %}{% endif %}" >
+                            <input type="text" class="edit-field" name="journal_name" value="{% if paper.journal %}{{ paper.journal.name }}{% else %}{% endif %}" >
                         </td>
                         <td class="col-differences">
                         {% if not comparison.journal %}
@@ -144,6 +142,12 @@
                             <input type="checkbox" class="edit-field" name="manually_modified" checked>
                         </td>
                     </tr>
+                    {% if not paper.scrape_hash %}
+                        <tr>
+                            <th></th>
+                        <td style="color:#FF0000;"><em>Paper has no scrape hash in DB!</em></td>
+                        </tr>
+                    {% endif %}
                 </table>
 
             <div>

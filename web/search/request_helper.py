@@ -1,3 +1,5 @@
+from math import ceil
+
 import requests
 from django.conf import settings
 import logging
@@ -52,7 +54,12 @@ class SearchRequestHelper:
         result_dois = [p['doi'] for p in self.response['results']]
         papers = sorted(list(Paper.objects.filter(pk__in=result_dois).all()), key=lambda x: result_dois.index(x.doi))
 
+        sorted_by = self._form.cleaned_data['sorted_by']
         for paper, infos in zip(papers, self.response['results']):
+            if sorted_by in SearchForm.TRENDING_CHOICES.keys():
+                if paper.altmetric_data and paper.altmetric_data.score > 0.0:
+                    paper.trend = int(ceil(SearchForm.TRENDING_CHOICES[sorted_by]['value'](paper)))
+                    paper.trend_description = SearchForm.TRENDING_CHOICES[sorted_by]['description']
             if 'title' in infos:
                 paper.title = infos['title']
             if 'abstract' in infos:

@@ -64,7 +64,7 @@ class RecomputeTopicAssignment(Runnable):
                     if paper.topic:
                         topic_occurrences_dict[paper.topic.name] += 1
                     paper.topic = topic
-                    paper.save(set_manually_modified=False)
+                    paper.save()
             if len(topic_occurrences_dict) > 0:
                 best_matching_old_topic = max(list(topic_occurrences_dict.items()), key=lambda x: x[1])
                 topic.name = best_matching_old_topic[0]

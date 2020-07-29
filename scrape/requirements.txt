@@ -1,7 +1,7 @@
 Django==3.0.7
 tika==1.24
 pdf2image==1.12.1
-Pillow==7.0.0
+Pillow==7.2.0
 beautifulsoup4==4.8.2
 arxiv>=0.5.3
 nameparser>=1.0.6
@@ -11,3 +11,4 @@ git+https://github.com/iacopy/pymed.git@fork-fixes#egg=pymed==0.8-fork-fixes-22-
 pysftp==0.2.9
 spacy==2.2.4
 pycld3==0.20
+pyaltmetric==0.2.0
