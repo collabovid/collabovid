@@ -18,7 +18,7 @@
             {{ paper.published_at }} &middot; {{ paper.host.name }}
             {% if not short %}
             &middot; Added {{ paper.created_at|naturaltime }}
-            <a href="{{ paper.url }}" class="float-right">
+            <a href="{{ paper.url }}" class="float-right mt-2">
                 Read more
             </a>
             {% endif %}
