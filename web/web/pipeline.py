@@ -16,9 +16,25 @@ PIPELINE = {
             'source_filenames': (
                 'js/moment.js',
                 'js/Chart.min.js',
+                'core/js/chart_colors.js',
                 'core/js/collabovid_charts.js',
             ),
             'output_filename': 'charts.js'
+        },
+        'dashboard-charts': {
+            'source_filenames': (
+                'js/moment.js',
+                'js/Chart.min.js',
+                'core/js/chart_colors.js',
+                'dashboard/dashboard_charts.js',
+            ),
+            'output_filename': 'dashboard_charts.js'
+        },
+        'datatables-lib': {
+            'source_filenames': (
+                'js/datatables.min.js',
+            ),
+            'output_filename': 'datatables-lib.js',
         },
         'search': {
             'source_filenames': (
@@ -114,6 +130,12 @@ PIPELINE = {
                 'dashboard/scrape/datatable.css',
             ),
             'output_filename': 'datatable.css',
+        },
+        'datatables-lib': {
+            'source_filenames': (
+                'css/datatables.min.css',
+            ),
+            'output_filename': 'datatables-lib.css',
         },
         'map': {
             'source_filenames': (
