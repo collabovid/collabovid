@@ -7,7 +7,7 @@
     <div class="card-body d-flex flex-column">
         <div class="card-text mb-2 text-muted">
             {% with paper=error.paper datapoint=error.datapoint form=error.form comparison=error.comparison%}
-            <form data-doi="{{ paper.doi }}" target="{% url "scrape_conflict" %}" method="POST">
+            <form data-doi="{{ paper.doi }}" method="POST">
             {% csrf_token %}
             <input type="hidden" name="action">
             <input type="hidden" name="doi" value="{{ paper.doi }}">
