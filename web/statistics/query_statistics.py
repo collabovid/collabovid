@@ -172,7 +172,6 @@ class SearchQueryStatistics:
         if is_not_default('article_type', 'all'):
             filters.append('article_type')
 
-        print(query.query['published_at_start'])
         if is_not_default('published_at_start', None) or is_not_default('published_at_end', None):
             filters.append('published_at')
 
