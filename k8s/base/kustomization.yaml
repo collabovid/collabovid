@@ -23,3 +23,4 @@ resources:
   - job-ingest-topics.yaml
   - job-change-category-colors.yaml
   - cronjob-altmetric-update.yaml
+  - job-fix-manually-modified.yaml
