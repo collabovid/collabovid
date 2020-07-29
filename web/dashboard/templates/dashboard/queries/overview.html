@@ -5,7 +5,7 @@
 {% block css %}
 {% stylesheet 'search' %}
 {% stylesheet 'charts' %}
-<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
+{% stylesheet 'datatables-lib' %}
 {% endblock %}
 
 {% block content %}
@@ -23,45 +23,37 @@
         </div>
     </div>
     <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_query_table.html' with queries=statistics.recent_queries id='recentTable' label='Recent Queries' %}
+        {% include 'dashboard/queries/partials/_query_terms_table.html' with queries=statistics.top_query_terms label='Top Query Terms' id='topTermsTable' %}
+    </div>
+    <div class="row mt-4">
         {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='tabChart' label='Search Type' %}
         {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='sortedByChart' label='Sorted By'%}
         {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='articleTypeChart' label='Article Type'%}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='filterChart' label='Number of Filters' %}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='filterCountsChart' label='Filter Count by Type' %}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='filterLengthsChart' label='Number Of Items in Filter' %}
     </div>
     <div class="row mt-4">
         {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='categoriesChart' label='Categories'%}
         {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='topicsChart' label='Topics'%}
     </div>
     <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card rounded shadow w-100">
-                <div class="card-body">
-                    <h3 class="card-title">Recent Queries</h3>
-                    <table class="table table-striped w-100 mt-3" id="recentTable">
-                        <thead>
-                        <tr>
-                            <th>Query</th>
-                            <th>Time</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for search_query in statistics.recent_unique_queries %}
-                        <tr>
-                            <td>{{ search_query.query.query }}</td>
-                            <td class="text-muted w-25">{{ search_query.created_at}}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='paperHostsChart' label='Paper Hosts'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='locationsChart' label='Locations'%}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='journalsChart' label='Journals'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='authorsChart' label='Authors'%}
     </div>
 </div>
 {% endblock %}
 
 {% block script %}
 {% javascript 'dashboard-charts' %}
-<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+{% javascript 'datatables-lib' %}
 <script>
     $(document).ready(function () {
         const timeData = JSON.parse('{{ statistics.time_data|escapejs }}');
@@ -70,15 +62,34 @@
         const articleTypeData = JSON.parse('{{ statistics.article_type_data|escapejs }}');
         const topCategories = JSON.parse('{{ statistics.top_categories|escapejs }}');
         const topTopics = JSON.parse('{{ statistics.top_topics|escapejs }}');
-        //const topTopics = JSON.parse('{{ statistics.top_topics|escapejs }}');
+        const topPaperHosts = JSON.parse('{{ statistics.top_paper_hosts|escapejs }}');
+        const topLocations = JSON.parse('{{ statistics.top_locations|escapejs }}');
+        const topJournals = JSON.parse('{{ statistics.top_journals|escapejs }}');
+        const topAuthors = JSON.parse('{{ statistics.top_authors|escapejs }}');
+        const filterDistribution = JSON.parse('{{ statistics.filter_distribution|escapejs }}');
+        const filterCountsByType = JSON.parse('{{ statistics.filter_type_counts|escapejs }}');
+        const filterLengths = JSON.parse('{{ statistics.filter_lengths|escapejs }}');
 
-        $('#recentTable').DataTable();
+        $('#recentTable').DataTable({
+            "order": [[4, "desc"]]
+        });
+        $('#topTermsTable').DataTable({
+            "order": [[1, "desc"]]
+        });
+
         $("#timeChart").queriesOverTime({plot_data: timeData});
         $("#tabChart").queryDistribution({plot_data: tabData});
         $("#sortedByChart").queryDistribution({plot_data: sortedByData});
         $("#articleTypeChart").queryDistribution({plot_data: articleTypeData});
         $("#categoriesChart").barChart({plot_data: topCategories});
         $("#topicsChart").barChart({plot_data: topTopics});
+        $('#paperHostsChart').barChart({plot_data: topPaperHosts});
+        $('#locationsChart').barChart({plot_data: topLocations});
+        $('#journalsChart').barChart({plot_data: topJournals});
+        $('#authorsChart').barChart({plot_data: topAuthors});
+        $('#filterChart').queryDistribution({plot_data: filterDistribution});
+        $('#filterCountsChart').barChart({plot_data: filterCountsByType});
+        $('#filterLengthsChart').stackedBarChart({plot_data: filterLengths});
     });
 </script>
 {% endblock %}

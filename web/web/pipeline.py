@@ -30,6 +30,12 @@ PIPELINE = {
             ),
             'output_filename': 'dashboard_charts.js'
         },
+        'datatables-lib': {
+            'source_filenames': (
+                'js/datatables.min.js',
+            ),
+            'output_filename': 'datatables-lib.js',
+        },
         'search': {
             'source_filenames': (
                 'js/bootstrap-select.min.js',
@@ -123,6 +129,12 @@ PIPELINE = {
                 'dashboard/scrape/datatable.css',
             ),
             'output_filename': 'datatable.css',
+        },
+        'datatables-lib': {
+            'source_filenames': (
+                'css/datatables.min.css',
+            ),
+            'output_filename': 'datatables-lib.css',
         },
         'map': {
             'source_filenames': (

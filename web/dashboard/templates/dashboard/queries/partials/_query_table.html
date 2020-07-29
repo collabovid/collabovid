@@ -1,0 +1,29 @@
+<div class="col-md-7">
+    <div class="card rounded shadow w-100">
+        <div class="card-body">
+            <h3 class="card-title">{{label}}</h3>
+            <table class="table table-striped w-100 mt-3" id="{{id}}">
+                <thead>
+                <tr>
+                    <th>Query</th>
+                    <th>Type</th>
+                    <th>Sorted By</th>
+                    <th>Page</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for search_query in queries %}
+                <tr>
+                    <td>{{ search_query.query.query }}</td>
+                    <td>{{ search_query.query.tab }}</td>
+                    <td>{{ search_query.query.sorted_by }}</td>
+                    <td>{{ search_query.query.page }}</td>
+                    <td class="text-muted w-25">{{ search_query.created_at}}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

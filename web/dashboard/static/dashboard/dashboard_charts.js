@@ -11,7 +11,6 @@
         plugin.settings.plot_data['x'].forEach(function (item) {
             created_dates.push(new Date(item));
         });
-        console.log(plugin.settings.plot_data['added'])
         return new Chart(plugin, {
             type: 'line',
             data: {
@@ -147,12 +146,57 @@ var chartColorIndex = 0;
             data: {
                 labels: keys,
                 datasets: [{
+                    label: 'all',
                     data: data,
                     backgroundColor: possibleColors,
                     fill: false
                 }]
             },
+            options: {}
+        });
+    }
+}(jQuery));
+
+(function ($) {
+    $.fn.stackedBarChart = function (options) {
+        let plugin = this;
+        plugin.init = function () {
+            plugin.settings = $.extend({
+                plot_data: null,
+            }, options);
+        };
+        plugin.init();
+
+        let data = plugin.settings.plot_data['data']
+        let possibleColors = []
+        for (let i = 0; i < data.length; i++) {
+            possibleColors.push(window.chartColors[Object.keys(window.chartColors)[chartColorIndex]])
+            chartColorIndex = (chartColorIndex + 1) % Object.keys(window.chartColors).length;
+        }
+        let datasets = []
+        for (let i = 0; i < data.length; i++) {
+            datasets.push({
+                label: i + 1,
+                data: data[i],
+                backgroundColor: possibleColors[i]
+            })
+        }
+
+        return new Chart(plugin, {
+            type: 'horizontalBar',
+            data: {
+                labels: plugin.settings.plot_data['labels'],
+                datasets: datasets
+            },
             options: {
+                scales: {
+                    xAxes: [{
+                        stacked: true
+                    }],
+                    yAxes: [{
+                        stacked: true
+                    }]
+                }
             }
         });
     }
