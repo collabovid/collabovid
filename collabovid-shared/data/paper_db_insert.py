@@ -112,7 +112,7 @@ class DatabaseUpdate:
 
                     if not self.force_update and not changed_externally:
                         db_article.last_scrape = timezone.now()
-                        db_article.save(set_manually_modified=False)
+                        db_article.save()
                         return db_article, False, False  # Article was neither created, nor updated
 
                     if changed_internally:
@@ -186,7 +186,7 @@ class DatabaseUpdate:
 
         db_article.visualized = False
         db_article.vectorized = False
-        db_article.save(set_manually_modified=False)
+        db_article.save()
 
         AuthorPaperMembership.objects.filter(paper=db_article).delete()
         rank = 0
@@ -206,7 +206,7 @@ class DatabaseUpdate:
 
         db_article.categories.clear()
         db_article.scrape_hash = datapoint.md5
-        db_article.save(set_manually_modified=False)
+        db_article.save()
 
     @staticmethod
     def _handle_conflict(db_article, datapoint):

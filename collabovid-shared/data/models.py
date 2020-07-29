@@ -478,17 +478,11 @@ class Paper(models.Model):
         # save=True in preview_image.save would call paper.save with default args (set_manually_modified=True)!
 
         if save:
-            self.save(set_manually_modified=False)
+            self.save()
 
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
-
-    def save(self, set_manually_modified=True, *args, **kwargs):
-        if set_manually_modified:
-            self.manually_modified = True
-        super(Paper, self).save(*args, **kwargs)
-
 
 class ScrapeConflict(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)

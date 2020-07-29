@@ -22,3 +22,4 @@ resources:
   - job-non-english-papers-init.yaml
   - job-ingest-topics.yaml
   - job-change-category-colors.yaml
+  - cronjob-altmetric-update.yaml

@@ -27,7 +27,7 @@ class PdfImageDownloadTask(Runnable):
             if paper.data_source_value == DataSource.ELSEVIER:
                 self.log(f"Download PDF preview image for {paper.doi}")
                 elsevier_updater.update_pdf_data(db_article=paper)
-                paper.save(set_manually_modified=False)
+                paper.save()
             else:
                 if paper.pdf_url:
                     self.log(f"Download PDF preview image for {paper.doi}")
@@ -38,6 +38,6 @@ class PdfImageDownloadTask(Runnable):
 
                         if image:
                             paper.add_preview_image(image)
-                            paper.save(set_manually_modified=False)
+                            paper.save()
                     except PdfExtractError as ex:
                         self.log(f"Error: {paper.doi}, {ex}")

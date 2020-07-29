@@ -403,7 +403,7 @@ def scrape_conflict(request):
                         paper.vectorized = False
 
                         paper.scrape_hash = json.loads(conflict.datapoint)['_md5']
-                        paper.save(set_manually_modified=False)
+                        paper.save()
                         conflict.delete()
                         messages.add_message(request, messages.SUCCESS, "Successfully saved the changes.")
                     except IntegrityError:
@@ -445,14 +445,12 @@ def change_author_name(request, author_id, doi=None):
             if current_paper.authors.count() == 1:
                 messages.add_message(request, messages.ERROR, "Cannot remove the only author of this paper")
                 return redirect_()
-            current_paper.authors.remove(author)
+            AuthorPaperMembership.objects.get(author=author, paper=current_paper).delete()
             current_paper.manually_modified = True
             current_paper.save()
         else:
             return HttpResponseNotFound()
-        print(action)
-        #AuthorNameResolution.add(author.first_name, author.last_name,
-        #                         request.POST.get('first_name'), request.POST.get('last_name'))
+
         return HttpResponse('Success')
 
 

@@ -42,6 +42,6 @@ print('Assigning Papers to topics')
 for paper in list(Paper.objects.all()):
     if paper.doi in paper_topic_dict:
         paper.topic = paper_topic_dict[paper.doi]
-    paper.save(set_manually_modified=False)
+    paper.save()
 
 print('Done')
