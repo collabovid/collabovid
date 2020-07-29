@@ -5,7 +5,7 @@
 {% block css %}
 {% stylesheet 'search' %}
 {% stylesheet 'charts' %}
-{% stylesheet 'datatables-lib' %}
+<link href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css" rel="stylesheet" type="text/css"/>
 {% endblock %}
 
 {% block content %}
@@ -53,7 +53,7 @@
 
 {% block script %}
 {% javascript 'dashboard-charts' %}
-{% javascript 'datatables-lib' %}
+<script src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js" type="text/javascript"></script>
 <script>
     $(document).ready(function () {
         const timeData = JSON.parse('{{ statistics.time_data|escapejs }}');
