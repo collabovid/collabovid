@@ -1,20 +1,84 @@
 {% extends "dashboard/base.html" %}
 {% load humanize %}
+{% load pipeline %}
+
+{% block css %}
+{% stylesheet 'search' %}
+{% stylesheet 'charts' %}
+<link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
+<div class="pb-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded shadow w-100">
+                <div class="card-body">
+                    <h3 class="card-title">Queries over Time</h3>
+                    <div>
+                        <canvas id="timeChart" style="min-height: 400px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='tabChart' label='Search Type' %}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='sortedByChart' label='Sorted By'%}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='articleTypeChart' label='Article Type'%}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='categoriesChart' label='Categories'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='topicsChart' label='Topics'%}
+    </div>
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card rounded shadow w-100">
+                <div class="card-body">
+                    <h3 class="card-title">Recent Queries</h3>
+                    <table class="table table-striped w-100 mt-3" id="recentTable">
+                        <thead>
+                        <tr>
+                            <th>Query</th>
+                            <th>Time</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for search_query in statistics.recent_unique_queries %}
+                        <tr>
+                            <td>{{ search_query.query.query }}</td>
+                            <td class="text-muted w-25">{{ search_query.created_at}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
-    <h2>Latest {{ search_queries.count }}/{{ total }} Queries</h2>
-    
-    <table class="table table-striped w-100 mt-3">
+{% block script %}
+{% javascript 'dashboard-charts' %}
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function () {
+        const timeData = JSON.parse('{{ statistics.time_data|escapejs }}');
+        const tabData = JSON.parse('{{ statistics.tab_data|escapejs }}');
+        const sortedByData = JSON.parse('{{ statistics.sorted_data|escapejs }}');
+        const articleTypeData = JSON.parse('{{ statistics.article_type_data|escapejs }}');
+        const topCategories = JSON.parse('{{ statistics.top_categories|escapejs }}');
+        const topTopics = JSON.parse('{{ statistics.top_topics|escapejs }}');
+        //const topTopics = JSON.parse('{{ statistics.top_topics|escapejs }}');
 
-        {% for search_query in search_queries %}
-
-            <tr>
-                <td>{{ search_query.query }}</td>
-                <td class="text-muted w-25">{{ search_query.created_at|naturaltime }}</td>
-            </tr>
-
-        {% endfor %}
-
-    </table>
+        $('#recentTable').DataTable();
+        $("#timeChart").queriesOverTime({plot_data: timeData});
+        $("#tabChart").queryDistribution({plot_data: tabData});
+        $("#sortedByChart").queryDistribution({plot_data: sortedByData});
+        $("#articleTypeChart").queryDistribution({plot_data: articleTypeData});
+        $("#categoriesChart").barChart({plot_data: topCategories});
+        $("#topicsChart").barChart({plot_data: topTopics});
+    });
+</script>
 {% endblock %}

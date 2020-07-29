@@ -24,6 +24,7 @@ from data.models import (
 )
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
+from statistics.query_statistics import SearchQueryStatistics
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -39,9 +40,10 @@ import os
 
 @staff_member_required
 def queries(request):
-    queries = SearchQuery.objects.order_by('-created_at')[:100]
+    queries = SearchQuery.objects.all()
+    statistics = SearchQueryStatistics(queries)
     return render(request, "dashboard/queries/overview.html",
-                  {'search_queries': queries, 'total': SearchQuery.objects.count()})
+                  {'statistics': statistics})
 
 
 @staff_member_required
@@ -357,11 +359,15 @@ def scrape_conflict(request):
             datapoint = json.loads(error.datapoint)
             form = PaperForm(instance=error.paper)
             comparison = {
-                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
-                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
-                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint['journal'],
+                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint[
+                    'publication_date'],
+                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(
+                    datapoint['authors']),
+                'journal': error.paper.journal.name != datapoint['journal'] if error.paper.journal else not datapoint[
+                    'journal'],
             }
-            errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
+            errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint),
+                           'comparison': comparison})
 
         return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
                       {'errors': errors, 'debug': settings.DEBUG})
@@ -438,7 +444,8 @@ def change_author_name(request, author_id, doi=None):
         elif action == 'delete_all':
             for paper in Paper.objects.filter(authors=author).all():
                 if paper.authors.count() == 1:
-                    messages.add_message(request, messages.ERROR, f"Cannot remove the only author of the paper \"{paper.title}\"")
+                    messages.add_message(request, messages.ERROR,
+                                         f"Cannot remove the only author of the paper \"{paper.title}\"")
                     return redirect_()
             AuthorNameResolution.ignore(author.first_name, author.last_name)
         elif action == 'delete_current':
@@ -451,7 +458,7 @@ def change_author_name(request, author_id, doi=None):
         else:
             return HttpResponseNotFound()
         print(action)
-        #AuthorNameResolution.add(author.first_name, author.last_name,
+        # AuthorNameResolution.add(author.first_name, author.last_name,
         #                         request.POST.get('first_name'), request.POST.get('last_name'))
         return HttpResponse('Success')
 
@@ -468,4 +475,3 @@ def swap_all_author_names(request, doi):
             return HttpResponseNotFound(f"Unknown Paper {doi}")
     else:
         return HttpResponseNotFound()
-

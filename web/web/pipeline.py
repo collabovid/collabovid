@@ -16,9 +16,19 @@ PIPELINE = {
             'source_filenames': (
                 'js/moment.js',
                 'js/Chart.min.js',
+                'core/js/chart_colors.js',
                 'core/js/collabovid_charts.js',
             ),
             'output_filename': 'charts.js'
+        },
+        'dashboard-charts': {
+            'source_filenames': (
+                'js/moment.js',
+                'js/Chart.min.js',
+                'core/js/chart_colors.js',
+                'dashboard/dashboard_charts.js',
+            ),
+            'output_filename': 'dashboard_charts.js'
         },
         'search': {
             'source_filenames': (
