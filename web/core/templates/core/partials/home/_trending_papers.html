@@ -1,0 +1,109 @@
+<div class="container py-5">
+    <div class="row align-items-end">
+        <div class="col-lg-7 col-12">
+            <div class="text-right">
+                <div class="btn-group change-paper-content" role="group">
+                    <button type="button" data-content="trending-papers-content"
+                            class="btn btn-sm btn-secondary active">Trending
+                    </button>
+                    <button type="button" data-content="recent-papers-content" class="btn btn-sm btn-secondary">Newest
+                    </button>
+                    <button type="button" data-content="most-popular-papers-content" class="btn btn-sm btn-secondary">
+                        Most Popular
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5 d-none d-lg-flex text-center">
+            {% if most_recent_paper_statistics.has_category_data %}
+                <h6 class="font-weight-light exchangeable-papers-content recent-papers-content" style="display: none;">
+                    Categories for papers
+                    from {{ most_recent_paper_statistics.latest_date }}
+                </h6>
+            {% endif %}
+
+
+            {% if trending_paper_statistics.has_category_data %}
+
+                <h6 class="font-weight-light exchangeable-papers-content trending-papers-content">
+                    Categories for the currently trending papers
+                </h6>
+            {% endif %}
+
+            {% if most_popular_paper_statistics.has_category_data %}
+                <h6 class="font-weight-light exchangeable-papers-content most-popular-papers-content"
+                    style="display: none;">
+                    Categories for the most popular papers
+                </h6>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="row display-flex">
+
+        <div class="col-lg-7 col-12 mt-1">
+
+            <div class="card w-100 shadow rounded bg-white exchangeable-papers-content recent-papers-content"
+                 style="display: none;">
+                <ul class="list-group">
+                    {% for paper in most_recent_paper_statistics.papers|slice:":5" %}
+                        {% include "core/partials/_paper_list_item.html" with paper=paper %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card w-100 shadow rounded bg-white exchangeable-papers-content trending-papers-content">
+                <ul class="list-group">
+                    {% for paper in trending_paper_statistics.papers|slice:":5" %}
+                        {% include "core/partials/_paper_list_item.html" with paper=paper %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="card w-100 shadow rounded bg-white exchangeable-papers-content most-popular-papers-content"
+                 style="display: none;">
+                <ul class="list-group">
+                    {% for paper in most_popular_paper_statistics.papers|slice:":5" %}
+                        {% include "core/partials/_paper_list_item.html" with paper=paper %}
+                    {% endfor %}
+                </ul>
+            </div>
+
+
+            <div class="text-center mt-3 small">
+                <a class="exchangeable-papers-content recent-papers-content" style="display: none;"
+                   href="{% url "search" %}?sorted_by=newest">show all</a>
+                <a class="exchangeable-papers-content trending-papers-content"
+                   href="{% url "search" %}?sorted_by=trending_d">show all</a>
+                <a class="exchangeable-papers-content most-popular-papers-content" style="display: none;"
+                   href="{% url "search" %}?sorted_by=popularity">show all</a>
+            </div>
+
+        </div>
+
+
+        <div class="col-lg-5 d-none d-lg-flex mt-1">
+            {% if most_recent_paper_statistics.has_category_data %}
+                <div class="exchangeable-papers-content recent-papers-content h-100" style="display: none;">
+                    <canvas id="most-recent-category-distribution-chart"></canvas>
+                </div>
+            {% endif %}
+
+            {% if trending_paper_statistics.has_category_data %}
+                <div class="exchangeable-papers-content trending-papers-content h-100">
+                    <canvas id="trending-category-distribution-chart"></canvas>
+                </div>
+            {% endif %}
+
+            {% if most_popular_paper_statistics.has_category_data %}
+                <div class="exchangeable-papers-content most-popular-papers-content h-100" style="display: none;">
+                    <canvas id="most-popular-category-distribution-chart"></canvas>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>

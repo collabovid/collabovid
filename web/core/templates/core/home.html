@@ -164,7 +164,8 @@
                         <h5 class="mb-0">Map</h5>
                         <div class="text-muted mb-5">
                             A lot of publications are location-specific. We extract these locations and provide a
-                            world map where you can find all the named cities, regions and countries with their related papers.
+                            world map where you can find all the named cities, regions and countries with their related
+                            papers.
                         </div>
                         <div class="feature-card-footer">
                             <a href="{% url "map" %}">Go to the map</a>
@@ -179,7 +180,8 @@
                         <div class="text-muted mb-5">
                             The visualization shows every publication embedded in a 3D space where the
                             position is determined by the publication's topic. Through interactive exploration
-                            in this space, we want to help researchers to identify connections between different articles and subjects.
+                            in this space, we want to help researchers to identify connections between different
+                            articles and subjects.
                         </div>
                         <div class="feature-card-footer">
                             <a href="{% url "embedding-visualization" %}">Explore the visualization</a>
@@ -245,43 +247,7 @@
     </div>
 
     <div class="bg-light">
-
-        <div class="container py-5">
-            <div class="row align-items-end">
-                <div class="col-lg-7 col-12">
-                    <h2 class="display-5 font-weight-light">Most Recent Papers</h2>
-                </div>
-
-                {% if most_recent_paper_statistics.has_category_data %}
-                    <div class="col-lg-5 d-none d-lg-flex text-center">
-                        <h6 class="font-weight-light" id="categoryDistributionTitle">
-                            Categories for papers
-                            from {{ most_recent_paper_date }}
-                        </h6>
-                    </div>
-                {% endif %}
-            </div>
-
-            <div class="row display-flex">
-
-                <div class="col-lg-7 col-12 mt-3">
-                    <div class="card w-100 shadow rounded bg-white">
-                        <ul class="list-group">
-                            {% for paper in most_recent_papers|slice:":5" %}
-                                {% include "core/partials/_paper_list_item.html" with paper=paper %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                </div>
-
-                {% if most_recent_paper_statistics.has_category_data %}
-                    <div class="col-lg-5 d-none d-lg-flex mt-3">
-                        <canvas id="categoryDistributionChart"></canvas>
-                    </div>
-                {% endif %}
-
-            </div>
-        </div>
+        {% include "core/partials/home/_trending_papers.html" %}
     </div>
 
     <div class="bg-white">
@@ -325,12 +291,37 @@
 
             {% if most_recent_paper_statistics.has_category_data %}
                 let recent_paper_categories = JSON.parse('{{ most_recent_paper_statistics.category_data|escapejs }}');
-                $("#categoryDistributionChart").paperCategoryDistribution({plot_data: recent_paper_categories});
+                $("#most-recent-category-distribution-chart").paperCategoryDistribution({plot_data: recent_paper_categories});
+            {% endif %}
+
+            {% if trending_paper_statistics.has_category_data %}
+                let trending_paper_categories = JSON.parse('{{ trending_paper_statistics.category_data|escapejs }}');
+                $("#trending-category-distribution-chart").paperCategoryDistribution({plot_data: trending_paper_categories});
+            {% endif %}
+
+            {% if most_popular_paper_statistics.has_category_data %}
+                let most_popular_categories = JSON.parse('{{ most_popular_paper_statistics.category_data|escapejs }}');
+                $("#most-popular-category-distribution-chart").paperCategoryDistribution({plot_data: most_popular_categories});
             {% endif %}
 
 
             $("#publicationsOverTimeChart").publicationsOverTime({plot_data: published_at_data});
             $("#paperHostDistribution").paperHostDistribution({plot_data: paper_host_data});
+
+
+            $(".change-paper-content button").click(function(){
+                if($(this).hasClass('active'))
+                {
+                    return;
+                }
+                $(this).closest('div').find('button.active').removeClass('active');
+
+                const contentClass = $(this).data('content');
+
+                $(".exchangeable-papers-content").hide();
+                $("."+contentClass).fadeIn();
+                $(this).addClass('active');
+            })
         });
 
     </script>

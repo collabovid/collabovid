@@ -1,4 +1,5 @@
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import F
 from django.shortcuts import render
 from django.http import HttpResponseNotFound
 
@@ -18,13 +19,25 @@ from django.shortcuts import get_object_or_404
 def home(request):
     if request.method == "GET":
         statistics = PaperStatistics(Paper.objects.all())
+
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
         topic_count = Topic.objects.count()
-        most_recent_papers = Paper.objects.filter(published_at=latest_date)
+        most_recent_papers = Paper.objects.filter(published_at=latest_date).order_by('-created_at')
+
+        trending_day_papers_ids = Paper.objects.order_by(F('altmetric_data__score_d').desc(nulls_last=True))[
+                                  :50].values_list('doi', flat=True)
+        trending_day_papers = Paper.objects.filter(pk__in=trending_day_papers_ids).order_by(
+            F('altmetric_data__score_d').desc(nulls_last=True))
+
+        popular_paper_ids = Paper.objects.order_by(F('altmetric_data__score').desc(nulls_last=True))[:50].values_list(
+            'doi', flat=True)
+        popular_papers = Paper.objects.filter(pk__in=popular_paper_ids).order_by(
+            F('altmetric_data__score').desc(nulls_last=True))
+
         return render(request, "core/home.html", {'statistics': statistics,
-                                                  'most_recent_papers': most_recent_papers.order_by('-created_at'),
                                                   'most_recent_paper_statistics': PaperStatistics(most_recent_papers),
-                                                  'most_recent_paper_date': latest_date,
+                                                  'trending_paper_statistics': PaperStatistics(trending_day_papers),
+                                                  'most_popular_paper_statistics': PaperStatistics(popular_papers),
                                                   'topic_count': topic_count})
 
 
@@ -50,8 +63,6 @@ def embedding_visualization(request, topic_pk=None, doi=None):
     category_colors = {}
     for category in categories:
         category_colors[category.pk] = category.color
-
-
 
     context = {
         'topics': topics,

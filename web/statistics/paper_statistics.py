@@ -19,6 +19,14 @@ class PaperStatistics:
         self._available = self._papers.count() > 0
 
     @property
+    def papers(self):
+        return self._papers
+
+    @property
+    def latest_date(self):
+        return self._papers.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
+
+    @property
     def available(self):
         return self._available
 
