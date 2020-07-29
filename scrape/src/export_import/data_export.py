@@ -20,7 +20,7 @@ from data.models import (
 
 
 class DataExport:
-    EXPORT_VERSION = 5
+    EXPORT_VERSION = 6
 
     @staticmethod
     def download_image(url):
@@ -163,7 +163,8 @@ class DataExport:
                         "location_modified": paper.location_modified,
                         "scrape_hash": paper.scrape_hash,
                         "visualized": paper.visualized,
-                        "vectorized": paper.vectorized
+                        "vectorized": paper.vectorized,
+                        "manually_modified": paper.manually_modified
                     }
 
                     if export_images and paper.preview_image and paper.preview_image.path:
