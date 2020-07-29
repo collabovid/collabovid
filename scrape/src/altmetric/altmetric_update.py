@@ -41,4 +41,4 @@ class AltmetricUpdate:
             paper.altmetric_data.save()
 
         paper.last_altmetric_update = timezone.now()
-        paper.save()
+        paper.save(set_manually_modified=False)
