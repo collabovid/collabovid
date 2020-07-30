@@ -1,3 +1,5 @@
+{% load search_url %}
+
 <div class="col-md-7">
     <div class="card rounded shadow w-100">
         <div class="card-body">
@@ -15,7 +17,7 @@
                 <tbody>
                 {% for search_query in queries %}
                 <tr>
-                    <td>{{ search_query.query.query }}</td>
+                    <td><a href="{{search_query.query | search_url_from_dict }}" target="_blank"> {{ search_query.query.query }}</a></td>
                     <td>{{ search_query.query.tab }}</td>
                     <td>{{ search_query.query.sorted_by }}</td>
                     <td>{{ search_query.query.page }}</td>

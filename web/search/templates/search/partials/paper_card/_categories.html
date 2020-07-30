@@ -1,5 +1,7 @@
+{% load search_url %}
+
 {% for category in paper.categories.all %}
-    <a href="{% url "search" %}?categories={{ category.pk }}"
+    <a href="{{ category.pk | search_url_from_category }}"
         class="category-link"
         data-category-id="{{ category.pk }}">
         <span class="badge badge-pill text-light"
