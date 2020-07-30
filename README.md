@@ -16,7 +16,7 @@ This repository contains the source code of the Collabovid project.
 
 - [Installation](#installation)
 - [Components](#components)
-- [Cvid Toolbox](#Cvid Toolbox)
+- [Cvid Toolbox](#CvidToolbox)
 - [Team](#team)
 - [FAQ](#faq)
 - [License](#license)
