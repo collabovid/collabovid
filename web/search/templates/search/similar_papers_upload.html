@@ -19,46 +19,100 @@
                         allows you to find similar articles for your query. Upload your literature as a
                         <strong>.bib</strong> file and try it out! To find out how to export your literature
                         as a .bib file, you can check out the tutorials for
-                        <a class="muted-white" target="_blank" href="https://libguides.usask.ca/c.php?g=218034&p=1458583">EndNote</a>,
-                        <a class="muted-white" target="_blank" href="https://libguides.usask.ca/c.php?g=218034&p=1446316">Mendeley</a>
+                        <a class="muted-white" target="_blank"
+                           href="https://libguides.usask.ca/c.php?g=218034&p=1458583">EndNote</a>,
+                        <a class="muted-white" target="_blank"
+                           href="https://libguides.usask.ca/c.php?g=218034&p=1446316">Mendeley</a>
                         and
-                        <a class="muted-white" target="_blank" href="https://libguides.usask.ca/c.php?g=218034&p=1446406">Zotero</a>.
+                        <a class="muted-white" target="_blank"
+                           href="https://libguides.usask.ca/c.php?g=218034&p=1446406">Zotero</a>.
                     </div>
 
-                    <form class="mt-5 mr-5 ml-5" id="upload-form" action="{% url "upload" %}" method="post"
-                          enctype="multipart/form-data">
+                    <div class="similar-paper-submission-container mt-5 mr-5 ml-5">
+                        <div class="text-right mb-1 change-input-type">
+                            <div class="btn-group mb-2" role="group">
+                                <button type="button"
+                                        data-form="upload-form"
+                                        class="btn btn-sm btn-secondary active"> Upload
+                                </button>
 
-                        {% csrf_token %}
-                        <input type="file" name="file" id="literature-file" style="display: none;"/>
-
-                        <div role="button" class="upload-area rounded">
-                            <div class="icon default">
-                                <i class="fas fa-file-upload fa-4x"></i>
+                                <button type="button"
+                                        data-form="raw-form"
+                                        class="btn btn-sm btn-secondary">
+                                    Raw Input
+                                </button>
                             </div>
-                            <div class="icon drag" style="display: none;">
-                                <i class="fas fa-4x fa-hand-point-down"></i>
-                            </div>
-                            <div class="icon indicator" style="display: none;">
-                                <i class="fas fa-4x fa-circle-notch fa-spin"></i>
-                            </div>
-                            <div class="icon success" style="display: none;">
-                                <i class="fas fa-4x fa-check-circle"></i>
-                            </div>
-                            <div class="icon error" style="display: none;">
-                                <i class="fas fa-4x fa-exclamation-circle"></i>
-                            </div>
-                            <h4 class="font-weight-light text-center"
-                                data-text-default="Upload your .bib file"
-                                data-text-dragging="Drag here"
-                                data-text-dragover="Drop it!"
-                                data-text-uploading="Uploading..."
-                                data-text-success="Your file was analyzed. Check the results below."
-                                data-text-error="We were unable to parse your file. It might be malformed or too large."
-                            >Upload your .bib file</h4>
                         </div>
 
-                    </form>
+                        <form class="form" action="{% url "upload" %}" method="post" id="raw-form"
+                              style="display: none;">
+                            {% csrf_token %}
 
+                            <div class="similar-content-area">
+                                <label class="d-block">
+                                    <textarea name="content"></textarea>
+                                </label>
+
+                                <div class="text-right mt-1">
+                                    <button class="btn btn-success">Send</button>
+                                </div>
+                            </div>
+
+                            <div class="text-center text-white">
+
+                                <div class="icon indicator" style="display: none;">
+                                    <i class="fas fa-4x fa-circle-notch fa-spin"></i>
+                                </div>
+                                <div class="icon success" style="display: none;">
+                                    <i class="fas fa-4x fa-check-circle"></i>
+                                </div>
+                                <div class="icon error" style="display: none;">
+                                    <i class="fas fa-4x fa-exclamation-circle"></i>
+                                </div>
+
+                                <h4 class="font-weight-light text-center results-text mt-3"
+                                    data-text-success="Your input was analyzed. Check the results below."
+                                    data-text-error="We were unable to parse your input. It might be malformed."
+                                ></h4>
+
+                            </div>
+                        </form>
+
+                        <form class="form" id="upload-form" action="{% url "upload" %}" method="post"
+                              enctype="multipart/form-data">
+
+                            {% csrf_token %}
+                            <input type="file" name="file" id="literature-file" style="display: none;"/>
+
+                            <div role="button" class="upload-area rounded">
+                                <div class="icon default">
+                                    <i class="fas fa-file-upload fa-4x"></i>
+                                </div>
+                                <div class="icon drag" style="display: none;">
+                                    <i class="fas fa-4x fa-hand-point-down"></i>
+                                </div>
+                                <div class="icon indicator" style="display: none;">
+                                    <i class="fas fa-4x fa-circle-notch fa-spin"></i>
+                                </div>
+                                <div class="icon success" style="display: none;">
+                                    <i class="fas fa-4x fa-check-circle"></i>
+                                </div>
+                                <div class="icon error" style="display: none;">
+                                    <i class="fas fa-4x fa-exclamation-circle"></i>
+                                </div>
+                                <h4 class="font-weight-light text-center"
+                                    data-text-default="Upload your .bib file"
+                                    data-text-dragging="Drag here"
+                                    data-text-dragover="Drop it!"
+                                    data-text-uploading="Uploading..."
+                                    data-text-success="Your file was analyzed. Check the results below."
+                                    data-text-error="We were unable to parse your file. It might be malformed or too large."
+                                >Upload your .bib file</h4>
+                            </div>
+
+                        </form>
+
+                    </div>
                 </div>
 
             </div>
@@ -88,14 +142,30 @@
 
             let drag_icon = $(".upload-area .icon.drag");
             let default_icon = $(".upload-area .icon.default");
-            let indicator_icon = $(".upload-area .icon.indicator");
-            let success_icon = $(".upload-area .icon.success");
-            let error_icon = $(".upload-area .icon.error");
+            let indicator_icon = $(".icon.indicator");
+            let success_icon = $(".icon.success");
+            let error_icon = $(".icon.error");
 
-            let icons = $(".upload-area .icon");
+            let icons = $(".icon");
             let file_field = $("#literature-file");
 
             let analysis_container = $("#analysis-container");
+
+            let raw_form = $("#raw-form");
+            let raw_form_result_text = raw_form.find('.results-text');
+
+            $(".change-input-type button").click(function () {
+                if ($(this).hasClass('active'))
+                    return;
+
+                let formId = $(this).data('form');
+
+                $(this).closest('div').find('button.active').removeClass('active');
+                $(this).addClass('active');
+
+                $("form").hide();
+                $("#" + formId).fadeIn();
+            });
 
 
             // preventing page from redirecting
@@ -183,6 +253,31 @@
                 uploadData(file_field.prop('files')[0]);
             });
 
+            function on_success(data) {
+                analysis_container.html(data);
+                icons.hide();
+                success_icon.show();
+                upload_area_text.text(upload_area_text.data('text-success'));
+                raw_form_result_text.text(raw_form_result_text.data('text-success'));
+                analysisSucceeded = true;
+            }
+
+            function on_error(error) {
+                icons.hide();
+                error_icon.show();
+                upload_area_text.text(upload_area_text.data('text-error'));
+                raw_form_result_text.text(raw_form_result_text.data('text-error'));
+                upload_area.removeClass('uploaded');
+
+            }
+
+            function pre_submission() {
+                $(".similar-paper-submission-container .change-input-type").hide();
+                icons.hide();
+                indicator_icon.show();
+
+            }
+
             function uploadData(file) {
 
                 let form_data = new FormData();
@@ -190,15 +285,9 @@
                 form_data.append('file', file);
                 form_data.append('csrfmiddlewaretoken', upload_form.children('input[name=csrfmiddlewaretoken]').val());
 
-                for (var p of form_data) {
-                    console.log(p);
-                }
-
-                icons.hide();
-                indicator_icon.show();
+                pre_submission();
                 upload_area.addClass('uploaded');
                 upload_area_text.text(upload_area_text.data('text-uploading'));
-
 
                 $.ajax({
                     url: upload_form.attr('action'),
@@ -207,23 +296,36 @@
                     contentType: false,
                     processData: false,
                     success: function (data) {
-                        analysis_container.html(data);
-                        icons.hide();
-                        success_icon.show();
-                        upload_area_text.text(upload_area_text.data('text-success'));
-                        analysisSucceeded = true;
+                        on_success(data);
                     },
                     error: function (request, error) {
                         console.log("Request: " + JSON.stringify(request));
                         console.log("Error: " + error);
-
-                        icons.hide();
-                        error_icon.show();
-                        upload_area_text.text(upload_area_text.data('text-error'));
-                        upload_area.removeClass('uploaded');
+                        on_error(error);
                     }
                 });
             }
+
+            raw_form.submit(function (e) {
+                e.preventDefault();
+
+                $(".similar-content-area").hide();
+                pre_submission();
+
+                $.ajax({
+                    url: raw_form.attr('action'),
+                    type: 'post',
+                    data: raw_form.serialize(),
+                    success: function (data) {
+                        on_success(data);
+                    },
+                    error: function (request, error) {
+                        console.log("Request: " + JSON.stringify(request));
+                        console.log("Error: " + error);
+                        on_error(error);
+                    }
+                });
+            });
         });
     </script>
 {% endblock %}
@@ -267,6 +369,25 @@
             -webkit-box-shadow: 0 0 0 0;
             -moz-box-shadow: 0 0 0 0;
             box-shadow: 0 0 0 0;
+        }
+
+        form .similar-content-area {
+        }
+
+        form .similar-content-area textarea {
+            width: 100%;
+            height: 200px;
+            padding: 8px;
+
+            border: none;
+            overflow: auto;
+            outline: none;
+
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+
+            border-radius: 10px;
         }
 
         .upload-area div {

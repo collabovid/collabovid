@@ -197,4 +197,8 @@ class SearchForm(forms.Form):
 
 
 class FindSimilarPapersForm(forms.Form):
-    file = forms.FileField()
+    file = forms.FileField(required=True)
+
+
+class FindSimilarPapersByTextForm(forms.Form):
+    content = forms.CharField(required=True, widget=forms.Textarea)

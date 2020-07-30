@@ -10,7 +10,7 @@ from statistics import PaperStatistics
 
 from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
 
-from search.forms import SearchForm, FindSimilarPapersForm
+from search.forms import SearchForm, FindSimilarPapersForm, FindSimilarPapersByTextForm
 from search.tagify.tagify_searchable import *
 
 from data.documents import AuthorDocument, JournalDocument, TopicDocument
@@ -25,16 +25,25 @@ def upload(request):
         return render(request, "search/similar_papers_upload.html")
     if request.method == "POST":
 
+        content = None
+
         form = FindSimilarPapersForm(request.POST, request.FILES)
 
         if form.is_valid():
             file_handle = request.FILES['file']
 
             if file_handle.size < MAX_UPLOAD_FILE_SIZE:
-                file_analyzer = BibFileAnalyzer(file_handle.read().decode('UTF-8'))
-                return render(request, "search/ajax/_file_analysis.html", {
-                    "file_analyzer": file_analyzer,
-                })
+                content = file_handle.read().decode('UTF-8')
+        else:
+            form = FindSimilarPapersByTextForm(request.POST)
+            if form.is_valid():
+                content = form.cleaned_data['content']
+
+        if content:
+            file_analyzer = BibFileAnalyzer(content)
+            return render(request, "search/ajax/_file_analysis.html", {
+                "file_analyzer": file_analyzer,
+            })
 
         return HttpResponseNotFound()
 
