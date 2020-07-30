@@ -5,7 +5,6 @@ the app provides interfaces between the external data sources and our internal d
 On the other hand, different tools are provided, concerning the maintance of the data.
 
 ## Interface to external article data sources
-
 ### Data Sources
 The app uses interfaces to several external data sources, providing meta data about 
 COVID-19 related research articles. The articles are distinguished only by its DOIs/
@@ -54,11 +53,49 @@ following facts:
 
 ## Other tools
 ### Geolocation extraction
+The geolocation extraction works in two steps. First, the NLP framework 
+[spaCy](https://spacy.io) is used to determine geopolitical entities (GPE) from 
+the article titles. In a second step, the extracted entities are searched in the 
+[geonames.org](geonames.org) database, to verify the location and get its coordinates.
+
+The GeoNames wrapper, located in `collabovid_shared/src/geolocations/geonames_db.py`, is
+used to build the GeoNames SQLiteDB on the one hand and to access it on the other hand.
+
+The SQLite database can be built as follows:
+1. Download the 
+[allCountries](http://download.geonames.org/export/dump/allCountries.zip) 
+Gazetteer data.
+2. Run the `loaddata` method in the GeoNames Python wrapper with the path to the
+downloaded file.
 
 ### Language Detection
+[Googles CLD3](https://github.com/google/cld3) is used to determine the language
+of article titles and abstracts. The results can be verified manually on the admin 
+dashboard and articles in other languages may be deleted.
 
 ### Data Import and Export
+The import and export classes may be used to keep local development databases in sync
+with the production database without scraping all data redundantly on all systems. Keep
+in mind, that artificial primary keys are not exported and hence may differ on
+different systems.
+
+Export archives on the productive system can be created as a task in the dashboard and 
+are stored in the Amazon S3 bucket. The can be fetched to local development systems
+using the cvid cli tool:
+
+- List available archives: `cvid data download -l`
+- Download an archive: `cvid data download <number>`
+
+To import an archive, use the _import data_ tab on the admin dashboard.
+
+
 
 ### Fulltext and PDF Thumbnail Extraction
+coming soon...
 
 ### Altmetric Scores
+[Altmetric]() offers a score for reasearch articles, indicating its popularity of in the 
+news and on social media platforms. We use this score, to sort search results by trend 
+(score increase past day, week, month, etc.) and by popularity (total score). The use of 
+the Altmetric API without a rate limit requires an API key, which has to be set as
+environment variable `ALTMETRIC_KEY`.
