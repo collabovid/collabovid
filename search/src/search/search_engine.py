@@ -144,7 +144,9 @@ class SearchEngine:
         filtered, papers = self.filter_papers()
         paper_score_table = defaultdict(int)
 
-        if query:
+        print(filtered, papers.count())
+
+        if query and papers.count() > 0:
             filtered_dois = None
 
             if filtered:
@@ -158,7 +160,8 @@ class SearchEngine:
 
             if self.search_type == SearchEngine.KEYWORD_SEARCH:
                 if settings.USING_ELASTICSEARCH:
-                    TimerUtilities.time_function(ElasticsearchRequestHelper.find, paper_score_table, query, ids=filtered_dois)
+                    TimerUtilities.time_function(ElasticsearchRequestHelper.find,
+                                                 paper_score_table, query, ids=filtered_dois)
                 else:
                     TimerUtilities.time_function(TitleSearch.find, paper_score_table, query, papers=papers)
             elif self.search_type == SearchEngine.COMBINED_SEARCH:
@@ -169,7 +172,7 @@ class SearchEngine:
                                                  influence=0.6)
             else:
                 raise ValueError("No valid search type provided")
-        else:
+        elif not query:
             return self.get_papers_no_query(papers)
 
         return paper_score_table
