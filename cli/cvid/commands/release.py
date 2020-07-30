@@ -78,11 +78,12 @@ class ReleaseCommand(Command):
             self.call_command('cluster restart --all --no-config-build')
 
         if not args.no_cronjob:
-            if self.resource_exists('cronjob', 'scrape-cron'):
-                self.print_info("Applying scrape cronjob")
-                self.call_command(f'cronjobs apply -n scrape-cron')
-            else:
-                self.print_info("Not applying cronjob because no one is currently in the cluster applied")
+            for cronjob_name in ['scrape-cron', 'altmetric-update-cron']:
+                if self.resource_exists('cronjob', cronjob_name):
+                    self.print_info(f"Applying {cronjob_name}")
+                    self.call_command(f'cronjobs apply -n {cronjob_name}')
+                else:
+                    self.print_info(f"Not applying {cronjob_name} because it is currently not in the cluster applied")
         else:
             self.print_info("Not applying scrape cronjob")
 
