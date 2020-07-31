@@ -280,7 +280,7 @@
                     let submission_data = generate_submission_data();
 
                     // Full data must be submitted to the view. Submission data can be saved in the url.
-                    let full_data = submission_data + "&" + no_url_submission_data + "&page=1";
+                    let full_data = submission_data + "&" + no_url_submission_data + "&page=" + window.Pagination.current_page;
 
                     window.open($(this).attr('href') + "?" + full_data, '_blank');
 
