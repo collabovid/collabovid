@@ -13,12 +13,13 @@ import json
 from django.conf import settings
 class SearchRequestHelper:
 
-    def __init__(self, form: SearchForm, save_request: bool = False):
+    def __init__(self, form: SearchForm, save_request: bool = False, highlight: bool = True):
         logger = logging.getLogger(__name__)
 
         self._response = None
         self._error = False
         self._form = form
+        self._highlight = highlight
 
         try:
             response = requests.get(form.url, params={
@@ -60,19 +61,21 @@ class SearchRequestHelper:
                 if paper.altmetric_data and paper.altmetric_data.score > 0.0:
                     paper.trend = int(ceil(SearchForm.TRENDING_CHOICES[sorted_by]['value'](paper)))
                     paper.trend_description = SearchForm.TRENDING_CHOICES[sorted_by]['description']
-            if 'title' in infos:
-                paper.title = infos['title']
-            if 'abstract' in infos:
-                paper.abstract = infos['abstract']
-            if 'authors.full_name' in infos:
-                highlighted_full_names = infos['authors.full_name']
 
-                for highlighted_full_name in highlighted_full_names:
-                    cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
+            if self._highlight:
+                if 'title' in infos:
+                    paper.title = infos['title']
+                if 'abstract' in infos:
+                    paper.abstract = infos['abstract']
+                if 'authors.full_name' in infos:
+                    highlighted_full_names = infos['authors.full_name']
 
-                    for author in paper.highlighted_authors:
-                        if author.full_name == cleaned_full_name:
-                            author.display_name = highlighted_full_name
+                    for highlighted_full_name in highlighted_full_names:
+                        cleaned_full_name = highlighted_full_name.replace('<em>', '').replace('</em>', '')
+
+                        for author in paper.highlighted_authors:
+                            if author.full_name == cleaned_full_name:
+                                author.display_name = highlighted_full_name
 
         paginator = FakePaginator(result_size=self.response['count'],
                                   page=self.response['page'],

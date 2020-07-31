@@ -95,7 +95,7 @@ def export_search_result(request, export_type):
         form = SearchForm(request.GET)
 
         if form.is_valid():
-            search_response_helper = SearchRequestHelper(form)
+            search_response_helper = SearchRequestHelper(form, highlight=False)
 
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()
