@@ -25,7 +25,7 @@ as ordered in the list below and take only the data from the higher prioritized 
   [Coronavirus Information Center](https://www.elsevier.com/connect/coronavirus-information-center),
   accessible via FTP
   
-- PubMed (using [forked pymed](https://github.com/iacopy/pymed/tree/fork-fixes))
+- **PubMed** (using [forked pymed](https://github.com/iacopy/pymed/tree/fork-fixes))
   provides a REST-API to access search query results. The used search query is:
       
       ("2019/12/01"[Date - Create] : "3000"[Date - Create]) AND 
@@ -35,8 +35,8 @@ The associated classes for fetching the article data are located in `src/updater
 insertion to the database and insertion error handling is done by `collabovid-shared`.
  
 ### Filtering articles
-The articles, indexed by Colabovid are filtered with the following rules:
-1. The article was published in 2020 or later
+The articles, indexed by Colabovid, are filtered using the two following rules:
+1. The article was published in 2020 or later and
 2. The title or the abstract matches the following regular expression:
        
        .*(corona.?virus|(^|\s)corona(\s|$)|covid.?(20)?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov).*
@@ -94,7 +94,7 @@ To import an archive, use the _import data_ tab on the admin dashboard.
 coming soon...
 
 ### Altmetric Scores
-[Altmetric]() offers a score for reasearch articles, indicating its popularity of in the 
+[Altmetric]() offers a score for reasearch articles, indicating its popularity in the 
 news and on social media platforms. We use this score, to sort search results by trend 
 (score increase past day, week, month, etc.) and by popularity (total score). The use of 
 the Altmetric API without a rate limit requires an API key, which has to be set as
