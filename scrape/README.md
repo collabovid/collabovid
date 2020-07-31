@@ -2,7 +2,7 @@
 
 The scrape app is responsible for keeping the article data up-to-date. On the one hand,
 the app provides interfaces between the external data sources and our internal database.
-On the other hand, different tools are provided, concerning the maintance of the data.
+On the other hand, different tools are provided, concerning the maintenance of the data.
 
 ## Interface to external article data sources
 ### Data Sources

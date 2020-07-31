@@ -2,6 +2,16 @@
 
 # Collabovid
 
+![](https://img.shields.io/badge/-docker-blue)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+![](https://img.shields.io/github/repo-size/michip/collabovid)
+![](https://img.shields.io/github/languages/count/michip/collabovid)
+![](https://img.shields.io/github/issues-closed/michip/collabovid)
+![](https://img.shields.io/github/commit-activity/m/michip/collabovid)
+![](https://img.shields.io/twitter/follow/collabovid?style=social)
+
+---
+
 Researchers from all over the world are working hard on the investigation of the SARS-CoV-2 
 virus and the impact of the disease, resulting in many new publications in journals or on
 so-called _preprint versions_ such as [medRxiv](https://connect.medrxiv.org/relate/content/181) or [bioRxiv](https://connect.biorxiv.org/relate/content/181). 
@@ -13,6 +23,7 @@ This repository contains the source code of the Collabovid project.
 
 
 ## Table of Contents
+
 
 - [Installation](#installation)
 - [Components](#components)
@@ -64,6 +75,13 @@ the *collabovid-shared* and *collabovid-store* packages are used.
 shared models (data), handlers for the geonames database (geolocations)
 as well as helpers for running tasks.
 
+* *collabovid-store* contains utility functions that allow other components 
+to work with files that are stored in an S3 bucket.
+
+#### Docker
+
+Coming soon..
+
 #### Tasks
 
 Tasks are classes that run certain code that can be executed from
@@ -92,22 +110,34 @@ must be registered
             for i in self.progress(range(100)):  #  Progress will be set automatically while iterating
                 pass
                 
+To register a task and make it visible to all other components, execute the following CVID CLI command:
+
+    cvid collect-tasks
+
 The task can now be called from the command line, e.g.
     
     # arg2 is automatically converted to a boolean flag
     python component/run_task.py -u username my-task --arg1 Value --arg2
             
 
-It is also possible to execute a task from code.
+It is also possible to execute a task from code or via the admin dashboard at the `/dashboard/tasks` url.
 
 
 ### Scrape
+
+The scrape app is responsible for keeping the article data up-to-date. On the one hand,
+the app provides interfaces between the external data sources and our internal database.
+On the other hand, different tools are provided, concerning the maintenance of the data.
+
 For further information look at the [README](scrape/README.md).
 
 ### Search
 For further information look at the [README](search/README.md).
 
 ### Web
+
+The web component contains the website (frontend) code along
+with some controllers and handlers to communicate with the other services.
 
 For further information look at the [README](web/README.md).
 
