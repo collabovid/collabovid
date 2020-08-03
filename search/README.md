@@ -10,7 +10,7 @@ the search component.
 
 The `api` folder contains a django app where the different api endpoints are exposed:
 
-* `/search` The search endpoint receives the following parameters:
+* GET `/search` The search endpoint receives the following parameters:
     
     | Parameter          | Description                                                                                                                                                                                                                      |
     |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -27,18 +27,37 @@ The `api` folder contains a django app where the different api endpoints are exp
     | journals           | The ids of the journals that should be used for filtering.                                                                                                                                                                       |
     | paper_hosts        | The ids of the paper_hosts that should be used for filtering.                                                                                                                                                                    |
     | locations          | The ids of the locations that should be used for filtering.                                                                                                                                                                      |
-    | result_type        |                                                                                                                                                                                                                                  |
-    | page               |                                                                                                                                                                                                                                  |
+    | result_type        | Either 'papers' (returns just or 'statistics'                                                                                                                                                                                    |
+    | page               | Which page should be returned if result_type = 'papers'                                                                                                                                                                          |
 
     and returns a response object that contains the resulting dois of the paper with 
     their respective scores.
 
     
-* `/similar`
-
-
-
-* `/startup-probe`
+* GET `/similar` The similar endpoint retrieves the most similar papers given a set of papers. The endpoint takes
+            the following GET parameters.
+   
+   | Parameter          | Description                                                                                                       |
+   |--------------------|-------------------------------------------------------------------------------------------------------------------|
+   | dois               | List of dois from the set of papers which most similar paper should be computed                                   |
+   | limit              | integer that specifies how many similar papers should be retrieved. If not specified, retrieves all papers.       |
+   
+   and returns a json response with the following structure:
+   
+   ```
+    {
+        "result": [
+            {
+                "doi": <doi>,
+                "score": <score>
+            },
+            ...
+        ]
+    }
+  
+  ```
+  
+* GET `/startup-probe`
 
     This is used internally by the Kubernetes scheduler as a startup and readiness probe.
     Because it takes some time to load the different models for providing the search functionality
@@ -51,7 +70,14 @@ The `api` folder contains a django app where the different api endpoints are exp
 ## Models
 
 We have a `models` directory where all trained models are stored. During development,
-this is simply the `models` directory in the main folder.
+this is simply the `models` directory in the main folder. 
+During production, this is a folder that exist on the host (ec2 instance) under `/opt/models`.
+The sync-daemon component is responsible for syncing the individual models (just directories that
+are stored as zip files) from S3 storage to the models folder. The models folder contains
+a file called `timestamps.json` which is used to keep track of new models. If a new model
+is pushed to S3, the sync-daemon realizes that the copy on the host is an older copy of the model
+and pulls the updated version. 
+
     
 ## Vectorizer
 
@@ -72,8 +98,7 @@ the vectorizer, multiple matrices can be added where each row corresponds to a p
 The base class for a vectorizer is [PaperVectorizer](src/analyze/vectorizer/paper_vectorizer.py).
 To get an instance of a vectorizer, the [get_vectorizer](src/analyze/vectorizer/__init__.py) method should be used.
 All vectorizers that are currently used in collabovid are from the type `TransformerPaperVectorizer` which produces embeddings with a
-custom trained BERT-siamese-network. Given a title and an abstract 
-the network was trained, to predict if they are from the same publication or not. 
+custom trained BERT-siamese-network. Given a title and an abstract, the network was trained, to predict if they are from the same publication or not. 
 By randomly exchanging some title and abstracts during training, the network has to learn what the papers are about to be good at the prediction.
 Therefore, the resulting embeddings characterize the content of the publications.
 A vector is produced for every title and abstract of each publication. Therefore,
@@ -85,6 +110,12 @@ This is done by the [setup-vectorizer](src/analyze/setup_vectorizer.py) task.
 For each vectorizer, the papers that are currently in the paper_matrix are synced
 with the papers that are in the database.
 
+After recomputing the paper matrix, the matrix is pushed to S3 where the matrices are stored in the
+same fashion as the models in the `models/paper_matrix` directory and are synchronized by the sync-daemon.
+This allows us to run multiple search containers where only one instance has to compute the paper matrix
+for all the updated papers. Before every access of the paper matrix, it is checked if there
+is a newer version available based on the timestamps file. If this is the case, the new paper
+matrix is loaded into memory.
 
 
 ## Categorization
@@ -101,6 +132,16 @@ in the file [src/analyze/models/litcovid_classifier.py](src/analyze/models/litco
 abstract from a paper as an input and outputs a probability for each category. If the probability
 is above 0.5, we assign the category to the paper. The category assignment is done in the
 [update-category-assignment](src/analyze/update_category_assignment.py) task.
+
+
+## Visualization Coordinates
+For the visualization feature, we wanted to use the coordinates of the vectorizer embeddings to provide
+the user with a visual representation of the semantic relationship between papers. 
+To map the embeddings into a three dimensional space, we use T-SNE. It does a better job in preserving
+the relationships from the high dimensional space in 3d than PCA. But this also means that we have to recompute
+the whole set of coordinates each time new papers are added or papers are changed. This is done by the
+[reduce-embedding-dimensionality](src/analyze/reduce_embedding_dimensionality.py) task and is run as part of the
+[scrape](../scrape/src/task_scrape.py) task.
 
 
 
