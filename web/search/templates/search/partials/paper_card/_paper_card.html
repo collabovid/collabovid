@@ -23,24 +23,24 @@
                 {% endif %}
                 <div data-badge-type="4" data-badge-popover="left" data-link-target="_blank"
                         {% if not paper|is_arxiv %}
-                        data-doi="{{paper.doi}}"
+                     data-doi="{{ paper.doi }}"
                         {% else %}
-                        data-arxiv-id={{paper.doi|extract_arxiv_id}}
+                            data-arxiv-id={{ paper.doi|extract_arxiv_id }}
                         {% endif %}
-                        data-hide-no-mentions="true" class="altmetric-embed d-inline">
+                data-hide-no-mentions="true" class="altmetric-embed d-inline">
                 </div>
                 {% if paper.trend %}
                     <span class="small ml-1">
                             <span class="small">
                             {% spaceless %}
-                            {% if paper.trend > 0.0 %}
-                                <span class="text-success" style="margin-right: 2px">↑</span>
-                            {% else %}
-                                <span class="text-danger" style="margin-right: 2px">↓</span>
-                            {% endif %}
-                            <span>{{ paper.trend }}</span>
+                                {% if paper.trend > 0.0 %}
+                                    <span class="text-success" style="margin-right: 2px">↑</span>
+                                {% else %}
+                                    <span class="text-danger" style="margin-right: 2px">↓</span>
+                                {% endif %}
+                                <span>{{ paper.trend }}</span>
                             {% endspaceless %}
-                            <span class="small text-muted">{{ paper.trend_description }}</span>
+                                <span class="small text-muted">{{ paper.trend_description }}</span>
                         </span>
                     </span>
                 {% endif %}
@@ -93,9 +93,9 @@
                         {% endif %}
                         <span class="text-nowrap text-muted author {% if forloop.counter > 5 %}d-none{% endif %}">
                                 {{ author.display_name|safe }}
-                                {% if user.is_authenticated and user.is_staff %}
-                                    <a target="_blank" href="{% url "change_author_name" author.pk paper.doi %}">[Edit]</a>
-                                {% endif %}
+                            {% if user.is_authenticated and user.is_staff %}
+                                <a target="_blank" href="{% url "change_author_name" author.pk paper.doi %}">[Edit]</a>
+                            {% endif %}
                             </span>
                     {% endfor %}
 
@@ -140,6 +140,21 @@
                                     {% endif %}
                                 </span>
 
+                            {% if paper.abstract|length >= mobile_preview_size %}
+                                <span class="small abstract-controls
+                                    {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
+                                        <a href="#" class="toggle-description show"
+                                           style="{% if extended %} display: none; {% endif %}">
+                                            [Read more]
+                                        </a>
+
+                                        <a href="#" class="toggle-description hide"
+                                           style="{% if not extended %} display: none; {% endif %}">
+                                            [Show less]
+                                        </a>
+                                    </span>
+                            {% endif %}
+
                             <div class="mt-1 text-muted">
 
                                 <div class="row">
@@ -169,6 +184,12 @@
 
                                     <div class="col-12 col-sm-8 text-sm-right small">
 
+                                        <a href="#"
+                                           data-doi="{{ paper.doi }}"
+                                           class="favorite-paper-link"><i class="fas fa-heart"></i></a>
+
+                                        &nbsp;
+
                                         <div class="dropdown d-inline">
                                             <a id="citeDropdown{{ paper.doi }}"
                                                data-toggle="dropdown" href="#"><i class="fas fa-quote-right"></i></a>
@@ -188,25 +209,6 @@
 
                                         |
 
-                                        {% if paper.abstract|length >= mobile_preview_size %}
-                                            <span class="abstract-controls
-                                                {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
-                                                    <a href="#" class="toggle-description show"
-                                                       style="{% if extended %} display: none; {% endif %}">
-                                                        Expand the abstract
-                                                    </a>
-
-                                                    <a href="#" class="toggle-description hide"
-                                                       style="{% if not extended %} display: none; {% endif %}">
-                                                        Hide the full abstract
-                                                    </a>
-                                                </span>
-                                        {% endif %}
-
-                                        {% if paper.abstract|length >= preview_size %}
-                                            |
-                                        {% endif %}
-
                                         {% if paper.pdf_url %}
                                             <a href="{{ paper.pdf_url }}" target="_blank">
                                                 Read the full text
@@ -214,7 +216,7 @@
                                             |
                                         {% endif %}
 
-                                        <a href="{% url "paper" paper.doi %}">Details and similar papers</a>
+                                        <a href="{% url "paper" paper.doi %}">Details</a>
                                         {% if paper.visualized %}
                                             |
                                             <a class="visualize-link"

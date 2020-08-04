@@ -27,7 +27,8 @@
     {% if using_analytics %}
         <script async defer data-domain="collabovid.org" src="https://plausible.io/js/plausible.js"></script>
     {% endif %}
-    <script type='text/javascript' data-domain="collabovid.org" src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
+    <script type='text/javascript' data-domain="collabovid.org"
+            src='https://d1bxh8uas1mnw7.cloudfront.net/assets/embed.js'></script>
 
     {% block css %}
     {% endblock %}
@@ -65,11 +66,18 @@
                 <li class="nav-item {% if request.resolver_match.url_name == "upload" %}active{% endif %}">
                     <a class="nav-link" href="{% url "upload" %}">Literature Analysis</a>
                 </li>
-               <li class="nav-item ml-2 d-none d-md-none d-lg-block">
-                    <a class="nav-link" href="https://twitter.com/collabovid"><img src="{% static "core/img/social/Twitter_Logo_WhiteOnImage.png" %}" class="img-fluid" width="15px"></a>
+                <li class="nav-item {% if request.resolver_match.url_name == "favorites" %}active{% endif %}">
+                    <a class="nav-link" href="{% url "favorites" %}">Favorite Papers</a>
+                </li>
+                <li class="nav-item ml-2 d-none d-md-none d-lg-block">
+                    <a class="nav-link" href="https://twitter.com/collabovid"><img
+                            src="{% static "core/img/social/Twitter_Logo_WhiteOnImage.png" %}" class="img-fluid"
+                            width="15px"></a>
                 </li>
                 <li class="nav-item d-none d-md-none d-lg-block">
-                    <a class="nav-link" href="https://github.com/michip/collabovid"><img src="{% static "core/img/social/GitHub-Mark-Light-64px.png" %}" class="img-fluid" width="16px"></a>
+                    <a class="nav-link" href="https://github.com/michip/collabovid"><img
+                            src="{% static "core/img/social/GitHub-Mark-Light-64px.png" %}" class="img-fluid"
+                            width="16px"></a>
                 </li>
 
 

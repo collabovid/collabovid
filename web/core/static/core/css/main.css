@@ -629,3 +629,18 @@ div.feature-card-footer {
     left: 0;
     right: 0;
 }
+
+a.favorite-paper-link.active
+{
+    color: #e76262;
+}
+
+a.favorite-paper-link:not(.active)
+{
+    color: #6c757d!important;
+}
+
+a.favorite-paper-link:not(.active):hover
+{
+    color: #494f53 !important;
+}

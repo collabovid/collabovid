@@ -1,0 +1,135 @@
+{% extends "core/base.html" %}
+{% load static %}
+{% load pipeline %}
+{% block content %}
+
+    <div class="gradient-header pb-5">
+        <div class="container">
+            <div class="row mt-5 mb-5">
+                <div class="col-12">
+
+                    <h1 class="text-white display-4">Your favorite literature</h1>
+
+                    <div class="muted-white">
+                        On this page you can find your favorite articles. You can add articles to the list of
+                        favorite articles by clicking on the <i class="fas fa-star"></i> symbol.
+                        If you are interested in a specific topic that your favorite articles cover, you can
+                        search for the most similar articles in our dataset too.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% include 'core/partials/_rounded_bottom.html' %}
+
+    </div>
+
+    <div id="paper-loading-indicator"
+         class="text-muted text-center fa-5x my-5">
+        <i class="fas fa-circle-notch fa-spin"></i>
+    </div>
+
+    <div id="no-favorites-alert" class="container mt-2" style="display: none;">
+        <div class="alert alert-secondary mx-3" role="alert">
+            <h4 class="alert-heading">No publications found</h4>
+            <p>
+                You have no favorite papers. To add papers to this list,
+                use the <i class="fas fa-star"></i> symbol. Note that your favorite papers
+                will be saved on your system. Once you delete the website data or switch to another
+                browser, your favorite papers list will be lost.
+            </p>
+        </div>
+    </div>
+
+    <div id="favorites-content" class="container mt-2" style="display: none;">
+        <div class="col-12">
+            <div class="other-components-container text-right" style="display: none; margin-bottom: -0.75em;">
+                <a href="#" id="favorite-analysis-link" data-action="{% url "favorite-analysis" %}">Find similar
+                    publications</a>
+            </div>
+
+            <div id="paper-container"></div>
+
+            <nav class="mt-5" id="pagination-container"></nav>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block script %}
+    {% javascript "similar_papers" %}
+
+    <script>
+        $(document).ready(function () {
+
+            const noFavoritesAlert = $("#no-favorites-alert");
+            const favoritesContent = $("#favorites-content");
+            const indicator = $("#paper-loading-indicator");
+
+
+            let favoriteDoisString = localStorage.getItem("favoritePapers");
+            let favoriteDois = [];
+            if (favoriteDoisString !== null) {
+                favoriteDois = JSON.parse(favoriteDoisString);
+            }
+
+            if (favoriteDois.length > 0) {
+
+                console.log(favoriteDois);
+                const form = $("#similar-paper-form");
+                const paperContainer = $("#paper-container");
+                const paginationContainer = $("#pagination-container");
+                const favoriteAnalysisLink = $("#favorite-analysis-link");
+                const otherComponentsContainer = $(".other-components-container");
+
+                const paginator = form.collabovidJsPaginator({
+                    indicator: indicator,
+                    paper_container: paperContainer,
+                    pagination_container: paginationContainer,
+                    otherComponentsContainer: otherComponentsContainer,
+                    receivePaperUrl: "{% url "receive-papers" %}"
+                });
+
+                favoritesContent.show();
+
+                paginator.loadDois(favoriteDois, 1);
+
+                favoriteAnalysisLink.click(function (e) {
+                    e.preventDefault();
+
+                    if (!window.formAjaxAllowed) {
+                        return false;
+                    }
+
+                    window.formAjaxAllowed = false;
+
+                    paperContainer.hide();
+                    indicator.show();
+                    paginationContainer.hide();
+                    favoriteAnalysisLink.parent().hide();
+
+                    $.get(favoriteAnalysisLink.data('action'), {
+                        'dois': JSON.stringify(favoriteDois)
+                    }, function (data) {
+                        window.formAjaxAllowed = true;
+
+                        paperContainer.html(data).show();
+                        indicator.hide();
+                    });
+                })
+            } else {
+                noFavoritesAlert.fadeIn();
+                indicator.hide();
+            }
+
+
+        });
+    </script>
+{% endblock %}
+
+{% block css %}
+{% endblock %}

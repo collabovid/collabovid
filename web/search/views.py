@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -19,6 +20,19 @@ import io
 
 MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
 
+
+def favorites(request):
+    return render(request, "search/favorites.html")
+
+
+def favorite_analysis(request):
+    dois = request.GET.get('dois', None)
+    if not dois:
+        return HttpResponseNotFound()
+    dois = json.loads(dois)
+    papers = Paper.objects.filter(pk__in=dois)
+
+    return render(request, "search/ajax/_favorite_analysis.html", {"papers": papers})
 
 def upload(request):
     if request.method == "GET":
