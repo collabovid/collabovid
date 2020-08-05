@@ -8,15 +8,20 @@
             <div class="row mt-5 mb-5">
                 <div class="col-12">
 
-                    <h1 class="text-white display-4">Upload your literature</h1>
+                    <h1 class="text-white display-4">Literature Analysis</h1>
 
                     <div class="muted-white">
-                        You can upload your existing literature files to find COVID-19 publications which are
-                        <strong>similar</strong> to your favorite articles. The data you upload will be processed
+                        Analyze your literature and find COVID-19 publications which are
+                        <strong>similar</strong> to your favorite articles.
+                        You can select a subset of your
+                        <a class="muted-white" href="{% url "favorites" %}">favorite articles</a>
+                        or upload your existing literature file. The data you upload will be processed
                         in order to identify articles which we have in our database. Afterwards the uploaded file
                         will be deleted permanently from our servers.
                         For the articles which are in our database, we provide a similarity search function that
-                        allows you to find similar articles for your query. Upload your literature as a
+                        allows you to find similar articles for your query.
+                        <a class="muted-white" href="{% url "search" %}">Search</a> for articles and select your favorites
+                        or upload your literature as a
                         <strong>.bib</strong> file and try it out! To find out how to export your literature
                         as a .bib file, you can check out the tutorials for
                         <a class="muted-white" target="_blank"
@@ -31,20 +36,26 @@
                     <div class="similar-paper-submission-container mt-5 mr-5 ml-5">
                         <div class="text-right mb-1 change-input-type">
                             <div class="btn-group mb-2" role="group">
+
+                                <a href="{% url "favorites" %}?similarity_analysis=1" class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-heart"></i> Select from favorites
+                                </a>
+
                                 <button type="button"
                                         data-form="upload-form"
-                                        class="btn btn-sm btn-secondary active"> Upload
+                                        class="btn btn-sm btn-secondary active">
+                                    <i class="fas fa-upload"></i> Upload
                                 </button>
 
                                 <button type="button"
                                         data-form="raw-form"
                                         class="btn btn-sm btn-secondary">
-                                    Raw Input
+                                    <i class="fas fa-keyboard"></i> Raw Input
                                 </button>
                             </div>
                         </div>
 
-                        <form class="form" action="{% url "upload" %}" method="post" id="raw-form"
+                        <form class="form" action="{% url "literature-analysis" %}" method="post" id="raw-form"
                               style="display: none;">
                             {% csrf_token %}
 
@@ -78,7 +89,7 @@
                             </div>
                         </form>
 
-                        <form class="form" id="upload-form" action="{% url "upload" %}" method="post"
+                        <form class="form" id="upload-form" action="{% url "literature-analysis" %}" method="post"
                               enctype="multipart/form-data">
 
                             {% csrf_token %}

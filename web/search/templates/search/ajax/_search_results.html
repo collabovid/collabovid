@@ -1,6 +1,5 @@
 {% if authors %}
     <div class="author-suggestions d-flex flex-row mt-1">
-
         <div>
             <i class="fas fa-exclamation-triangle text-warning"></i>
         </div>
@@ -15,9 +14,7 @@
                 </span>
             {% endfor %}
         </div>
-
     </div>
-
 {% endif %}
 
 {% for paper in papers %}
@@ -60,5 +57,6 @@
         {% endif %}
 
         _altmetric_embed_init();
+        window.update_favorite_links();
     </script>
 

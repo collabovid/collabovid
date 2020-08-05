@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -20,9 +21,29 @@ import io
 MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
 
 
-def upload(request):
+def favorites(request):
+
     if request.method == "GET":
-        return render(request, "search/similar_papers_upload.html")
+
+        show_similarity_analysis = request.GET.get('similarity_analysis', None) is not None
+
+        return render(request, "search/favorites.html", {"show_similarity_analysis": show_similarity_analysis})
+
+    return HttpResponseNotFound()
+
+
+def favorite_analysis(request):
+    dois = request.GET.get('dois', None)
+    if not dois:
+        return HttpResponseNotFound()
+    dois = json.loads(dois)
+    papers = Paper.objects.filter(pk__in=dois)
+
+    return render(request, "search/ajax/_favorite_analysis.html", {"papers": papers})
+
+def literature_analysis(request):
+    if request.method == "GET":
+        return render(request, "search/literature_analysis.html")
     if request.method == "POST":
 
         content = None

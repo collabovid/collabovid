@@ -1,0 +1,15 @@
+{% if papers %}
+    <div class="mt-2">
+        <h3 class="text-muted">Select interesting publications for your research</h3>
+        For your favorite articles, we provide a similarity search function that
+        allows you to find similar articles for the selected papers. Select one or more papers
+        from your list an click on the button below to find articles that are closely related.
+    </div>
+    {% include "search/partials/_similar_papers_selection.html" with papers=papers.all title="Favorite publications" %}
+{% else %}
+
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+    </div>
+
+{% endif %}
