@@ -87,7 +87,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button id="clear-all-favorites"  type="button" class="btn btn-danger">Clear</button>
+                    <button id="clear-all-favorites" type="button" class="btn btn-danger">Clear</button>
                 </div>
             </div>
         </div>
@@ -148,6 +148,17 @@
                     indicator.show();
                     paginationContainer.hide();
                     favoriteAnalysisLink.parent().hide();
+
+                    let favoriteDoisString = localStorage.getItem("favoritePapers");
+                    let favoriteDois = [];
+                    if (favoriteDoisString !== null) {
+                        favoriteDois = JSON.parse(favoriteDoisString);
+                    }
+
+                    if(favoriteDois.length === 0){
+                        location.reload();
+                        return false;
+                    }
 
                     $.get(favoriteAnalysisLink.data('action'), {
                         'dois': JSON.stringify(favoriteDois)
