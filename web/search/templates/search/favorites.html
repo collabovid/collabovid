@@ -131,10 +131,6 @@
                     receivePaperUrl: "{% url "receive-papers" %}"
                 });
 
-                favoritesContent.show();
-
-                paginator.loadDois(favoriteDois, 1);
-
                 favoriteAnalysisLink.click(function (e) {
                     e.preventDefault();
 
@@ -155,7 +151,7 @@
                         favoriteDois = JSON.parse(favoriteDoisString);
                     }
 
-                    if(favoriteDois.length === 0){
+                    if (favoriteDois.length === 0) {
                         location.reload();
                         return false;
                     }
@@ -176,6 +172,16 @@
                     location.reload();
                     return false;
                 });
+
+
+                favoritesContent.show();
+
+                {% if show_similarity_analysis %}
+                    favoriteAnalysisLink.click();
+                {% else %}
+                    paginator.loadDois(favoriteDois, 1);
+                {% endif %}
+
             } else {
                 noFavoritesAlert.fadeIn();
                 indicator.hide();

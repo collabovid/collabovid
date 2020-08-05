@@ -64,7 +64,7 @@
                     <a class="nav-link" href="{% url "embedding-visualization" %}">Visualization</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "upload" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "upload" %}">Literature Analysis</a>
+                    <a class="nav-link" href="{% url "literature-analysis" %}">Literature Analysis</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "favorites" %}active{% endif %}">
                     <a class="d-inline-flex flex-row nav-link align-items-center" href="{% url "favorites" %}">

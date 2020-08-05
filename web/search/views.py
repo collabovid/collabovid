@@ -22,7 +22,14 @@ MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
 
 
 def favorites(request):
-    return render(request, "search/favorites.html")
+
+    if request.method == "GET":
+
+        show_similarity_analysis = request.GET.get('similarity_analysis', None) is not None
+
+        return render(request, "search/favorites.html", {"show_similarity_analysis": show_similarity_analysis})
+
+    return HttpResponseNotFound()
 
 
 def favorite_analysis(request):
@@ -34,9 +41,9 @@ def favorite_analysis(request):
 
     return render(request, "search/ajax/_favorite_analysis.html", {"papers": papers})
 
-def upload(request):
+def literature_analysis(request):
     if request.method == "GET":
-        return render(request, "search/similar_papers_upload.html")
+        return render(request, "search/literature_analysis.html")
     if request.method == "POST":
 
         content = None
