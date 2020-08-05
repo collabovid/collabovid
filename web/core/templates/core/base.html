@@ -67,7 +67,12 @@
                     <a class="nav-link" href="{% url "upload" %}">Literature Analysis</a>
                 </li>
                 <li class="nav-item {% if request.resolver_match.url_name == "favorites" %}active{% endif %}">
-                    <a class="nav-link" href="{% url "favorites" %}">Favorite Papers</a>
+                    <a class="d-inline-flex flex-row nav-link align-items-center" href="{% url "favorites" %}">
+                        <div>Favorites</div>
+                        <div class="ml-1 small" style="padding-bottom: 1px;">
+                            <span id="favorite-papers-badge" class="badge badge-favorites {% if request.resolver_match.url_name == "favorites" %}active{% endif %} align-middle" style="display: none;"></span>
+                        </div>
+                    </a>
                 </li>
                 <li class="nav-item ml-2 d-none d-md-none d-lg-block">
                     <a class="nav-link" href="https://twitter.com/collabovid"><img

@@ -11,10 +11,16 @@
                     <h1 class="text-white display-4">Your favorite literature</h1>
 
                     <div class="muted-white">
-                        On this page you can find your favorite articles. You can add articles to the list of
-                        favorite articles by clicking on the <i class="fas fa-star"></i> symbol.
+                        On this page you can find your favorite articles. You can add and remove articles to this list
+                        by clicking on the <i class="fas fa-heart"></i> symbol. The list
+                        of papers is stored in your browser and not visible to nor saved on the Collabovid server.
+                        Thus, if you switch to another browser your data won't be
+                        transferred. When deleting the page data of collabovid.org, your
+                        favorite list is permanently deleted. You can find out more information on how the local stoarge
+                        is used
+                        in our <a href="{% url "privacy" %}" class="muted-white">data protection declaration</a>.
                         If you are interested in a specific topic that your favorite articles cover, you can
-                        search for the most similar articles in our dataset too.
+                        search for similar articles in our dataset, too.
 
                     </div>
 
@@ -33,12 +39,12 @@
         <i class="fas fa-circle-notch fa-spin"></i>
     </div>
 
-    <div id="no-favorites-alert" class="container mt-2" style="display: none;">
-        <div class="alert alert-secondary mx-3" role="alert">
+    <div id="no-favorites-alert" class="container mt-3" style="display: none;">
+        <div class="alert alert-warning mx-3" role="alert">
             <h4 class="alert-heading">No publications found</h4>
             <p>
                 You have no favorite papers. To add papers to this list,
-                use the <i class="fas fa-star"></i> symbol. Note that your favorite papers
+                use the <i class="fas fa-heart"></i> symbol. Note that your favorite papers
                 will be saved on your system. Once you delete the website data or switch to another
                 browser, your favorite papers list will be lost.
             </p>
@@ -47,14 +53,43 @@
 
     <div id="favorites-content" class="container mt-2" style="display: none;">
         <div class="col-12">
-            <div class="other-components-container text-right" style="display: none; margin-bottom: -0.75em;">
-                <a href="#" id="favorite-analysis-link" data-action="{% url "favorite-analysis" %}">Find similar
-                    publications</a>
+            <div class="other-components-container text-right text-muted"
+                 style="display: none; margin-bottom: -0.75em;">
+                <a href="#" id="clear-all-favorites-link"
+                   data-toggle="modal" data-target="#clear-favorites-modal">Clear the favorites list</a>
+                &middot;
+                <a href="#" id="favorite-analysis-link" data-action="{% url "favorite-analysis" %}">
+                    Search for similar publications
+                </a>
             </div>
 
             <div id="paper-container"></div>
 
             <nav class="mt-5" id="pagination-container"></nav>
+        </div>
+    </div>
+
+    <!-- Clear Favorites Modal -->
+    <div class="modal fade" id="clear-favorites-modal" tabindex="-1" role="dialog"
+         aria-labelledby="clear-all-favorites-link"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Clear favorites list</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure that you want to clear your list of favorite articles?
+                    The list will be deleted permanently.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button id="clear-all-favorites"  type="button" class="btn btn-danger">Clear</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -85,6 +120,8 @@
                 const paginationContainer = $("#pagination-container");
                 const favoriteAnalysisLink = $("#favorite-analysis-link");
                 const otherComponentsContainer = $(".other-components-container");
+
+                const clearFavoritesButton = $("#clear-all-favorites");
 
                 const paginator = form.collabovidJsPaginator({
                     indicator: indicator,
@@ -120,7 +157,14 @@
                         paperContainer.html(data).show();
                         indicator.hide();
                     });
-                })
+                });
+
+                clearFavoritesButton.click(function (e) {
+                    e.preventDefault();
+                    localStorage.removeItem("favoritePapers");
+                    location.reload();
+                    return false;
+                });
             } else {
                 noFavoritesAlert.fadeIn();
                 indicator.hide();

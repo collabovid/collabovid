@@ -644,3 +644,15 @@ a.favorite-paper-link:not(.active):hover
 {
     color: #494f53 !important;
 }
+
+.badge.badge-favorites.active
+{
+    color: #212529;
+    background-color: #f8f9fa;
+}
+
+.badge.badge-favorites
+{
+    background-color: rgba(255,255,255,.5);
+    color: #6e6e6e;
+}

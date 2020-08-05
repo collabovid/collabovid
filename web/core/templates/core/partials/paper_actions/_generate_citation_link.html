@@ -1,0 +1,16 @@
+<div class="dropdown d-inline">
+    <a id="citeDropdown{{ doi }}"
+       data-toggle="dropdown" href="#"><i class="fas fa-quote-right"></i></a>
+    <div class="dropdown-menu dropdown-menu-right mobile-dropdown export-dropdown"
+         aria-labelledby="citeDropdown{{ doi }}">
+        <h6 class="dropdown-header">Export file format</h6>
+        <a class="dropdown-item"
+           href="{% url "export-paper" "ris" doi %}">
+            Research Information System Format (RIS)
+        </a>
+        <a class="dropdown-item"
+           href="{% url "export-paper" "bibtex" doi %}">
+            BibTeX
+        </a>
+    </div>
+</div>

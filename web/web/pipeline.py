@@ -9,6 +9,7 @@ PIPELINE = {
                 'js/popper.min.js',
                 'js/bootstrap.min.js',
                 'js/jquery.ihavecookies.js',
+                'core/js/favorites.js'
             ),
             'output_filename': 'base.js'
         },
