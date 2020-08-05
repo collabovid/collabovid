@@ -1,3 +1,5 @@
+{% load search_url %}
+
 <div class="container py-5">
     <div class="row align-items-end">
         <div class="col-lg-7 col-12">
@@ -75,11 +77,11 @@
 
             <div class="text-center mt-3 small">
                 <a class="exchangeable-papers-content recent-papers-content" style="display: none;"
-                   href="{% url "search" %}?sorted_by=newest">show all</a>
+                   href="{{'newest' | search_url_from_sorted_by }}">show all</a>
                 <a class="exchangeable-papers-content trending-papers-content"
-                   href="{% url "search" %}?sorted_by=trending_d">show all</a>
+                   href="{{'trending_d' | search_url_from_sorted_by }}">show all</a>
                 <a class="exchangeable-papers-content most-popular-papers-content" style="display: none;"
-                   href="{% url "search" %}?sorted_by=popularity">show all</a>
+                   href="{{'popularity' | search_url_from_sorted_by }}">show all</a>
             </div>
 
         </div>

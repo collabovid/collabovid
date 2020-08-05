@@ -1,5 +1,6 @@
 {% load static %}
 {% load humanize %}
+{% load search_url %}
 <div class="col-xl-4 col-lg-6 col-md-6 col-sm-12 my-3">
     <div class="card rounded shadow h-100 overflow-hidden">
         <div style="width: 40px;
@@ -37,7 +38,7 @@
 
 
             <div class="position-absolute" style="right:2em; bottom: 1em;">
-                <a class="float-right" href="{% url "search" %}?categories={{ category_statistic.pk }}">Explore</a>
+                <a class="float-right" href="{{ category_statistic.pk | search_url_from_category }}">Explore</a>
             </div>
         </div>
     </div>

@@ -24,6 +24,7 @@ from data.models import (
 )
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
+from statistics.query_statistics import SearchQueryStatistics
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
@@ -39,9 +40,10 @@ import os
 
 @staff_member_required
 def queries(request):
-    queries = SearchQuery.objects.order_by('-created_at')[:100]
+    queries = SearchQuery.objects.all()
+    statistics = SearchQueryStatistics(queries)
     return render(request, "dashboard/queries/overview.html",
-                  {'search_queries': queries, 'total': SearchQuery.objects.count()})
+                  {'statistics': statistics})
 
 
 @staff_member_required

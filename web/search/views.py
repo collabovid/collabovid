@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -10,7 +11,7 @@ from statistics import PaperStatistics
 
 from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
 
-from search.forms import SearchForm, FindSimilarPapersForm
+from search.forms import SearchForm, FindSimilarPapersForm, FindSimilarPapersByTextForm
 from search.tagify.tagify_searchable import *
 
 from data.documents import AuthorDocument, JournalDocument, TopicDocument
@@ -20,10 +21,32 @@ import io
 MAX_UPLOAD_FILE_SIZE = 5000000  # in bytes, 5MB
 
 
-def upload(request):
+def favorites(request):
+
     if request.method == "GET":
-        return render(request, "search/similar_papers_upload.html")
+
+        show_similarity_analysis = request.GET.get('similarity_analysis', None) is not None
+
+        return render(request, "search/favorites.html", {"show_similarity_analysis": show_similarity_analysis})
+
+    return HttpResponseNotFound()
+
+
+def favorite_analysis(request):
+    dois = request.GET.get('dois', None)
+    if not dois:
+        return HttpResponseNotFound()
+    dois = json.loads(dois)
+    papers = Paper.objects.filter(pk__in=dois)
+
+    return render(request, "search/ajax/_favorite_analysis.html", {"papers": papers})
+
+def literature_analysis(request):
+    if request.method == "GET":
+        return render(request, "search/literature_analysis.html")
     if request.method == "POST":
+
+        content = None
 
         form = FindSimilarPapersForm(request.POST, request.FILES)
 
@@ -31,10 +54,17 @@ def upload(request):
             file_handle = request.FILES['file']
 
             if file_handle.size < MAX_UPLOAD_FILE_SIZE:
-                file_analyzer = BibFileAnalyzer(file_handle.read().decode('UTF-8'))
-                return render(request, "search/ajax/_file_analysis.html", {
-                    "file_analyzer": file_analyzer,
-                })
+                content = file_handle.read().decode('UTF-8')
+        else:
+            form = FindSimilarPapersByTextForm(request.POST)
+            if form.is_valid():
+                content = form.cleaned_data['content']
+
+        if content:
+            file_analyzer = BibFileAnalyzer(content)
+            return render(request, "search/ajax/_file_analysis.html", {
+                "file_analyzer": file_analyzer,
+            })
 
         return HttpResponseNotFound()
 
@@ -86,7 +116,7 @@ def export_search_result(request, export_type):
         form = SearchForm(request.GET)
 
         if form.is_valid():
-            search_response_helper = SearchRequestHelper(form)
+            search_response_helper = SearchRequestHelper(form, highlight=False)
 
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()

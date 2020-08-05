@@ -9,6 +9,7 @@ PIPELINE = {
                 'js/popper.min.js',
                 'js/bootstrap.min.js',
                 'js/jquery.ihavecookies.js',
+                'core/js/favorites.js'
             ),
             'output_filename': 'base.js'
         },
@@ -16,9 +17,19 @@ PIPELINE = {
             'source_filenames': (
                 'js/moment.js',
                 'js/Chart.min.js',
+                'core/js/chart_colors.js',
                 'core/js/collabovid_charts.js',
             ),
             'output_filename': 'charts.js'
+        },
+        'dashboard-charts': {
+            'source_filenames': (
+                'js/moment.js',
+                'js/Chart.min.js',
+                'core/js/chart_colors.js',
+                'dashboard/dashboard_charts.js',
+            ),
+            'output_filename': 'dashboard_charts.js'
         },
         'search': {
             'source_filenames': (
@@ -64,12 +75,13 @@ PIPELINE = {
         'similar_papers': {
             'source_filenames': (
                 'core/js/pagination.js',
+                'search/js/collabovid_js_paginator.js',
                 'search/js/collabovid_similar_search.js',
                 'core/js/paper_cards.js',
                 'search/js/export_confirm.js'
             ),
             'output_filename': 'similar_search.js'
-        },
+        }
     },
     'STYLESHEETS': {
         'base': {

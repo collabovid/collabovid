@@ -8,6 +8,8 @@ from Crypto.Cipher import AES
 from datetime import datetime, timezone
 
 
+lang_prefix = 'LC_ALL=en_US'
+
 class ShareConfigCommand(Command):
     KEY_FILE_SIZE = 128
     KEY_FILE_TYPE = str(KEY_FILE_SIZE) + 's'
@@ -18,17 +20,17 @@ class ShareConfigCommand(Command):
         if args.collect:
             self._collect('.deployment/config.zip')
         elif args.share:
-            self.run_shell_command("git pull", cwd=".deployment/")
+            self.run_shell_command(f"{lang_prefix} git pull", cwd=".deployment/")
             self._collect('.deployment/config.zip')
             self._encrypt('.deployment/config.zip')
-            self.run_shell_command("git add config.zip.enc", cwd=".deployment/")
-            self.run_shell_command("git commit -m \"New Config\"", cwd=".deployment/")
-            self.run_shell_command("git push", cwd=".deployment/")
+            self.run_shell_command(f"{lang_prefix} git add config.zip.enc", cwd=".deployment/")
+            self.run_shell_command(f"{lang_prefix} git commit -m \"New Config\"", cwd=".deployment/")
+            self.run_shell_command(f"{lang_prefix} git push", cwd=".deployment/")
             os.remove('.deployment/config.zip')
         elif args.generate_key:
             self._generate_key()
         elif args.load:
-            self.run_shell_command("git pull", cwd=".deployment/")
+            self.run_shell_command(f"{lang_prefix} git pull", cwd=".deployment/")
             now_utc = str(datetime.now(timezone.utc).timestamp())
             self.print_info("Saving current config")
             self._collect('.deployment/.old/' + now_utc + '.zip')
@@ -147,7 +149,7 @@ class ShareConfigCommand(Command):
     def _collect(self, target_path):
         self.print_info("Collecting zip file...")
 
-        paths = self.run_shell_command("git clean -dnx | cut -c 14-", cwd="k8s/",
+        paths = self.run_shell_command(f"{lang_prefix} git clean -dnx | cut -c 14-", cwd="k8s/",
                                        collect_output=True).stdout.decode('utf-8').rstrip().split('\n')
 
         cleaned_paths = ['cvid-config.json']

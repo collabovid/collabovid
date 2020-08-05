@@ -10,6 +10,16 @@ body {
     background: #F5F5F5;
 }
 
+@media (max-width: 576px) {
+    .display-4 {
+        font-size: 2.5rem;
+    }
+
+    .h1, h1 {
+        font-size: 2rem;
+    }
+}
+
 .feedback-bar {
     background-color: #5b73aa;
     color: #fff;
@@ -589,19 +599,16 @@ label.nav-link {
 
 /** Selectable List Group End */
 
-.paper-card-badges-container a, .paper-card-badges-container a:hover
-{
+.paper-card-badges-container a, .paper-card-badges-container a:hover {
     line-height: 1;
     text-decoration: none;
 }
 
-.paper-card-badges-container a span.badge
-{
+.paper-card-badges-container a span.badge {
     white-space: normal;
 }
 
-.paper-card-badges-container a span.topic-badge
-{
+.paper-card-badges-container a span.topic-badge {
     background: #007799;
     color: #ffffff;
 }
@@ -613,8 +620,7 @@ label.nav-link {
     }
 }
 
-div.feature-card-footer
-{
+div.feature-card-footer {
     position: absolute;
     padding-bottom: .5em;
     padding-right: 1em;
@@ -622,4 +628,31 @@ div.feature-card-footer
     text-align: right;
     left: 0;
     right: 0;
+}
+
+a.favorite-paper-link.active
+{
+    color: #e76262;
+}
+
+a.favorite-paper-link:not(.active)
+{
+    color: #6c757d!important;
+}
+
+a.favorite-paper-link:not(.active):hover
+{
+    color: #494f53 !important;
+}
+
+.badge.badge-favorites.active
+{
+    color: #212529;
+    background-color: #f8f9fa;
+}
+
+.badge.badge-favorites
+{
+    background-color: rgba(255,255,255,.5);
+    color: #6e6e6e;
 }

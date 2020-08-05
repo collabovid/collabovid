@@ -1,20 +1,95 @@
 {% extends "dashboard/base.html" %}
 {% load humanize %}
+{% load pipeline %}
+
+{% block css %}
+{% stylesheet 'search' %}
+{% stylesheet 'charts' %}
+<link href="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.css" rel="stylesheet" type="text/css"/>
+{% endblock %}
 
 {% block content %}
+<div class="pb-5">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card rounded shadow w-100">
+                <div class="card-body">
+                    <h3 class="card-title">Queries over Time</h3>
+                    <div>
+                        <canvas id="timeChart" style="min-height: 400px"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_query_table.html' with queries=statistics.recent_queries id='recentTable' label='Recent Queries' %}
+        {% include 'dashboard/queries/partials/_query_terms_table.html' with queries=statistics.top_query_terms label='Top Query Terms' id='topTermsTable' %}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='tabChart' label='Search Type' %}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='sortedByChart' label='Sorted By'%}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='articleTypeChart' label='Article Type'%}
+        {% include 'dashboard/queries/partials/_small_chart_card.html' with canvas_id='filterChart' label='Number of Filters' %}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='filterCountsChart' label='Filter Count by Type' %}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='filterLengthsChart' label='Number Of Items in Filter' %}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='categoriesChart' label='Categories'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='topicsChart' label='Topics'%}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='paperHostsChart' label='Paper Hosts'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='locationsChart' label='Locations'%}
+    </div>
+    <div class="row mt-4">
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='journalsChart' label='Journals'%}
+        {% include 'dashboard/queries/partials/_bar_chart_card.html' with canvas_id='authorsChart' label='Authors'%}
+    </div>
+</div>
+{% endblock %}
 
-    <h2>Latest {{ search_queries.count }}/{{ total }} Queries</h2>
-    
-    <table class="table table-striped w-100 mt-3">
+{% block script %}
+{% javascript 'dashboard-charts' %}
+<script src="https://cdn.datatables.net/v/dt/dt-1.10.21/datatables.min.js" type="text/javascript"></script>
+<script>
+    $(document).ready(function () {
+        const timeData = JSON.parse('{{ statistics.time_data|escapejs }}');
+        const tabData = JSON.parse('{{ statistics.tab_data|escapejs }}');
+        const sortedByData = JSON.parse('{{ statistics.sorted_data|escapejs }}');
+        const articleTypeData = JSON.parse('{{ statistics.article_type_data|escapejs }}');
+        const topCategories = JSON.parse('{{ statistics.top_categories|escapejs }}');
+        const topTopics = JSON.parse('{{ statistics.top_topics|escapejs }}');
+        const topPaperHosts = JSON.parse('{{ statistics.top_paper_hosts|escapejs }}');
+        const topLocations = JSON.parse('{{ statistics.top_locations|escapejs }}');
+        const topJournals = JSON.parse('{{ statistics.top_journals|escapejs }}');
+        const topAuthors = JSON.parse('{{ statistics.top_authors|escapejs }}');
+        const filterDistribution = JSON.parse('{{ statistics.filter_distribution|escapejs }}');
+        const filterCountsByType = JSON.parse('{{ statistics.filter_type_counts|escapejs }}');
+        const filterLengths = JSON.parse('{{ statistics.filter_lengths|escapejs }}');
 
-        {% for search_query in search_queries %}
+        $('#recentTable').DataTable({
+            "order": [[4, "desc"]]
+        });
+        $('#topTermsTable').DataTable({
+            "order": [[1, "desc"]]
+        });
 
-            <tr>
-                <td>{{ search_query.query }}</td>
-                <td class="text-muted w-25">{{ search_query.created_at|naturaltime }}</td>
-            </tr>
-
-        {% endfor %}
-
-    </table>
+        $("#timeChart").queriesOverTime({plot_data: timeData});
+        $("#tabChart").queryDistribution({plot_data: tabData});
+        $("#sortedByChart").queryDistribution({plot_data: sortedByData});
+        $("#articleTypeChart").queryDistribution({plot_data: articleTypeData});
+        $("#categoriesChart").barChart({plot_data: topCategories});
+        $("#topicsChart").barChart({plot_data: topTopics});
+        $('#paperHostsChart').barChart({plot_data: topPaperHosts});
+        $('#locationsChart').barChart({plot_data: topLocations});
+        $('#journalsChart').barChart({plot_data: topJournals});
+        $('#authorsChart').barChart({plot_data: topAuthors});
+        $('#filterChart').queryDistribution({plot_data: filterDistribution});
+        $('#filterCountsChart').barChart({plot_data: filterCountsByType});
+        $('#filterLengthsChart').stackedBarChart({plot_data: filterLengths});
+    });
+</script>
 {% endblock %}

@@ -1,3 +1,5 @@
+{% load search_url %}
+
 <div id="topics-container">
     <div class="row">
         <div class="d-none d-md-block col-md-3 text-left mt-2">
@@ -44,7 +46,7 @@
                                 <h6 class="show-topic d-inline-block mb-0"
                                     style="cursor: pointer;">{{ topic.name }}</h6>
                                 <div class="mt-1 small">
-                                    <a href="{% url "search" %}?topics={{ topic.pk }}" class="float-right">
+                                    <a href="{{ topic.pk | search_url_from_topic }}" class="float-right">
                                         View all papers
                                     </a>
                                     <div class="text-muted">

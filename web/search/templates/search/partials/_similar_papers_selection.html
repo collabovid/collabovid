@@ -1,0 +1,84 @@
+<form id="similar-paper-form" method="get" action="{% url "similar-papers" %}">
+
+    <h4 class="text-muted mt-3">
+        {% if title %}{{ title }}{% else %}Found Papers{% endif %}
+        <span class="selected-count-label float-right small text-danger">Selected <span>0</span>/10</span>
+    </h4>
+    <ul class="list-group selectable-list-group w-100">
+        {% for paper in papers %}
+            {% include "core/partials/_paper_list_item.html" with paper=paper selectable=True %}
+        {% endfor %}
+    </ul>
+
+
+    {% if missing_entries %}
+        <h4 class="text-muted mt-3">{% if missing_title %}{{ missing_title }}{% else %}Missing Papers{% endif %}</h4>
+        <ul class="list-group w-100">
+            {% for paper in missing_entries %}
+                <li class="list-group-item text-danger">
+                    {{ paper.title }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="d-flex mt-3">
+
+        <div class="text-left text-muted">
+            <a id="clear-button" href="#">Deselect all</a> &middot;
+            <a id="select-all-button" href="#">Select All</a>
+        </div>
+
+        <div class="text-right flex-fill">
+            <button id="similar-paper-form-disabled-button" class="btn btn-success"
+                    disabled="disabled">Continue
+            </button>
+
+            <button id="similar-paper-form-enabled-button" style="display: none;" class="btn btn-success">
+                Continue
+            </button>
+        </div>
+    </div>
+
+</form>
+
+<script>
+    $(document).ready(function (e) {
+
+        let form = $("#similar-paper-form");
+        let disabled_button = $("#similar-paper-form-disabled-button");
+        let enabled_button = $("#similar-paper-form-enabled-button");
+
+        disabled_button.tooltip();
+
+        $("#clear-button").click(function (e) {
+            e.preventDefault();
+            form.find("input").prop("checked", false).change();
+        });
+
+        $("#select-all-button").click(function (e) {
+            e.preventDefault();
+            form.find("input").prop("checked", true).change();
+        });
+
+        form.find("input[name=dois]").change(function () {
+
+            let total = form.find("input[name=dois]").length;
+            let selected = form.find("input[name=dois]:checked").length;
+
+            if (selected >= 1 && selected <= 10) {
+                disabled_button.hide();
+                enabled_button.show();
+                $(".selected-count-label").removeClass('text-danger');
+            } else {
+                disabled_button.show();
+                enabled_button.hide();
+                $(".selected-count-label").addClass('text-danger');
+            }
+
+            $(".selected-count-label span").html(selected)
+
+        });
+
+    })
+</script>
