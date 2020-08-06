@@ -1,4 +1,6 @@
 import json
+
+from django.db.models import QuerySet
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotFound, JsonResponse, HttpResponse
 from django.core.paginator import EmptyPage, PageNotAnInteger
@@ -111,24 +113,44 @@ def search(request):
     return HttpResponseNotFound()
 
 
+def export(papers, export_type: str):
+    if isinstance(papers, QuerySet):
+        count = papers.count()
+    else:
+        count = len(papers)
+
+    if count > 0:
+        if export_type == 'ris':
+            exporter = RisFileExporter(papers=papers)
+        elif export_type == 'bibtex':
+            exporter = BibTeXFileExporter(papers=papers)
+        else:
+            return HttpResponseNotFound()
+
+        return exporter.build_response()
+
+    return HttpResponseNotFound()
+
+
 def export_search_result(request, export_type):
     if request.method == "GET":
         form = SearchForm(request.GET)
 
         if form.is_valid():
             search_response_helper = SearchRequestHelper(form, highlight=False)
-
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()
+                return export(search_result['paginator'].page(1), export_type=export_type)
 
-                if export_type == 'ris':
-                    exporter = RisFileExporter(papers=search_result['paginator'].page(1))
-                elif export_type == 'bibtex':
-                    exporter = BibTeXFileExporter(papers=search_result['paginator'].page(1))
-                else:
-                    return HttpResponseNotFound()
+    return HttpResponseNotFound()
 
-                return exporter.build_response()
+
+def export_dois(request, export_type):
+    if request.method == "GET":
+        dois = request.GET.getlist('dois')
+        if dois:
+            papers = Paper.objects.filter(pk__in=dois)
+            return export(papers, export_type=export_type)
 
     return HttpResponseNotFound()
 
@@ -136,16 +158,7 @@ def export_search_result(request, export_type):
 def export_paper(request, export_type, doi):
     if request.method == "GET":
         get_object_or_404(Paper, pk=doi)
-
-        if export_type == 'ris':
-            exporter = RisFileExporter(papers=Paper.objects.filter(pk=doi))
-        elif export_type == 'bibtex':
-            exporter = BibTeXFileExporter(papers=Paper.objects.filter(pk=doi))
-        else:
-            return HttpResponseNotFound()
-
-        return exporter.build_response()
-
+        return export(Paper.objects.filter(pk=doi), export_type=export_type)
     return HttpResponseNotFound()
 
 

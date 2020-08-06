@@ -53,14 +53,39 @@
 
     <div id="favorites-content" class="container mt-2" style="display: none;">
         <div class="col-12">
-            <div class="other-components-container text-right text-muted"
+            <div class="other-components-container text-muted"
                  style="display: none; margin-bottom: -0.75em;">
-                <a href="#" id="clear-all-favorites-link"
-                   data-toggle="modal" data-target="#clear-favorites-modal">Clear the favorites list</a>
-                &middot;
-                <a href="#" id="favorite-analysis-link" data-action="{% url "favorite-analysis" %}">
-                    Search for similar publications
-                </a>
+                <div class="d-flex flex-row align-items-end">
+                    <div>
+                        <div class="dropdown d-inline-block">
+                            <button type="button" id="citeDropdown" class="btn btn-info"
+                                    data-toggle="dropdown">
+                                <i class="fas fa-download"></i><span class="d-none d-md-inline"> Export List</span>
+                            </button>
+                            <div class="dropdown-menu mobile-dropdown"
+                                 aria-labelledby="citeDropdown">
+                                <h6 class="dropdown-header">Export file format</h6>
+                                <a class="dropdown-item favorites-download-button"
+                                   href="{% url "dois-export" "ris" %}">
+                                    Research Information System Format (.ris)
+                                </a>
+                                <a class="dropdown-item favorites-download-button"
+                                   href="{% url "dois-export" "bibtex" %}">
+                                    BibTeX (.bib)
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-fill text-right">
+                        <a href="#" id="clear-all-favorites-link" class="d-block d-md-inline"
+                           data-toggle="modal" data-target="#clear-favorites-modal">Clear the favorites list</a>
+                        <span class="d-none d-md-inline">&middot;</span>
+                        <a class="d-block d-md-inline" href="#" id="favorite-analysis-link"
+                           data-action="{% url "favorite-analysis" %}">
+                            Search for similar publications
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div id="paper-container"></div>
@@ -101,20 +126,24 @@
     <script>
         $(document).ready(function () {
 
+            function getFavoriteDois() {
+                let favoriteDoisString = localStorage.getItem("favoritePapers");
+                let favoriteDois = [];
+                if (favoriteDoisString !== null) {
+                    favoriteDois = JSON.parse(favoriteDoisString);
+                }
+
+                return favoriteDois;
+            }
+
             const noFavoritesAlert = $("#no-favorites-alert");
             const favoritesContent = $("#favorites-content");
             const indicator = $("#paper-loading-indicator");
 
-
-            let favoriteDoisString = localStorage.getItem("favoritePapers");
-            let favoriteDois = [];
-            if (favoriteDoisString !== null) {
-                favoriteDois = JSON.parse(favoriteDoisString);
-            }
+            let favoriteDois = getFavoriteDois();
 
             if (favoriteDois.length > 0) {
 
-                console.log(favoriteDois);
                 const form = $("#similar-paper-form");
                 const paperContainer = $("#paper-container");
                 const paginationContainer = $("#pagination-container");
@@ -143,13 +172,9 @@
                     paperContainer.hide();
                     indicator.show();
                     paginationContainer.hide();
-                    favoriteAnalysisLink.parent().hide();
+                    otherComponentsContainer.hide();
 
-                    let favoriteDoisString = localStorage.getItem("favoritePapers");
-                    let favoriteDois = [];
-                    if (favoriteDoisString !== null) {
-                        favoriteDois = JSON.parse(favoriteDoisString);
-                    }
+                    let favoriteDois = getFavoriteDois();
 
                     if (favoriteDois.length === 0) {
                         location.reload();
@@ -173,6 +198,29 @@
                     return false;
                 });
 
+                $(".favorites-download-button").click(function (e) {
+                        e.preventDefault();
+                        let favoriteDois = getFavoriteDois();
+
+                        if (window.show_confirm_export_dialog()) {
+
+                            if (favoriteDois.length > 0) {
+                                let dois = "";
+
+                                $.each(favoriteDois, function (index, doi) {
+                                    if (index > 0)
+                                        dois += "&";
+                                    dois += 'dois=' + doi;
+                                });
+                                window.open($(this).attr('href') + "?" + dois, '_blank');
+                            } else {
+                                location.reload();
+                                return false;
+                            }
+                        }
+                    }
+                );
+
 
                 favoritesContent.show();
 
@@ -188,7 +236,8 @@
             }
 
 
-        });
+        })
+        ;
     </script>
 {% endblock %}
 
