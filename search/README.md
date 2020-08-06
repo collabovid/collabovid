@@ -142,7 +142,3 @@ the relationships from the high dimensional space in 3d than PCA. But this also 
 the whole set of coordinates each time new papers are added or papers are changed. This is done by the
 [reduce-embedding-dimensionality](src/analyze/reduce_embedding_dimensionality.py) task and is run as part of the
 [scrape](../scrape/src/task_scrape.py) task.
-
-
-
-## Elasticsearch

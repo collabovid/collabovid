@@ -122,6 +122,25 @@ The task can now be called from the command line, e.g.
 
 It is also possible to execute a task from code or via the admin dashboard at the `/dashboard/tasks` url.
 
+### Elasticsearch
+
+We are using a free version of [Elasticsearch](https://www.elastic.co/) for keyword search, to improve the ordering
+of the semantic search and to show suggestions
+for various model names in *web*. In order to connect Django and Elasticsearch
+we use the `django-elasticsearch-dsl` package (see [GitHub](https://github.com/django-es/django-elasticsearch-dsl))
+which in turn was build up on `elasticsearch-dsl` (see [GitHub](https://github.com/elastic/elasticsearch-dsl-py/)).
+The Django specific package implements all necessary signals
+that trigger index updates once a database object is changed.
+The Elasticsearch indices are defined in the *collabovid-shared* package, 
+i.e. `data/documents.py`. Elasticsearch won't be activated by default. The environment variable
+`USING_ELASTICSEARCH=1` has to be set for every component. 
+To initialize Elasticsearch use the following command
+ 
+    python manage.my search_index --rebuild
+    
+The default Elasticsearch URL is defined in the `elasticsearch_settings.py`
+and is set to `localhost:9200`. To change the address set the environment variable
+`ELASTICSEARCH_URL`.
 
 ### Scrape
 
