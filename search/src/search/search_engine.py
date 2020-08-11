@@ -9,7 +9,11 @@ from src.search.utils import TimerUtilities
 from .semantic_search import SemanticSearch
 from .development.title_search import TitleSearch
 
+
 class SearchEngine:
+    """
+    This class manages the combination of different searches.
+    """
     COMBINED_SEARCH = 1
     KEYWORD_SEARCH = 2
 
@@ -18,7 +22,6 @@ class SearchEngine:
     ARTICLE_TYPE_PEER_REVIEWED = 1
 
     def __init__(self, form):
-
         if form['tab'] == 'combined':
             self.search_type = SearchEngine.COMBINED_SEARCH
         elif form['tab'] == 'keyword':
@@ -29,6 +32,10 @@ class SearchEngine:
         self.form = form
 
     def filter_papers(self):
+        """
+        Filters the papers based on the forms contents.
+        :return:
+        """
         category_ids = self.form['categories']
         start_date = self.form['published_at_start']
         end_date = self.form['published_at_end']
@@ -138,13 +145,17 @@ class SearchEngine:
         return score_table
 
     def search(self):
+        """
+        Performs a search operation. If no query is given the papers will get the same score
+        unless only one category filter is applied in which case their score will be the category membership
+        score.
+        :return: A dict of dois with a score.
+        """
 
         query = self.form["query"].strip()
 
         filtered, papers = self.filter_papers()
         paper_score_table = defaultdict(int)
-
-        print(filtered, papers.count())
 
         if query and papers.count() > 0:
             filtered_dois = None

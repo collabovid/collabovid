@@ -5,9 +5,19 @@ from math import floor
 
 
 class SemanticSearch:
-
+    """
+    Provides semantic search functionality.
+    """
     @staticmethod
     def find(score_table: dict, query: str, ids: List[str], top=None):
+        """
+        Makes a semantic search for a given query.
+        :param score_table: The score table.
+        :param query: The query.
+        :param ids: Filtered ids, i.e. the dois of papers that match the applied filters. Can be None if
+        all dois should be included.
+        :param top: Optional. Include only the top n papers if set to an integer.
+        """
 
         ids_set = set(ids) if ids else None
 
@@ -29,5 +39,3 @@ class SemanticSearch:
                 else:
                     # List is sorted, thus we can break
                     break
-
-        return query

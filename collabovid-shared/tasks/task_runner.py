@@ -37,11 +37,11 @@ class TaskRunner:
         else:
             runnable.log("Finished", cls.task_name(), "without exceptions")
             task.status = Task.STATUS_FINISHED
+        finally:
             task.progress = 100
-
-        task.ended_at = timezone.now()
-        runnable.flush()
-        task.save()
+            task.ended_at = timezone.now()
+            runnable.flush()
+            task.save()
 
     @staticmethod
     def run_task(cls, *args, **kwargs):

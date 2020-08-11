@@ -1,10 +1,7 @@
 from django.conf import settings
 from django.db.models import Q, QuerySet
 
-from typing import List
-
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from django.contrib.postgres.search import TrigramDistance
 
 class TitleSearch:
     """
@@ -12,12 +9,12 @@ class TitleSearch:
     """
 
     @staticmethod
-    def find(score_table: dict, query: str, papers: QuerySet, ):
+    def find(score_table: dict, query: str, papers: QuerySet):
         """
-        :param score_table
-        :param query:
-        :param papers:
-        :param score_min:
+        Performs a simple title match for a given query.
+        :param score_table The score table
+        :param query: The query
+        :param papers: The papers queryset
         :return:
         """
 
