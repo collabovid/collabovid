@@ -24,6 +24,11 @@ from django.core.serializers.json import DjangoJSONEncoder
 
 
 def covid_related(db_article):
+    """
+    Return true, iff the given article was not available before 2020/01/01 and the title, abstract or content contains
+    one of the keywords, matching this regex:
+            corona.?virus|(^|\s)corona(\s|$)|covid.?(20)?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov
+    """
     if db_article.published_at and db_article.published_at < date(year=2019, month=12, day=1):
         return False
 
@@ -37,6 +42,11 @@ def covid_related(db_article):
 
 @dataclass
 class SerializableArticleRecord:
+    """
+    Staging data structure for article records. Meta information of articles are fetched from external data sources and
+    stored in this data structure. After verifying the data (integrity ocstraints, etc.), the data are transferred to
+    the database.
+    """
     doi: Optional[str] = None
     title: Optional[str] = None
     abstract: Optional[str] = None
@@ -55,17 +65,29 @@ class SerializableArticleRecord:
 
     @property
     def md5(self):
+        """
+        Returns the md5 hash of all meta data (obviously except the md5_ value).
+        """
         if not self._md5:
             m = hashlib.md5(self.json().encode('utf-8'))
             self._md5 = m.hexdigest()[:22]  # Maximum length of MD5 is 22 hex digits
         return self._md5
 
     def json(self):
+        """
+        Serializes the data structure to JSON.
+        """
         return json.dumps(self.__dict__, sort_keys=True, cls=DjangoJSONEncoder)
 
 
 class DatabaseUpdate:
+    """
+    Class for transferring the fetched data to the database.
+    """
     class UpdateException(Exception):
+        """
+        Raised, to abort the update process of the current record.
+        """
         def __init__(self, msg):
             self.msg = msg
 
@@ -73,9 +95,15 @@ class DatabaseUpdate:
             return self.msg
 
     class Error(UpdateException):
+        """
+        Raised, if an error, concerning the database insert process, occurs.
+        """
         pass
 
     class SkipArticle(UpdateException):
+        """
+        Raised, if an article update should be skipped for some reason (e.g. already tracked by other data source)
+        """
         pass
 
     def __init__(self, datasource, update_existing=False, force_update=False):
@@ -84,6 +112,13 @@ class DatabaseUpdate:
         self.force_update = force_update
 
     def insert(self, datapoint: SerializableArticleRecord):
+        """
+        Verifies that all integrity constraints are fulfilled and inserts the article data into the database. Checks if
+        the article is on the ignore list and checks for conflicts with manual modifications.
+
+        Returns a triple (Paper, bool, bool), containing the created/updated db article record and if the article was
+        created or updated or neither created or updated.
+        """
         self._validate_integrity_constraints(datapoint)
 
         if IgnoredPaper.objects.filter(doi=datapoint.doi).exists():
@@ -129,6 +164,9 @@ class DatabaseUpdate:
 
     @staticmethod
     def _validate_integrity_constraints(datapoint: SerializableArticleRecord):
+        """
+        Tests against serveal integrity constraints.
+        """
         error = None
         error_msg = None
         if not datapoint.doi:
@@ -168,6 +206,9 @@ class DatabaseUpdate:
             raise DatabaseUpdate.Error(error_msg)
 
     def _update(self, db_article: Paper, datapoint: SerializableArticleRecord):
+        """
+        Inserts article information to the database.
+        """
         db_article.title = datapoint.title
         db_article.abstract = datapoint.abstract
         db_article.published_at = datapoint.publication_date

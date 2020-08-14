@@ -8,6 +8,11 @@ from data.models import AltmetricData, DataSource
 
 
 class AltmetricUpdate:
+    """
+    Class for updating the altmetric score of the articles.
+    """
+
+    # Time between two reqests to the Altmetric API.
     QUERY_INTERVAL_SEC = 0.0
 
     def __init__(self, api_key):
@@ -15,6 +20,9 @@ class AltmetricUpdate:
         self.last_query = None
 
     def update(self, paper):
+        """
+        Updates the altmetric score and history for the given article.
+        """
         if self.last_query:
             elapsed_time_sec = time.time() - self.last_query
             if self.QUERY_INTERVAL_SEC > 0.0 and elapsed_time_sec < self.QUERY_INTERVAL_SEC:

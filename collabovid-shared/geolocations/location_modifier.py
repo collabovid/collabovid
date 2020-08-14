@@ -6,9 +6,15 @@ from geolocations.geoname_db import GeonamesDB, GeonamesDBError, Location
 
 
 class LocationModifier:
+    """
+    Class to update locations in the database.
+    """
+
     @staticmethod
     def delete_and_ignore_location(location):
-        """Removes location and all associated location memberships and add all membership words to ignore list."""
+        """
+        Removes location and all associated location memberships and add all membership words to ignore list.
+        """
         memberships = GeoLocationMembership.objects.filter(location=location)
 
         for membership in memberships:
@@ -25,7 +31,10 @@ class LocationModifier:
 
     @staticmethod
     def change_location(location, new_geonames_id):
-        """Maps an existing location to another location with the given Geonames ID."""
+        """
+        Maps an existing location to another location with the given Geonames ID.
+        """
+
         try:
             new_location = GeoLocation.objects.get(geonames_id=new_geonames_id)
         except GeoLocation.DoesNotExist:
@@ -52,7 +61,9 @@ class LocationModifier:
 
     @staticmethod
     def add_location(article, geonames_id):
-        """Adds the given location to the given article and returns the possibly created location."""
+        """
+        Adds the given location to the given article and returns the possibly created location.
+        """
         try:
             location = GeoLocation.objects.get(geonames_id=geonames_id)
         except GeoLocation.DoesNotExist:
@@ -73,6 +84,10 @@ class LocationModifier:
 
     @staticmethod
     def delete_location_membership(location_id, article_id):
+        """
+        Deletes a location membership of an article.
+        """
+
         try:
             membership = GeoLocationMembership.objects.get(paper_id=article_id, location_id=location_id)
             with transaction.atomic():

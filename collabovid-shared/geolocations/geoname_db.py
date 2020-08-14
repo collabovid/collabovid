@@ -20,6 +20,9 @@ class GeonamesDBError(Exception):
 
 
 class TimeZone(Base):
+    """
+        SQLAlchemy table class for GeoNames database timezone.
+        """
     __tablename__ = 'timezone'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -30,6 +33,9 @@ class TimeZone(Base):
 
 @total_ordering
 class Location(Base):
+    """
+    SQLAlchemy table class for GeoNames database location.
+    """
     __tablename__ = 'location'
 
     id = Column(Integer, primary_key=True)
@@ -61,6 +67,9 @@ class Location(Base):
 
     @property
     def feature_value(self):
+        """
+            Scores a location with a value based on feature class and population.
+        """
         hierarchy = [
             'A.PCL', 'P.PPLC', 'A.ADM1', 'A.ADM2', 'A.ADM3', 'A.ADM4', 'A.ADM5', 'A', 'P.PPL', 'P', '',
         ]
@@ -76,6 +85,9 @@ class Location(Base):
 
 
 class Alias(Base):
+    """
+        SQLAlchemy table class for GeoNames database alias.
+    """
     __tablename__ = 'alias'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -84,6 +96,9 @@ class Alias(Base):
 
 
 class GeonamesDB:
+    """
+    Class to query GeoNames SQLite database.
+    """
     class RecordNotFound(LookupError):
         def __init__(self, search_term):
             self.search_term = search_term
@@ -127,6 +142,9 @@ class GeonamesDB:
         return self.session.query(Alias)
 
     def search_country(self, country_code):
+        """
+        Search a country by country code.
+        """
         return self.locations.filter(
             Location.country_code == country_code,
             Location.feature_class == 'A',
@@ -134,6 +152,10 @@ class GeonamesDB:
         ).first()
 
     def search(self, query, country_code=None, feature=None):
+        """
+        Search a location by name or alias. Can be filtered by country code and feature class. Returns queryset of all
+        matching locations.
+        """
         lquery = query.lower()
         q = Location.id.in_(self.session.query(Alias.location_id).filter(Alias.name == lquery))
 
@@ -146,12 +168,21 @@ class GeonamesDB:
         return self.locations.filter(q)
 
     def search_most_probable(self, query, country=None, feature=None):
+        """
+        Like search, but returns only most probable location.
+        """
         result = sorted(self.search(query, country_code=country, feature=feature), reverse=True)
         if len(result) == 0:
             raise GeonamesDB.RecordNotFound(query)
         return result[0]
 
     def loaddata(self, path):
+        """
+        Creates an sqlite3 database and fills it with content. Requires the allCountries.txt Gazetteer data from
+        geonames.org.
+
+        :param path: Path to allCountries.txt Gazetteer.
+        """
         engine = create_engine(self._connection_string, echo=False)
         Base.metadata.create_all(engine)
         Session = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)

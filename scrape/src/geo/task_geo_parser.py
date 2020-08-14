@@ -9,6 +9,10 @@ from tasks.colors import Green, Red, Grey
 
 @register_task
 class GeoParserTask(Runnable):
+    """
+    Task to update geo locations for all papers.
+    """
+
     @staticmethod
     def task_name():
         return 'parse-geo-locations'

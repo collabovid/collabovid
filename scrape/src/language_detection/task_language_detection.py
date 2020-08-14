@@ -5,6 +5,10 @@ from tasks.definitions import register_task, Runnable
 
 @register_task
 class LanguageDetectionTask(Runnable):
+    """
+    Recomputes probabilities that papers are not written in english language.
+    """
+
     @staticmethod
     def task_name():
         return 'detect-non-english-papers'

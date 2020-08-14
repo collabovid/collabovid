@@ -5,10 +5,16 @@ import spacy
 from geolocations.geoname_db import GeonamesDB, Location
 from django.conf import settings
 
+
+# Used spaCy model for recognizing geo political entities.
 _SPACY_MODEL = 'en_core_web_lg'
 
 
 class GeoParser:
+    """
+    Uses the GeoNames database and the spaCy framework to detect and match geopolitical entities in a given query.
+    """
+
     def __init__(self, db_path, name_resolutions=None):
         self.nlp = spacy.load(os.path.join(settings.MODELS_BASE_DIR, "en_core_web_lg"))
         self.geonames_db = GeonamesDB(db_path)
@@ -29,6 +35,9 @@ class GeoParser:
         self.geonames_db.close_session()
 
     def parse(self, query, merge=False):
+        """
+        Extract geo locations from a given query.
+        """
         doc = self.nlp(query)
         locations = []
         ignored_entities = []
@@ -116,6 +125,10 @@ class GeoParser:
 
     @staticmethod
     def _get_alternate_term(text):
+        """
+        Replaces/Removes several suffixes/prefixes from a given search term.
+        """
+
         ltext = text.lower()
 
         prefixes = ['the ']
