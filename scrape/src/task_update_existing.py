@@ -16,8 +16,8 @@ class UpdateExistingTask(Runnable):
     def task_name():
         return "update-existing-articles"
 
-    def __init__(self, force_update: bool = False, medrxiv_count: int = 0, arxiv_count: int = 0,
-                 pubmed_count: int = 1, elsevier_count: int = 1, *args, **kwargs):
+    def __init__(self, force_update: bool = False, medrxiv_count: int = 50, arxiv_count: int = 50,
+                 pubmed_count: int = 100, elsevier_count: int = 100, *args, **kwargs):
         super(UpdateExistingTask, self).__init__(*args, **kwargs)
         self.force_update = force_update
         self.medrxiv_count = medrxiv_count
@@ -26,10 +26,10 @@ class UpdateExistingTask(Runnable):
         self.elsevier_count = elsevier_count
 
     def run(self):
-        # self.log("Updating medRxiv/bioRxiv articles...")
-        # TaskRunner.run_task(MedBiorxivUpdateTask, force_update=self.force_update, count=self.medrxiv_count,
-        #                     started_by=self._task.started_by)
-        # self.log("Finished updating medRxiv/bioRxiv articles...")
+        self.log("Updating medRxiv/bioRxiv articles...")
+        TaskRunner.run_task(MedBiorxivUpdateTask, force_update=self.force_update, count=self.medrxiv_count,
+                            started_by=self._task.started_by)
+        self.log("Finished updating medRxiv/bioRxiv articles...")
 
         self.progress(15)
 
@@ -37,16 +37,16 @@ class UpdateExistingTask(Runnable):
         TaskRunner.run_task(ArxivUpdateTask, force_update=self.force_update, count=self.arxiv_count,
                             started_by=self._task.started_by)
 
-        # self.progress(30)
-        #
-        # self.log("Finished updating arXiv articles...")
-        #
-        # self.log("Updating Elsevier articles...")
-        # TaskRunner.run_task(ElsevierUpdateTask, force_update=self.force_update, count=self.elsevier_count,
-        #                     started_by=self._task.started_by)
-        # self.log("Finished updating Elsevier articles...")
-        #
-        # self.progress(45)
+        self.progress(30)
+
+        self.log("Finished updating arXiv articles...")
+
+        self.log("Updating Elsevier articles...")
+        TaskRunner.run_task(ElsevierUpdateTask, force_update=self.force_update, count=self.elsevier_count,
+                            started_by=self._task.started_by)
+        self.log("Finished updating Elsevier articles...")
+
+        self.progress(45)
 
         self.log("Updating Pubmed articles...")
         TaskRunner.run_task(PubmedUpdateTask, force_update=self.force_update, count=self.pubmed_count,

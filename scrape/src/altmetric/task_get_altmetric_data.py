@@ -48,14 +48,14 @@ class AltmetricUpdateTask(Runnable):
         self.log(f"Update Altmetric data of {sorted_papers.count()} papers")
 
         n_errors = 0
-        # for paper in self.progress(sorted_papers):
-        #     try:
-        #         altmetric_update.update(paper)
-        #     except (AltmetricException, AltmetricHTTPException) as ex:
-        #         self.log(f"Error at paper {paper.doi}: {ex}")
-        #         n_errors += 1
-        #     if n_errors >= self.MAX_ERRORS:
-        #         break
+        for paper in self.progress(sorted_papers):
+            try:
+                altmetric_update.update(paper)
+            except (AltmetricException, AltmetricHTTPException) as ex:
+                self.log(f"Error at paper {paper.doi}: {ex}")
+                n_errors += 1
+            if n_errors >= self.MAX_ERRORS:
+                break
 
         if n_errors > 0:
             raise Exception("Failed to update all Altmetric scores")
