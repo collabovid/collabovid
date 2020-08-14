@@ -11,6 +11,9 @@ import datetime
 
 
 class ElsevierUpdater(DataUpdater):
+    """
+    Updater class for the Elsevier data source.
+    """
     @property
     def data_source(self):
         return DataSource.ELSEVIER

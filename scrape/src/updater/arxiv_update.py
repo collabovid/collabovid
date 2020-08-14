@@ -24,6 +24,9 @@ def _get_arxiv_id_from_url(url):
 
 
 class ArxivUpdater(DataUpdater):
+    """
+    Updater class for the arXiv data source.
+    """
     _ARXIV_SEARCH_QUERY = 'title:"COVID 19" OR title:"SARS-CoV-2" OR title:"coronavirus" ' \
                           'OR abs:"COVID 19" OR abs:"SARS-CoV-2" OR abs:"coronavirus"'
 

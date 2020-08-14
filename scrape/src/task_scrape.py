@@ -15,6 +15,10 @@ from django.conf import settings
 
 @register_task
 class ScrapeTask(Runnable):
+    """
+    Gets new publications from all data sources and post-processes them.
+    This includes categories, visualization, altmetric data and location extraction.
+    """
     @staticmethod
     def task_name():
         return "scrape"

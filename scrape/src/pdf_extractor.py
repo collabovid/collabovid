@@ -10,6 +10,9 @@ from tika import parser
 
 
 class PdfExtractError(Exception):
+    """
+    Exception that is thrown if an error occurs during PDF extraction.
+    """
     def __init__(self, msg):
         self.msg = msg
 
@@ -21,8 +24,16 @@ class PdfExtractError(Exception):
 
 
 class PdfFromBytesExtractor:
+    """
+    Extracts either the fulltext or the preview image from a given PDF file.
+    """
     @staticmethod
     def content_from_bytes(pdf):
+        """
+        Extracts the fulltext of a given PDF. The used methods are very basic and need improvement (cleanliness of text)
+        @param pdf: PDF file as bytes.
+        @return: Fulltext as string.
+        """
         content = parser.from_buffer(pdf)
         if 'content' in content:
             text = content['content']
@@ -67,6 +78,12 @@ class PdfFromBytesExtractor:
 
     @staticmethod
     def image_from_bytes(pdf, page=1):
+        """
+        Extracts an image of one of the pdf pages.
+        @param pdf: PDF as bytes.
+        @param page: The PDF page that should be used for the image.
+        @return: Image as ContentFile.
+        """
         try:
             pages = convert_from_bytes(pdf, first_page=page, last_page=page)
         except (PDFPageCountError, PDFSyntaxError):
@@ -84,6 +101,9 @@ class PdfFromBytesExtractor:
 
 
 class PdfFromUrlExtractor:
+    """
+    Wrapper for the PdfFromBytesExtractor that receives the PDF bytes from a given URL.
+    """
     def __init__(self, pdf_url):
         self._pdf_response = None
         self._pdf_url = pdf_url

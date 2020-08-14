@@ -12,6 +12,10 @@ from django.conf import settings
 
 @register_task
 class UpdateExistingTask(Runnable):
+    """
+    Updates publications that are already present in the database and post-processes them.
+    This includes categories, visualization, altmetric data and location extraction.
+    """
     @staticmethod
     def task_name():
         return "update-existing-articles"

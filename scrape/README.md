@@ -91,7 +91,10 @@ To import an archive, use the _import data_ tab on the admin dashboard.
 
 
 ### Fulltext and PDF Thumbnail Extraction
-coming soon...
+Some publishers offer access to the PDF files of their publications, namely medRxiv, bioRxiv, arXiv and Elsevier. In case a PDF file for a publication is available, it can be used for two purposes:
+1. **Extracting a thumbnail:** Using [pdf2image](https://pypi.org/project/pdf2image/), a thumbnail is created as a small image of one of the PDF pages and displayed on the website. To make it work, the setting `ALLOW_IMAGE_SCRAPING` in this module's settings file must be `True`. Extracting the image can either be done automatically when scraping new publications by passing the argument `pdf_image=True` to the updater or manually by executing the task `download-pdf-images`.
+2. **Extracting the fulltext:** The fulltext of PDF files can be extracted using [Apache Tika](https://tika.apache.org/). This is automatically done when passing the argument `pdf_content=True` to the updater. However, we currently do not extract fulltext, as it did not bring great improvements to our machine learning approaches.
+
 
 ### Altmetric Scores
 [Altmetric]() offers a score for reasearch articles, indicating its popularity in the 

@@ -17,6 +17,9 @@ _BIORXIV_PAPERHOST_URL = 'https://www.biorxiv.org'
 
 
 class MedrxivUpdater(DataUpdater):
+    """
+    Updater class for the medRxiv/bioRxiv data source.
+    """
     _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'
 
     @property

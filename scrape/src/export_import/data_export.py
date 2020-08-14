@@ -20,6 +20,9 @@ from data.models import (
 
 
 class DataExport:
+    """
+    Export database content to a .tar.gz file.
+    """
     EXPORT_VERSION = 6
 
     @staticmethod
@@ -57,8 +60,10 @@ class DataExport:
 
     @staticmethod
     def export_data(queryset, out_dir, export_images=True, log=print):
-        """Exports database data in json format and preview images to a tar.gz archive.
-        Returns the path to the newly created archive."""
+        """
+        Exports database data in json format and preview images to a tar.gz archive.
+        Returns the path to the newly created archive.
+        """
         start = timer()
 
         authors = {}

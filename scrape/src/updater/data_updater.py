@@ -9,6 +9,9 @@ from src.updater.update_statistics import UpdateStatistics
 
 
 class DataUpdater(object):
+    """
+    Base class that is used for pulling new articles from the datasources and updating already existing ones.
+    """
     def __init__(self, log=print, pdf_content=False, pdf_image=False, update_existing=False, force_update=False):
         self.log = log
         self.update_existing = update_existing
@@ -19,21 +22,25 @@ class DataUpdater(object):
 
     @property
     def data_source(self):
+        """ Return the data source of the respective updater. """
         raise NotImplementedError
 
     def _get_data_points(self):
+        """ Iterator that yields all articles that the publisher provides one by one (as SerializableArticleRecord). """
         raise NotImplementedError
 
     def _get_data_point(self, doi):
+        """ Return the article for a given DOI (as SerializableArticleRecord) or None, if it can not be fetched. """
         raise NotImplementedError
 
     def _count(self):
+        """ Return the number of all articles that the publisher provides. """
         raise NotImplementedError
 
     @staticmethod
     def set_last_scrape(datapoint):
         """
-        Set the current time as last_scrape time.
+        Set the current time as last_scrape time for the DB article matching the datapoint's doi.
         Needs to be done if articles should be updated and now contain data errors.
         Otherwise, we would try to update these articles over and over.
         """
@@ -46,6 +53,12 @@ class DataUpdater(object):
                 pass
 
     def get_or_create_db_article(self, datapoint):
+        """
+        Inserts an article into the database based on a given datapoint.
+        If it already exists, it may be updated depending on the instance variables
+        @param datapoint: The datapoint that contains the articles' information.
+        @return: Tuple (article, bool) where bool is True iff the article was newly created.
+        """
         try:
             db_article, created, updated = self.db_updater.insert(datapoint)
             if updated:
@@ -69,6 +82,9 @@ class DataUpdater(object):
         return None, None
 
     def get_new_data(self, progress=None):
+        """
+        Gets new articles from the datasource and inserts them into the database.
+        """
         self.statistics = UpdateStatistics()
         self.statistics.start()
 
@@ -90,7 +106,7 @@ class DataUpdater(object):
     def update_existing_data(self, count=None, progress=None):
         """
         Updates the stored papers, starting with the one with the earliest last-scrape.
-        Count is the total number of papers to update.
+        @param count: Total number of papers to update.
         """
         self.statistics = UpdateStatistics()
         self.statistics.start()
@@ -126,6 +142,11 @@ class DataUpdater(object):
         self.log(self.statistics)
 
     def update_pdf_data(self, db_article):
+        """
+        Base method to extract a PDF image and the PDF content (depending on the instance variables).
+        Tries to download the PDF using the pdf_url of the article, may be overriden for publisher-specific ways.
+        @param db_article: Article that should be updated.
+        """
         if not self.pdf_image and not self.pdf_content:
             return
         if not db_article.pdf_url:

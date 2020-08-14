@@ -7,6 +7,9 @@ from data.paper_db_insert import SerializableArticleRecord
 
 
 class PubmedUpdater(DataUpdater):
+    """
+    Updater class for the Pubmed data source.
+    """
     _PUBMED_SEARCH_QUERY = '("2019/12/01"[Date - Create] : "3000"[Date - Create]) AND ((COVID-19) OR (SARS-CoV-2) OR (Coronavirus)) AND Journal Article[ptyp]'
 
     @property
@@ -28,7 +31,7 @@ class PubmedUpdater(DataUpdater):
         return len(self._query_result)
 
     def _create_serializable_record(self, pubmed_article):
-        """ Construct a serializable record from a given pubmed article (return value of pymed's query) """
+        """ Constructs a serializable record from a given pubmed article (return value of pymed's query) """
 
         article = SerializableArticleRecord(title=pubmed_article.title,
                                             abstract=pubmed_article.abstract, is_preprint=False)

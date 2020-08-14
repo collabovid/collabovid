@@ -9,6 +9,7 @@ from django.db import transaction
 from data.models import (
     Author,
     AuthorNameResolution,
+    AuthorPaperMembership,
     Category,
     CategoryMembership,
     DataSource,
@@ -22,7 +23,7 @@ from data.models import (
     Journal,
     Paper,
     PaperData,
-    PaperHost, AuthorPaperMembership
+    PaperHost
 )
 from django.utils.timezone import make_aware
 from PIL import Image
@@ -30,8 +31,10 @@ from tasks.colors import Red
 
 
 class ImportMappings:
-    """ Mappings usually map the id (primary key that is read from export file) to the corresponding database object"""
-
+    """
+    Helper class for data import.
+    Mappings usually map the id (primary key that is read from export file) to the corresponding database object.
+    """
     def __init__(self):
         self.journal_mapping = {}
         self.paperhost_mapping = {}
@@ -44,6 +47,9 @@ class ImportMappings:
 
 
 class ImportStatistics:
+    """
+    Helper class that holds statistics of imported data.
+    """
     def __init__(self):
         self.journals_created = 0
         self.paperhosts_created = 0
@@ -100,6 +106,9 @@ class ImportStatistics:
 
 
 class DataImport:
+    """
+    Import article data that has been previously exported using the DataExport class.
+    """
     def __init__(self, log=print, progress=None):
         self._mappings = ImportMappings()
         self.log = log
@@ -108,6 +117,9 @@ class DataImport:
         self.statistics = ImportStatistics()
 
     def _cleanup_models(self):
+        """
+        Cleanup and remove orphaned entries from the database that may occur.
+        """
         self.statistics.authors_deleted = Author.cleanup()
         self.statistics.journals_deleted = Journal.cleanup()
         self.statistics.paperdata_deleted = PaperData.cleanup()
@@ -242,6 +254,9 @@ class DataImport:
                 self.statistics.ignored_papers_created += 1
 
     def _import_author_resolutions(self, author_resolutions):
+        """
+        Imports the author name resolutions.
+        """
         for res in author_resolutions:
             if not res["target_lname"] and not res["target_fname"]:
                 AuthorNameResolution.ignore(first=res["source_fname"], last=res["source_lname"])
@@ -344,7 +359,7 @@ class DataImport:
                 papers_to_add.append(db_paper)
                 self.statistics.added_papers += 1
 
-                self._mappings.doi_to_author_mapping[db_paper.doi] = []  # maps doi to a list of its db_authors
+                self._mappings.doi_to_author_mapping[db_paper.doi] = []
 
                 for author_id in paper["author_ids"]:
                     author = authors[author_id]
@@ -420,7 +435,9 @@ class DataImport:
         self.statistics.delete_candidates_created = len(candidates_to_create)
 
     def import_data(self, filepath):
-        """Imports database data from .tar.gz archive to database."""
+        """
+        Imports database data from .tar.gz archive to database.
+        """
         self.statistics.start_timer()
         self._mappings = ImportMappings()
 

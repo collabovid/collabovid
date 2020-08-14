@@ -60,7 +60,7 @@ def partition(lst, n):
 
 
 class DoiPiiMapping:
-    """Stores a mapping from DOIs to PIIs as Dict. Reads and saves the mapping in a persistent file."""
+    """Stores a mapping from DOIs to PIIs as dict. Reads and saves the mapping in a persistent file."""
     def __init__(self, path, log=print):
         self._mapping = None
         self.path = pathlib.Path(path)
@@ -94,6 +94,9 @@ class DoiPiiMapping:
 
 
 class ElsevierCache:
+    """
+    Used for maintaining a local cache of Elsevier's FTP server that stores the articles about the coronavirus.
+    """
     __LAST_UPDATE_PATH = 'last_update_timestamp.txt'
     __METADATA_INDEX_FILE = '_index_metadata.txt'
     __DOI_PII_MAPPING_FILE = 'doi_pii_mapping.txt'
@@ -131,6 +134,9 @@ class ElsevierCache:
                 )
 
     def refresh(self):
+        """
+        Refreshes the local files to match the current version of the files on the FTP server.
+        """
         self.log("Check latest elsevier dataset version against cache version")
         cache_version = self.cache_version()
         latest_version = self.latest_version()
