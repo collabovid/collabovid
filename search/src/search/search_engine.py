@@ -179,8 +179,7 @@ class SearchEngine:
                 TimerUtilities.time_function(SemanticSearch.find, paper_score_table, query, ids=filtered_dois)
 
                 if settings.USING_ELASTICSEARCH:
-                    TimerUtilities.time_function(ElasticsearchRequestHelper.enhance_results, paper_score_table, query,
-                                                 influence=0.6)
+                    TimerUtilities.time_function(ElasticsearchRequestHelper.enhance_results, paper_score_table, query)
             else:
                 raise ValueError("No valid search type provided")
         elif not query:
