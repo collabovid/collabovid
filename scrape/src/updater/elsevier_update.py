@@ -97,3 +97,4 @@ class ElsevierUpdater(DataUpdater):
             image = PdfFromBytesExtractor.image_from_bytes(pdf, page=2)
             if image:
                 db_article.add_preview_image(image)
+                image.close()

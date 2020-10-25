@@ -13,6 +13,7 @@ class PdfExtractError(Exception):
     """
     Exception that is thrown if an error occurs during PDF extraction.
     """
+
     def __init__(self, msg):
         self.msg = msg
 
@@ -27,6 +28,7 @@ class PdfFromBytesExtractor:
     """
     Extracts either the fulltext or the preview image from a given PDF file.
     """
+
     @staticmethod
     def content_from_bytes(pdf):
         """
@@ -97,6 +99,9 @@ class PdfFromBytesExtractor:
         pages[0].save(fp=buffer, format='JPEG')
 
         pillow_image = ContentFile(buffer.getvalue())
+        buffer.close()
+        for page in pages:
+            page.close()
         return pillow_image
 
 
@@ -104,6 +109,7 @@ class PdfFromUrlExtractor:
     """
     Wrapper for the PdfFromBytesExtractor that receives the PDF bytes from a given URL.
     """
+
     def __init__(self, pdf_url):
         self._pdf_response = None
         self._pdf_url = pdf_url
@@ -143,3 +149,7 @@ class PdfFromUrlExtractor:
             print(f'Problem with response in extracting image from {self._pdf_url}')
             return None
         return PdfFromBytesExtractor.image_from_bytes(self._pdf_response.content, page=page)
+
+    def __del__(self):
+        self._pdf_response.close()
+        del self._pdf_response

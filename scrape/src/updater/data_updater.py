@@ -6,12 +6,14 @@ from django.utils import timezone
 from src.pdf_extractor import PdfExtractError, PdfFromUrlExtractor
 from data.paper_db_insert import DatabaseUpdate
 from src.updater.update_statistics import UpdateStatistics
+import gc
 
 
 class DataUpdater(object):
     """
     Base class that is used for pulling new articles from the datasources and updating already existing ones.
     """
+
     def __init__(self, log=print, pdf_content=False, pdf_image=False, update_existing=False, force_update=False):
         self.log = log
         self.update_existing = update_existing
@@ -95,6 +97,7 @@ class DataUpdater(object):
 
         for data_point in iterator:
             self.get_or_create_db_article(data_point)
+            gc.collect()
 
         self.log("Delete orphaned authors and journals")
         self.statistics.authors_deleted = Author.cleanup()
@@ -159,6 +162,7 @@ class DataUpdater(object):
             image = pdf_extractor.extract_image()
             if image:
                 db_article.add_preview_image(image)
+                image.close()
 
         if self.pdf_content:
             content = pdf_extractor.extract_contents()

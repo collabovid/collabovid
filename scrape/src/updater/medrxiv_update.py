@@ -9,7 +9,6 @@ from datetime import datetime
 from src.updater.data_updater import DataUpdater
 from data.paper_db_insert import SerializableArticleRecord
 
-
 _MEDRXIV_PAPERHOST_NAME = 'medRxiv'
 _BIORXIV_PAPERHOST_NAME = 'bioRxiv'
 _MEDRXIV_PAPERHOST_URL = 'https://www.medrxiv.org'
@@ -98,7 +97,7 @@ class MedrxivUpdater(DataUpdater):
             article.pdf_url = host_url + relative_url
 
         article.authors = self._extract_authors(article_soup)
-
+        response.close()
         return article
 
     def _get_data_points(self):
