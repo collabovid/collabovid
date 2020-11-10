@@ -22,3 +22,9 @@ S3_DB_EXPORT_LOCATION = 'export'
 AWS_EMBEDDINGS_FILE_PATH = 'embeddings/embeddings_3d.json'
 EMBEDDINGS_FILE_URL = AWS_S3_BUCKET_URL + f'/{AWS_EMBEDDINGS_FILE_PATH}'
 PAPER_ATLAS_IMAGES_FILE_URL = AWS_S3_BUCKET_URL + '/embeddings/atlas.jpg'
+
+AWS_SES_ACCESS_KEY_ID = os.getenv('AWS_SES_ACCESS_KEY_ID', None)
+AWS_SES_SECRET_ACCESS_KEY = os.getenv('AWS_SES_SECRET_ACCESS_KEY', None)
+EMAIL_BACKEND = 'django_ses.SESBackend'
+AWS_SES_REGION_NAME = 'eu-central-1'
+AWS_SES_REGION_ENDPOINT = 'email.eu-central-1.amazonaws.com'
