@@ -1,3 +1,5 @@
+from django.db.models.functions import ExtractYear, ExtractWeek, ExtractMonth
+
 from data.models import Topic
 
 from collections import defaultdict
@@ -43,13 +45,18 @@ class PaperStatistics:
     def published_at_data(self):
         if not self._published_at_plot_data:
             self._published_at_plot_data = defaultdict(list)
-            for published_count in self._papers.filter(published_at__gt=datetime(2020, 1, 1)).values(
-                    'published_at').annotate(papers_added=Count('doi')).order_by('published_at'):
-                self._published_at_plot_data['x'].append(published_count['published_at'])
+            for published_count in self._papers.filter(published_at__gt=datetime(2020, 1, 1)).annotate(
+                    year=ExtractYear('published_at')).annotate(week=ExtractWeek('published_at')) \
+                    .values('year', 'week').annotate(papers_added=Count('doi')).order_by('week', 'year'):
+                year_week_str = f"{published_count['year']}-W{published_count['week']}-1"
+                self._published_at_plot_data['x'].append(datetime.strptime(year_week_str, "%Y-W%W-%w"))
+
                 self._published_at_plot_data['added'].append(published_count['papers_added'])
                 self._published_at_plot_data['total'].append(sum(self._published_at_plot_data['added']))
 
             self._published_at_plot_data = json.dumps(self._published_at_plot_data, cls=DjangoJSONEncoder)
+
+            print(self._published_at_plot_data)
 
         return self._published_at_plot_data
 

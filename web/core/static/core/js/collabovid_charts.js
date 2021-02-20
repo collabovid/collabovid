@@ -30,7 +30,7 @@
                     yAxisID: 'total'
                 },
                     {
-                        label: 'Published at date',
+                        label: 'Published in this week',
                         backgroundColor: window.chartColors.red,
                         type: 'bar',
                         data: plugin.settings.plot_data['added'],
@@ -45,7 +45,8 @@
                         type: 'time',
                         time: {
                             parser: 'MM/DD/YYYY',
-                            round: 'day',
+                            round: 'week',
+                            unit: 'week',
                             tooltipFormat: 'll'
                         },
                         scaleLabel: {
@@ -71,7 +72,7 @@
                         type: 'linear',
                         position: 'right',
                         scaleLabel: {
-                            labelString: 'Number of papers/day',
+                            labelString: 'Number of papers/week',
                             display: true,
                         },
 
@@ -82,7 +83,11 @@
                 },
                 tooltips:
                     {
-                        callbacks: {},
+                        callbacks: {
+                            title: function (tooltipItems, data) {
+                                return "Week of " + tooltipItems[0].xLabel;
+                            }
+                        },
                     },
             }
         });
