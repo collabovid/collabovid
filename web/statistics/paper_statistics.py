@@ -16,6 +16,8 @@ class PaperStatistics:
         self._paper_host_data = None
         self._category_data = None
         self._topic_data = None
+        self._has_category_data = None
+        self._latest_date = None
 
         self._available = self._papers.count() > 0
 
@@ -28,7 +30,10 @@ class PaperStatistics:
 
     @property
     def latest_date(self):
-        return self._papers.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
+        if self._latest_date is None:
+            self._latest_date = self._papers.filter(published_at__lte=datetime.now().date()).latest(
+                'published_at').published_at
+        return self._latest_date
 
     @property
     def available(self):
@@ -51,7 +56,6 @@ class PaperStatistics:
     @property
     def paper_host_data(self):
         if not self._paper_host_data:
-
             paper_hosts = self._papers.values('host').annotate(count=Count('*')).annotate(name=F('host__name'))
 
             self._paper_host_data = json.dumps(
@@ -62,13 +66,15 @@ class PaperStatistics:
 
     @property
     def has_category_data(self):
-        return self._papers.filter(~Q(categories=None)).exists()
+        if self._has_category_data is None:
+            self._has_category_data = self._papers.annotate(categories_count=Count('categories'))\
+                .filter(categories_count__gt=0).exists()
+        return self._has_category_data
 
     @property
     def category_data(self):
         if not self._category_data:
-
-            categories = self._papers.annotate(name=F('categories__name'), color=F('categories__color'))\
+            categories = self._papers.annotate(name=F('categories__name'), color=F('categories__color')) \
                 .values('name', 'color').annotate(count=Count('pk'))
 
             self._category_data = json.dumps({
