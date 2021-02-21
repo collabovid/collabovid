@@ -1,12 +1,17 @@
-from django.db.models.functions import ExtractYear, ExtractWeek, ExtractMonth
+from django.db.models.functions import ExtractWeek, Extract
 
 from data.models import Topic
 
 from collections import defaultdict
-from django.db.models import Count, QuerySet, F, Q
+from django.db.models import Count, QuerySet, F, Q, DateTimeField
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.utils.timezone import datetime, timedelta
+
+
+@DateTimeField.register_lookup
+class ExtractISOYear(Extract):
+    lookup_name = 'isoyear'
 
 
 class PaperStatistics:
@@ -46,7 +51,7 @@ class PaperStatistics:
         if not self._published_at_plot_data:
             self._published_at_plot_data = defaultdict(list)
             for published_count in self._papers.filter(published_at__gt=datetime(2020, 1, 1)).annotate(
-                    year=ExtractYear('published_at')).annotate(week=ExtractWeek('published_at')) \
+                    year=ExtractISOYear('published_at')).annotate(week=ExtractWeek('published_at')) \
                     .values('year', 'week').annotate(papers_added=Count('doi')).order_by('year', 'week'):
                 year_week_str = f"{published_count['year']}-W{published_count['week']}-1"
                 self._published_at_plot_data['x'].append(datetime.strptime(year_week_str, "%Y-W%W-%w"))
@@ -74,7 +79,7 @@ class PaperStatistics:
     @property
     def has_category_data(self):
         if self._has_category_data is None:
-            self._has_category_data = self._papers.annotate(categories_count=Count('categories'))\
+            self._has_category_data = self._papers.annotate(categories_count=Count('categories')) \
                 .filter(categories_count__gt=0).exists()
         return self._has_category_data
 
