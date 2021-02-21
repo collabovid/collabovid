@@ -7,6 +7,7 @@ from django.db.models import Count, QuerySet, F, Q, DateTimeField
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from django.utils.timezone import datetime, timedelta
+from isoweek import Week
 
 
 @DateTimeField.register_lookup
@@ -53,8 +54,8 @@ class PaperStatistics:
             for published_count in self._papers.filter(published_at__gt=datetime(2020, 1, 1)).annotate(
                     year=ExtractISOYear('published_at')).annotate(week=ExtractWeek('published_at')) \
                     .values('year', 'week').annotate(papers_added=Count('doi')).order_by('year', 'week'):
-                year_week_str = f"{published_count['year']}-W{published_count['week']}-1"
-                self._published_at_plot_data['x'].append(datetime.strptime(year_week_str, "%Y-W%W-%w"))
+
+                self._published_at_plot_data['x'].append(Week(published_count['year'], published_count['week']).monday())
 
                 self._published_at_plot_data['added'].append(published_count['papers_added'])
                 self._published_at_plot_data['total'].append(sum(self._published_at_plot_data['added']))
