@@ -5,6 +5,7 @@ from math import ceil
 
 from src.search.elasticsearch import ElasticsearchRequestHelper
 from django.conf import settings
+from typing import Union
 
 
 class VirtualPaginator:
@@ -15,16 +16,24 @@ class VirtualPaginator:
     """
     PAPER_PAGE_COUNT = 10
 
-    def __init__(self, search_results: dict, form: dict):
+    def __init__(self, search_results: Union[dict, QuerySet], form: dict):
 
         self._form = form
 
+        if isinstance(search_results, dict):
+            paper_query = Paper.objects.filter(pk__in=search_results.keys())
+        else:
+            paper_query = search_results
+
         if form['sorted_by'] == 'newest' or (form['sorted_by'] == 'top' and not form['query'].strip()):
-            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by("-published_at",                                                                              "-created_at")
+            self.sorted_dois = paper_query.order_by("-published_at", "-created_at")
         elif form['sorted_by'] == 'top':
-            self.sorted_dois = sorted(search_results.keys(), key=lambda x: search_results[x], reverse=True)
+            if isinstance(search_results, QuerySet):
+                self.sorted_dois = paper_query
+            else:
+                self.sorted_dois = sorted(search_results.keys(), key=lambda x: search_results[x], reverse=True)
         elif form['sorted_by'] == 'popularity':
-            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by(
+            self.sorted_dois = paper_query.order_by(
                 F('altmetric_data__score').desc(nulls_last=True)
             )
         elif form['sorted_by'].startswith('trending'):
@@ -33,7 +42,7 @@ class VirtualPaginator:
                 raise ValueError("Sorted by has unknown value" + str(form['sorted_by']))
 
             sort_key = f'altmetric_data__score_{span}'
-            self.sorted_dois = Paper.objects.filter(pk__in=search_results.keys()).order_by(
+            self.sorted_dois = paper_query.order_by(
                 F(sort_key).desc(nulls_last=True)
             )
         else:

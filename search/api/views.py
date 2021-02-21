@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from django.http import JsonResponse, HttpResponse, HttpResponseServerError, HttpResponseBadRequest
 
 from data.models import Paper
@@ -35,7 +36,13 @@ def search(request):
 
             return JsonResponse(page)
         elif form['result_type'] == 'statistics':
-            return JsonResponse({'results': list(search_result.keys())})
+            if isinstance(search_result, dict):
+                result = list(search_result.keys())
+            elif isinstance(search_result, QuerySet):
+                result = list(search_result.values_list('doi', flat=True))
+            else:
+                raise ValueError()
+            return JsonResponse({'results': result})
 
         return HttpResponseBadRequest()
 

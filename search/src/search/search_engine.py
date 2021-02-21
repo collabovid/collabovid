@@ -57,7 +57,7 @@ class SearchEngine:
         elif article_type_string == 'preprints':
             article_type = SearchEngine.ARTICLE_TYPE_PREPRINTS
 
-        papers = Paper.objects.all()
+        papers = Paper.objects
 
         filtered = False
 
@@ -120,29 +120,28 @@ class SearchEngine:
 
         category_ids = self.form['categories']
 
-        filtered_dois = list(papers.values_list('doi', flat=True))
-
-        score_table = dict()
-
-        for doi in filtered_dois:
-            score_table[doi] = 1
-
         if category_ids and len(category_ids) == 1:
+
+            filtered_dois = list(papers.values_list('doi', flat=True))
+
+            score_table = dict()
+
+            for doi in filtered_dois:
+                score_table[doi] = 1
+
             try:
                 category = Category.objects.get(pk=category_ids[0])
-
                 memberships = CategoryMembership.objects.filter(paper__in=papers, category=category). \
                     annotate(doi=F('paper__doi'))
-
                 for membership in memberships:
                     score_table[membership.doi] = membership.score
-
+                return score_table
             except Category.DoesNotExist:
                 raise Exception("Provided unknown category")
             except CategoryMembership.DoesNotExist:
                 raise Exception("Filtering yielded incorrect papers for category")
 
-        return score_table
+        return papers
 
     def search(self):
         """
