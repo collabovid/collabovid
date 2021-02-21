@@ -47,7 +47,7 @@ class PaperStatistics:
             self._published_at_plot_data = defaultdict(list)
             for published_count in self._papers.filter(published_at__gt=datetime(2020, 1, 1)).annotate(
                     year=ExtractYear('published_at')).annotate(week=ExtractWeek('published_at')) \
-                    .values('year', 'week').annotate(papers_added=Count('doi')).order_by('week', 'year'):
+                    .values('year', 'week').annotate(papers_added=Count('doi')).order_by('year', 'week'):
                 year_week_str = f"{published_count['year']}-W{published_count['week']}-1"
                 self._published_at_plot_data['x'].append(datetime.strptime(year_week_str, "%Y-W%W-%w"))
 
