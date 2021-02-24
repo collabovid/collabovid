@@ -24,7 +24,7 @@ from data.models import (
 )
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
-from statistics.query_statistics import SearchQueryStatistics
+from collabovid_statistics.query_statistics import SearchQueryStatistics
 from tasks.models import Task
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required

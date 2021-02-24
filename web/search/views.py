@@ -9,7 +9,7 @@ from search.literature_utils.literature_file_analyzer import BibFileAnalyzer
 from search.literature_utils.literature_file_exporter import RisFileExporter, BibTeXFileExporter
 
 from search.suggestions_helper import SuggestionsHelper
-from statistics import PaperStatistics
+from collabovid_statistics import PaperStatistics
 
 from search.request_helper import SearchRequestHelper, SimilarPaperRequestHelper
 

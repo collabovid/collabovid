@@ -5,7 +5,7 @@ from django.http import HttpResponseNotFound
 
 from core.date_utils import DateUtils
 from data.models import GeoCity, GeoCountry, Paper, Category, Topic
-from statistics import PaperStatistics, CategoryStatistics
+from collabovid_statistics import PaperStatistics, CategoryStatistics
 import json
 
 from django.utils.timezone import datetime

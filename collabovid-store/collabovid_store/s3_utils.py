@@ -37,6 +37,11 @@ class S3BucketClient:
         object = self.s3.Object(self.bucket, key)
         object.put(Body=str.encode(json.dumps(data)))
 
+    def make_public(self, key):
+        object_acl = self.s3.ObjectAcl(self.bucket, key)
+        response = object_acl.put(ACL='public-read')
+        return response
+
     def all_objects(self, prefix=""):
         return [
             urlunquote(e["Key"])

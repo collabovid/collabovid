@@ -9,3 +9,4 @@ from src.task_elsevier_update import ElsevierUpdateTask, ElsevierNewArticlesTask
 from src.geo.task_geo_parser import GeoParserTask
 from src.language_detection.task_language_detection import LanguageDetectionTask
 from src.altmetric.task_get_altmetric_data import AltmetricUpdateTask
+from src.task_statistics_update import StatisticsUpdateTask
