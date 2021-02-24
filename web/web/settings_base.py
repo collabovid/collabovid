@@ -133,6 +133,7 @@ if 'PRINT_DEBUG_TO_CONSOLE' in os.environ and int(os.environ['PRINT_DEBUG_TO_CON
 
 IMPRINT_URL = os.getenv("IMPRINT_URL", "")
 DATA_PROTECTION_URL = os.getenv("DATA_PROTECTION_URL", "")
+STATISTICS_URL = os.getenv("STATISTICS_URL", "")
 
 USING_ANALYTICS = False
 

@@ -33,6 +33,7 @@ def home(request):
         popular_papers = Paper.objects.filter(pk__in=popular_paper_ids)
 
         return render(request, "core/home.html", {'statistics': statistics,
+                                                  'statistics_url': settings.STATISTICS_URL,
                                                   'most_recent_paper_statistics':
                                                       PaperStatistics(papers=most_recent_papers,
                                                                       ordered_papers=most_recent_papers.order_by(

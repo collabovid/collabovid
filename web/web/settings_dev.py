@@ -12,3 +12,4 @@ ALLOWED_HOSTS += ['*']
 DEBUG = True
 
 SAVE_SEARCH_QUERIES = False
+STATISTICS_URL = os.getenv("STATISTICS_URL", "https://collabovid.s3.eu-central-1.amazonaws.com/statistics/statistics.json")
