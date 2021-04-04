@@ -133,32 +133,32 @@ def export(papers, export_type: str):
 
 
 def export_search_result(request, export_type):
-    if request.method == "GET":
+    """if request.method == "GET":
         form = SearchForm(request.GET)
 
         if form.is_valid():
             search_response_helper = SearchRequestHelper(form, highlight=False)
             if not search_response_helper.error:
                 search_result = search_response_helper.build_search_result()
-                return export(search_result['paginator'].page(1), export_type=export_type)
+                return export(search_result['paginator'].page(1), export_type=export_type)"""
 
     return HttpResponseNotFound()
 
 
 def export_dois(request, export_type):
-    if request.method == "GET":
+    """if request.method == "GET":
         dois = request.GET.getlist('dois')
         if dois:
             papers = Paper.objects.filter(pk__in=dois)
-            return export(papers, export_type=export_type)
+            return export(papers, export_type=export_type)"""
 
     return HttpResponseNotFound()
 
 
 def export_paper(request, export_type, doi):
-    if request.method == "GET":
+    """if request.method == "GET":
         get_object_or_404(Paper, pk=doi)
-        return export(Paper.objects.filter(pk=doi), export_type=export_type)
+        return export(Paper.objects.filter(pk=doi), export_type=export_type)"""
     return HttpResponseNotFound()
 
 
