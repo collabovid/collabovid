@@ -2,3 +2,6 @@ User-agent: *
 Crawl-delay: 120
 Disallow: /export
 Disallow: /search
+
+User-agent: SemrushBot
+Disallow: /
