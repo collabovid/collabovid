@@ -114,7 +114,7 @@ def search(request):
 
 
 def export(papers, export_type: str):
-    if isinstance(papers, QuerySet):
+    """if isinstance(papers, QuerySet):
         count = papers.count()
     else:
         count = len(papers)
@@ -127,7 +127,7 @@ def export(papers, export_type: str):
         else:
             return HttpResponseNotFound()
 
-        return exporter.build_response()
+        return exporter.build_response()"""
 
     return HttpResponseNotFound()
 
