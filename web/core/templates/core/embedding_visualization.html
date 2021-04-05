@@ -9,7 +9,7 @@
     <div class="gradient-header pb-0 overflow-hidden">
         <div class="row mx-0 px-0">
             <div class="col-12 px-0">
-                <div id="embedding-visualization-container" class="embedding-visualization-container">
+                <div id="embedding-visualization-container" class="embedding-visualization-container" style="visibility: hidden">
                     <div class="canvas-adaptive-height">
                         <div id="canvas-container">
                             <canvas id="visualization-container"></canvas>
@@ -18,6 +18,9 @@
 
                     {% include "core/partials/embedding/_controls.html" %}
                     {% include "core/partials/embedding/_legend.html" %}
+                </div>
+                 <div id="visualization-loader" class="text-center fa-5x my-5" style="display: none;">
+                    <i class="fas fa-circle-notch fa-spin"></i>
                 </div>
             </div>
         </div>

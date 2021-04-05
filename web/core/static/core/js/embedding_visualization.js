@@ -114,8 +114,17 @@ const EmbeddingVisualization = function () {
             let scene = new THREE.Scene();
             scene.background = null;
 
-            let loader = new THREE.FileLoader();
+            let manager = new THREE.LoadingManager();
+            manager.onStart = function () {
+                $('#embedding-visualization-container').hide();
+                $('#visualization-loader').show();
+            }
+            let loader = new THREE.FileLoader(manager);
+
             loader.load(options.fileUrl, function (data) {
+                $('#embedding-visualization-container').css('visibility', 'visible').show();
+                $('#visualization-loader').hide();
+
                 let paperData = JSON.parse(data);
                 let papers = paperData.papers;
                 let geometry = scope.buildGeometry(papers, 0);
@@ -290,8 +299,7 @@ const EmbeddingVisualization = function () {
                     }
                 });
 
-                for (let i=0; i<papers.length;i++)
-                {
+                for (let i = 0; i < papers.length; i++) {
                     papers[i].published_at = moment(papers[i].published_at, "YYYY-MM-DD")
                 }
 
@@ -348,8 +356,7 @@ const EmbeddingVisualization = function () {
                 }
                 let isHidden = false;
                 let faceStartIndex = i * 2;
-                if (this.geometry.faces[faceStartIndex].materialIndex === this.hiddenMaterialIndex)
-                {
+                if (this.geometry.faces[faceStartIndex].materialIndex === this.hiddenMaterialIndex) {
                     continue;
                 }
 
