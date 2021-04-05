@@ -41,3 +41,11 @@ SECURE_REDIRECT_EXEMPT = [r'^system-health/$']
 
 USING_ANALYTICS = True
 SAVE_SEARCH_QUERIES = True
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/cache',
+    }
+}

@@ -24,6 +24,8 @@ ENV DJANGO_SETTINGS_MODULE=${PROJECT_NAME}.settings_prod
 ENV SECRET_KEY='xyz'
 ENV SECRET_KEY=''
 
+RUN mkdir /cache
+
 EXPOSE 80
 STOPSIGNAL SIGTERM
 CMD ["./run_server.sh"]

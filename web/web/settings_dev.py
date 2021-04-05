@@ -13,3 +13,11 @@ DEBUG = True
 
 SAVE_SEARCH_QUERIES = False
 STATISTICS_URL = os.getenv("STATISTICS_URL", "https://collabovid.s3.eu-central-1.amazonaws.com/statistics/statistics.json")
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
