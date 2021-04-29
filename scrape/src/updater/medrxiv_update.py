@@ -19,8 +19,6 @@ class MedrxivUpdater(DataUpdater):
     """
     Updater class for the medRxiv/bioRxiv data source.
     """
-    _COVID_JSON_URL = 'https://connect.medrxiv.org/relate/collection_json.php?grp=181'
-
     @property
     def data_source(self):
         return DataSource.MEDBIORXIV
@@ -30,11 +28,29 @@ class MedrxivUpdater(DataUpdater):
                          update_existing=update_existing, force_update=force_update)
         self._article_json = None
 
+    def _build_json_url(self, cursor=0):
+        """
+        Build the URL to the article JSON according to https://api.biorxiv.org/covid19/help.
+        """
+        return f'https://api.biorxiv.org/covid19/{cursor}/json'
+
     def _get_article_json(self):
         if not self._article_json:
+            self.log("Beginning HTTP requests to fetch article JSON")
+            chunk_size = 30  # as given by the API (see API description)
             try:
-                response = requests.get(self._COVID_JSON_URL)
-                self._article_json = json.loads(response.text)['rels']
+                # Perform initial request to fetch the most recent 30 articles
+                response = requests.get(self._build_json_url(cursor=0))
+                cur_json = json.loads(response.text)
+                total_count = cur_json['messages'][0]['total']
+                self._article_json = cur_json['collection']
+
+                for cur_cursor in range(chunk_size, total_count, chunk_size):
+                    # Request the next batch of 30 articles and append them to the list
+                    response = requests.get(self._build_json_url(cursor=cur_cursor))
+                    cur_collection = json.loads(response.text)['collection']
+                    self._article_json += cur_collection
+                self.log("Finished HTTP requests to fetch article JSON")
             except requests.exceptions.ConnectionError:
                 raise Exception("Unable to download medRxiv COVID-19 article list JSON")
 
@@ -70,7 +86,7 @@ class MedrxivUpdater(DataUpdater):
         if skip_existing and Paper.objects.filter(doi=article.doi).exists():
             return None
 
-        site = raw_data['rel_site']
+        site = raw_data['rel_site'].lower()
         if site == "medrxiv":
             article.paperhost = _MEDRXIV_PAPERHOST_NAME
             host_url = _MEDRXIV_PAPERHOST_URL
