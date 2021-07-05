@@ -5,6 +5,7 @@ cvid-config.json
 .deployment/
 release
 resources
+env/
 
 set_secret_envs.sh
 set_db_envs.sh

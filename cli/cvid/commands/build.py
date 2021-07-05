@@ -16,14 +16,14 @@ class BuildCommand(CommandWithServices):
         if "search" in service_names or "web" in service_names:
             # First build the collabovid base image where search and web depend upon
             self.run_shell_command(
-                "DOCKER_BUILDKIT=1 docker build -t collabovid-base -f docker/collabovid-base.Dockerfile .")
+                "DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 -t collabovid-base -f docker/collabovid-base.Dockerfile .")
 
         # Build all services with docker buildkit enabled and tag them with an automatically generated tag
         for service, config in args.services:
             self.print_info("Building service: {}".format(service))
             tag = self.generate_tag()
             image = f"{service}:{tag}"
-            self.run_shell_command(f"DOCKER_BUILDKIT=1 docker build -t {image} -f docker/{service}.Dockerfile .")
+            self.run_shell_command(f"DOCKER_BUILDKIT=1 docker buildx build --platform linux/amd64 -t {image} -f docker/{service}.Dockerfile .")
 
             # delete/untag all old images from that service
             if args.delete_old:

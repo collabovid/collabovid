@@ -401,17 +401,17 @@ class DataImport:
                                                        state=location["state"])
                     location_memberships_to_create.append(membership)
 
-        Paper.objects.bulk_create(papers_to_add)
+        Paper.objects.bulk_create(papers_to_add, batch_size=1000)
         Author.objects.bulk_create([author["db_author"] for author in self._mappings.db_author_mapping.values()
-                                    if author["created"]])
-        CategoryMembership.objects.bulk_create(category_memberships_to_create)
-        GeoLocationMembership.objects.bulk_create(location_memberships_to_create)
+                                    if author["created"]], batch_size=1000)
+        CategoryMembership.objects.bulk_create(category_memberships_to_create, batch_size=1000)
+        GeoLocationMembership.objects.bulk_create(location_memberships_to_create, batch_size=1000)
 
         author_paper_memberships = []
         for doi, authors in self._mappings.doi_to_author_mapping.items():
             author_paper_memberships += [AuthorPaperMembership(paper_id=doi, author_id=author.pk, rank=i)
                                          for i, author in enumerate(authors)]
-        AuthorPaperMembership.objects.bulk_create(author_paper_memberships)
+        AuthorPaperMembership.objects.bulk_create(author_paper_memberships, batch_size=1000)
         # recompute counts because post save signals are not triggered on bulk create
         GeoLocation.recompute_counts(GeoCity.objects.all(), GeoCountry.objects.all())
 
