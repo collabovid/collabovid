@@ -70,8 +70,8 @@ class Journal(models.Model):
     @property
     def name_suggest(self):
         suggestions = [self.name]
-        #suggestions = [' '.join(p) for p in permutations(self.name.split())]
-        #if self.alias:
+        # suggestions = [' '.join(p) for p in permutations(self.name.split())]
+        # if self.alias:
         #    suggestions += [' '.join(p) for p in permutations(self.alias.split())]
         return suggestions
 
@@ -228,16 +228,7 @@ class PaperData(models.Model):
     Model to store large data which should not be loaded on each select on a regular Paper
     """
     content = models.TextField(null=True, default=None)
-
-    @staticmethod
-    def cleanup():
-        used_data_ids = [p.data_id for p in Paper.objects.all() if p.data_id]
-        n_objects_deleted, deleted_objects = PaperData.objects.exclude(id__in=used_data_ids).delete()
-        if n_objects_deleted == 0 or 'data.PaperData' not in deleted_objects:
-            return 0
-        else:
-            return deleted_objects['data.PaperData']
-
+    abstract = models.TextField(null=True, blank=True, default=None)
 
 class VerificationState(models.IntegerChoices):
     REJECTED = 0, gettext_lazy('rejected')
@@ -290,7 +281,6 @@ class GeoLocation(models.Model):
     @property
     def is_city(self):
         return hasattr(self, 'geocity')
-
 
     @property
     def is_country(self):
@@ -347,6 +337,14 @@ class AltmetricData(models.Model):
     score_6m = models.FloatField(default=0)
     score_y = models.FloatField(default=0)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['score']),
+            models.Index(fields=['score_d']),
+            models.Index(fields=['score_w']),
+            models.Index(fields=['score_1m']),
+        ]
+
 
 class Paper(models.Model):
     MAX_DOI_LENGTH = 100
@@ -381,7 +379,7 @@ class Paper(models.Model):
     data_source_value = models.IntegerField(choices=DataSource.choices)
     version = models.CharField(max_length=40, null=True, blank=True, default=None)
 
-    data = models.OneToOneField(PaperData, null=True, default=None, related_name='paper', blank=True, on_delete=models.SET_NULL)
+    data = models.OneToOneField(PaperData, related_name='paper', on_delete=models.CASCADE)
 
     pubmed_id = models.CharField(max_length=20, null=True, blank=True, default=None)
 
@@ -393,14 +391,14 @@ class Paper(models.Model):
                               on_delete=models.SET_DEFAULT)
     covid_related = models.BooleanField(null=True, default=None)
     topic_score = models.FloatField(default=0.0)
-    abstract = models.TextField()
 
     url = models.URLField(null=True, blank=True, default=None)
     pdf_url = models.URLField(null=True, blank=True, default=None)
     is_preprint = models.BooleanField(default=True)
 
     published_at = models.DateField(null=True, default=None)
-    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, blank=True, default=None)
+    journal = models.ForeignKey(Journal, related_name="papers", on_delete=models.CASCADE, null=True, blank=True,
+                                default=None)
 
     vectorized = models.BooleanField(default=False)
     visualized = models.BooleanField(default=False)
@@ -412,6 +410,11 @@ class Paper(models.Model):
 
     locations = models.ManyToManyField(GeoLocation, related_name="papers", through="GeoLocationMembership")
     location_modified = models.BooleanField(default=False)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['published_at']),
+        ]
 
     @property
     def ranked_authors(self):
@@ -479,6 +482,18 @@ class Paper(models.Model):
     @staticmethod
     def max_length(field: str):
         return Paper._meta.get_field(field).max_length
+
+    @staticmethod
+    def quick_count():
+        """
+        Using cached count within postgres because large table counting is very slow.
+        :return:
+        """
+        from django.db import connection
+        with connection.cursor() as cursor:
+            cursor.execute(f"SELECT reltuples FROM pg_class WHERE relname='{Paper._meta.db_table}'")
+            row = cursor.fetchone()
+            return int(row[0])
 
 
 class ScrapeConflict(models.Model):

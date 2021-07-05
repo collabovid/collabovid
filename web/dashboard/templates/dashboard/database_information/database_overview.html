@@ -1,0 +1,50 @@
+{% extends "dashboard/base.html" %}
+{% load static %}
+{% block content %}
+
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+        <h1 class="h2">Database Information</h1>
+    </div>
+
+    <table class="table table-striped">
+        <tr>
+            <td>Paper table</td>
+            <td>{{ paper_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Paper data table</td>
+            <td>{{ paper_data_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Altmetric table</td>
+            <td>{{ altmetric_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Author table</td>
+            <td>{{ author_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Author membership table</td>
+            <td>{{ author_membership_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Journal table</td>
+            <td>{{ journal_table_size }}</td>
+        </tr>
+        <tr>
+            <td>Geo location table</td>
+            <td>{{ geolocation_table_size }}</td>
+        </tr>
+
+        <tr>
+            <td>Geo location membership table</td>
+            <td>{{ geolocation_membership_table_size }}</td>
+        </tr>
+    </table>
+
+{% endblock %}

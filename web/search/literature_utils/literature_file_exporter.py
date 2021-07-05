@@ -44,7 +44,7 @@ class RisFileExporter(LiteratureFileExporter):
                 'primary_title': paper.title,
                 'first_authors': [", ".join([author.last_name, author.first_name]) for author in
                                   paper.authors.all()],
-                'abstract': paper.abstract,
+                'abstract': paper.data.abstract,
                 'doi': paper.doi,
                 'publication_year': paper.published_at.year,
                 'publisher': paper.host.name
@@ -88,7 +88,7 @@ class BibTeXFileExporter(LiteratureFileExporter):
 
         for paper in self._papers:
             entry = {
-                'abstract': paper.abstract,
+                'abstract': paper.data.abstract,
                 'title': paper.title,
                 'year': str(paper.published_at.year),
                 'ID': self.generate_id(paper),

@@ -7,6 +7,7 @@ urlpatterns = [
     path('', lambda request: redirect('tasks', permanent=False), name='dashboard'),
     path('tasks', tasks, name='tasks'),
     path('queries', queries, name='queries'),
+    path('database', database_overview, name='database-overview'),
     path('tasks/detail/<int:id>', task_detail, name='task_detail'),
     path('tasks/create/', select_task, name='task_select'),
     path('tasks/create/<str:task_id>', create_task, name='task_create'),

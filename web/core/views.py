@@ -18,7 +18,7 @@ from django.shortcuts import get_object_or_404
 
 def home(request):
     if request.method == "GET":
-        statistics = PaperStatistics(Paper.objects)
+        statistics = PaperStatistics(Paper.objects, is_all=True)
 
         latest_date = Paper.objects.filter(published_at__lte=datetime.now().date()).latest('published_at').published_at
         topic_count = Topic.objects.count()
