@@ -34,7 +34,7 @@ class PubmedUpdater(DataUpdater):
         """ Constructs a serializable record from a given pubmed article (return value of pymed's query) """
 
         article = SerializableArticleRecord(title=pubmed_article.title,
-                                            abstract=pubmed_article.abstract, is_preprint=False)
+                                            abstract=pubmed_article.data.abstract, is_preprint=False)
         if pubmed_article.doi:
             article.doi = pubmed_article.doi.strip()
         article.paperhost = "PubMed"

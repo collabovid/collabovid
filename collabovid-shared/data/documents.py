@@ -65,7 +65,7 @@ class PaperDocument(Document):
     })
 
     title = fields.TextField(analyzer='english')
-    abstract = fields.TextField(analyzer='english')
+    abstract = fields.TextField(analyzer='english', attr="abstract")
 
     class Django:
         model = Paper

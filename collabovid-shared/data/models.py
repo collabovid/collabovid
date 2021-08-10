@@ -495,6 +495,10 @@ class Paper(models.Model):
             row = cursor.fetchone()
             return int(row[0])
 
+    @property
+    def abstract(self):
+        return self.data.abstract
+
 
 class ScrapeConflict(models.Model):
     paper = models.ForeignKey(Paper, on_delete=models.CASCADE)
