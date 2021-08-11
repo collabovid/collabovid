@@ -35,6 +35,7 @@ class ImportMappings:
     Helper class for data import.
     Mappings usually map the id (primary key that is read from export file) to the corresponding database object.
     """
+
     def __init__(self):
         self.journal_mapping = {}
         self.paperhost_mapping = {}
@@ -43,13 +44,14 @@ class ImportMappings:
         self.paperdata_mapping = {}  # maps doi to PaperData
         self.doi_to_author_mapping = {}  # maps doi to list of db_authors for later insertion into m2m through table
         self.db_author_mapping = {}  # maps tuple (first name, last name) to dict:
-                                     # {"db_author": db_author, "created": True / False}
+        # {"db_author": db_author, "created": True / False}
 
 
 class ImportStatistics:
     """
     Helper class that holds statistics of imported data.
     """
+
     def __init__(self):
         self.journals_created = 0
         self.paperhosts_created = 0
@@ -109,6 +111,7 @@ class DataImport:
     """
     Import article data that has been previously exported using the DataExport class.
     """
+
     def __init__(self, log=print, progress=None):
         self._mappings = ImportMappings()
         self.log = log
@@ -122,7 +125,6 @@ class DataImport:
         """
         self.statistics.authors_deleted = Author.cleanup()
         self.statistics.journals_deleted = Journal.cleanup()
-        self.statistics.paperdata_deleted = PaperData.cleanup()
 
     def _import_journals(self, journals):
         """
@@ -224,11 +226,10 @@ class DataImport:
         for i, (paper, paper_info) in enumerate(zip(papers, paper_informations)):
             if not (paper_info["db_paper"] and paper_info["will_update"]):
                 continue
-            if paper["content"] and paper["content"] != "None":
-                db_paperdata = PaperData(content=paper["content"])
-                self._mappings.paperdata_mapping[paper["doi"]] = db_paperdata
-                paperdata_to_create.append(db_paperdata)
-        PaperData.objects.bulk_create(paperdata_to_create)
+            db_paperdata = PaperData(content=paper["content"], abstract=paper["abstract"])
+            self._mappings.paperdata_mapping[paper["doi"]] = db_paperdata
+            paperdata_to_create.append(db_paperdata)
+        PaperData.objects.bulk_create(paperdata_to_create, batch_size=1000)
         self.statistics.paperdata_created = len(paperdata_to_create)
 
     def _import_geo_name_resolutions(self, geo_name_resolutions):
@@ -317,7 +318,6 @@ class DataImport:
 
             if paper_info["will_update"]:
                 db_paper.title = paper["title"][:paper_title_max_len]
-                db_paper.abstract = paper["abstract"]
                 db_paper.data_source_value = paper["datasource_id"]
                 db_paper.version = paper["version"]
                 db_paper.covid_related = paper["covid_related"]

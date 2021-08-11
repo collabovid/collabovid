@@ -118,31 +118,31 @@
 
                             <!-- Mobile version of the abstract with less preview size. -->
                             <span class="d-md-none d-inline" style="font-size: 0.8em">
-                                    {% if not extended and paper.abstract|length >= mobile_preview_size %}
+                                    {% if not extended and paper.data.abstract|length >= mobile_preview_size %}
                                         <span class="short">{{ paper|preview_slice:True|safe }}</span><span
                                             class="dots">...</span><span
                                             class="long"
                                             style="display: none;">{{ paper|full_text_slice:True|safe }}</span>
                                     {% else %}
-                                        <span class="short">{{ paper.abstract|safe }}</span>
+                                        <span class="short">{{ paper.data.abstract|safe }}</span>
                                     {% endif %}
                                 </span>
 
                             <!-- Desktop version of the abstract with more preview size. -->
                             <span class="d-md-inline d-none" style="font-size: 0.8em">
-                                    {% if not extended and paper.abstract|length >= preview_size %}
+                                    {% if not extended and paper.data.abstract|length >= preview_size %}
                                         <span class="short">{{ paper|preview_slice|safe }}</span><span
                                             class="dots">...</span><span
                                             class="long"
                                             style="display: none;">{{ paper|full_text_slice|safe }}</span>
                                     {% else %}
-                                        <span class="short">{{ paper.abstract|safe }}</span>
+                                        <span class="short">{{ paper.data.abstract|safe }}</span>
                                     {% endif %}
                                 </span>
 
-                            {% if paper.abstract|length >= mobile_preview_size %}
+                            {% if paper.data.abstract|length >= mobile_preview_size %}
                                 <span class="small abstract-controls
-                                    {% if paper.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
+                                    {% if paper.data.abstract|length < preview_size %}d-inline d-md-none{% endif %}">
                                         <a href="#" class="toggle-description show"
                                            style="{% if extended %} display: none; {% endif %}">
                                             [Read more]

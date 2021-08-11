@@ -37,10 +37,10 @@
                     <tr>
                         <th>Abstract: </th>
                         <td>
-                            {{ form.abstract }}
+                            {{ data_form.abstract }}
                         </td>
                         <td class="col-differences">
-                        {% if paper.abstract != datapoint.abstract %}
+                        {% if data_form.abstract != datapoint.abstract %}
                             {{ datapoint.abstract }}
                         {% endif %}
                         </td>

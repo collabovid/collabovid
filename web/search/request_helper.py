@@ -66,7 +66,7 @@ class SearchRequestHelper:
                 if 'title' in infos:
                     paper.title = infos['title']
                 if 'abstract' in infos:
-                    paper.abstract = infos['abstract']
+                    paper.data.abstract = infos['abstract']
                 if 'authors.full_name' in infos:
                     highlighted_full_names = infos['authors.full_name']
 

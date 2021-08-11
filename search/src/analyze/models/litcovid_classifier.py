@@ -53,7 +53,7 @@ class LitcovidMultiLabelClassifier():
         :return:
         """
         for papers in batch_iterator(paper_iterator, batch_size=batch_size):
-            input = [(paper.title, paper.abstract) for paper in papers]
+            input = [(paper.title, paper.data.abstract) for paper in papers]
             tokens = self._tokenize(input)
             with torch.no_grad():
                 logits = self.model(**tokens)[0]

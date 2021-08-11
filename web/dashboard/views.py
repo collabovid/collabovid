@@ -7,7 +7,7 @@ from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
 from collabovid_store.s3_utils import S3BucketClient
-from dashboard.forms import PaperForm
+from dashboard.forms import PaperForm, PaperDataForm
 from data.models import (
     Author,
     AuthorNameResolution,
@@ -20,7 +20,9 @@ from data.models import (
     IgnoredPaper,
     Journal,
     Paper,
+    PaperData,
     ScrapeConflict,
+    AltmetricData
 )
 from geolocations.geoname_db import GeonamesDBError
 from search.models import SearchQuery
@@ -36,7 +38,7 @@ from tasks.load import AVAILABLE_TASKS, get_task_by_id
 from geolocations.location_modifier import LocationModifier
 
 import os
-
+from django.db import connection
 
 @staff_member_required
 def queries(request):
@@ -45,6 +47,25 @@ def queries(request):
     return render(request, "dashboard/queries/overview.html",
                   {'statistics': statistics})
 
+@staff_member_required
+def database_overview(request):
+
+    def get_table_size(M):
+        with connection.cursor() as c:
+            c.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{M._meta.db_table}'))")
+            return c.fetchall()[0][0]
+
+    context = dict()
+    context["paper_table_size"] = get_table_size(Paper)
+    context["paper_data_table_size"] = get_table_size(PaperData)
+    context["author_table_size"] = get_table_size(Author)
+    context["journal_table_size"] = get_table_size(Journal)
+    context["geolocation_table_size"] = get_table_size(GeoLocation)
+    context["altmetric_table_size"] = get_table_size(AltmetricData)
+    context["author_membership_table_size"] = get_table_size(AuthorPaperMembership)
+    context["geolocation_membership_table_size"] = get_table_size(GeoLocationMembership)
+
+    return render(request, "dashboard/database_information/database_overview.html", context)
 
 @staff_member_required
 def tasks(request):
@@ -358,12 +379,17 @@ def scrape_conflict(request):
         for error in ScrapeConflict.objects.all():
             datapoint = json.loads(error.datapoint)
             form = PaperForm(instance=error.paper)
+            data_form = PaperDataForm(instance=error.paper.data)
             comparison = {
                 'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
                 'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
                 'journal': error.paper.journal.name == datapoint['journal'] if error.paper.journal else datapoint['journal'],
             }
-            errors.append({'paper': error.paper, 'form': form, 'datapoint': json.loads(error.datapoint), 'comparison': comparison})
+            errors.append({'paper': error.paper,
+                           'form': form,
+                           'data_form': data_form,
+                           'datapoint': json.loads(error.datapoint),
+                           'comparison': comparison})
 
         return render(request, 'dashboard/scrape/scrape_conflicts_overview.html',
                       {'errors': errors, 'debug': settings.DEBUG})
@@ -375,9 +401,13 @@ def scrape_conflict(request):
 
         if 'accept-button' in request.POST:
             form = PaperForm(request.POST, instance=paper)
+            data_form = PaperDataForm(request.POST, instance=paper.data)
             if not form.is_valid():
                 messages.add_message(request, messages.ERROR, f"{form.errors}")
-            else:
+            if not data_form.is_valid():
+                messages.add_message(request, messages.ERROR, f"{data_form.errors}")
+
+            if form.is_valid() and data_form.is_valid():
                 with transaction.atomic():
                     try:
                         form.save()

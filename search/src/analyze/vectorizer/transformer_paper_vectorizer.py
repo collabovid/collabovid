@@ -93,7 +93,7 @@ class TransformerPaperVectorizer(PaperVectorizer):
             title_tokens, title_index_array = self._sliding_window_tokenizer.tokenize(
                 [paper.title.lower() for paper in paper_batch])
             abstract_tokens, abstracts_index_array = self._sliding_window_tokenizer.tokenize(
-                [paper.abstract.lower() for paper in paper_batch])
+                [paper.data.abstract.lower() for paper in paper_batch])
             with torch.no_grad():
                 title_embeddings, abstract_embeddings = [
                     self._pool_embeddings(self._generate_embeddings(features), end_index_array).detach().cpu().numpy()

@@ -134,7 +134,7 @@ class DataExport:
                     paper_data = {
                         "doi": paper.doi,
                         "title": paper.title,
-                        "abstract": paper.abstract,
+                        "abstract": paper.data.abstract,
                         "author_ids": [author.pk for author in paper.ranked_authors],
                         "content": paper.data.content if paper.data else None,
                         "published_at": datetime.strftime(paper.published_at, "%Y-%m-%d")

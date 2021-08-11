@@ -37,8 +37,8 @@ def edit_object_link(user, object):
 
 
 def get_next_preview_size(paper, size):
-    starting_em = [i.start() for i in re.finditer('<em>', paper.abstract)]
-    ending_em = [i.end() for i in re.finditer('</em>', paper.abstract)]
+    starting_em = [i.start() for i in re.finditer('<em>', paper.data.abstract)]
+    ending_em = [i.end() for i in re.finditer('</em>', paper.data.abstract)]
 
     for start, end in zip(starting_em, ending_em):
         if start-SLICE_DIFFERENCE < size < end+SLICE_DIFFERENCE:
@@ -64,10 +64,10 @@ def abstract_preview_size(paper):
 @register.filter
 def preview_slice(paper, mobile=False):
     slice_size_func = abstract_preview_size_mobile if mobile else abstract_preview_size
-    return paper.abstract[:slice_size_func(paper)-SLICE_DIFFERENCE]
+    return paper.data.abstract[:slice_size_func(paper)-SLICE_DIFFERENCE]
 
 
 @register.filter
 def full_text_slice(paper, mobile=False):
     slice_size_func = abstract_preview_size_mobile if mobile else abstract_preview_size
-    return paper.abstract[slice_size_func(paper)-SLICE_DIFFERENCE:]
+    return paper.data.abstract[slice_size_func(paper)-SLICE_DIFFERENCE:]

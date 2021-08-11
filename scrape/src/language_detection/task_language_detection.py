@@ -29,7 +29,7 @@ class LanguageDetectionTask(Runnable):
         language_detector = LanguageDetector()
         for paper in self.progress(Paper.objects.all()):
             title_lang_prediction = language_detector.detect(paper.title.lower())
-            abs_lang_prediction = language_detector.detect(paper.abstract.lower())
+            abs_lang_prediction = language_detector.detect(paper.data.abstract.lower())
 
 
             if not_english_prob(title_lang_prediction) > 0 or not_english_prob(abs_lang_prediction) > 0:

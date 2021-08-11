@@ -35,7 +35,7 @@ def covid_related(db_article):
     covid19_keywords = r'(corona.?virus|(^|\s)corona(\s|$)|covid.?(20)?19|(^|\s)covid(\s|$)|sars.?cov.?2|2019.?ncov)'
 
     return (bool(re.search(covid19_keywords, db_article.title, re.IGNORECASE)) or
-            bool(db_article.abstract and re.search(covid19_keywords, db_article.abstract, re.IGNORECASE)) or
+            bool(db_article.data and db_article.data.abstract and re.search(covid19_keywords, db_article.data.abstract, re.IGNORECASE)) or
             bool((db_article.data and re.search(covid19_keywords, db_article.data.content, re.IGNORECASE)))
             )
 
@@ -210,7 +210,7 @@ class DatabaseUpdate:
         Inserts article information to the database.
         """
         db_article.title = datapoint.title
-        db_article.abstract = datapoint.abstract
+        db_article.data.abstract = datapoint.abstract
         db_article.published_at = datapoint.publication_date
 
         db_article.url = datapoint.url

@@ -1,6 +1,6 @@
 from django.db.models.functions import ExtractWeek, Extract
 
-from data.models import Topic
+from data.models import Topic, Paper
 
 from collections import defaultdict
 from django.db.models import Count, QuerySet, F, Q, DateTimeField
@@ -17,7 +17,7 @@ class ExtractISOYear(Extract):
 
 class PaperStatistics:
 
-    def __init__(self, papers: QuerySet, ordered_papers: QuerySet = None):
+    def __init__(self, papers: QuerySet, ordered_papers: QuerySet = None, is_all=False):
         self._papers = papers
         self._ordered_papers = ordered_papers
         self._published_at_plot_data = None
@@ -28,6 +28,7 @@ class PaperStatistics:
         self._latest_date = None
 
         self._available = self._papers.count() > 0
+        self._is_all = is_all
 
     @property
     def papers(self):
@@ -112,6 +113,8 @@ class PaperStatistics:
 
     @property
     def paper_count(self):
+        if self._is_all:
+            return Paper.quick_count()
         return self._papers.count()
 
     @property

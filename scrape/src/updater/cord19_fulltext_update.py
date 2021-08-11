@@ -17,7 +17,7 @@ class Cord19FulltextUpdater:
                 if not paper.abstract:
                     metadata = cache.get_metadata(paper.doi)
                     if metadata and metadata['abstract']:
-                        paper.abstract = metadata['abstract']
+                        paper.data.abstract = metadata['abstract']
                         paper.save()
                         count_abstract += 1
 

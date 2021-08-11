@@ -1,5 +1,5 @@
 from django.contrib import admin
-from data.models import Category, Paper, Topic, PaperHost, Author, Journal, GeoCity, GeoCountry, GeoNameResolution, \
+from data.models import Category, Paper, PaperData, Topic, PaperHost, Author, Journal, GeoCity, GeoCountry, GeoNameResolution, \
     IgnoredPaper
 
 admin.site.register(Category)
@@ -11,6 +11,7 @@ admin.site.register(GeoCity)
 admin.site.register(GeoCountry)
 admin.site.register(GeoNameResolution)
 admin.site.register(IgnoredPaper)
+admin.site.register(PaperData)
 
 
 class PaperAdmin(admin.ModelAdmin):
