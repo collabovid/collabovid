@@ -112,7 +112,7 @@ class Command:
             self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option_name)),
                                    quiet=quiet)
             self.run_shell_command(
-                "(cd {} && kustomize edit add patch {})".format(join(temp_dir, env), ('option-' + option_name)),
+                "(cd {} && kustomize edit add patch --path {})".format(join(temp_dir, env), ('option-' + option_name)),
                 quiet=quiet)
 
         # allow caller to add further customization
