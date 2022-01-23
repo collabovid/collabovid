@@ -1,0 +1,10 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: author-cleanup
+spec:
+  template:
+    spec:
+      containers:
+      - name: web
+        imagePullPolicy: Never

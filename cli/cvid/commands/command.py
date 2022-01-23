@@ -103,17 +103,20 @@ class Command:
                                                                         image_tag), quiet=quiet)
 
         options_dir = join(kubernetes_dir, 'options')
-        for option in self.current_env_config()['optionFiles']:
-            option_file_path = join(options_dir, option)
-            if not exists(option_file_path):
+        for option in self.current_env_config()['options']:
+            option_dir_path = join(options_dir, option)
+            if not exists(option_dir_path):
                 print("Unknown optionFiles item specified in config: {}".format(option))
                 exit(2)
-            option_name = option.replace('/', '-')
-            self.run_shell_command("cp {} {}".format(option_file_path, join(temp_dir, env, 'option-' + option_name)),
-                                   quiet=quiet)
-            self.run_shell_command(
-                "(cd {} && kustomize edit add patch --path {})".format(join(temp_dir, env), ('option-' + option_name)),
-                quiet=quiet)
+            for option_file_name in os.listdir(option_dir_path):
+                full_option_path = os.path.join(option_dir_path, option_file_name)
+                option_name = f'{option}-{option_file_name}'.replace('/', '-')
+                self.run_shell_command(
+                    "cp {} {}".format(full_option_path, join(temp_dir, env, 'option-' + option_name)), quiet=quiet)
+                self.run_shell_command(
+                    "(cd {} && kustomize edit add patch --path {})".format(join(temp_dir, env),
+                                                                           ('option-' + option_name)),
+                    quiet=quiet)
 
         # allow caller to add further customization
         if customize_callback is not None:

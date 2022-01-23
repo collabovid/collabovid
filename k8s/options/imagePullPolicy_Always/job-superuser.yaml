@@ -1,0 +1,10 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: superuser
+spec:
+  template:
+    spec:
+      containers:
+        - name: web
+          imagePullPolicy: Always

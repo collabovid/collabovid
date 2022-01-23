@@ -1,0 +1,10 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: sync-daemon
+spec:
+  template:
+    spec:
+      containers:
+        - name: daemon-set
+          imagePullPolicy: Always

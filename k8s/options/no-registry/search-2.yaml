@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: search-latest
+data:
+  REGISTRY: ""
+  # Never in base64
+  TASK_IMAGE_PULL_POLICY: "TmV2ZXI="
