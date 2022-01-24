@@ -2,7 +2,7 @@ name: Deploy
 on:
   push:
     branches:
-      - production
+      - master
 jobs:
   build_and_deploy:
     name: Build and Deploy
@@ -16,5 +16,7 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           cd collabovid
+          git pull
           source venv/bin/activate
-          cvid release
+          cvid use single-node
+          cvid release --no-push
