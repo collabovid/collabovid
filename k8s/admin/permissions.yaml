@@ -1,0 +1,57 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: collabovid-base-role
+rules:
+  - apiGroups:
+      - ""
+      - "apps"
+      - "batch"
+    resources:
+      - "deployments"
+      - "events"
+      - "jobs"
+    verbs:
+      - "create"
+      - "get"
+      - "list"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collabovid-base-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: collabovid-base-role
+subjects:
+  - kind: User
+    name: collabovid
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: collabovid-role-creator
+rules:
+  - apiGroups:
+      - "rbac.authorization.k8s.io"
+    resources:
+      - "clusterroles"
+    verbs:
+      - "create"
+      - "get"
+      - "watch"
+      - "list"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: collabovid-role-creator-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: collabovid-role-creator
+subjects:
+  - kind: User
+    name: collabovid
