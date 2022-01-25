@@ -230,6 +230,7 @@ class PaperData(models.Model):
     content = models.TextField(null=True, default=None)
     abstract = models.TextField(null=True, blank=True, default=None)
 
+
 class VerificationState(models.IntegerChoices):
     REJECTED = 0, gettext_lazy('rejected')
     AUTOMATICALLY_REJECTED = 1, gettext_lazy('rejected automatically')
