@@ -3,7 +3,7 @@ kind: Kustomization
 
 resources:
   - ../../base
-  - envs
+  - ./envs
   - postgres.yaml
 
 patchesStrategicMerge:
@@ -13,7 +13,6 @@ patchesStrategicMerge:
 
 secretGenerator:
   - name: postgres
-    behavior: merge
     envs:
       - envs/postgres.env
   - name: web
