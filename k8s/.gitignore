@@ -1,4 +1,3 @@
 dist
 cluster_config.yaml
 tmp
-/overlays/single-node/envs/

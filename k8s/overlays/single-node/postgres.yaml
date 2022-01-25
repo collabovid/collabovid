@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+        - name: vol
+          hostPath:
+            path: /home/collabovid/data/postgres
+        - name: dumps
+          hostPath:
+            path: /home/collabovid/data/db_dumps
+      containers:
+        - name: postgres
+          image: postgres:12
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: postgres
+          volumeMounts:
+            - name: vol
+              mountPath: /data
+            - name: dumps
+              mountPath: /dumps
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+      nodePort: 30003
+      protocol: TCP
+  selector:
+    app: postgres
+

@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: elasticsearch
+spec:
+  serviceName: "elasticsearch"
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      initContainers:
+        - name: volume-ownership
+          image: busybox:1.29.2
+          command: [ "chmod", "-R", "777", "/usr/share/elasticsearch/data" ]
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/elasticsearch/data
+      volumes:
+      - name: data
+        hostPath:
+          path: /home/collabovid/data/elasticsearch
