@@ -15,10 +15,13 @@ rules:
       - "create"
       - "get"
       - "list"
+      - "delete"
   - apiGroups:
       - ""
+      - "metrics.k8s.io"
     resources:
       - "nodes"
+      - "pods"
       - "nodes/stats"
     verbs:
       - "watch"
@@ -53,6 +56,7 @@ rules:
       - "get"
       - "watch"
       - "list"
+      - "delete"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -80,6 +84,7 @@ rules:
       - "get"
       - "patch"
       - "list"
+      - "delete"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -104,12 +109,14 @@ rules:
       - "tokenreviews"
     verbs:
       - "create"
+      - "delete"
   - apiGroups:
     - "authorization.k8s.io"
     resources:
       - "subjectaccessreviews"
     verbs:
       - "create"
+      - "delete"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -132,11 +139,44 @@ rules:
       - "traefik.containo.us"
     resources:
       - "ingressroutes"
+      - "middlewares"
     verbs:
       - "get"
       - "create"
       - "list"
       - "watch"
+      - "delete"
+      - "patch"
+  - apiGroups:
+      - "cert-manager.io"
+    resources:
+      - "clusterissuers"
+      - "certificates/status"
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+      - "patch"
+  - apiGroups:
+      - "cert-manager.io"
+    resources:
+      - "certificates/status"
+    verbs:
+      - "get"
+      - "update"
+  - apiGroups:
+    - "networking.k8s.io"
+    resources:
+      - "ingressclasses"
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "delete"
+      - "patch"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -149,3 +189,4 @@ roleRef:
 subjects:
   - kind: User
     name: collabovid
+

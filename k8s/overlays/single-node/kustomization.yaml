@@ -5,11 +5,15 @@ resources:
   - ../../base
   - ./envs
   - postgres.yaml
+  - letsencrypt.yaml
+  - traefik-dashboard.yaml
+  - traefik-web.yaml
 
 patchesStrategicMerge:
   - search.yaml
   - web.yaml
   - elasticsearch.yaml
+
 
 secretGenerator:
   - name: postgres

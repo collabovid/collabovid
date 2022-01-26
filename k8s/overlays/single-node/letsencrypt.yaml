@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  name: traefik-internal
+spec:
+  controller: traefik.io/ingress-controller
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    privateKeySecretRef:
+      name: collabovid-tls
+    solvers:
+      - http01:
+          ingress:
+            class: traefik-internal
+        selector: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: traefik-dashboard-cert
+  labels:
+    "use-http01-solver": "true"
+spec:
+  secretName: traefik-dashboard-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: web-cert
+  labels:
+    "use-http01-solver": "true"
+spec:
+  secretName: web-cert
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
