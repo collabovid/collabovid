@@ -20,7 +20,8 @@ spec:
   tls:
     - secretName: web-cert
   rules:
-    - http:
+    - host: localhost
+      http:
         paths:
           - path: /
             pathType: Prefix
