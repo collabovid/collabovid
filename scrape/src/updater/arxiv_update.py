@@ -50,7 +50,6 @@ class ArxivUpdater(DataUpdater):
         if not self._query_result:
             query_result = arxiv.Search(self._ARXIV_SEARCH_QUERY,
                                         sort_by=arxiv.SortCriterion.SubmittedDate,
-                                        max_results=50,
                                         sort_order=arxiv.SortOrder.Descending)
             self._query_result = [x for x in query_result.results()
                                   if self._get_datetime(x.updated).date() >= datetime.date(2019, 12, 1)]
