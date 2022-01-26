@@ -29,7 +29,7 @@ class ReleaseCommand(Command):
         self.call_command('cluster apply -r secret --all --no-config-build')
 
         # In order to check if migrations are pending we have to communicate with the database
-        if self.current_env() == 'dev':
+        if self.current_env() in ['dev', 'single-node']:
             # Start the postgres deployment if in dev mode
             self.call_command('cluster apply -r deployment -n postgres --no-config-build')
 
