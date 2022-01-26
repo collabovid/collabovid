@@ -37,7 +37,7 @@ def covid_related(db_article):
 
     return (bool(re.search(covid19_keywords, db_article.title, re.IGNORECASE)) or
             bool(db_article.data and db_article.data.abstract and re.search(covid19_keywords, db_article.data.abstract, re.IGNORECASE)) or
-            bool((db_article.data and db_article.data.content and re.search(covid19_keywords, db_article.data.content, re.IGNORECASE)))
+            bool(db_article.data and db_article.data.content and re.search(covid19_keywords, db_article.data.content, re.IGNORECASE))
             )
 
 
