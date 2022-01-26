@@ -50,6 +50,7 @@ class ArxivUpdater(DataUpdater):
         if not self._query_result:
             query_result = arxiv.Search(self._ARXIV_SEARCH_QUERY,
                                         sort_by=arxiv.SortCriterion.SubmittedDate,
+                                        max_results=50,
                                         sort_order=arxiv.SortOrder.Descending)
             self._query_result = [x for x in query_result.results()
                                   if self._get_datetime(x.updated).date() >= datetime.date(2019, 12, 1)]
@@ -70,16 +71,16 @@ class ArxivUpdater(DataUpdater):
 
     def _create_serializable_record(self, raw_data: arxiv.Result):
         """ Construct a serializable record from a given result of the arxiv package """
-        article = SerializableArticleRecord(doi=_get_arxiv_id_from_url(raw_data.doi),
+        article = SerializableArticleRecord(doi=_get_arxiv_id_from_url(raw_data.entry_id),
                                             title=raw_data.title.replace('\n', ' '),
                                             abstract=raw_data.summary.replace('\n', ' '),
                                             is_preprint=True)
         article.paperhost = _ARXIV_PAPERHOST_NAME
         article.datasource = DataSource.ARXIV
-        article.url = raw_data.doi
+        article.url = raw_data.entry_id
         article.publication_date = self._get_datetime(raw_data.published).date()
 
-        version_match = re.match('^\S+v(\d+)$', raw_data.doi)
+        version_match = re.match('^\S+v(\d+)$', raw_data.entry_id)
         if version_match:
             article.version = version_match.group(1)
         else:

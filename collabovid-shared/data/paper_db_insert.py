@@ -212,7 +212,7 @@ class DatabaseUpdate:
         """
         db_article.title = datapoint.title
 
-        if hasattr(db_article, 'data'):
+        if not hasattr(db_article, 'data'):
             db_article.data, _ = PaperData.objects.get_or_create(paper=db_article)
 
         db_article.data.abstract = datapoint.abstract
