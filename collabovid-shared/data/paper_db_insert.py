@@ -233,6 +233,7 @@ class DatabaseUpdate:
         db_article.visualized = False
         db_article.vectorized = False
         db_article.save()
+        db_article.data.save()
 
         AuthorPaperMembership.objects.filter(paper=db_article).delete()
         rank = 0
@@ -253,6 +254,7 @@ class DatabaseUpdate:
         db_article.categories.clear()
         db_article.scrape_hash = datapoint.md5
         db_article.save()
+
 
     @staticmethod
     def _handle_conflict(db_article, datapoint):
