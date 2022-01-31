@@ -97,24 +97,28 @@ class MedrxivUpdater(DataUpdater):
         article.url = raw_data['rel_link']
         article.publication_date = datetime.strptime(raw_data['rel_date'], "%Y-%m-%d").date()
 
-        response = requests.get(article.url)
-        article_soup = BeautifulSoup(response.text, 'html.parser')
-        redirected_url = response.url
+        try:
+            response = requests.get(article.url)
+            article_soup = BeautifulSoup(response.text, 'html.parser')
+            redirected_url = response.url
 
-        version_match = re.match(r'^\S+v(\d+)$', redirected_url)
-        if version_match:
-            article.version = version_match.group(1)
-        else:
-            article.version = '1'
+            version_match = re.match(r'^\S+v(\d+)$', redirected_url)
+            if version_match:
+                article.version = version_match.group(1)
+            else:
+                article.version = '1'
 
-        dl_element = article_soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
-        if dl_element and dl_element.has_attr('href'):
-            relative_url = dl_element['href']
-            article.pdf_url = host_url + relative_url
+            dl_element = article_soup.find('a', attrs={'class': 'article-dl-pdf-link link-icon'})
+            if dl_element and dl_element.has_attr('href'):
+                relative_url = dl_element['href']
+                article.pdf_url = host_url + relative_url
 
-        article.authors = self._extract_authors(article_soup)
-        response.close()
-        return article
+            article.authors = self._extract_authors(article_soup)
+            response.close()
+            return article
+        except requests.RequestException:
+            self.log(f"Could not access {article.url}. Skipped.")
+            return None
 
     def _get_data_points(self):
         self._get_article_json()
