@@ -81,6 +81,10 @@ class MedrxivUpdater(DataUpdater):
         return authors
 
     def _create_serializable_record(self, raw_data, skip_existing=False):
+
+        if 'rel_doi' not in raw_data or 'rel_abs' not in raw_data or 'rel_title' not in raw_data:
+            return None
+
         article = SerializableArticleRecord(doi=raw_data['rel_doi'], title=raw_data['rel_title'],
                                             abstract=raw_data['rel_abs'], is_preprint=True)
         if skip_existing and Paper.objects.filter(doi=article.doi).exists():
