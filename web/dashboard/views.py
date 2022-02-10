@@ -3,6 +3,7 @@ from time import strftime
 
 from django.conf import settings
 from django.db import transaction, IntegrityError
+from django.db.models import Q
 from django.http import HttpResponseNotFound, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 
@@ -40,6 +41,7 @@ from geolocations.location_modifier import LocationModifier
 import os
 from django.db import connection
 
+
 @staff_member_required
 def queries(request):
     queries = SearchQuery.objects.all()
@@ -47,9 +49,9 @@ def queries(request):
     return render(request, "dashboard/queries/overview.html",
                   {'statistics': statistics})
 
+
 @staff_member_required
 def database_overview(request):
-
     def get_table_size(M):
         with connection.cursor() as c:
             c.execute(f"SELECT pg_size_pretty(pg_total_relation_size('{M._meta.db_table}'))")
@@ -66,6 +68,7 @@ def database_overview(request):
     context["geolocation_membership_table_size"] = get_table_size(GeoLocationMembership)
 
     return render(request, "dashboard/database_information/database_overview.html", context)
+
 
 @staff_member_required
 def tasks(request):
@@ -131,7 +134,6 @@ def create_task(request, task_id):
 def delete_task(request):
     if request.method == 'POST':
         id = request.POST.get('id')
-        print(id)
         query = Task.objects.filter(pk=id)
         if query.count() > 0:
             query.delete()
@@ -145,14 +147,15 @@ def delete_task(request):
 @staff_member_required
 def delete_all_finished(request):
     if request.method == 'POST':
-        days = 1
-        date_limit = timezone.now() - timedelta(days=days)
-        query = Task.objects.filter(ended_at__lte=date_limit).defer('log')
+        date_limit_ended = timezone.now() - timedelta(days=1)
+        date_limit_pending = timezone.now() - timedelta(days=7)
+        query = Task.objects.filter(Q(ended_at__lte=date_limit_ended) | (
+                    Q(started_at__lte=date_limit_pending) & Q(status=Task.STATUS_PENDING))).defer('log')
         if query.count() > 0:
             query.delete()
-            messages.add_message(request, messages.SUCCESS, 'Deleted All Finished Tasks.')
+            messages.add_message(request, messages.SUCCESS, f'Deleted {query.count()} finished or pending tasks.')
         else:
-            messages.add_message(request, messages.WARNING, 'No Tasks to delete.')
+            messages.add_message(request, messages.WARNING, 'No tasks to delete.')
         return redirect('tasks')
     return HttpResponseNotFound()
 
@@ -381,9 +384,12 @@ def scrape_conflict(request):
             form = PaperForm(instance=error.paper)
             data_form = PaperDataForm(instance=error.paper.data)
             comparison = {
-                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint['publication_date'],
-                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(datapoint['authors']),
-                'journal': error.paper.journal.name == datapoint['journal'] if error.paper.journal else datapoint['journal'],
+                'publication_date': datetime.strftime(error.paper.published_at, '%Y-%m-%d') == datapoint[
+                    'publication_date'],
+                'authors': sorted([[a.last_name, a.first_name] for a in error.paper.authors.all()]) == sorted(
+                    datapoint['authors']),
+                'journal': error.paper.journal.name == datapoint['journal'] if error.paper.journal else datapoint[
+                    'journal'],
             }
             errors.append({'paper': error.paper,
                            'form': form,
@@ -470,7 +476,8 @@ def change_author_name(request, author_id, doi=None):
         elif action == 'delete_all':
             for paper in Paper.objects.filter(authors=author).all():
                 if paper.authors.count() == 1:
-                    messages.add_message(request, messages.ERROR, f"Cannot remove the only author of the paper \"{paper.title}\"")
+                    messages.add_message(request, messages.ERROR,
+                                         f"Cannot remove the only author of the paper \"{paper.title}\"")
                     return redirect_()
             AuthorNameResolution.ignore(author.first_name, author.last_name)
         elif action == 'delete_current':
@@ -498,4 +505,3 @@ def swap_all_author_names(request, doi):
             return HttpResponseNotFound(f"Unknown Paper {doi}")
     else:
         return HttpResponseNotFound()
-
