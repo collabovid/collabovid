@@ -37,9 +37,13 @@ class NearestNeighborTopicAssignment(Runnable):
                     if doi in paper_topic_dict:
                         topic_id = paper_topic_dict[doi]
                         topic_occurrences[topic_id] += score
-                topic_id, occurrences = max(list(topic_occurrences.items()), key=lambda x: x[1])
-                paper.topic = Topic.objects.get(pk=topic_id)
-                paper.save()
-                self.log(f"Assigned {paper.title} to topic: {paper.topic.name}")
+
+                if len(topic_occurrences) > 0:
+                    topic_id, occurrences = max(list(topic_occurrences.items()), key=lambda x: x[1])
+                    paper.topic = Topic.objects.get(pk=topic_id)
+                    paper.save()
+                    self.log(f"Assigned {paper.title} to topic: {paper.topic.name}")
+                else:
+                    self.log(f"Skipped {paper.title} because there were no topics.")
 
         print('NearestNeighborTopicAssignment Finished')
