@@ -7,6 +7,7 @@ from src.task_medrxiv_update import MedBiorxivNewArticlesTask
 from src.task_arxiv_update import ArxivNewArticlesTask
 from src.task_pubmed_update import PubmedNewArticlesTask
 from src.task_elsevier_update import ElsevierNewArticlesTask
+from src.task_statistics_update import StatisticsUpdateTask
 
 from tasks.definitions import Runnable, register_task
 from tasks.launcher.task_launcher import get_task_launcher
@@ -19,6 +20,7 @@ class ScrapeTask(Runnable):
     Gets new publications from all data sources and post-processes them.
     This includes categories, visualization, altmetric data and location extraction.
     """
+
     @staticmethod
     def task_name():
         return "scrape"
@@ -50,10 +52,12 @@ class ScrapeTask(Runnable):
         self.progress(40)
 
         self.log("Get new Pubmed articles...")
-        TaskRunner.run_task(PubmedNewArticlesTask,
-                            started_by=self._task.started_by)
+        # TaskRunner.run_task(PubmedNewArticlesTask,
+        #                    started_by=self._task.started_by)
         self.log("Finished getting new Pubmed articles...")
 
+        # Updating statistics
+        TaskRunner.run_task(StatisticsUpdateTask, started_by=self._task.started_by)
         self.progress(60)
 
         if settings.UPDATE_VECTORIZER:
