@@ -25,3 +25,4 @@ resources:
   - cronjob-altmetric-update.yaml
   - job-fix-manually-modified.yaml
   - metrics.yaml
+  - job-set-vectorized.yaml

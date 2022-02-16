@@ -14,6 +14,6 @@ def set_vectorized():
 
 
 if __name__ == '__main__':
-    print('setting all paers to vectorized=True')
+    print('setting all papers to vectorized=True')
     set_vectorized()
     print('Done with update.')
